@@ -1,0 +1,47 @@
+##demuxer##
+DT_CFLAGS += -DENABLE_DEMUXER_FFMPEG=1
+
+##video decoder and output##
+DT_CFLAGS += -DENABLE_VDEC_NULL=0
+DT_CFLAGS += -DENABLE_VDEC_FFMPEG=1
+
+DT_CFLAGS += -DENABLE_VO_NULL=0
+DT_CFLAGS += -DENABLE_VO_SDL=1
+DT_CFLAGS += -DENABLE_VO_FB=0
+DT_CFLAGS += -DENABLE_VO_OPENGL=0
+
+##audio decoder and output##
+DT_CFLAGS += -DENABLE_ADEC_NULL=0
+DT_CFLAGS += -DENABLE_ADEC_FFMPEG=1
+
+DT_CFLAGS += -DENABLE_AO_NULL=0
+DT_CFLAGS += -DENABLE_AO_SDL=0
+DT_CFLAGS += -DENABLE_AO_ALSA=1
+DT_CFLAGS += -DENABLE_AO_OSS=0
+
+#config
+DT_DEMUXER=yes
+DT_DEMUXER_FFMPEG=yes
+DT_UTIL=yes
+DT_AUDIO=yes
+DT_AUDIO_FFMPEG=yes
+DT_AUDIO_ALSA=yes
+DT_VIDEO=yes
+DT_VIDEO_FFMPEG=yes
+DT_VIDEO_SDL=yes
+DT_PORT=yes
+DT_HOST=yes
+DT_PLAYER=yes
+
+
+# ffmpeg
+FFMPEG_A = $(DT_DEMUXER_FFMPEG)
+#DT_FFMPEG_DIR = ./ffmpeg 
+FFMPEGPARTS_ALL = libavfilter libavformat libavcodec libswscale libswresample libavutil 
+FFMPEGPARTS = $(foreach part, $(FFMPEGPARTS_ALL), $(if $(wildcard $(DT_FFMPEG_DIR)/$(part)), $(part)))
+FFMPEGLIBS  = $(foreach part, $(FFMPEGPARTS), $(DT_FFMPEG_DIR)/$(part)/$(part).a)
+
+DT_CFLAGS-$(FFMPEG_A)   += -I$(DT_FFMPEG_DIR)
+COMMON_LIBS-$(FFMPEG_A) += $(FFMPEGLIBS)
+COMMON_LIBS += $(COMMON_LIBS-yes)
+DT_CFLAGS += $(DT_CFLAGS-yes)
