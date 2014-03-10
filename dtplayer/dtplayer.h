@@ -7,6 +7,7 @@
 #include "dt_av.h"
 #include "dt_event.h"
 
+#include <pthread.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
@@ -15,7 +16,7 @@
 typedef struct{
         int status; // 0 start 1 pause 2 quit
         int flag;
-        int tid;
+        pthread_t tid;
 }io_loop_t;
 
 typedef struct{
@@ -52,7 +53,7 @@ typedef struct dtplayer_context{
     int (*update_cb)(player_state_t *state); // update player info to uplevel
 
     io_loop_t io_loop;
-    int event_loop_id;
+    pthread_t event_loop_id;
     
     void *player_server;
 } dtplayer_context_t;

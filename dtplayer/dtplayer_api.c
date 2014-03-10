@@ -1,10 +1,13 @@
 #include "dthost_api.h"
-
 #include "dtplayer_api.h"
 #include "dtplayer.h"
 #include "dt_event.h"
 
+#include "pthread.h"
+
 #define TAG "PLAYER-API"
+
+static dtplayer_context_t ply_ctx;
 
 dtplayer_para_t *dtplayer_alloc_para()
 {
@@ -36,7 +39,8 @@ int dtplayer_init(void **player_priv, dtplayer_para_t * para)
     int ret = 0;
 	if (!para)
 		return -1;
-	dtplayer_context_t *dtp_ctx = malloc(sizeof(dtplayer_context_t));
+	//dtplayer_context_t *dtp_ctx = malloc(sizeof(dtplayer_context_t));
+	dtplayer_context_t *dtp_ctx = &ply_ctx;
     if(!dtp_ctx)
     {
         dt_error(TAG,"dtplayer context malloc failed \n");
@@ -101,7 +105,8 @@ int dtplayer_stop(void *player_priv)
     dt_send_event(event);
     
     /*need to wait until player stop ok*/
-    pthread_join(dtp_ctx->event_loop_id,NULL);
+    dt_info(TAG,"EVENT_LOOP_ID:%lu \n",dtp_ctx->event_loop_id);
+    int ret = pthread_join(dtp_ctx->event_loop_id,NULL);
     return 0;
 }
 

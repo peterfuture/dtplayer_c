@@ -2,7 +2,9 @@
 
 //include ffmpeg header
 #include "libavcodec/avcodec.h"
+#include "libavresample/avresample.h"
 #include "libswscale/swscale.h"
+#include "libswresample/swresample.h"
 
 #define TAG "AUDIO-DECODER-FFMPEG"
 static AVFrame *frame;

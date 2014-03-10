@@ -1,9 +1,6 @@
 #ifndef DT_AUDIO_H
 #define DT_AUDIO_H
 
-#include <pthread.h>
-#include <unistd.h>
-
 #include "dt_av.h"
 #include "dt_utils.h"
 #include "dt_event.h"
@@ -13,7 +10,8 @@
 #include "dtaudio_filter.h"
 #include "dtaudio_output.h"
 
-#include "unistd.h"
+#include <pthread.h>
+#include <unistd.h>
 
 #define DTAUDIO_LOG_TAG "dtaudio"
 #define DTAUDIO_PCM_BUF_SIZE 5*1024*1024; // pcm tmp buffer

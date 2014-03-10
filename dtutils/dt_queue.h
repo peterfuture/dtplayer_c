@@ -60,6 +60,7 @@ void dlp_queue_push_tail(queue_t * qu, void *data);
 void dlp_queue_push_nth(queue_t * qu, void *data, uint32_t n);
 
 void *dlp_queue_pop_head(queue_t * qu);
+void *dlp_queue_pre_pop_head(queue_t * qu);
 void *dlp_queue_pop_tail(queue_t * qu);
 void *dlp_queue_pop_nth(queue_t * qu, uint32_t n);
 

@@ -5,6 +5,8 @@
 #include "dtplayer_update.h"
 #include "dt_ini.h"
 
+#include "pthread.h"
+
 #define TAG "PLAYER"
 
 static void *event_handle_loop(dtplayer_context_t * dtp_ctx);
@@ -127,6 +129,7 @@ int player_init(dtplayer_context_t *dtp_ctx)
 		dt_error(TAG"file:%s [%s:%d] player io thread start failed \n", __FILE__,__FUNCTION__, __LINE__);
 		goto ERR2;
 	}
+    dt_info(TAG,"[%s:%d] create event handle loop thread id = %lu\n",__FUNCTION__,__LINE__,tid);
     dtp_ctx->event_loop_id = tid;
     dt_info(TAG,"[%s:%d] END PLAYER INIT, RET = %d\n",__FUNCTION__,__LINE__,ret);
 	set_player_status(dtp_ctx, PLAYER_STATUS_INIT_EXIT);
@@ -236,8 +239,8 @@ FAIL:
 
 int player_stop(dtplayer_context_t *dtp_ctx)
 {
-    set_player_status(dtp_ctx,PLAYER_STATUS_STOP);
     dt_info(TAG,"PLAYER STOP STATUS SET\n");
+    set_player_status(dtp_ctx,PLAYER_STATUS_STOP);
     return 0;
 }
 
@@ -309,7 +312,7 @@ QUIT:
     set_player_status(dtp_ctx,PLAYER_STATUS_EXIT);
     player_handle_cb(dtp_ctx);
 
-    free(dtp_ctx);
+    //free(dtp_ctx);
     pthread_exit(NULL);
     return NULL;
 }

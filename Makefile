@@ -15,7 +15,6 @@ CC       = gcc
 CXX      = gcc
 STRIP    = strip 
 
-#CFLAGS   =  -Wall -Wimplicit-function-declaration
 CFLAGS   = -g -Wall 
 CFLAGS  += $(DT_CFLAGS)
 DT_DEBUG = -g

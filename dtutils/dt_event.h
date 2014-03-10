@@ -26,7 +26,7 @@ typedef struct event_server_mgt{
     dt_lock_t server_lock;
     int server_count;
     int exit_flag;
-    int transport_loop_id;
+    pthread_t transport_loop_id;
 }dt_server_mgt_t;
 
 
