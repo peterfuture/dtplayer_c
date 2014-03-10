@@ -20,7 +20,7 @@ CFLAGS   = -g -Wall
 CFLAGS  += $(DT_CFLAGS)
 DT_DEBUG = -g
 
-LDFLAGS                  += -lpthread -lz -m 
+LDFLAGS                  += -lpthread -lz -lm  
 LDFLAGS-$(DT_VIDEO_SDL)  += -lSDL
 LDFLAGS-$(DT_AUDIO_ALSA) += -lasound
 LDFLAGS                  += $(LDFLAGS-yes)
