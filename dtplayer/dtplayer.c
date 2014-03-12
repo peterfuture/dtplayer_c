@@ -122,7 +122,11 @@ int player_init(dtplayer_context_t *dtp_ctx)
     dtp_ctx->media_info->no_audio = !ctrl_info->has_audio;
     dtp_ctx->media_info->no_video = !ctrl_info->has_video;
     dtp_ctx->media_info->no_sub = !ctrl_info->has_sub;
-    
+
+    /*dest width height*/
+    ctrl_info->width = para->width;
+    ctrl_info->height = para->height;
+
     /*create event loop*/
     ret = pthread_create(&tid, NULL, (void *)&event_handle_loop, (void *)dtp_ctx);
     if (ret == -1) {

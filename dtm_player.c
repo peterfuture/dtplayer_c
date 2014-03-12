@@ -83,7 +83,9 @@ int main(int argc, char **argv)
     para->update_cb = (void *)update_cb;
 	//para->no_audio=1;
 	//para->no_video=1;
-	ret = dtplayer_init(&player_priv, para);
+	para->width = 720;
+    para->height = 480;
+    ret = dtplayer_init(&player_priv, para);
     if(ret <0)
         return -1;
     

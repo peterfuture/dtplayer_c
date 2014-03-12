@@ -29,6 +29,9 @@ typedef struct{
     int cur_vst_index;
     int cur_sst_index;
 
+    /*dest width height*/
+    int width;
+    int height;
     /*ctrl flag*/
     int eof_flag;
     int sync_enable;
