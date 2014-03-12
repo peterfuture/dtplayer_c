@@ -75,18 +75,21 @@ int video_drop(dtvideo_context_t *vctx,int64_t target_pts)
     dt_info(TAG,"[%s:%d]target pts:%lld \n",__FUNCTION__,__LINE__,target_pts);
     AVPicture_t *pic = NULL;
     int64_t cur_pts = video_get_first_pts(vctx);
-    int drop_count = 50;
+    int drop_count = 300;
     do
     {
         pic = dtvideo_output_read((void *)vctx);
         if(!pic)
         {
             if(drop_count-- == 0)
+            {
+                dt_info(TAG,"3s read nothing, quit drop video\n");
                 break;
-            usleep(1000);
+            }
+            usleep(10000);
             continue;
         }
-        drop_count = 50;
+        drop_count = 300;
         cur_pts = pic->pts;
         dt_debug(TAG,"read pts:%lld \n",pic->pts);
         free(pic);
@@ -94,7 +97,7 @@ int video_drop(dtvideo_context_t *vctx,int64_t target_pts)
         if(cur_pts > target_pts)
             break;
     }while(1);
-    dt_info(TAG,"video drop finish\n");
+    dt_info(TAG,"video drop finish,drop count:%d \n",drop_count);
     vctx->current_pts = cur_pts;
     dtvideo_update_pts((void *)vctx);
     return 0;
