@@ -7,6 +7,8 @@
 
 #define TAG "host-MGT"
 #define AVSYNC_THRESHOLD 100 //ms
+#define AVSYNC_THRESHOLD_MAX  3*1000 //ms
+#define AVSYNC_DROP_THRESHOLD  10*1000 //ms
 
 //==Part1:PTS Relative
 int host_sync_enable(dthost_context_t *hctx)
@@ -50,6 +52,8 @@ int host_update_apts(dthost_context_t * hctx,int64_t apts)
         hctx->sys_time = apts;
         return 0;
     }
+    if(!hctx->para.sync_enable) //sync disable, video will correct systime
+        return 0; 
     //maybe need to correct sys clock
     int64_t vpts = host_get_vpts(hctx);
     int64_t sys_time = host_get_systime(hctx);
@@ -58,15 +62,24 @@ int host_update_apts(dthost_context_t * hctx,int64_t apts)
     
     if(sys_time == -1)//if systime have not been set,wait
         return 0;
-    if(!host_sync_enable(hctx))
-        return 0;
-    if(asdiff<AVSYNC_THRESHOLD)
-        return 0;
-    //we need to reset sys clock
-    hctx->sys_time = apts;
 
-    dt_info(TAG,"[%s:%d] need to reset. apts:%lld vpts:%lld sys_time:%lld AVDIFF:%d ASDIFF:%d\n",__FUNCTION__,__LINE__,apts,vpts,sys_time,avdiff,asdiff);
-    //dthost_update_systime(hctx,apts);    
+    if(host_sync_enable(hctx) && avdiff/90 > AVSYNC_THRESHOLD_MAX) //close sync
+    {
+        dt_info("avdiff:%d ecceed :%d ms, cloase sync \n",avdiff/90,AVSYNC_THRESHOLD_MAX);
+        hctx->sync_mode = DT_SYNC_VIDEO_MASTER;
+        return 0;
+    }
+    
+    if(hctx->sync_enable && hctx->sync_mode == DT_SYNC_VIDEO_MASTER && avdiff/90 < AVSYNC_THRESHOLD_MAX) // enable sync again
+        hctx->sync_mode = DT_SYNC_AUDIO_MASTER;
+ 
+    if(avdiff<AVSYNC_THRESHOLD)
+        return 0;
+    if(host_sync_enable(hctx)) 
+    {
+        dt_info(TAG,"[%s:%d] correct sys time apts:%lld vpts:%lld sys_time:%lld AVDIFF:%d ASDIFF:%d\n",__FUNCTION__,__LINE__,apts,vpts,sys_time,avdiff,asdiff);
+        hctx->sys_time = apts;
+    }
     return 0;
 }
 
@@ -75,11 +88,6 @@ int host_update_vpts(dthost_context_t * hctx,int64_t vpts)
 	//return dtvideo_externel_get_pts(hctx->video_priv);
     hctx->pts_video = vpts;
     dt_debug(TAG,"update vpts:%llx \n",vpts);
-    if(!hctx->para.has_audio)
-    {
-        hctx->sys_time = vpts;
-        return 0;
-    }
     //maybe need to correct sys clock
     int64_t apts = host_get_apts(hctx);
     int64_t sys_time = host_get_systime(hctx);
@@ -88,12 +96,22 @@ int host_update_vpts(dthost_context_t * hctx,int64_t vpts)
     
     if(sys_time == -1)
         return 0;
-    if(!host_sync_enable(hctx))
+    if(!hctx->sync_enable && avdiff/90 > AVSYNC_THRESHOLD)
+    {
+        hctx->sys_time = vpts;
         return 0;
-    if(vsdiff<AVSYNC_THRESHOLD)
+    }
+
+    if(host_sync_enable(hctx) && avdiff/90 > AVSYNC_THRESHOLD_MAX) //close sync
+    {
+        dt_info("avdiff:%d ecceed :%d ms, cloase sync \n",avdiff/90,AVSYNC_THRESHOLD_MAX);
+        hctx->sync_mode = DT_SYNC_VIDEO_MASTER;
         return 0;
-    hctx->sys_time = vpts;
-    dt_info(TAG,"[%s:%d] need to reset. apts:%lld vpts:%lld sys_time:%lld AVDIFF:%d VSDIFF:%d \n",__FUNCTION__,__LINE__,apts,vpts,sys_time,avdiff,vsdiff);
+    }
+
+    if(hctx->sync_enable && hctx->sync_mode == DT_SYNC_VIDEO_MASTER && avdiff/90 < AVSYNC_THRESHOLD_MAX)
+        hctx->sync_mode = DT_SYNC_AUDIO_MASTER;
+    
     return 0;
 }
 
@@ -155,8 +173,14 @@ int host_start(dthost_context_t * hctx)
     hctx->pts_video = first_vpts;
 
     int drop_flag = 0;
-    drop_flag = abs(hctx->pts_audio - hctx->pts_video)/90 > 100; // exceed 100ms
-    if(!hctx->sync_enable)
+    int av_diff_ms = abs(hctx->pts_video - hctx->pts_audio)/90;
+    if(av_diff_ms > 10 * 1000)
+    {
+        dt_info(TAG,"FIRST AV DIFF EXCEED 10S,DO NOT DROP\n");
+        hctx->sync_mode = DT_SYNC_VIDEO_MASTER;
+    }
+    drop_flag = (av_diff_ms > 100 && av_diff_ms < AVSYNC_DROP_THRESHOLD) ; // exceed 100ms
+    if(!host_sync_enable(hctx))
         drop_flag = 0;
     if(drop_flag)
     {
