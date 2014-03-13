@@ -56,7 +56,6 @@ int dtplayer_init(void **player_priv, dtplayer_para_t * para)
     if(ret < 0)
     {
         dt_error(TAG,"PLAYER INIT FAILED \n");
-        free(dtp_ctx);
         return -1;
     }
 	*player_priv = dtp_ctx;
