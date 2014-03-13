@@ -451,7 +451,7 @@ int host_get_state(dthost_context_t *hctx,host_state_t *state)
         state->cur_vpts = -1;
         state->vdec_err_cnt = -1;
     }
-    dt_info(TAG,"[%s:%d] apts:%lld vpts:%lld systime:%lld tsync_enable:%d sync_mode:%d \n",__FUNCTION__,__LINE__,hctx->pts_audio,hctx->pts_video,hctx->sys_time,hctx->sync_enable,hctx->sync_mode);
+    dt_debug(TAG,"[%s:%d] apts:%lld vpts:%lld systime:%lld tsync_enable:%d sync_mode:%d \n",__FUNCTION__,__LINE__,hctx->pts_audio,hctx->pts_video,hctx->sys_time,hctx->sync_enable,hctx->sync_mode);
     state->cur_systime = hctx->sys_time;
     return 0;
 }

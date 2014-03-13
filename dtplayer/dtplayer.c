@@ -72,7 +72,13 @@ int player_init(dtplayer_context_t *dtp_ctx)
     ctrl_info->has_audio = (para->no_audio == -1)?dtp_ctx->media_info->has_audio:(!para->no_audio);
     ctrl_info->has_video = (para->no_video == -1)?dtp_ctx->media_info->has_video:(!para->no_video);
     ctrl_info->has_sub = (para->no_sub == -1)?dtp_ctx->media_info->has_sub:(!para->no_sub);
-    
+   
+    if(!ctrl_info->has_audio && !ctrl_info->has_video)
+    {
+        dt_info(TAG,"HAVE NO A-V STREAM \n");
+        return -1;
+    }
+
     int sync_enable_ini = -1;
     if(GetEnv("PLAYER","player.syncenable",value)>0)
         sync_enable_ini = atoi(value);
@@ -116,13 +122,15 @@ int player_init(dtplayer_context_t *dtp_ctx)
         ctrl_info->cur_vst_index = -1;
     if(!ctrl_info->has_sub)
         ctrl_info->cur_sst_index = -1;
-  
-    dt_info(TAG,"Finally, audio:%d video:%d sub:%d \n",ctrl_info->has_audio,ctrl_info->has_video,ctrl_info->has_sub);
 
+    ctrl_info->has_sub = 0; // do not support sub for now 
     dtp_ctx->media_info->no_audio = !ctrl_info->has_audio;
     dtp_ctx->media_info->no_video = !ctrl_info->has_video;
     dtp_ctx->media_info->no_sub = !ctrl_info->has_sub; 
-    dtp_ctx->media_info->no_sub = 1; // do not support sub for now
+
+    dt_info(TAG,"Finally, ctrl info, audio:%d video:%d sub:%d \n",ctrl_info->has_audio,ctrl_info->has_video,ctrl_info->has_sub);
+    dt_info(TAG,"Finally, no audio:%d no video:%d no sub:%d \n",dtp_ctx->media_info->no_audio,dtp_ctx->media_info->no_video,dtp_ctx->media_info->no_sub);
+
     /*dest width height*/
     ctrl_info->width = para->width;
     ctrl_info->height = para->height;
