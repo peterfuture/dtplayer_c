@@ -55,7 +55,7 @@ static void dump_media_info(dt_media_info_t *info)
         dt_info(TAG,"|bitrate:%d width:%d height:%d duration:%lld \n",info->vstreams[i]->bit_rate,info->vstreams[i]->width,info->vstreams[i]->height,info->vstreams[i]->duration);
     }
     dt_info(TAG,"|audio stream info,num:%d\n",info->ast_num);
-    for(i=0;i<info->vst_num;i++)
+    for(i=0;i<info->ast_num;i++)
     {
         dt_info(TAG,"|audio stream:%d index:%d id:%d\n",i,info->astreams[i]->index,info->astreams[i]->id);
         dt_info(TAG,"|bitrate:%d sample_rate:%d channels:%d bps:%d duration:%lld \n",info->astreams[i]->bit_rate,info->astreams[i]->sample_rate,info->astreams[i]->channels,info->astreams[i]->bps,info->astreams[i]->duration);
