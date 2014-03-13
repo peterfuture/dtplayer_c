@@ -112,7 +112,7 @@ static void *video_output_thread(void *args)
 	AVPicture_t *picture_pre;
 	AVPicture_t *picture;
 	AVPicture_t *pic;
-	int64_t sys_clock;	//contrl fps
+	int64_t sys_clock;	//contrl video display
 	int64_t cur_time,time_diff;
 	dtvideo_context_t *vctx = vo->parent;
 	for (;;) {
@@ -131,7 +131,7 @@ static void *video_output_thread(void *args)
 			usleep(1000);
 			continue;
         }
-		cur_time = dt_gettime();
+		cur_time = (int64_t)dt_gettime();
         sys_clock = dtvideo_get_systime(vo->parent);
         if(sys_clock == -1)
         {
@@ -176,7 +176,10 @@ static void *video_output_thread(void *args)
         if(picture_pre)
         {
             if(picture_pre->pts == -1) //invalid pts, calc using last pts
+            {
+                dt_debug(TAG,"can not get vpts from frame,estimate using fps:%d  \n",vo->para.fps);
                 picture_pre->pts = vctx->current_pts + 90000 / vo->para.fps; 
+            }
             if(sys_clock >= picture_pre->pts)
             {
                 dt_debug(TAG,"drop frame,sys clock:%lld thispts:%lld next->pts:%lld \n",sys_clock,picture->pts,picture_pre->pts);

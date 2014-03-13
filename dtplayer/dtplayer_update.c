@@ -12,7 +12,14 @@ static int calc_cur_time(dtplayer_context_t *dtp_ctx,host_state_t *host_state)
         play_stat->start_time = ctrl_info->start_time;
         dt_info(TAG,"START TIME:%lld \n",ctrl_info->start_time);
     }
-    int sys_time =(host_state->cur_systime>play_stat->start_time)?(host_state->cur_systime - play_stat->start_time):host_state->cur_systime;
+
+    if(ctrl_info->first_time == -1 && host_state->cur_systime !=-1)
+    {
+        ctrl_info->first_time = host_state->cur_systime;
+        dt_info(TAG,"SET FIRST TIME:%lld \n",ctrl_info->first_time);
+    }
+    //int64_t sys_time =(host_state->cur_systime>play_stat->start_time)?(host_state->cur_systime - play_stat->start_time):host_state->cur_systime;
+    int64_t sys_time =(host_state->cur_systime > ctrl_info->first_time)?(host_state->cur_systime - ctrl_info->first_time):host_state->cur_systime;
     play_stat->cur_time = sys_time /90000;
     play_stat->cur_time_ms = sys_time /90;
     return 0;

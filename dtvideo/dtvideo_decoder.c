@@ -117,7 +117,7 @@ static void *video_decode_loop(void *arg)
 			goto DECODE_END;
 		decoder->frame_count++;
 	    //Got one frame
-        picture->pts = frame.pts;
+        //picture->pts = frame.pts;
 		/*queue in */
 		dlp_queue_push_tail(picture_queue, picture);
 		picture = NULL;

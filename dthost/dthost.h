@@ -15,7 +15,7 @@ typedef struct {
     int64_t pts_video;
     int sync_enable;
     int sync_mode; 
-	int av_diff;
+	int64_t av_diff;
     /*a-v-s port part*/
 	void *port_priv;
 	void *audio_priv;
@@ -31,10 +31,10 @@ int host_write_frame(dthost_context_t * hctx, dt_av_frame_t * frame,int type);
 int host_read_frame(dthost_context_t * hctx, dt_av_frame_t * frame,int type);
 
 int host_sync_enable(dthost_context_t *hctx);
-int host_get_apts(dthost_context_t * hctx);
-int host_get_vpts(dthost_context_t * hctx);
-int host_get_systime(dthost_context_t * hctx);
-int host_get_avdiff(dthost_context_t * hctx);
+int64_t host_get_apts(dthost_context_t * hctx);
+int64_t host_get_vpts(dthost_context_t * hctx);
+int64_t host_get_systime(dthost_context_t * hctx);
+int64_t host_get_avdiff(dthost_context_t * hctx);
 int64_t host_get_current_time(dthost_context_t * hctx);
 int host_update_apts(dthost_context_t * hctx,int64_t apts);
 int host_update_vpts(dthost_context_t * hctx,int64_t vpts);

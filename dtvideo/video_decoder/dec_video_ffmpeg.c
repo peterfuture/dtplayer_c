@@ -63,6 +63,7 @@ int ffmpeg_vdec_init(dtvideo_decoder_t * decoder)
 	//select video decoder and call init
 	AVCodec *codec = NULL;
 	AVCodecContext *avctxp = (AVCodecContext *) decoder->decoder_priv;
+    avctxp->thread_count = 1; //do not use multi thread,may crash
 	//printf("file:%s [%s:%d] param-- w:%d h:%d id:%d extr_si:%d \n",__FILE__,__FUNCTION__,__LINE__,avctxp->width,avctxp->height,id,avctxp->extradata_size);
 	enum AVCodecID id = avctxp->codec_id;
 	codec = avcodec_find_decoder(id);
@@ -71,7 +72,6 @@ int ffmpeg_vdec_init(dtvideo_decoder_t * decoder)
 		       __FUNCTION__, __LINE__);
 		return -1;
 	}
-
 	if (avcodec_open2(avctxp, codec, NULL) < 0) {
 		dt_error(TAG,"file:%s [%s:%d] video codec open failed \n", __FILE__,
 		       __FUNCTION__, __LINE__);
@@ -94,16 +94,12 @@ static void output_picture(dtvideo_decoder_t * decoder, AVFrame * src_frame,
 	memset(pict, 0, sizeof(AVPicture_t));
 	AVPicture *dest_pic = (AVPicture *) (pict);
 	// Allocate an AVFrame structure
-	numBytes =
-	    avpicture_get_size(decoder->para.d_pixfmt, decoder->para.d_width,
-			       decoder->para.d_height);
+	numBytes =avpicture_get_size(decoder->para.d_pixfmt, decoder->para.d_width,decoder->para.d_height);
 	buffer = (uint8_t *) malloc(numBytes * sizeof(uint8_t));
-	avpicture_fill((AVPicture *) dest_pic, buffer, decoder->para.d_pixfmt,
-		       decoder->para.d_width, decoder->para.d_height);
+	avpicture_fill((AVPicture *) dest_pic, buffer, decoder->para.d_pixfmt,decoder->para.d_width, decoder->para.d_height);
 
 	// Convert the image from its native format to RGB
-	ret =
-	    img_convert2((AVPicture *) dest_pic, decoder->para.d_pixfmt,
+	ret =img_convert2((AVPicture *) dest_pic, decoder->para.d_pixfmt,
 			 (AVPicture *) src_frame, decoder->para.s_pixfmt,
 			 decoder->para.s_width, decoder->para.s_height,
 			 decoder->para.d_width, decoder->para.d_height);
@@ -137,10 +133,10 @@ int ffmpeg_vdec_decode(dtvideo_decoder_t * decoder, dt_av_frame_t * dt_frame,
     pkt.buf = NULL;	
     avcodec_decode_video2(avctxp, frame, &got_picture, &pkt);
 	if (got_picture) {
-		output_picture(decoder, frame, frame->best_effort_timestamp,pic);
-		//printf("==get picture size:%d \n",frame->linesize[0]);
-		//printf("==got picture pts:%llu timestamp:%lld \n",frame->pkt_pts,frame->best_effort_timestamp);
-		return 1;
+		//output_picture(decoder, frame, frame->best_effort_timestamp,pic);
+		output_picture(decoder, frame, av_frame_get_best_effort_timestamp(frame),pic);
+		//dt_info(TAG,"==got picture pts:%llu timestamp:%lld \n",frame->pkt_pts,frame->best_effort_timestamp);
+        return 1;
 	}
 	//inbuf will be freed outside
 	return 0;
