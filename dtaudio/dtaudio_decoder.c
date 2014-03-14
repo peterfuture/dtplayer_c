@@ -229,12 +229,12 @@ REFILL_BUFFER:
 		if (decoder->status == ADEC_STATUS_EXIT)
 			goto EXIT;
 		/*write pcm */
-		if (get_buf_space(out) < out_size) {
-			dt_debug(TAG,"[%s:%d] output buffer do not left enough space ,space=%d level:%d outsie:%d \n",__FUNCTION__,__LINE__,get_buf_space(out),get_buf_level(out),out_size);
+		if (buf_space(out) < out_size) {
+			dt_info(TAG,"[%s:%d] output buffer do not left enough space ,space=%d level:%d outsie:%d \n",__FUNCTION__,__LINE__,buf_space(out),buf_level(out),out_size);
 			usleep(1000 * 10);
             goto REFILL_BUFFER;
 		}
-		ret = write_buf(out, out_ptr + fill_size, out_size);
+		ret = buf_put(out, out_ptr + fill_size, out_size);
 		fill_size += ret;
 		out_size -= ret;
 		decoder->pts_cache_size = out_size;
@@ -282,7 +282,7 @@ int audio_decoder_init(dtaudio_decoder_t * decoder)
 	/*init pcm buffer */
 	dtaudio_context_t *actx = (dtaudio_context_t *) decoder->parent;
 	int size = DTAUDIO_PCM_BUF_SIZE;
-	ret = init_buf(&actx->audio_decoded_buf, size);
+	ret = buf_init(&actx->audio_decoded_buf, size);
 	if (ret < 0)
     {
 		ret = -1;
@@ -299,7 +299,7 @@ int audio_decoder_init(dtaudio_decoder_t * decoder)
 	audio_decoder_start(decoder);
     return ret;
 ERR2:
-    uninit_buf(&actx->audio_decoded_buf);
+    buf_release(&actx->audio_decoded_buf);
 ERR1:
 	decoder->dec_wrapper->release(decoder);
 ERR0:
@@ -320,7 +320,7 @@ int audio_decoder_stop(dtaudio_decoder_t * decoder)
 	decoder->dec_wrapper->release(decoder);
 	/*uninit buf */
 	dtaudio_context_t *actx = (dtaudio_context_t *) decoder->parent;
-	uninit_buf(&actx->audio_decoded_buf);
+	buf_release(&actx->audio_decoded_buf);
 	/*unregister adec */
 	adec_unregister_all();
 	return 0;

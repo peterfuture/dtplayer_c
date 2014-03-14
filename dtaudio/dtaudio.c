@@ -23,7 +23,7 @@ int audio_filter_read()
 int audio_output_read(void *priv, uint8_t *buf, int size)
 {
 	dtaudio_context_t *actx = (dtaudio_context_t *) priv;
-	return read_buf(&actx->audio_decoded_buf, buf, size);
+	return buf_get(&actx->audio_decoded_buf, buf, size);
 }
 
 //==Part2: PTS&STATUS Relative
