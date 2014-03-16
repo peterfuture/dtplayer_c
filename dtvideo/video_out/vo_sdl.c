@@ -143,14 +143,14 @@ static void vo_sdl_display(dtvideo_output_t * vo, AVPicture_t * pict)
 	vo_lock();
 
 	SDL_LockYUVOverlay(overlay);
-	p.data[0] = overlay->pixels[0];
+    p.data[0] = overlay->pixels[0];
 	p.data[1] = overlay->pixels[2];
 	p.data[2] = overlay->pixels[1];
 	p.linesize[0] = overlay->pitches[0];
 	p.linesize[1] = overlay->pitches[2];
 	p.linesize[2] = overlay->pitches[1];
 	vo_sdl_sws(vo, &p, pict);	/* only do memcpy */
-	SDL_UnlockYUVOverlay(overlay);
+    SDL_UnlockYUVOverlay(overlay);
 
 	rect.x = dx;
 	rect.y = dy;
@@ -161,111 +161,10 @@ static void vo_sdl_display(dtvideo_output_t * vo, AVPicture_t * pict)
 	vo_unlock();
 }
 
-#if 0
-static void vo_sdl_event_loop(void *arg)
-{
-	SDL_Event event;
-	while (1) {
-		SDL_WaitEvent(&event);
-		switch (event.type) {
-		case SDL_VIDEORESIZE:
-			vo_lock();
-			screen =
-			    SDL_SetVideoMode(event.resize.w, event.resize.h, 0,
-					     SDL_HWSURFACE | SDL_RESIZABLE |
-					     SDL_ASYNCBLIT | SDL_HWACCEL);
-			ww = dw = event.resize.w;
-			wh = dh = event.resize.h;
-			vo_unlock();
-			break;
-		case SDL_KEYDOWN:
-			switch (event.key.keysym.sym) {
-			case SDLK_h:
-				show_ui_key();
-				break;
-			case SDLK_s:
-				dlp_screen_shot();
-				break;
-			case SDLK_ESCAPE:
-			case SDLK_q:
-				dlp_exit(-2);
-			case SDLK_9:
-				dlp_sub_volume();
-				break;
-			case SDLK_0:
-				dlp_add_volume();
-				break;
-			case SDLK_p:
-			case SDLK_SPACE:
-				dlp_pause_play();
-				break;
-			case SDLK_LEFT:
-				dlp_seek(-10);
-				break;
-			case SDLK_RIGHT:
-				dlp_seek(10);
-				break;
-			case SDLK_PAGEDOWN:
-				dlp_seek(60);
-				break;
-			case SDLK_PAGEUP:
-				dlp_seek(-60);
-				break;
-			case SDLK_f:
-				dlp_full_screen();
-				break;
-			case SDLK_1:
-				vo_sdl_zoom_size(1);
-				break;
-			case SDLK_2:
-				vo_sdl_zoom_size(2);
-				break;
-			case SDLK_3:
-				vo_sdl_zoom_size(3);
-				break;
-			case SDLK_4:
-				vo_sdl_zoom_size(4);
-				break;
-			}
-		}
-	}
-}
-
-static int vo_sdl_control(int cmd, void *arg)
-{
-	switch (cmd) {
-	case VO_TOGGLE_FULLSCREEN:
-		toggle_full_screen();
-		break;
-	case VO_ZOOM:
-		vo_sdl_zoom_size(*((int *)arg));
-		break;
-	default:
-		av_log(NULL, AV_LOG_ERROR, "vo sdl: cmd not support now!\n");
-		break;
-	}
-	return 0;
-}
-#endif
-#if 0
-vo_t vo_sdl = {
-	.id = VO_ID_SDL,
-	.name = "sdl",
-	.vo_init = vo_sdl_init,
-	.vo_uninit = vo_sdl_uninit,
-	.vo_display = vo_sdl_display,
-	.vo_event_loop = vo_sdl_event_loop,
-	.vo_control = vo_sdl_control,
-};
-#endif
-
 vo_operations_t vo_sdl_ops = {
 	.id = VO_ID_SDL,
 	.name = "sdl",
 	.vo_init = vo_sdl_init,
-//    .ao_start= ao_alsa_start,
-	//.vo_pause= vo_sdl_pause,
-	//.vo_resume=vo_sdl_resume,
 	.vo_stop = vo_sdl_uninit,
 	.vo_write = vo_sdl_display,
 };

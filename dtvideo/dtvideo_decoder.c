@@ -63,7 +63,7 @@ static void *video_decode_loop(void *arg)
 	dtvideo_context_t *vctx = (dtvideo_context_t *) decoder->parent;
 	queue_t *picture_queue = vctx->vo_queue;
 	/*used for decode */
-	AVPicture_t *picture;
+	AVPicture_t *picture = NULL;
 	int ret;
 	dt_info(TAG,"[%s:%d] start decode loop \n", __FUNCTION__, __LINE__);
 
@@ -119,8 +119,8 @@ static void *video_decode_loop(void *arg)
 	    //Got one frame
         //picture->pts = frame.pts;
 		/*queue in */
-		dlp_queue_push_tail(picture_queue, picture);
-		picture = NULL;
+        dlp_queue_push_tail(picture_queue, picture);
+        picture = NULL;
 DECODE_END:	
         //we successfully decodec one frame
 		if (frame.data) {

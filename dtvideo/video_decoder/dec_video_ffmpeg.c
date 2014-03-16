@@ -11,15 +11,15 @@
 
 #define TAG "VDEC-FFMPEG"
 static AVFrame *frame;
+static struct SwsContext *pSwsCtx =NULL;;
 
-static int img_convert2(AVPicture * dst, int dst_pix_fmt, const AVPicture * src,
+static int img_convert(AVPicture * dst, int dst_pix_fmt, const AVPicture * src,
 			int src_pix_fmt, int src_width, int src_height,
 			int dest_width, int dest_height)
 {
 	int ret = 0;
 	int w;
 	int h;
-	static struct SwsContext *pSwsCtx;
 	w = src_width;
 	h = src_height;
 	//pSwsCtx = sws_getContext(w, h, src_pix_fmt,dest_width, dest_height, dst_pix_fmt,SWS_BICUBIC, NULL, NULL, NULL);
@@ -27,7 +27,6 @@ static int img_convert2(AVPicture * dst, int dst_pix_fmt, const AVPicture * src,
 				 dest_height, dst_pix_fmt, SWS_BICUBIC, NULL,
 				 NULL, NULL);
 	ret =sws_scale(pSwsCtx, src->data, src->linesize, 0, h, dst->data,dst->linesize);
-	//sws_freeContext(pSwsCtx);
 	if (ret > 0)
 		return 0;
 	else
@@ -83,14 +82,13 @@ int ffmpeg_vdec_init(dtvideo_decoder_t * decoder)
 	return 0;
 }
 
-static void output_picture(dtvideo_decoder_t * decoder, AVFrame * src_frame,
+static int output_picture(dtvideo_decoder_t * decoder, AVFrame * src_frame,
 			   int64_t pts, AVPicture_t ** p_pict)
 {
 	int ret;
 	uint8_t *buffer;
 	int numBytes;
-	AVPicture_t *pict;
-	pict = malloc(sizeof(AVPicture_t));
+	AVPicture_t *pict = malloc(sizeof(AVPicture_t));
 	memset(pict, 0, sizeof(AVPicture_t));
 	AVPicture *dest_pic = (AVPicture *) (pict);
 	// Allocate an AVFrame structure
@@ -99,7 +97,7 @@ static void output_picture(dtvideo_decoder_t * decoder, AVFrame * src_frame,
 	avpicture_fill((AVPicture *) dest_pic, buffer, decoder->para.d_pixfmt,decoder->para.d_width, decoder->para.d_height);
 
 	// Convert the image from its native format to RGB
-	ret =img_convert2((AVPicture *) dest_pic, decoder->para.d_pixfmt,
+	ret =img_convert((AVPicture *) dest_pic, decoder->para.d_pixfmt,
 			 (AVPicture *) src_frame, decoder->para.s_pixfmt,
 			 decoder->para.s_width, decoder->para.s_height,
 			 decoder->para.d_width, decoder->para.d_height);
@@ -107,21 +105,30 @@ static void output_picture(dtvideo_decoder_t * decoder, AVFrame * src_frame,
 		goto FAIL;
 	(pict)->pts = pts;
 	*p_pict = pict;
-	dt_debug(TAG,"==line  %d %d %d %d \n",(pict)->linesize[0],(pict)->linesize[1],(pict)->linesize[2],(pict)->linesize[3]);
-	return;
+	return 0;
 FAIL:
 	av_free(pict);
 	*p_pict = NULL;
-	return;
+	return -1;
 
 }
 
-//1 get one frame 0 failed -1 err
+/*
+ *decode one frame using ffmpeg
+ *
+ * return value
+ * 1  dec one frame and get one frame
+ * 0  dec one frame without out
+ * -1 err occured while decoding 
+ *
+ * */
+
 int ffmpeg_vdec_decode(dtvideo_decoder_t * decoder, dt_av_frame_t * dt_frame,
 		       AVPicture_t ** pic)
 {
-	AVCodecContext *avctxp = (AVCodecContext *) decoder->decoder_priv;
-	dt_debug(TAG,"file:%s [%s:%d] param-- w:%d h:%d  extr_si:%d \n",__FILE__,__FUNCTION__,__LINE__,avctxp->width,avctxp->height,avctxp->extradata_size);
+    int ret = 0;  
+    AVCodecContext *avctxp = (AVCodecContext *) decoder->decoder_priv;
+	dt_debug(TAG,"[%s:%d] param-- w:%d h:%d  extr_si:%d \n",__FUNCTION__,__LINE__,avctxp->width,avctxp->height,avctxp->extradata_size);
 	int got_picture = 0;
 	AVPacket pkt;
 
@@ -133,13 +140,17 @@ int ffmpeg_vdec_decode(dtvideo_decoder_t * decoder, dt_av_frame_t * dt_frame,
     pkt.buf = NULL;	
     avcodec_decode_video2(avctxp, frame, &got_picture, &pkt);
 	if (got_picture) {
-		//output_picture(decoder, frame, frame->best_effort_timestamp,pic);
-		output_picture(decoder, frame, av_frame_get_best_effort_timestamp(frame),pic);
-		//dt_info(TAG,"==got picture pts:%llu timestamp:%lld \n",frame->pkt_pts,frame->best_effort_timestamp);
-        return 1;
+		ret = output_picture(decoder, frame, av_frame_get_best_effort_timestamp(frame),pic);
+		if(ret == -1)
+            ret = 0;
+        else
+            ret = 1;
+        //dt_info(TAG,"==got picture pts:%llu timestamp:%lld \n",frame->pkt_pts,frame->best_effort_timestamp);
 	}
-	//inbuf will be freed outside
-	return 0;
+    av_frame_unref(frame);
+	//no need to free dt_frame
+    //will be freed outside
+	return ret;
 }
 
 int ffmpeg_vdec_release(dtvideo_decoder_t * decoder)
@@ -147,7 +158,10 @@ int ffmpeg_vdec_release(dtvideo_decoder_t * decoder)
 	AVCodecContext *avctxp = (AVCodecContext *) decoder->decoder_priv;
 	avcodec_close(avctxp);
 	avcodec_free_frame(&frame);
-	return 0;
+    if(pSwsCtx)
+        sws_freeContext(pSwsCtx);
+    pSwsCtx = NULL;
+    return 0;
 }
 
 dec_video_wrapper_t vdec_ffmpeg_ops = {
