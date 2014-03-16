@@ -723,15 +723,17 @@ void CloseTypeFile()
 	CloseIniFile ();
 	s_read_flags=0;
 }
-static int sys_file_is_open = 0;
-int GetEnv(char* appNam,char* keyNam,char* keyVal)
+
+static int FileIsOpen = 0;
+
+int
+GetPrivateProfileString(char* appNam,char* keyNam,char* keyVal,char* filNam)
 {
-    char *filNam = INI_FILE;
 	while(s_read_flags)
 		usleep(10000);
 	s_read_flags=1;
 
-    if(sys_file_is_open == 1)
+    if(FileIsOpen == 1)
     {
     	char tmpBuf[CONF_MAX_PATH];
 		memcpy(tmpBuf,ReadString (appNam, keyNam,"NotFound"),CONF_MAX_PATH);
@@ -762,7 +764,7 @@ int GetEnv(char* appNam,char* keyNam,char* keyVal)
 		
 		//CloseIniFile ();
 		s_read_flags=0;
-        sys_file_is_open = 1;
+        FileIsOpen = 1;
 		return strlen(keyVal);
 	}else
 	{
@@ -828,8 +830,26 @@ int WritePrivateProfileString(char* appNam,char* keyNam, char* keyVal,char* filN
 	}
 }
 
+/* api add by dtsoft 
+ *
+ *get Env from ini file
+ *
+ * KEY-VALUE EXAMPLE: 
+ * [PLAYER]
+ * PLAYER.NOAUDIO = 1
+ *
+ * appNam = PLAYER
+ * keyNam = PLAYER.NOAUDIO
+ * keyVal = 1
+ *
+ * */
 
 
+int GetEnv(char* appNam,char* keyNam,char* keyVal)
+{
+    char *fileNam = INI_FILE;
+    return GetPrivateProfileString(appNam,keyNam,keyVal,fileNam);
+}
 
 //#define INIFILE_TEST_THIS_FILE 1
 #ifdef INIFILE_TEST_THIS_FILE
