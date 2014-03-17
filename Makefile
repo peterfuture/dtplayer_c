@@ -15,7 +15,7 @@ CC       = gcc
 CXX      = gcc
 STRIP    = strip 
 
-CFLAGS   = -g -Wall 
+CFLAGS   += -g -Wall 
 CFLAGS  += $(DT_CFLAGS)
 DT_DEBUG = -g
 
@@ -118,9 +118,11 @@ OBJS_DTPLAYER   += $(addsuffix .o, $(basename $(SRCS_DTPLAYER)))
 DTM_PLAYER_DEPS  = $(OBJS_DTPLAYER)  $(OBJS_COMMON) $(COMMON_LIBS)
 
 dtm_player$(EXESUF): $(DTM_PLAYER_DEPS)
-	$(CC) -g -o $@ $^ $(LDFLAGS)  
+	@echo BUILD-TARGET $@
+	@$(CC) -g -o $@ $^ $(LDFLAGS)  
 
 dtm_player_g$(EXESUF): $(DTM_PLAYER_DEPS)
+	@echo BUILD-TARGET $@
 	$(CC) -g -o $@ $^ $(LDFLAGS)  
 
 all: $(ALL_PRG)

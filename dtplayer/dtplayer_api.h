@@ -24,6 +24,17 @@ typedef enum {
     PLAYER_STATUS_EXIT, 
 } player_status_t;
 
+typedef struct{
+    /* player state */
+    player_status_t cur_status;
+    player_status_t last_status;
+  
+    int64_t cur_time_ms;
+    int64_t cur_time;
+    
+    int64_t start_time;
+}player_state_t;
+
 typedef struct dtplayer_para {
 	char file_name[FILE_NAME_MAX_LENGTH];
 	int video_index;
@@ -39,19 +50,8 @@ typedef struct dtplayer_para {
 	int width;
 	int height;
     
-    void *update_cb;
+    int (*update_cb)(player_status_t *sta);
 } dtplayer_para_t;
-
-typedef struct{
-    /* player state */
-    player_status_t cur_status;
-    player_status_t last_status;
-  
-    int64_t cur_time_ms;
-    int64_t cur_time;
-    
-    int64_t start_time;
-}player_state_t;
 
 dtplayer_para_t *dtplayer_alloc_para();
 int dtplayer_release_para(dtplayer_para_t *para);

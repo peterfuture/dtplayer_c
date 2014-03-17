@@ -1,10 +1,12 @@
 ###### generic rules #######
+
 #==============================================
 %.o: %.S
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 %.o: %.c
-	$(CC) $(CFLAGS) -c -o $@ $<
+	@echo CC $@ 
+	@$(CC) $(CFLAGS) -c -o $@ $< 
 
 %.o: %.cpp
 	$(CC) $(CXXFLAGS) -c -o $@ $<
