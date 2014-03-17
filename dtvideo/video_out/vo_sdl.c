@@ -1,14 +1,3 @@
-/**********************************************
- * Dawn Light Player
- *
- *   vo_sdl.c
- *
- * Created by kf701
- * 14:11:50 02/26/08 CST
- *
- * $Id: vo_sdl.c 59 2008-04-20 09:25:53Z kf701 $
- **********************************************/
-
 #if ENABLE_VO_SDL
 
 #include "../dtvideo_output.h"
@@ -18,34 +7,11 @@
 
 #define TAG "VO-SDL"
 
-static pthread_mutex_t vo_mutex;
-
-static void vo_lock_init()
-{
-	pthread_mutex_init(&vo_mutex, NULL);
-}
-
-static void vo_lock_free()
-{
-	pthread_mutex_destroy(&vo_mutex);
-}
-
-static void vo_lock()
-{
-	pthread_mutex_lock(&vo_mutex);
-}
-
-static void vo_unlock()
-{
-	pthread_mutex_unlock(&vo_mutex);
-}
-
 static int fs_screen_width = 0, fs_screen_height = 0;
-
 static SDL_Surface *screen = NULL;
 static SDL_Overlay *overlay = NULL;
-
 static int dx, dy, dw, dh, ww, wh;
+static dt_lock_t vo_mutex;
 
 static int vo_sdl_init(dtvideo_output_t * vo)
 {
@@ -54,9 +20,8 @@ static int vo_sdl_init(dtvideo_output_t * vo)
 	putenv("SDL_VIDEO_WINDOW_POS=center");
 	putenv("SDL_VIDEO_CENTERED=1");
 
-	flags = SDL_INIT_VIDEO | SDL_INIT_VIDEO | SDL_INIT_TIMER;
+	flags = SDL_INIT_VIDEO;
 	if (SDL_Init(flags)) {
-		//av_log(NULL, AV_LOG_ERROR, "initialize SDL: %s\n", SDL_GetError());
 		dt_error("initialize SDL: %s\n", SDL_GetError());
 		return -1;
 	}
@@ -80,7 +45,7 @@ static int vo_sdl_init(dtvideo_output_t * vo)
 
 	overlay = SDL_CreateYUVOverlay(dw, dh, SDL_YV12_OVERLAY, screen);
 
-	vo_lock_init();
+    dt_lock_init(&vo_mutex,NULL);
 
 	dt_info(TAG,"w:%d h:%d planes:%d \n",overlay->w,overlay->h,overlay->planes);
 	dt_info(TAG,"pitches:%d %d %d \n",overlay->pitches[0],overlay->pitches[1],overlay->pitches[2]);
@@ -89,25 +54,24 @@ static int vo_sdl_init(dtvideo_output_t * vo)
 	return 0;
 }
 
-static int vo_sdl_uninit(dtvideo_output_t * vo)
+static int vo_sdl_stop(dtvideo_output_t * vo)
 {
-	vo_lock();
-
-	SDL_FreeYUVOverlay(overlay);
+    dt_lock(&vo_mutex);
+	
+    SDL_FreeYUVOverlay(overlay);
 	overlay = NULL;
 
-	vo_lock_free();
+    dt_unlock(&vo_mutex);
 
 	dt_info(TAG,"uninit vo sdl\n");
 	return 0;
 }
 
-static void vo_sdl_display(dtvideo_output_t * vo, AVPicture_t * pict)
+static void vo_sdl_render(dtvideo_output_t * vo, AVPicture_t * pict)
 {
+    dt_lock(&vo_mutex);
+
 	SDL_Rect rect;
-
-	vo_lock();
-
 	SDL_LockYUVOverlay(overlay);
 
     memcpy(overlay->pixels[0],pict->data[0],dw*dh);    
@@ -121,15 +85,15 @@ static void vo_sdl_display(dtvideo_output_t * vo, AVPicture_t * pict)
 	rect.h = dh;
 	SDL_DisplayYUVOverlay(overlay, &rect);
 
-	vo_unlock();
+    dt_unlock(&vo_mutex);
 }
 
 vo_operations_t vo_sdl_ops = {
 	.id = VO_ID_SDL,
 	.name = "sdl",
 	.vo_init = vo_sdl_init,
-	.vo_stop = vo_sdl_uninit,
-	.vo_write = vo_sdl_display,
+	.vo_stop = vo_sdl_stop,
+	.vo_render = vo_sdl_render,
 };
 
 #endif /* ENABLE_VO_SDL */

@@ -189,7 +189,7 @@ static void *video_output_thread(void *args)
             }
         }
 		/*display picture & update vpts */
-		ret = vo->vout_ops->vo_write(vo, pic);
+		ret = vo->vout_ops->vo_render(vo, pic);
 		if (ret < 0) {
 			printf("frame toggle failed! \n");
 			usleep(1000);

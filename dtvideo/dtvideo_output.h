@@ -15,14 +15,8 @@ typedef struct _vo_t {
 	char *name;
 
 	int (*vo_init) (dtvideo_output_t * ao);
-	int (*vo_start) (dtvideo_output_t * ao);
-	int (*vo_pause) (dtvideo_output_t * ao);
-	int (*vo_resume) (dtvideo_output_t * ao);
-	int (*vo_stop) (dtvideo_output_t * ao);
-	 uint64_t(*vo_latency) (dtvideo_output_t * ao);
-	int (*vo_level) (dtvideo_output_t * ao);
-	int (*vo_write) (dtvideo_output_t * ao, AVPicture_t * pic);
-	//int(*ao_control)(dtaudio_output_t *ao,int cmd, void *arg);
+    int (*vo_stop) (dtvideo_output_t * ao);
+	int (*vo_render) (dtvideo_output_t * ao, AVPicture_t * pic);
 	void *handle;
 	struct _vo_t *next;
 } vo_operations_t;
