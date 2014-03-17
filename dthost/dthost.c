@@ -65,7 +65,7 @@ int host_update_apts(dthost_context_t * hctx,int64_t apts)
 
     if(host_sync_enable(hctx) && avdiff/90 > AVSYNC_THRESHOLD_MAX) //close sync
     {
-        dt_info("avdiff:%lld ecceed :%d ms, cloase sync \n",avdiff/90,AVSYNC_THRESHOLD_MAX);
+        dt_info(TAG,"avdiff:%lld ecceed :%d ms, cloase sync \n",avdiff/90,AVSYNC_THRESHOLD_MAX);
         hctx->sync_mode = DT_SYNC_VIDEO_MASTER;
         return 0;
     }
@@ -85,14 +85,13 @@ int host_update_apts(dthost_context_t * hctx,int64_t apts)
 
 int host_update_vpts(dthost_context_t * hctx,int64_t vpts)
 {
-	//return dtvideo_externel_get_pts(hctx->video_priv);
     hctx->pts_video = vpts;
     dt_debug(TAG,"update vpts:%llx \n",vpts);
     //maybe need to correct sys clock
-    int64_t apts = host_get_apts(hctx);
+    //int64_t apts = host_get_apts(hctx);
     int64_t sys_time = host_get_systime(hctx);
     int64_t avdiff = host_get_avdiff(hctx);
-    int64_t vsdiff = llabs(vpts - hctx->sys_time)/90; //vpts sys_time diff
+    //int64_t vsdiff = llabs(vpts - hctx->sys_time)/90; //vpts sys_time diff
     
     if(sys_time == -1)
         return 0;
@@ -105,7 +104,7 @@ int host_update_vpts(dthost_context_t * hctx,int64_t vpts)
 
     if(host_sync_enable(hctx) && avdiff/90 > AVSYNC_THRESHOLD_MAX) //close sync
     {
-        dt_info("avdiff:%d ecceed :%d ms, cloase sync \n",avdiff/90,AVSYNC_THRESHOLD_MAX);
+        dt_info(TAG,"avdiff:%d ecceed :%d ms, cloase sync \n",avdiff/90,AVSYNC_THRESHOLD_MAX);
         hctx->sync_mode = DT_SYNC_VIDEO_MASTER;
         return 0;
     }

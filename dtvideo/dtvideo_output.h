@@ -14,9 +14,9 @@ typedef struct _vo_t {
 	int id;
 	char *name;
 
-	int (*vo_init) (dtvideo_output_t * ao);
-    int (*vo_stop) (dtvideo_output_t * ao);
-	int (*vo_render) (dtvideo_output_t * ao, AVPicture_t * pic);
+	int (*vo_init)(dtvideo_output_t * ao);
+    int (*vo_stop)(dtvideo_output_t * ao);
+	int (*vo_render)(dtvideo_output_t * ao, AVPicture_t * pic);
 	void *handle;
 	struct _vo_t *next;
 } vo_operations_t;

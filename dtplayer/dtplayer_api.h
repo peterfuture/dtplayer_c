@@ -50,7 +50,7 @@ typedef struct dtplayer_para {
 	int width;
 	int height;
     
-    int (*update_cb)(player_status_t *sta);
+    int (*update_cb)(player_state_t *sta);
 } dtplayer_para_t;
 
 dtplayer_para_t *dtplayer_alloc_para();

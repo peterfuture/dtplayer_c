@@ -105,7 +105,7 @@ int dtplayer_stop(void *player_priv)
     
     /*need to wait until player stop ok*/
     dt_info(TAG,"EVENT_LOOP_ID:%lu \n",dtp_ctx->event_loop_id);
-    int ret = pthread_join(dtp_ctx->event_loop_id,NULL);
+    pthread_join(dtp_ctx->event_loop_id,NULL);
     return 0;
 }
 

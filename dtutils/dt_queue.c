@@ -20,12 +20,14 @@ static void unlock_queue(queue_t * qu)
 	pthread_mutex_unlock(&qu->mutex);
 }
 
+#if 0
 static int dlp_wakeup_on_queue(queue_t * qu)
 {
 	if (unlikely(NULL == qu))
 		return -1;
 	return pthread_cond_broadcast(&qu->cond);
 }
+#endif
 
 int dlp_wait_on_queue(queue_t * qu)
 {

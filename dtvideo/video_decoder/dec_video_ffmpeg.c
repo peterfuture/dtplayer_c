@@ -13,24 +13,14 @@
 static AVFrame *frame;
 static struct SwsContext *pSwsCtx =NULL;;
 
-static int img_convert(AVPicture * dst, int dst_pix_fmt, const AVPicture * src,
+static int img_convert(AVPicture * dst, int dst_pix_fmt, AVFrame * src,
 			int src_pix_fmt, int src_width, int src_height,
 			int dest_width, int dest_height)
 {
-	int ret = 0;
-	int w;
-	int h;
-	w = src_width;
-	h = src_height;
-	//pSwsCtx = sws_getContext(w, h, src_pix_fmt,dest_width, dest_height, dst_pix_fmt,SWS_BICUBIC, NULL, NULL, NULL);
-	pSwsCtx =sws_getCachedContext(pSwsCtx, w, h, src_pix_fmt, dest_width,
-				 dest_height, dst_pix_fmt, SWS_BICUBIC, NULL,
-				 NULL, NULL);
-	ret =sws_scale(pSwsCtx, src->data, src->linesize, 0, h, dst->data,dst->linesize);
-	if (ret > 0)
-		return 0;
-	else
-		return -1;
+	//pSwsCtx = sws_getContext(src_width, src_height, src_pix_fmt,dest_width, dest_height, dst_pix_fmt,SWS_BICUBIC, NULL, NULL, NULL);
+	pSwsCtx =sws_getCachedContext(pSwsCtx, src_width,src_height,src->format, dest_width,dest_height, dst_pix_fmt, SWS_BICUBIC, NULL,NULL, NULL);
+	sws_scale(pSwsCtx, src->data, src->linesize, 0, src_height, dst->data,dst->linesize);
+	return 0;
 }
 
 void SaveFrame(AVFrame * pFrame, int width, int height, int iFrame)
@@ -63,29 +53,24 @@ int ffmpeg_vdec_init(dtvideo_decoder_t * decoder)
 	AVCodec *codec = NULL;
 	AVCodecContext *avctxp = (AVCodecContext *) decoder->decoder_priv;
     avctxp->thread_count = 1; //do not use multi thread,may crash
-	//printf("file:%s [%s:%d] param-- w:%d h:%d id:%d extr_si:%d \n",__FILE__,__FUNCTION__,__LINE__,avctxp->width,avctxp->height,id,avctxp->extradata_size);
 	enum AVCodecID id = avctxp->codec_id;
 	codec = avcodec_find_decoder(id);
 	if (NULL == codec) {
-		dt_error(TAG,"file:%s [%s:%d] video codec find failed \n", __FILE__,
-		       __FUNCTION__, __LINE__);
+		dt_error(TAG,"[%s:%d] video codec find failed \n",__FUNCTION__, __LINE__);
 		return -1;
 	}
 	if (avcodec_open2(avctxp, codec, NULL) < 0) {
-		dt_error(TAG,"file:%s [%s:%d] video codec open failed \n", __FILE__,
-		       __FUNCTION__, __LINE__);
+		dt_error(TAG,"[%s:%d] video codec open failed \n",__FUNCTION__, __LINE__);
 		return -1;
 	}
 	dt_info(TAG," [%s:%d] ffmpeg dec init ok \n",__FUNCTION__,__LINE__);
 	//alloc one frame for decode
-	frame = avcodec_alloc_frame();
+	frame = av_frame_alloc();
 	return 0;
 }
 
-static int output_picture(dtvideo_decoder_t * decoder, AVFrame * src_frame,
-			   int64_t pts, AVPicture_t ** p_pict)
+static int output_picture(dtvideo_decoder_t * decoder, AVFrame * src_frame,int64_t pts, AVPicture_t ** p_pict)
 {
-	int ret;
 	uint8_t *buffer;
 	int numBytes;
 	AVPicture_t *pict = malloc(sizeof(AVPicture_t));
@@ -97,20 +82,13 @@ static int output_picture(dtvideo_decoder_t * decoder, AVFrame * src_frame,
 	avpicture_fill((AVPicture *) dest_pic, buffer, decoder->para.d_pixfmt,decoder->para.d_width, decoder->para.d_height);
 
 	// Convert the image from its native format to RGB
-	ret =img_convert((AVPicture *) dest_pic, decoder->para.d_pixfmt,
-			 (AVPicture *) src_frame, decoder->para.s_pixfmt,
+	img_convert((AVPicture *) dest_pic, decoder->para.d_pixfmt,
+			 src_frame, decoder->para.s_pixfmt,
 			 decoder->para.s_width, decoder->para.s_height,
 			 decoder->para.d_width, decoder->para.d_height);
-	if (ret == -1)
-		goto FAIL;
 	(pict)->pts = pts;
 	*p_pict = pict;
 	return 0;
-FAIL:
-	av_free(pict);
-	*p_pict = NULL;
-	return -1;
-
 }
 
 /*
@@ -157,7 +135,7 @@ int ffmpeg_vdec_release(dtvideo_decoder_t * decoder)
 {
 	AVCodecContext *avctxp = (AVCodecContext *) decoder->decoder_priv;
 	avcodec_close(avctxp);
-	avcodec_free_frame(&frame);
+	av_frame_free(&frame);
     if(pSwsCtx)
         sws_freeContext(pSwsCtx);
     pSwsCtx = NULL;

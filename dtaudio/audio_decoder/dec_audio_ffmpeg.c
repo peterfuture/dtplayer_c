@@ -15,24 +15,20 @@ int ffmpeg_adec_init(dtaudio_decoder_t * decoder)
 	AVCodec *codec = NULL;
 	AVCodecContext *avctxp = (AVCodecContext *) decoder->decoder_priv;
 	enum AVCodecID id = avctxp->codec_id;
-	dt_info(TAG,"file:%s [%s:%d] param-- channel:%d sample:%d \n", __FILE__,
-	       __FUNCTION__, __LINE__, avctxp->channels, avctxp->sample_rate);
+	dt_info(TAG,"[%s:%d] param-- channel:%d sample:%d \n",__FUNCTION__, __LINE__, avctxp->channels, avctxp->sample_rate);
 	codec = avcodec_find_decoder(id);
 	if (NULL == codec) {
-		dt_error(TAG,"file:%s [%s:%d] video codec find failed \n", __FILE__,
-		       __FUNCTION__, __LINE__);
+		dt_error(TAG,"[%s:%d] video codec find failed \n", __FILE__,__FUNCTION__, __LINE__);
 		return -1;
 	}
 
 	if (avcodec_open2(avctxp, codec, NULL) < 0) {
-		dt_error(TAG,"file:%s [%s:%d] video codec open failed \n", __FILE__,
-		       __FUNCTION__, __LINE__);
+		dt_error(TAG,"[%s:%d] video codec open failed \n",__FUNCTION__, __LINE__);
 		return -1;
 	}
-	dt_info(TAG,"file:%s [%s:%d] ffmpeg dec init ok \n", __FILE__, __FUNCTION__,
-	       __LINE__);
+	dt_info(TAG,"[%s:%d] ffmpeg dec init ok \n",__FUNCTION__,__LINE__);
 	//alloc one frame for decode
-	frame = avcodec_alloc_frame();
+	frame = av_frame_alloc();
 	return 0;
 }
 
@@ -43,7 +39,7 @@ static void audio_convert(dtaudio_decoder_t * decoder, AVFrame * dst,AVFrame * s
 	int out_channels;
 	AVCodecContext *avctxp = (AVCodecContext *) decoder->decoder_priv;
 	//for audio post processor
-	struct SwsContext *m_sws_ctx = NULL;
+	//struct SwsContext *m_sws_ctx = NULL;
 	struct SwrContext *m_swr_ctx = NULL;
 	//ResampleContext *m_resample_ctx=NULL;
 	enum AVSampleFormat src_fmt = avctxp->sample_fmt;
@@ -53,7 +49,6 @@ static void audio_convert(dtaudio_decoder_t * decoder, AVFrame * dst,AVFrame * s
 	*dst = *src;
 	
     dst->data[0] = NULL;
-	dst->type = 0;
 	out_channels =decoder->aparam.channels > 2 ? 2 : decoder->aparam.channels;
 	nb_sample = frame->nb_samples;
 	dst_buf_size =nb_sample * av_get_bytes_per_sample(dst_fmt) * out_channels;
@@ -73,11 +68,12 @@ static void audio_convert(dtaudio_decoder_t * decoder, AVFrame * dst,AVFrame * s
 					       avctxp->sample_rate, 0, NULL);
 			swr_init(m_swr_ctx);
 		}
-
+        uint8_t **out = (uint8_t **)&dst->data;
+        const uint8_t **in = (const uint8_t **)src->extended_data;
 		if (m_swr_ctx) {
 			int ret, out_count;
 			out_count = nb_sample;
-			ret =swr_convert(m_swr_ctx, dst->data, out_count,src->data, nb_sample);
+			ret =swr_convert(m_swr_ctx,out, out_count,in, nb_sample);
 			if (ret < 0) {
 				//set audio mute
 				memset(dst->data[0], 0, dst_buf_size);
@@ -145,7 +141,7 @@ int ffmpeg_adec_release(dtaudio_decoder_t * decoder)
 {
 	AVCodecContext *avctxp = (AVCodecContext *) decoder->decoder_priv;
 	avcodec_close(avctxp);
-	avcodec_free_frame(&frame);
+	av_frame_free(&frame);
 	return 0;
 }
 

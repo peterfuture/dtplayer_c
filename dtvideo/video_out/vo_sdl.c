@@ -67,7 +67,7 @@ static int vo_sdl_stop(dtvideo_output_t * vo)
 	return 0;
 }
 
-static void vo_sdl_render(dtvideo_output_t * vo, AVPicture_t * pict)
+static int vo_sdl_render(dtvideo_output_t * vo, AVPicture_t * pict)
 {
     dt_lock(&vo_mutex);
 
@@ -86,6 +86,7 @@ static void vo_sdl_render(dtvideo_output_t * vo, AVPicture_t * pict)
 	SDL_DisplayYUVOverlay(overlay, &rect);
 
     dt_unlock(&vo_mutex);
+    return 0;
 }
 
 vo_operations_t vo_sdl_ops = {
