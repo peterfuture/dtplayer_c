@@ -11,8 +11,6 @@
 
 #if ENABLE_VO_SDL
 
-#include "libavcodec/avcodec.h"
-#include "libswscale/swscale.h"
 #include "../dtvideo_output.h"
 
 #include <SDL/SDL.h>
@@ -67,20 +65,16 @@ static int vo_sdl_init(dtvideo_output_t * vo)
 	SDL_EventState(SDL_SYSWMEVENT, SDL_IGNORE);
 	SDL_EventState(SDL_USEREVENT, SDL_IGNORE);
 
-	{
-		const SDL_VideoInfo *vi = SDL_GetVideoInfo();
-		fs_screen_width = vi->current_w;
-		fs_screen_height = vi->current_h;
-	}
+	const SDL_VideoInfo *vi = SDL_GetVideoInfo();
+	fs_screen_width = vi->current_w;
+	fs_screen_height = vi->current_h;
 
 	dx = dy = 0;
-	//ww = dw = dlpctxp->pwidth;
-	//wh = dh = dlpctxp->pheight;
 	ww = dw = vo->para.d_width;
 	wh = dh = vo->para.d_height;
 
 	flags = SDL_HWSURFACE | SDL_ASYNCBLIT | SDL_HWACCEL | SDL_RESIZABLE;
-	SDL_WM_SetIcon(SDL_LoadBMP("icon.bmp"), NULL);
+	//SDL_WM_SetIcon(SDL_LoadBMP("icon.bmp"), NULL);
 	screen = SDL_SetVideoMode(ww, wh, 0, flags);
 	SDL_WM_SetCaption("dtplayer", NULL);
 
@@ -88,9 +82,8 @@ static int vo_sdl_init(dtvideo_output_t * vo)
 
 	vo_lock_init();
 
-	//if ( dlpctxp->fs )
-	//      toggle_full_screen();
-
+	dt_info(TAG,"w:%d h:%d planes:%d \n",overlay->w,overlay->h,overlay->planes);
+	dt_info(TAG,"pitches:%d %d %d \n",overlay->pitches[0],overlay->pitches[1],overlay->pitches[2]);
 	dt_info(TAG,"init vo sdl OK\n");
 
 	return 0;
@@ -109,47 +102,17 @@ static int vo_sdl_uninit(dtvideo_output_t * vo)
 	return 0;
 }
 
-static int vo_sdl_sws(dtvideo_output_t * vo, AVPicture * dst, AVPicture * src)
-{
-	static struct SwsContext *img_convert_ctx;
-	//int dst_pix_fmt = PIX_FMT_YUV420P;
-	int dst_pix_fmt = vo->para.d_pixfmt;
-#if 1
-	img_convert_ctx = sws_getCachedContext(img_convert_ctx,
-					       vo->para.d_width,
-					       vo->para.d_height, dst_pix_fmt,
-					       vo->para.d_width,
-					       vo->para.d_height, dst_pix_fmt,
-					       SWS_BICUBIC, NULL, NULL, NULL);
-#endif
-#if 0
-	img_convert_ctx =
-	    sws_getContext(vo->para.d_width, vo->para.d_height, dst_pix_fmt,
-			   vo->para.d_width, vo->para.d_height, dst_pix_fmt,
-			   SWS_BICUBIC, NULL, NULL, NULL);
-#endif
-
-	sws_scale(img_convert_ctx, src->data, src->linesize,
-		  0, vo->para.d_height, dst->data, dst->linesize);
-	//sws_freeContext(img_convert_ctx);
-	return 0;
-}
-
 static void vo_sdl_display(dtvideo_output_t * vo, AVPicture_t * pict)
 {
 	SDL_Rect rect;
-	AVPicture p;
 
 	vo_lock();
 
 	SDL_LockYUVOverlay(overlay);
-    p.data[0] = overlay->pixels[0];
-	p.data[1] = overlay->pixels[2];
-	p.data[2] = overlay->pixels[1];
-	p.linesize[0] = overlay->pitches[0];
-	p.linesize[1] = overlay->pitches[2];
-	p.linesize[2] = overlay->pitches[1];
-	vo_sdl_sws(vo, &p, pict);	/* only do memcpy */
+
+    memcpy(overlay->pixels[0],pict->data[0],dw*dh);    
+    memcpy(overlay->pixels[1],pict->data[2],dw*dh/4);    
+    memcpy(overlay->pixels[2],pict->data[1],dw*dh/4);    
     SDL_UnlockYUVOverlay(overlay);
 
 	rect.x = dx;
