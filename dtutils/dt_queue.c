@@ -21,15 +21,14 @@ static void unlock_queue(queue_t * qu)
 }
 
 #if 0
-static int dlp_wakeup_on_queue(queue_t * qu)
+static int wakeup_on_queue(queue_t * qu)
 {
 	if (unlikely(NULL == qu))
 		return -1;
 	return pthread_cond_broadcast(&qu->cond);
 }
-#endif
 
-int dlp_wait_on_queue(queue_t * qu)
+int wait_on_queue(queue_t * qu)
 {
 	if (unlikely(NULL == qu))
 		return -1;
@@ -40,7 +39,7 @@ int dlp_wait_on_queue(queue_t * qu)
 }
 
 /* timeout unit : millisecond */
-int dlp_wait_on_queue_timeout(queue_t * qu, int timeout)
+int wait_on_queue_timeout(queue_t * qu, int timeout)
 {
 	if (unlikely(NULL == qu))
 		return -1;
@@ -66,14 +65,15 @@ int dlp_wait_on_queue_timeout(queue_t * qu, int timeout)
 	}
 	return 0;
 }
+#endif
 
 /**
  * @brief create a queue
  * return queue
  */
-queue_t *dlp_queue_new(void)
+queue_t *queue_new(void)
 {
-	queue_t *q = (queue_t *) av_malloc(sizeof(queue_t));
+	queue_t *q = (queue_t *) malloc(sizeof(queue_t));
 	q->head = q->tail = NULL;
 	q->length = 0;
 	pthread_mutex_init(&q->mutex, NULL);
@@ -84,43 +84,43 @@ queue_t *dlp_queue_new(void)
 /**
  * @brief delete a queue
  */
-void dlp_queue_free(queue_t * qu, free_func func)
+void queue_free(queue_t * qu, free_func func)
 {
 	void *data;
 
 	if (unlikely(NULL == qu))
 		return;
 
-	while ((data = dlp_queue_pop_tail(qu))) {
+	while ((data = queue_pop_tail(qu))) {
 		if (func)
 			func(data);
-		av_free(data);
+		free(data);
 	}
 
 	pthread_mutex_destroy(&qu->mutex);
 	//pthread_cond_destroy(&qu->cond);
 
-	av_free(qu);
+	free(qu);
 }
 
-void dlp_queue_flush(queue_t * qu, free_func func)
+void queue_flush(queue_t * qu, free_func func)
 {
 	void *data;
 
 	if (unlikely(NULL == qu))
 		return;
 
-	while ((data = dlp_queue_pop_tail(qu))) {
+	while ((data = queue_pop_tail(qu))) {
 		if (func)
 			func(data);
-		av_free(data);
+		free(data);
 	}
 }
 
 /**
  * @brief get length of queue
  */
-uint32_t dlp_queue_length(queue_t * qu)
+uint32_t queue_length(queue_t * qu)
 {
 	if (unlikely(NULL == qu))
 		return 0;
@@ -132,7 +132,7 @@ uint32_t dlp_queue_length(queue_t * qu)
  * @param qu	queue
  * @param data	node data
  */
-void dlp_queue_push_head(queue_t * qu, void *data)
+void queue_push_head(queue_t * qu, void *data)
 {
 	_node_t *node = NULL;
 
@@ -140,7 +140,7 @@ void dlp_queue_push_head(queue_t * qu, void *data)
 		return;
 
 	lock_queue(qu);
-	node = (_node_t *) av_malloc(sizeof(_node_t));
+	node = (_node_t *) malloc(sizeof(_node_t));
 	node->data = data;
 	node->next = qu->head;
 	node->prev = NULL;
@@ -152,7 +152,7 @@ void dlp_queue_push_head(queue_t * qu, void *data)
 		qu->tail = qu->head;
 	qu->length++;
 	unlock_queue(qu);
-	//dlp_wakeup_on_queue(qu);
+	//wakeup_on_queue(qu);
 }
 
 /**
@@ -160,7 +160,7 @@ void dlp_queue_push_head(queue_t * qu, void *data)
  * @param qu	queue
  * @param data	node data
  */
-void dlp_queue_push_tail(queue_t * qu, void *data)
+void queue_push_tail(queue_t * qu, void *data)
 {
 	_node_t *node = NULL;
 
@@ -168,7 +168,7 @@ void dlp_queue_push_tail(queue_t * qu, void *data)
 		return;
 
 	lock_queue(qu);
-	node = (_node_t *) av_malloc(sizeof(_node_t));
+	node = (_node_t *) malloc(sizeof(_node_t));
 	node->data = data;
 	node->next = NULL;
 	node->prev = qu->tail;
@@ -181,7 +181,7 @@ void dlp_queue_push_tail(queue_t * qu, void *data)
 	qu->length++;
 	//printf("queue in length:%d \n",qu->length);
 	unlock_queue(qu);
-	//dlp_wakeup_on_queue(qu);
+	//wakeup_on_queue(qu);
 }
 
 /**
@@ -189,7 +189,7 @@ void dlp_queue_push_tail(queue_t * qu, void *data)
  * @param qu	queue
  * @param data	node data
  */
-void dlp_queue_push_nth(queue_t * qu, void *data, uint32_t n)
+void queue_push_nth(queue_t * qu, void *data, uint32_t n)
 {
 	_node_t *node, *p;
 
@@ -199,14 +199,14 @@ void dlp_queue_push_nth(queue_t * qu, void *data, uint32_t n)
 	lock_queue(qu);
 	if (unlikely(n > qu->length)) {
 		unlock_queue(qu);
-		return dlp_queue_push_tail(qu, data);
+		return queue_push_tail(qu, data);
 	}
 	if (unlikely(n <= 1)) {
 		unlock_queue(qu);
-		return dlp_queue_push_head(qu, data);
+		return queue_push_head(qu, data);
 	}
 
-	node = (_node_t *) av_malloc(sizeof(_node_t));
+	node = (_node_t *) malloc(sizeof(_node_t));
 	node->data = data;
 
 	p = get_node_link_nth(qu, n - 1);
@@ -219,7 +219,7 @@ void dlp_queue_push_nth(queue_t * qu, void *data, uint32_t n)
 	qu->length++;
 
 	unlock_queue(qu);
-	//dlp_wakeup_on_queue(qu);
+	//wakeup_on_queue(qu);
 }
 
 /**
@@ -227,7 +227,7 @@ void dlp_queue_push_nth(queue_t * qu, void *data, uint32_t n)
  * @param qu	queue
  * @return	queue node data
  */
-void *dlp_queue_pop_head(queue_t * qu)
+void *queue_pop_head(queue_t * qu)
 {
 	_node_t *p;
 	void *data = NULL;
@@ -246,7 +246,7 @@ void *dlp_queue_pop_head(queue_t * qu)
 
 	qu->length--;
 	data = p->data;
-	av_free(p);
+	free(p);
       end:
 	unlock_queue(qu);
 	return data;
@@ -257,7 +257,7 @@ void *dlp_queue_pop_head(queue_t * qu)
  * @param qu	queue
  * @return	queue node data
  */
-void *dlp_queue_pre_pop_head(queue_t * qu)
+void *queue_pre_pop_head(queue_t * qu)
 {
 	_node_t *p;
 	void *data = NULL;
@@ -278,7 +278,7 @@ void *dlp_queue_pre_pop_head(queue_t * qu)
  * @param qu	queue
  * @return	queue node data
  */
-void *dlp_queue_pop_tail(queue_t * qu)
+void *queue_pop_tail(queue_t * qu)
 {
 	_node_t *p;
 	void *data = NULL;
@@ -296,7 +296,7 @@ void *dlp_queue_pop_tail(queue_t * qu)
 
 	qu->length--;
 	data = p->data;
-	av_free(p);
+	free(p);
 
 	//printf("queue out tail length:%d \n",qu->length);
       end:
@@ -309,7 +309,7 @@ void *dlp_queue_pop_tail(queue_t * qu)
  * @param qu	queue
  * @return	queue node data
  */
-void *dlp_queue_pop_nth(queue_t * qu, uint32_t n)
+void *queue_pop_nth(queue_t * qu, uint32_t n)
 {
 	_node_t *p, *q;
 	void *data = NULL;
@@ -320,11 +320,11 @@ void *dlp_queue_pop_nth(queue_t * qu, uint32_t n)
 
 	if (n > qu->length) {
 		unlock_queue(qu);
-		return dlp_queue_pop_tail(qu);
+		return queue_pop_tail(qu);
 	}
 	if (n <= 1) {
 		unlock_queue(qu);
-		return dlp_queue_pop_head(qu);
+		return queue_pop_head(qu);
 	}
 
 	p = get_node_link_nth(qu, n);
@@ -335,7 +335,7 @@ void *dlp_queue_pop_nth(queue_t * qu, uint32_t n)
 
 	qu->length--;
 	data = p->data;
-	av_free(p);
+	free(p);
 
       end:
 	unlock_queue(qu);
@@ -347,7 +347,7 @@ void *dlp_queue_pop_nth(queue_t * qu, uint32_t n)
  * @param qu	queue
  * @return	queue node data
  */
-void *dlp_queue_peek_head(queue_t * qu)
+void *queue_peek_head(queue_t * qu)
 {
 	if (unlikely(NULL == qu))
 		return NULL;
@@ -360,7 +360,7 @@ void *dlp_queue_peek_head(queue_t * qu)
  * @param qu	queue
  * @return	queue node data
  */
-void *dlp_queue_peek_tail(queue_t * qu)
+void *queue_peek_tail(queue_t * qu)
 {
 	if (unlikely(NULL == qu))
 		return NULL;
@@ -373,7 +373,7 @@ void *dlp_queue_peek_tail(queue_t * qu)
  * @param qu	queue
  * @return	queue node data
  */
-void *dlp_queue_peek_nth(queue_t * qu, uint32_t n)
+void *queue_peek_nth(queue_t * qu, uint32_t n)
 {
 	_node_t *p;
 
@@ -381,9 +381,9 @@ void *dlp_queue_peek_nth(queue_t * qu, uint32_t n)
 		return NULL;
 
 	if (n > qu->length)
-		return dlp_queue_peek_tail(qu);
+		return queue_peek_tail(qu);
 	if (n <= 1)
-		return dlp_queue_peek_head(qu);
+		return queue_peek_head(qu);
 
 	p = get_node_link_nth(qu, n);
 

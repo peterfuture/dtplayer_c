@@ -26,7 +26,7 @@ AVPicture_t *dtvideo_output_read(void *priv)
 	if (picture_queue->length == 0) {
 		return NULL;
 	}
-	return dlp_queue_pop_head(picture_queue);
+	return queue_pop_head(picture_queue);
 }
 
 /*pre get picture from vo_queue, not remove*/
@@ -37,7 +37,7 @@ AVPicture_t *dtvideo_output_pre_read(void *priv)
 	if (picture_queue->length == 0) {
 		return NULL;
 	}
-	return dlp_queue_pre_pop_head(picture_queue);
+	return queue_pre_pop_head(picture_queue);
 }
 //==Part2: PTS&STATUS Relative
 int dtvideo_get_avdiff(void *priv)

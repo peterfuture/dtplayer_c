@@ -119,7 +119,7 @@ static void *video_decode_loop(void *arg)
 	    //Got one frame
         //picture->pts = frame.pts;
 		/*queue in */
-        dlp_queue_push_tail(picture_queue, picture);
+        queue_push_tail(picture_queue, picture);
         picture = NULL;
 DECODE_END:	
         //we successfully decodec one frame
@@ -156,7 +156,7 @@ int video_decoder_init(dtvideo_decoder_t * decoder)
 	dt_info(TAG,"[%s:%d] video decoder init ok\n", __FUNCTION__, __LINE__);
 	/*init pcm buffer */
 	dtvideo_context_t *vctx = (dtvideo_context_t *) decoder->parent;
-	vctx->vo_queue = dlp_queue_new();
+	vctx->vo_queue = queue_new();
 	queue_t *picture_queue = vctx->vo_queue;
 	if (NULL == picture_queue) {
 		dt_error(TAG,"create video out queue failed\n");
@@ -200,7 +200,7 @@ int video_decoder_stop(dtvideo_decoder_t * decoder)
 	//uninit_buf(&vctx->video_decoded_buf);     
 	queue_t *picture_queue = vctx->vo_queue;
 	if (picture_queue) {
-		dlp_queue_free(picture_queue, (free_func) dtpicture_free);
+		queue_free(picture_queue, (free_func) dtpicture_free);
 		picture_queue = NULL;
 	}
 	/*unregister adec */
