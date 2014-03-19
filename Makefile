@@ -35,7 +35,6 @@ SRCS_COMMON-$(DT_UTIL) += dtutils/dt_time.c
 SRCS_COMMON-$(DT_UTIL) += dtutils/dt_event.c
 SRCS_COMMON-$(DT_UTIL) += dtutils/dt_buffer.c
 SRCS_COMMON-$(DT_UTIL) += dtutils/dt_queue.c
-SRCS_COMMON-$(DT_UTIL) += dtutils/dt_pthread.c
 
 #dtdemuxer
 SRCS_COMMON-$(DT_DEMUXER) +=dtdemux/dtdemuxer_api.c

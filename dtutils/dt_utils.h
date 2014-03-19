@@ -6,7 +6,6 @@
 #include "dt_event_def.h"
 #include "dt_event_def.h"
 #include "dt_lock.h"
-#include "dt_pthread.h"
 #include "dt_log.h"
 #include "dt_queue.h"
 #include "dt_time.h"

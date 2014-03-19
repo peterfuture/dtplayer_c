@@ -1,7 +1,7 @@
 #ifndef _DLP_QUEUE_H_
 #define _DLP_QUEUE_H_
 
-#include "dt_pthread.h"
+#include "pthread.h"
 #include "stdint.h"
 
 #ifndef MAX
