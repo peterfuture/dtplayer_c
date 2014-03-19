@@ -1,4 +1,4 @@
-.PHONY: all clean
+#.PHONY: all clean
 
 #======================================================
 #                   HEADER                
@@ -7,22 +7,25 @@ include config.mk
 include rules.mk
 
 #======================================================
-#                   MACRO 
+#                   ENV 
 #======================================================
 export MAKEROOT := $(shell pwd)
 AR       = ar
 CC       = gcc
-CXX      = gcc
+CXX      = g++
 STRIP    = strip 
 
-CFLAGS   += -g -Wall 
-CFLAGS  += $(DT_CFLAGS)
+CFLAGS   +=  -Wall 
 DT_DEBUG = -g
 
 LDFLAGS                  += -lpthread -lz -lm  
 LDFLAGS-$(DT_VIDEO_SDL)  += -lSDL
 LDFLAGS-$(DT_AUDIO_ALSA) += -lasound
 LDFLAGS                  += $(LDFLAGS-yes)
+
+COMMON_LIBS += $(COMMON_LIBS-yes)
+DT_CFLAGS += $(DT_CFLAGS-yes)
+CFLAGS  += $(DT_CFLAGS)
 
 #======================================================
 #                   SOURCECODE
@@ -75,7 +78,8 @@ SRCS_COMMON-$(DT_PLAYER) +=dtplayer/dtplayer_io.c
 SRCS_COMMON-$(DT_PLAYER) +=dtplayer/dtplayer_update.c
 
 SRCS_COMMON +=$(SRCS_COMMON-yes)
-OBJS_COMMON += $(addsuffix .o, $(basename $(SRCS_COMMON)))
+OBJS_COMMON_RELEASE += $(addsuffix .o, $(basename $(SRCS_COMMON)))
+OBJS_COMMON_DEBUG += $(addsuffix .debug.o, $(basename $(SRCS_COMMON)))
 
 DIRS =  . \
         dtcommon \
@@ -112,19 +116,31 @@ PRG-$(DT_PLAYER)  += dtm_player$(EXESUF)
 PRG-$(DT_PLAYER)  += dtm_player_g$(EXESUF)
 ALL_PRG += $(PRG-yes)
 
+#dtm player
 SRCS_DTPLAYER   += dtm_player.c version.c
-OBJS_DTPLAYER   += $(addsuffix .o, $(basename $(SRCS_DTPLAYER)))
-DTM_PLAYER_DEPS  = $(OBJS_DTPLAYER)  $(OBJS_COMMON) $(COMMON_LIBS)
+OBJS_DTPLAYER_RELEASE   += $(addsuffix .o, $(basename $(SRCS_DTPLAYER)))
+DTM_PLAYER_DEPS_RELEASE  = $(OBJS_DTPLAYER_RELEASE)  $(OBJS_COMMON_RELEASE) $(COMMON_LIBS)
+OBJS_DTPLAYER_DEBUG   += $(addsuffix .debug.o, $(basename $(SRCS_DTPLAYER)))
+DTM_PLAYER_DEPS_DEBUG  = $(OBJS_DTPLAYER_DEBUG)  $(OBJS_COMMON_DEBUG) $(COMMON_LIBS)
 
-dtm_player$(EXESUF): $(DTM_PLAYER_DEPS)
-	@echo BUILD-TARGET $@
-	@$(CC) -g -o $@ $^ $(LDFLAGS)  
-
-dtm_player_g$(EXESUF): $(DTM_PLAYER_DEPS)
-	@echo BUILD-TARGET $@
-	$(CC) -g -o $@ $^ $(LDFLAGS)  
 
 all: $(ALL_PRG)
+	@echo =====================================================
+	@echo build $(ALL_PRG) done
+	@echo =====================================================
+
+dtm_player$(EXESUF): $(DTM_PLAYER_DEPS_RELEASE)
+	@$(CC) -o $@ $^ $(LDFLAGS)
+	@$(STRIP) $@	
+	@echo =====================================================
+	@echo build $@ done
+	@echo =====================================================
+
+dtm_player_g$(EXESUF): $(DTM_PLAYER_DEPS_DEBUG)
+	@$(CC) -g -o $@ $^ $(LDFLAGS)  
+	@echo =====================================================
+	@echo build $@ ok
+	@echo =====================================================
 
 clean:
-	-rm -f $(call ALL_DIRS,/*.o /*.a /*.ho /*~ /*.exe)
+	-rm -f $(call ALL_DIRS,/*.o /*.d /*.a /*.ho /*~ /*.exe)
