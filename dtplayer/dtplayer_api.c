@@ -46,7 +46,7 @@ int dtplayer_init(void **player_priv, dtplayer_para_t * para)
         dt_error(TAG,"dtplayer context malloc failed \n");
         return -1;
     }
-    memset(dtp_ctx,0,sizeof(dtp_ctx));
+    memset(dtp_ctx,0,sizeof(*dtp_ctx));
     memcpy(&dtp_ctx->player_para, para, sizeof(dtplayer_para_t));
     
     /*init server for player and process */

@@ -238,7 +238,7 @@ static int demuxer_ffmpeg_setup_info(demuxer_wrapper * wrapper,dt_media_info_t *
     int i;
 
     /*reset vars*/
-    memset(info,0,sizeof(info));
+    memset(info,0,sizeof(*info));
     //set cur stream index -1 ,other vars have been reset to 0
     info->cur_ast_index = -1;
     info->cur_vst_index = -1;
