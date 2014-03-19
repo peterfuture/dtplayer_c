@@ -1,4 +1,4 @@
-#.PHONY: all clean
+.PHONY: all clean
 
 #======================================================
 #                   HEADER                
@@ -112,8 +112,8 @@ ALL_DIRS     = $(call ADDSUFFIXES,$(1),$(DIRS))
 #                   TARGET BUILD                      
 #======================================================
 EXESUF             = .exe 
-PRG-$(DT_PLAYER)  += dtm_player$(EXESUF)
-PRG-$(DT_PLAYER)  += dtm_player_g$(EXESUF)
+PRG-$(DTM_PLAYER)  += dtm_player$(EXESUF)
+PRG-$(DTM_PLAYER)  += dtm_player_g$(EXESUF)
 ALL_PRG += $(PRG-yes)
 
 #dtm player
@@ -139,7 +139,7 @@ dtm_player$(EXESUF): $(DTM_PLAYER_DEPS_RELEASE)
 dtm_player_g$(EXESUF): $(DTM_PLAYER_DEPS_DEBUG)
 	@$(CC) -g -o $@ $^ $(LDFLAGS)  
 	@echo =====================================================
-	@echo build $@ ok
+	@echo build $@ done
 	@echo =====================================================
 
 clean:
