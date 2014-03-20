@@ -1,0 +1,8 @@
+release version 1.0
+
+add sdl2 support(av)
+add file stream sample code
+add mp3 demuxer sample code
+add libmad decoder sample code
+
+fix bugs meet from now to release time
