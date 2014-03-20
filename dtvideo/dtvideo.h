@@ -19,39 +19,39 @@
 
 typedef enum
 {
-	VIDEO_STATUS_IDLE,
-	VIDEO_STATUS_INITING,
-	VIDEO_STATUS_INITED,
-	VIDEO_STATUS_RUNNING,
-	VIDEO_STATUS_ACTIVE,
-	VIDEO_STATUS_PAUSED,
-	VIDEO_STATUS_STOPPED,
-	VIDEO_STATUS_TERMINATED,
+    VIDEO_STATUS_IDLE,
+    VIDEO_STATUS_INITING,
+    VIDEO_STATUS_INITED,
+    VIDEO_STATUS_RUNNING,
+    VIDEO_STATUS_ACTIVE,
+    VIDEO_STATUS_PAUSED,
+    VIDEO_STATUS_STOPPED,
+    VIDEO_STATUS_TERMINATED,
 } dtvideo_status_t;
 
 typedef struct
 {
-	/*param */
-	dtvideo_para_t video_para;
-	//dt_buffer_t video_decoded_buf;
-	dt_buffer_t video_filtered_buf;
-	/*module */
-	dtvideo_decoder_t video_dec;
-	//dtvideo_filter_t video_filt;
-	dtvideo_output_t video_out;
-	queue_t *vo_queue;
+    /*param */
+    dtvideo_para_t video_para;
+    //dt_buffer_t video_decoded_buf;
+    dt_buffer_t video_filtered_buf;
+    /*module */
+    dtvideo_decoder_t video_dec;
+    //dtvideo_filter_t video_filt;
+    dtvideo_output_t video_out;
+    queue_t *vo_queue;
 
-	/*pts relative */
-	int64_t first_pts;
-	int64_t current_pts;
-	int64_t last_valid_pts;
-	/*other */
-	pthread_t msg_thread_pid;
-	dtvideo_status_t video_status;
+    /*pts relative */
+    int64_t first_pts;
+    int64_t current_pts;
+    int64_t last_valid_pts;
+    /*other */
+    pthread_t msg_thread_pid;
+    dtvideo_status_t video_status;
 
-	int event_loop_id;
-	void *video_server;
-	void *parent;				//dthost
+    int event_loop_id;
+    void *video_server;
+    void *parent;               //dthost
 } dtvideo_context_t;
 
 int dtvideo_read_frame (void *priv, dt_av_frame_t * frame);

@@ -14,49 +14,49 @@
 #include <unistd.h>
 
 #define DTAUDIO_LOG_TAG "dtaudio"
-#define DTAUDIO_PCM_BUF_SIZE 5*1024*1024;	// pcm tmp buffer
-#define MAX_DECODED_OUT_SIZE 19200	//max out size for decode one time
+#define DTAUDIO_PCM_BUF_SIZE 5*1024*1024; // pcm tmp buffer
+#define MAX_DECODED_OUT_SIZE 19200 //max out size for decode one time
 
 typedef struct
 {
-	int audio_decoder_format;
-	int audio_filter_flag;
-	int audio_output_id;
+    int audio_decoder_format;
+    int audio_filter_flag;
+    int audio_output_id;
 } dtaudio_ctrl_t;
 
 typedef enum
 {
-	AUDIO_STATUS_IDLE,
-	AUDIO_STATUS_INITING,
-	AUDIO_STATUS_INITED,
-	AUDIO_STATUS_RUNNING,
-	AUDIO_STATUS_ACTIVE,
-	AUDIO_STATUS_PAUSED,
-	AUDIO_STATUS_STOP,
-	AUDIO_STATUS_TERMINATED,
+    AUDIO_STATUS_IDLE,
+    AUDIO_STATUS_INITING,
+    AUDIO_STATUS_INITED,
+    AUDIO_STATUS_RUNNING,
+    AUDIO_STATUS_ACTIVE,
+    AUDIO_STATUS_PAUSED,
+    AUDIO_STATUS_STOP,
+    AUDIO_STATUS_TERMINATED,
 } dtaudio_status_t;
 
 typedef struct
 {
-	/*param */
-	dtaudio_para_t audio_param;
-	/*ctrl */
-	dtaudio_ctrl_t audio_ctrl;
-	/*buf */
-	//dt_packet_list_t *audio_pack_list;
-	dt_buffer_t audio_decoded_buf;
-	dt_buffer_t audio_filtered_buf;
-	/*module */
-	dtaudio_decoder_t audio_dec;
-	dtaudio_filter_t audio_filt;
-	dtaudio_output_t audio_out;
-	//dtaudio_pts_t    audio_pts;
-	/*other */
-	pthread_t event_loop_id;
-	dtaudio_status_t audio_state;
-	void *audio_server;
-	void *dtport_priv;			//data source
-	void *parent;				//dtcodec
+    /*param */
+    dtaudio_para_t audio_param;
+    /*ctrl */
+    dtaudio_ctrl_t audio_ctrl;
+    /*buf */
+    //dt_packet_list_t *audio_pack_list;
+    dt_buffer_t audio_decoded_buf;
+    dt_buffer_t audio_filtered_buf;
+    /*module */
+    dtaudio_decoder_t audio_dec;
+    dtaudio_filter_t audio_filt;
+    dtaudio_output_t audio_out;
+    //dtaudio_pts_t    audio_pts;
+    /*other */
+    pthread_t event_loop_id;
+    dtaudio_status_t audio_state;
+    void *audio_server;
+    void *dtport_priv;          //data source
+    void *parent;               //dtcodec
 } dtaudio_context_t;
 
 int audio_read_frame (void *priv, dt_av_frame_t * frame);

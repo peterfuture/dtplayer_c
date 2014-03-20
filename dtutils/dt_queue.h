@@ -28,19 +28,19 @@
 
 typedef struct _node_
 {
-	void *data;
-	int size;
-	struct _node_ *next;
-	struct _node_ *prev;
+    void *data;
+    int size;
+    struct _node_ *next;
+    struct _node_ *prev;
 } _node_t;
 
 typedef struct
 {
-	_node_t *head;
-	_node_t *tail;
-	uint32_t length;
-	pthread_mutex_t mutex;
-	pthread_cond_t cond;
+    _node_t *head;
+    _node_t *tail;
+    uint32_t length;
+    pthread_mutex_t mutex;
+    pthread_cond_t cond;
 } queue_t;
 
 queue_t *queue_new (void);

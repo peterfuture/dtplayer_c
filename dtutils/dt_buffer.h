@@ -13,12 +13,12 @@
 
 typedef struct
 {
-	uint8_t *data;
-	int size;
-	int level;
-	uint8_t *rd_ptr;
-	uint8_t *wr_ptr;
-	dt_lock_t mutex;
+    uint8_t *data;
+    int size;
+    int level;
+    uint8_t *rd_ptr;
+    uint8_t *wr_ptr;
+    dt_lock_t mutex;
 } dt_buffer_t;
 
 int buf_init (dt_buffer_t * dbt, int size);

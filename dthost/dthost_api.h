@@ -10,66 +10,66 @@
 
 typedef struct
 {
-	/*flag */
-	int has_audio;
-	int has_video;
-	int has_sub;
-	int sync_enable;
+    /*flag */
+    int has_audio;
+    int has_video;
+    int has_sub;
+    int sync_enable;
 
-	/*audio */
-	int audio_format;
-	int audio_channel;
-	int audio_samplerate;
-	int audio_bitrate;
-	int audio_sample_fmt;
-	int audio_codec_id;
-	int audio_block_align;
-	int audio_num, audio_den;	//for stream pts calc
-	int audio_extra_size;
-	unsigned char audio_extra_data[AUDIO_EXTR_DATA_SIZE];
-	int audio_filter;			//audio filter options
-	int audio_output;			//audio output device select
-	void *actx_priv;			//point to 
+    /*audio */
+    int audio_format;
+    int audio_channel;
+    int audio_samplerate;
+    int audio_bitrate;
+    int audio_sample_fmt;
+    int audio_codec_id;
+    int audio_block_align;
+    int audio_num, audio_den;   //for stream pts calc
+    int audio_extra_size;
+    unsigned char audio_extra_data[AUDIO_EXTR_DATA_SIZE];
+    int audio_filter;           //audio filter options
+    int audio_output;           //audio output device select
+    void *actx_priv;            //point to 
 
-	/*video */
-	int video_format;
-	int video_dest_width;
-	int video_dest_height;
-	int video_src_width;
-	int video_src_height;
-	int video_dest_pixfmt;
-	int video_src_pixfmt;
-	int video_rate;
-	int video_extr;
-	int video_ratio;
-	double video_fps;
-	int video_num, video_den;	//for stream pts calc
-	void *video_para;
-	unsigned long long ratio64;
-	int video_extra_size;
-	unsigned char video_extra_data[VIDEO_EXTR_DATA_SIZE];
-	int video_filter;
-	int video_output;
-	void *vctx_priv;
+    /*video */
+    int video_format;
+    int video_dest_width;
+    int video_dest_height;
+    int video_src_width;
+    int video_src_height;
+    int video_dest_pixfmt;
+    int video_src_pixfmt;
+    int video_rate;
+    int video_extr;
+    int video_ratio;
+    double video_fps;
+    int video_num, video_den;   //for stream pts calc
+    void *video_para;
+    unsigned long long ratio64;
+    int video_extra_size;
+    unsigned char video_extra_data[VIDEO_EXTR_DATA_SIZE];
+    int video_filter;
+    int video_output;
+    void *vctx_priv;
 
-	/*sub */
-	int sub_format;
-	int sub_id;
-	int sub_width;
-	int sub_height;
+    /*sub */
+    int sub_format;
+    int sub_id;
+    int sub_width;
+    int sub_height;
 } dthost_para_t;
 
 typedef struct
 {
-	int abuf_level;
-	int vbuf_level;
+    int abuf_level;
+    int vbuf_level;
 
-	int adec_err_cnt;
-	int vdec_err_cnt;
+    int adec_err_cnt;
+    int vdec_err_cnt;
 
-	int64_t cur_apts;
-	int64_t cur_vpts;
-	int64_t cur_systime;
+    int64_t cur_apts;
+    int64_t cur_vpts;
+    int64_t cur_systime;
 
 } host_state_t;
 

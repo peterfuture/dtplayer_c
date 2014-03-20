@@ -15,52 +15,52 @@
 
 typedef struct
 {
-	int status;					// 0 start 1 pause 2 quit
-	int flag;
-	pthread_t tid;
+    int status;                 // 0 start 1 pause 2 quit
+    int flag;
+    pthread_t tid;
 } io_loop_t;
 
 typedef struct
 {
-	/*stream info */
-	int64_t start_time;
-	int64_t first_time;
+    /*stream info */
+    int64_t start_time;
+    int64_t first_time;
 
-	  /**/ int cur_ast_index;
-	int cur_vst_index;
-	int cur_sst_index;
+      /**/ int cur_ast_index;
+    int cur_vst_index;
+    int cur_sst_index;
 
-	/*dest width height */
-	int width;
-	int height;
-	/*ctrl flag */
-	int eof_flag;
-	int sync_enable;
-	int has_audio;
-	int has_video;
-	int has_sub;
+    /*dest width height */
+    int width;
+    int height;
+    /*ctrl flag */
+    int eof_flag;
+    int sync_enable;
+    int has_audio;
+    int has_video;
+    int has_sub;
 
 } player_ctrl_t;
 
 typedef struct dtplayer_context
 {
-	char *file_name;
-	dtplayer_para_t player_para;
+    char *file_name;
+    dtplayer_para_t player_para;
 
-	void *demuxer_priv;
-	dt_media_info_t *media_info;
+    void *demuxer_priv;
+    dt_media_info_t *media_info;
 
-	player_ctrl_t ctrl_info;
-	dthost_para_t host_para;
-	void *host_priv;
+    player_ctrl_t ctrl_info;
+    dthost_para_t host_para;
+    void *host_priv;
 
-	player_state_t state;
-	int (*update_cb) (player_state_t * state);	// update player info to uplevel
+    player_state_t state;
+    int (*update_cb) (player_state_t * state); // update player info to uplevel
 
-	io_loop_t io_loop;
-	pthread_t event_loop_id;
+    io_loop_t io_loop;
+    pthread_t event_loop_id;
 
-	void *player_server;
+    void *player_server;
 } dtplayer_context_t;
 
 int player_init (dtplayer_context_t * dtp_ctx);

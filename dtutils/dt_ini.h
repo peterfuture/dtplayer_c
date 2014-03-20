@@ -25,13 +25,13 @@ typedef unsigned char BYTE;
 
 typedef enum
 {
-	NET_PWD_METHOD_DISABLE = 0,
-	NET_PWD_METHOD_WO,
-	NET_PWD_METHOD_WS,
-	NET_PWD_METHOD_WPA,
-	NET_PWD_METHOD_WPA2,
+    NET_PWD_METHOD_DISABLE = 0,
+    NET_PWD_METHOD_WO,
+    NET_PWD_METHOD_WS,
+    NET_PWD_METHOD_WPA,
+    NET_PWD_METHOD_WPA2,
 
-	NET_PWD_METHOD_NUM,
+    NET_PWD_METHOD_NUM,
 } Net_Pwd_Method;
 #define NET_PWD_METHOD_DISABLE_STR  _T("禁用加密")
 #define NET_PWD_METHOD_WO_STR       _T("WEP Open")
@@ -41,24 +41,24 @@ typedef enum
 
 typedef enum
 {
-	NET_PWD1_TYPE_TKIP = 0,
-	NET_PWD1_TYPE_AES,
-	NET_PWD1_TYPE_NUM,
+    NET_PWD1_TYPE_TKIP = 0,
+    NET_PWD1_TYPE_AES,
+    NET_PWD1_TYPE_NUM,
 } Net_Pwd1_Type;
 #define NET_PWD1_TYPE_TKIP_STR  _T("TKIP")
 #define NET_PWD1_TYPE_AES_STR   _T("AES")
 
 typedef enum
 {
-	NET_PWD2_TYPE_ASCII = 0,
-	NET_PWD2_TYPE_HEX,
-	NET_PWD2_TYPE_NUM,
+    NET_PWD2_TYPE_ASCII = 0,
+    NET_PWD2_TYPE_HEX,
+    NET_PWD2_TYPE_NUM,
 } Net_Pwd2_Type;
 #define NET_PWD2_TYPE_ASCII_STR  _T("ASCII")
 #define NET_PWD2_TYPE_HEX_STR   _T("HEX")
 
 #define LINUX 1
-#ifdef LINUX					/* Remove CR, on unix systems. */
+#ifdef LINUX                    /* Remove CR, on unix systems. */
 #define INI_REMOVE_CR
 #define DONT_HAVE_STRUPR
 #endif
@@ -83,19 +83,19 @@ typedef const char cchr;
 
 struct ENTRY
 {
-	char Type;
-	char *Text;
-	struct ENTRY *pPrev;
-	struct ENTRY *pNext;
+    char Type;
+    char *Text;
+    struct ENTRY *pPrev;
+    struct ENTRY *pNext;
 } ENTRY;
 
 typedef struct
 {
-	struct ENTRY *pSec;
-	struct ENTRY *pKey;
-	char KeyText[128];
-	char ValText[128];
-	char Comment[255];
+    struct ENTRY *pSec;
+    struct ENTRY *pKey;
+    char KeyText[128];
+    char ValText[128];
+    char Comment[255];
 } EFIND;
 
 /* Macros */

@@ -5,9 +5,9 @@
 
 typedef struct
 {
-	int has_video;
-	int has_audio;
-	int has_subtitle;
+    int has_video;
+    int has_audio;
+    int has_subtitle;
 } dtport_para_t;
 
 int dtport_stop (void *port);

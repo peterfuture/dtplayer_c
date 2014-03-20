@@ -2,7 +2,7 @@
 #define DTAUDIO_FILTER_H
 typedef struct
 {
-	int filter;
+    int filter;
 } dtaudio_filter_t;
 
 int audio_filter_init ();

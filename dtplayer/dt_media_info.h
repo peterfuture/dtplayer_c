@@ -12,83 +12,83 @@
 
 typedef struct
 {
-	int num;
-	int den;
+    int num;
+    int den;
 } dtratio;
 
 typedef struct
 {
-	int index;
-	int id;
-	int bit_rate;
-	int width;
-	int height;
-	int pix_fmt;
-	int64_t duration;
-	dtratio sample_aspect_ratio;	//witdh:height
-	dtratio frame_rate_ratio;
-	dtratio time_base;
-	int extradata_size;
-	uint8_t *extradata;
-	video_format_t format;
-	void *codec_priv;
+    int index;
+    int id;
+    int bit_rate;
+    int width;
+    int height;
+    int pix_fmt;
+    int64_t duration;
+    dtratio sample_aspect_ratio; //witdh:height
+    dtratio frame_rate_ratio;
+    dtratio time_base;
+    int extradata_size;
+    uint8_t *extradata;
+    video_format_t format;
+    void *codec_priv;
 } vstream_info_t;
 
 typedef struct
 {
-	int index;
-	int id;
-	int bit_rate;
-	int sample_rate;
-	int channels;
-	int bps;
-	int64_t duration;
-	dtratio time_base;
-	int extradata_size;
-	uint8_t *extradata;
-	audio_format_t format;
-	void *codec_priv;
+    int index;
+    int id;
+    int bit_rate;
+    int sample_rate;
+    int channels;
+    int bps;
+    int64_t duration;
+    dtratio time_base;
+    int extradata_size;
+    uint8_t *extradata;
+    audio_format_t format;
+    void *codec_priv;
 } astream_info_t;
 
 typedef struct
 {
-	int index;
-	int id;
-	int bit_rate;
-	int width;
-	int height;
-	int extradata_size;
-	uint8_t *extradata;
-	subtitle_format_t format;
-	void *codec_priv;
+    int index;
+    int id;
+    int bit_rate;
+    int width;
+    int height;
+    int extradata_size;
+    uint8_t *extradata;
+    subtitle_format_t format;
+    void *codec_priv;
 } sstream_info_t;
 
 typedef struct
 {
-	char file_name[FILE_NAME_MAX_LENGTH];
-	media_format_t format;
-	int64_t start_time;
-	int64_t duration;
-	int64_t file_size;
-	int bit_rate;
+    char file_name[FILE_NAME_MAX_LENGTH];
+    media_format_t format;
+    int64_t start_time;
+    int64_t duration;
+    int64_t file_size;
+    int bit_rate;
 
-	unsigned int nb_stream;
-	int has_video;
-	int no_video;
-	int vst_num;
-	int cur_vst_index;
-	int has_audio;
-	int no_audio;
-	int ast_num;
-	int cur_ast_index;
-	int has_sub;
-	int no_sub;
-	int sst_num;
-	int cur_sst_index;
+    unsigned int nb_stream;
+    int has_video;
+    int no_video;
+    int vst_num;
+    int cur_vst_index;
+    int has_audio;
+    int no_audio;
+    int ast_num;
+    int cur_ast_index;
+    int has_sub;
+    int no_sub;
+    int sst_num;
+    int cur_sst_index;
 
-	vstream_info_t *vstreams[MAX_VIDEO_STREAM_NUM];
-	astream_info_t *astreams[MAX_AUDIO_STREAM_NUM];
-	sstream_info_t *sstreams[MAX_SUBTITLE_STREAM_NUM];
+    vstream_info_t *vstreams[MAX_VIDEO_STREAM_NUM];
+    astream_info_t *astreams[MAX_AUDIO_STREAM_NUM];
+    sstream_info_t *sstreams[MAX_SUBTITLE_STREAM_NUM];
 } dt_media_info_t;
 
 #endif

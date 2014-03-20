@@ -11,26 +11,26 @@
 
 typedef enum
 {
-	PORT_STATUS_IDLE = -1,
-	PORT_STATUS_INITING,
-	PORT_STATUS_INITED,
-	PORT_STATUS_RUNNING,
-	PORT_STATUS_EXIT,
+    PORT_STATUS_IDLE = -1,
+    PORT_STATUS_INITING,
+    PORT_STATUS_INITED,
+    PORT_STATUS_RUNNING,
+    PORT_STATUS_EXIT,
 } port_status_t;
 
 typedef struct
 {
-	dt_packet_queue_t queue_audio;
-	dt_packet_queue_t queue_video;
-	dt_packet_queue_t queue_subtitle;
+    dt_packet_queue_t queue_audio;
+    dt_packet_queue_t queue_video;
+    dt_packet_queue_t queue_subtitle;
 
-	buf_state_t dps_audio;
-	buf_state_t dps_video;
-	buf_state_t dps_sub;
+    buf_state_t dps_audio;
+    buf_state_t dps_video;
+    buf_state_t dps_sub;
 
-	dtport_para_t param;
-	port_status_t status;
-	void *parent;
+    dtport_para_t param;
+    port_status_t status;
+    void *parent;
 } dtport_context_t;
 
 int port_stop (dtport_context_t * pctx);

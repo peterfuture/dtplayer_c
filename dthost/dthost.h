@@ -8,19 +8,19 @@
 
 typedef struct
 {
-	dthost_para_t para;
-	/*av sync */
-	dt_sync_mode_t av_sync;
-	int64_t sys_time;
-	int64_t pts_audio;
-	int64_t pts_video;
-	int sync_enable;
-	int sync_mode;
-	int64_t av_diff;
-	/*a-v-s port part */
-	void *port_priv;
-	void *audio_priv;
-	void *video_priv;
+    dthost_para_t para;
+    /*av sync */
+    dt_sync_mode_t av_sync;
+    int64_t sys_time;
+    int64_t pts_audio;
+    int64_t pts_video;
+    int sync_enable;
+    int sync_mode;
+    int64_t av_diff;
+    /*a-v-s port part */
+    void *port_priv;
+    void *audio_priv;
+    void *video_priv;
 } dthost_context_t;
 
 int host_start (dthost_context_t * hctx);
