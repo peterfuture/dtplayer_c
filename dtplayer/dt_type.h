@@ -1,8 +1,9 @@
 #ifndef DT_AV_TYPE_H
 #define DT_AV_TYPE_H
 
-typedef enum{
-    MEDIA_FORMAT_INVALID = -1,
+typedef enum
+{
+	MEDIA_FORMAT_INVALID = -1,
 	MEDIA_FORMAT_MPEGTS,
 	MEDIA_FORMAT_MPEGPS,
 	MEDIA_FORMAT_RM,
@@ -26,22 +27,24 @@ typedef enum{
 	MEDIA_FORMAT_APE,
 	MEDIA_FORMAT_AMR,
 	MEDIA_FORMAT_UNKOWN,
-}media_format_t;
+} media_format_t;
 
-typedef enum{
-    VIDEO_FORMAT_INVALID = -1,
+typedef enum
+{
+	VIDEO_FORMAT_INVALID = -1,
 	VIDEO_FORMAT_UNKOWN,
-}video_format_t;
+} video_format_t;
 
-typedef enum{
-    AUDIO_FORMAT_INVALID = -1,
+typedef enum
+{
+	AUDIO_FORMAT_INVALID = -1,
 	AUDIO_FORMAT_UNKOWN,
-}audio_format_t;
+} audio_format_t;
 
-typedef enum{
-    SUBTITLE_FORMAT_INVALID = -1,
-    SUBTITLE_FORMAT_UNKOWN,
-}subtitle_format_t;
-
+typedef enum
+{
+	SUBTITLE_FORMAT_INVALID = -1,
+	SUBTITLE_FORMAT_UNKOWN,
+} subtitle_format_t;
 
 #endif

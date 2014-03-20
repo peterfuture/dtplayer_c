@@ -17,62 +17,62 @@
 
 static pthread_mutex_t vo_mutex;
 
-static void vo_lock_init()
+static void vo_lock_init ()
 {
-	pthread_mutex_init(&vo_mutex, NULL);
+	pthread_mutex_init (&vo_mutex, NULL);
 }
 
-static void vo_lock_free()
+static void vo_lock_free ()
 {
-	pthread_mutex_destroy(&vo_mutex);
+	pthread_mutex_destroy (&vo_mutex);
 }
 
-static void vo_lock()
+static void vo_lock ()
 {
-	pthread_mutex_lock(&vo_mutex);
+	pthread_mutex_lock (&vo_mutex);
 }
 
-static void vo_unlock()
+static void vo_unlock ()
 {
-	pthread_mutex_unlock(&vo_mutex);
+	pthread_mutex_unlock (&vo_mutex);
 }
 
-static int vo_example_init(void)
+static int vo_example_init (void)
 {
 	dlpctxp->novideo = 1;
 	/* ... */
-	vo_lock_init();
+	vo_lock_init ();
 	return 0;
 }
 
-static int vo_example_uninit(void)
+static int vo_example_uninit (void)
 {
-	vo_lock();
+	vo_lock ();
 	/* ... */
-	vo_lock_free();
+	vo_lock_free ();
 	return 0;
 }
 
-static void vo_example_display(AVPicture * pict)
+static void vo_example_display (AVPicture * pict)
 {
-	vo_lock();
+	vo_lock ();
 	/* ... */
-	vo_unlock();
+	vo_unlock ();
 	return;
 }
 
-static void vo_example_event_loop(void)
+static void vo_example_event_loop (void)
 {
 	while (1)
-		sleep(10);
+		sleep (10);
 }
 
-static int vo_example_control(int cmd, void *arg)
+static int vo_example_control (int cmd, void *arg)
 {
-	switch (cmd) {
+	switch (cmd)
+	{
 	default:
-		av_log(NULL, AV_LOG_ERROR,
-		       "VO NULL not support control now!\n");
+		av_log (NULL, AV_LOG_ERROR, "VO NULL not support control now!\n");
 		break;
 	}
 	return 0;

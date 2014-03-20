@@ -6,18 +6,18 @@
 
 /* error handling */
 #define DTERROR(e) (-(e))
-#define DTUNERROR(e) (-(e)) 
+#define DTUNERROR(e) (-(e))
 
 /*common*/
 #define DTERROR_NONE               DTERROR(0)
-#define DTERROR_FAIL               DTERROR(1) 
+#define DTERROR_FAIL               DTERROR(1)
 
 /*dtplayer*/
-#define DTERROR_READ_FAILED        DTERROR(100) 
-#define DTERROR_READ_TIMEOUT       DTERROR(101) 
+#define DTERROR_READ_FAILED        DTERROR(100)
+#define DTERROR_READ_TIMEOUT       DTERROR(101)
 #define DTERROR_READ_AGAIN         DTERROR(102)
 
-#define DTERROR_READ_EOF           DTERROR(150) 
+#define DTERROR_READ_EOF           DTERROR(150)
 
 //dthost
 //dtport

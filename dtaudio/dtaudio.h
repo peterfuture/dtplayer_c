@@ -14,16 +14,18 @@
 #include <unistd.h>
 
 #define DTAUDIO_LOG_TAG "dtaudio"
-#define DTAUDIO_PCM_BUF_SIZE 5*1024*1024; // pcm tmp buffer
+#define DTAUDIO_PCM_BUF_SIZE 5*1024*1024;	// pcm tmp buffer
 #define MAX_DECODED_OUT_SIZE 19200	//max out size for decode one time
 
-typedef struct {
+typedef struct
+{
 	int audio_decoder_format;
 	int audio_filter_flag;
 	int audio_output_id;
 } dtaudio_ctrl_t;
 
-typedef enum {
+typedef enum
+{
 	AUDIO_STATUS_IDLE,
 	AUDIO_STATUS_INITING,
 	AUDIO_STATUS_INITED,
@@ -34,7 +36,8 @@ typedef enum {
 	AUDIO_STATUS_TERMINATED,
 } dtaudio_status_t;
 
-typedef struct {
+typedef struct
+{
 	/*param */
 	dtaudio_para_t audio_param;
 	/*ctrl */
@@ -51,23 +54,23 @@ typedef struct {
 	/*other */
 	pthread_t event_loop_id;
 	dtaudio_status_t audio_state;
-    void *audio_server;
-    void *dtport_priv;	//data source
-	void *parent;		//dtcodec
+	void *audio_server;
+	void *dtport_priv;			//data source
+	void *parent;				//dtcodec
 } dtaudio_context_t;
 
-int audio_read_frame(void *priv, dt_av_frame_t * frame);
-int audio_output_read(void *priv, uint8_t *buf, int size);
-int64_t audio_get_current_pts(dtaudio_context_t * actx);
-int64_t audio_get_first_pts(dtaudio_context_t * actx);
-int audio_drop(dtaudio_context_t *actx,int64_t target_pts);
-void audio_update_pts(void * priv);
-int audio_get_dec_state(dtaudio_context_t * actx, dec_state_t * dec_state);
-int audio_get_out_closed(dtaudio_context_t * actx);
-int audio_start(dtaudio_context_t * actx);
-int audio_pause(dtaudio_context_t * actx);
-int audio_resume(dtaudio_context_t * actx);
-int audio_stop(dtaudio_context_t * actx);
-int audio_init(dtaudio_context_t * actx);
+int audio_read_frame (void *priv, dt_av_frame_t * frame);
+int audio_output_read (void *priv, uint8_t * buf, int size);
+int64_t audio_get_current_pts (dtaudio_context_t * actx);
+int64_t audio_get_first_pts (dtaudio_context_t * actx);
+int audio_drop (dtaudio_context_t * actx, int64_t target_pts);
+void audio_update_pts (void *priv);
+int audio_get_dec_state (dtaudio_context_t * actx, dec_state_t * dec_state);
+int audio_get_out_closed (dtaudio_context_t * actx);
+int audio_start (dtaudio_context_t * actx);
+int audio_pause (dtaudio_context_t * actx);
+int audio_resume (dtaudio_context_t * actx);
+int audio_stop (dtaudio_context_t * actx);
+int audio_init (dtaudio_context_t * actx);
 
 #endif

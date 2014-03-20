@@ -8,15 +8,15 @@
 #define AUDIO_EXTR_DATA_SIZE 4096
 #define VIDEO_EXTR_DATA_SIZE 4096
 
-
-typedef struct {
+typedef struct
+{
 	/*flag */
 	int has_audio;
 	int has_video;
 	int has_sub;
-    int sync_enable;
-    
-    /*audio */
+	int sync_enable;
+
+	/*audio */
 	int audio_format;
 	int audio_channel;
 	int audio_samplerate;
@@ -27,9 +27,9 @@ typedef struct {
 	int audio_num, audio_den;	//for stream pts calc
 	int audio_extra_size;
 	unsigned char audio_extra_data[AUDIO_EXTR_DATA_SIZE];
-	int audio_filter;	//audio filter options
-	int audio_output;	//audio output device select
-	void *actx_priv;	//point to 
+	int audio_filter;			//audio filter options
+	int audio_output;			//audio output device select
+	void *actx_priv;			//point to 
 
 	/*video */
 	int video_format;
@@ -59,35 +59,36 @@ typedef struct {
 	int sub_height;
 } dthost_para_t;
 
-typedef struct{
-    int abuf_level;
-    int vbuf_level;
+typedef struct
+{
+	int abuf_level;
+	int vbuf_level;
 
-    int adec_err_cnt;
-    int vdec_err_cnt;
+	int adec_err_cnt;
+	int vdec_err_cnt;
 
-    int64_t cur_apts;
-    int64_t cur_vpts;
-    int64_t cur_systime;
+	int64_t cur_apts;
+	int64_t cur_vpts;
+	int64_t cur_systime;
 
-}host_state_t;
+} host_state_t;
 
-int dthost_start(void *host_priv);
-int dthost_pause(void *host_priv);
-int dthost_resume(void *host_priv);
-int dthost_stop(void *host_priv);
-int dthost_init(void **host_priv, dthost_para_t * para);
-int dthost_read_frame(void *host_priv, dt_av_frame_t * frame,int type);
-int dthost_write_frame(void *host_priv, dt_av_frame_t * frame,int type);
-int64_t dthost_get_apts(void *host_priv);
-int64_t dthost_update_apts(void *host_priv,int64_t pts);
-int64_t dthost_get_vpts(void *host_priv);
-void dthost_update_vpts(void *host_priv,int64_t vpts);
-int dthost_get_avdiff(void *host_priv);
-int64_t dthost_get_current_time(void *host_priv);
-int64_t dthost_get_systime(void *host_priv);
-void dthost_update_systime(void *host_priv,int64_t systime);
-int dthost_get_state(void *host_priv,host_state_t *state);
-int dthost_get_out_closed(void *host_priv);
+int dthost_start (void *host_priv);
+int dthost_pause (void *host_priv);
+int dthost_resume (void *host_priv);
+int dthost_stop (void *host_priv);
+int dthost_init (void **host_priv, dthost_para_t * para);
+int dthost_read_frame (void *host_priv, dt_av_frame_t * frame, int type);
+int dthost_write_frame (void *host_priv, dt_av_frame_t * frame, int type);
+int64_t dthost_get_apts (void *host_priv);
+int64_t dthost_update_apts (void *host_priv, int64_t pts);
+int64_t dthost_get_vpts (void *host_priv);
+void dthost_update_vpts (void *host_priv, int64_t vpts);
+int dthost_get_avdiff (void *host_priv);
+int64_t dthost_get_current_time (void *host_priv);
+int64_t dthost_get_systime (void *host_priv);
+void dthost_update_systime (void *host_priv, int64_t systime);
+int dthost_get_state (void *host_priv, host_state_t * state);
+int dthost_get_out_closed (void *host_priv);
 
 #endif

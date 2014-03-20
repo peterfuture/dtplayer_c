@@ -5,7 +5,8 @@
 #include "dt_av.h"
 #include "dtvideo_api.h"
 
-typedef enum {
+typedef enum
+{
 	VDEC_STATUS_IDLE,
 	VDEC_STATUS_RUNNING,
 	VDEC_STATUS_PAUSED,
@@ -14,18 +15,19 @@ typedef enum {
 
 typedef struct dtvideo_decoder dtvideo_decoder_t;
 
-typedef struct video_decoder_operation {
+typedef struct video_decoder_operation
+{
 	int (*init) (dtvideo_decoder_t * decoder);
-	int (*decode_frame) (dtvideo_decoder_t * decoder, dt_av_frame_t * frame,
-			     AVPicture_t ** pic);
+	int (*decode_frame) (dtvideo_decoder_t * decoder, dt_av_frame_t * frame, AVPicture_t ** pic);
 	int (*release) (dtvideo_decoder_t * decoder);
 	char *name;
-    video_format_t vfmt; // not used, for ffmpeg
+	video_format_t vfmt;		// not used, for ffmpeg
 	int type;
 	struct video_decoder_operation *next;
-}dec_video_wrapper_t;
+} dec_video_wrapper_t;
 
-struct dtvideo_decoder {
+struct dtvideo_decoder
+{
 	dtvideo_para_t para;
 	dec_video_wrapper_t *dec_wrapper;
 	pthread_t video_decoder_pid;
@@ -44,10 +46,10 @@ struct dtvideo_decoder {
 	void *decoder_priv;
 };
 
-int video_decoder_init(dtvideo_decoder_t * decoder);
-int video_decoder_release(dtvideo_decoder_t * decoder);
-int video_decoder_stop(dtvideo_decoder_t * decoder);
-int video_decoder_start(dtvideo_decoder_t * decoder);
-void dtpicture_free(void *pic);
+int video_decoder_init (dtvideo_decoder_t * decoder);
+int video_decoder_release (dtvideo_decoder_t * decoder);
+int video_decoder_stop (dtvideo_decoder_t * decoder);
+int video_decoder_start (dtvideo_decoder_t * decoder);
+void dtpicture_free (void *pic);
 
 #endif

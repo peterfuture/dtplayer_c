@@ -3,7 +3,7 @@
 
 #include "dtplayer.h"
 
-int player_handle_cb(dtplayer_context_t *dtp_ctx);
-void player_update_state(dtplayer_context_t *dtp_ctx);
+int player_handle_cb (dtplayer_context_t * dtp_ctx);
+void player_update_state (dtplayer_context_t * dtp_ctx);
 
 #endif
