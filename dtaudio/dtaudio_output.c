@@ -36,6 +36,15 @@ static int select_ao_device (dtaudio_output_t * ao, int id)
 {
     ao_operations_t **p;
     p = &first_ao;
+
+    if(id == -1) // user did not choose vo,use default one
+    {
+        if(!*p)
+            return -1;
+        ao->aout_ops = *p;
+        return 0;
+    }
+
     while (*p != NULL && (*p)->id != id)
         p = &(*p)->next;
     if (!*p)

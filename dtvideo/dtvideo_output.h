@@ -38,6 +38,7 @@ typedef enum _VO_ID_
     VO_ID_FB,
     VO_ID_GL,
     VO_ID_DIRECTX,
+    VO_ID_SDL2,
 } dt_vo_t;
 
 typedef struct

@@ -15,11 +15,15 @@ CC       = gcc
 CXX      = g++
 STRIP    = strip 
 
-CFLAGS   +=  -Wall 
+CFLAGS  += -Wall 
 DT_DEBUG = -g
 
-LDFLAGS                  += -lpthread -lz -lm  
+CFLAGS  += -I/usr/include -I/usr/local/include
+LDFLAGS += -L/usr/local/lib -L/usr/lib
+
+LDFLAGS                  += -lpthread -lz -lm
 LDFLAGS-$(DT_VIDEO_SDL)  += -lSDL
+LDFLAGS-$(DT_VIDEO_SDL2) += -lSDL2 -Wl,-rpath=/usr/local/lib
 LDFLAGS-$(DT_AUDIO_ALSA) += -lasound
 LDFLAGS                  += $(LDFLAGS-yes)
 
@@ -60,6 +64,7 @@ SRCS_COMMON-$(DT_VIDEO) += dtvideo/dtvideo_decoder.c
 SRCS_COMMON-$(DT_VIDEO) += dtvideo/dtvideo_output.c
 SRCS_COMMON-$(DT_VIDEO_FFMPEG) += dtvideo/video_decoder/dec_video_ffmpeg.c  #dec
 SRCS_COMMON-$(DT_VIDEO_SDL) += dtvideo/video_out/vo_sdl.c                   #out
+SRCS_COMMON-$(DT_VIDEO_SDL2)+= dtvideo/video_out/vo_sdl2.c                  #out
 
 #dtport
 SRCS_COMMON-$(DT_PORT) += dtport/dt_packet_queue.c
@@ -130,14 +135,14 @@ all: $(ALL_PRG)
 	@echo =====================================================
 
 dtm_player$(EXESUF): $(DTM_PLAYER_DEPS_RELEASE)
-	@$(CC) -o $@ $^ $(LDFLAGS)
+	@$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 	@$(STRIP) $@	
 	@echo =====================================================
 	@echo build $@ done
 	@echo =====================================================
 
 dtm_player_g$(EXESUF): $(DTM_PLAYER_DEPS_DEBUG)
-	@$(CC) -g -o $@ $^ $(LDFLAGS)  
+	@$(CC) $(CFLAGS) -g -o $@ $^ $(LDFLAGS)  
 	@echo =====================================================
 	@echo build $@ done
 	@echo =====================================================

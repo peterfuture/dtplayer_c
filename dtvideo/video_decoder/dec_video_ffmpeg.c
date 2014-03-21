@@ -18,10 +18,12 @@ static int img_convert (AVPicture * dst, int dst_pix_fmt, AVFrame * src, int src
     //pSwsCtx = sws_getContext(src_width, src_height, src_pix_fmt,dest_width, dest_height, dst_pix_fmt,SWS_BICUBIC, NULL, NULL, NULL);
     pSwsCtx = sws_getCachedContext (pSwsCtx, src_width, src_height, src->format, dest_width, dest_height, dst_pix_fmt, SWS_BICUBIC, NULL, NULL, NULL);
     sws_scale (pSwsCtx, src->data, src->linesize, 0, src_height, dst->data, dst->linesize);
+    dt_debug(TAG,"first 4 byte:%02x %02x %02x %02x data addr:%p",dst->data[0][0],dst->data[0][1],dst->data[0][2],dst->data[0][3],dst->data[0]);
+    dt_debug(TAG,"line size:%d %d %d\n",dst->linesize[0],dst->linesize[1],dst->linesize[2]);
     return 0;
 }
 
-void SaveFrame (AVFrame * pFrame, int width, int height, int iFrame)
+static void SaveFrame (AVFrame * pFrame, int width, int height, int iFrame)
 {
     FILE *pFile;
     char szFilename[32];
@@ -80,9 +82,9 @@ static int output_picture (dtvideo_decoder_t * decoder, AVFrame * src_frame, int
     buffer = (uint8_t *) malloc (numBytes * sizeof (uint8_t));
     avpicture_fill ((AVPicture *) dest_pic, buffer, decoder->para.d_pixfmt, decoder->para.d_width, decoder->para.d_height);
 
-    // Convert the image from its native format to RGB
+    // Convert the image from its native format to YV12
     img_convert ((AVPicture *) dest_pic, decoder->para.d_pixfmt, src_frame, decoder->para.s_pixfmt, decoder->para.s_width, decoder->para.s_height, decoder->para.d_width, decoder->para.d_height);
-    (pict)->pts = pts;
+    pict->pts = pts;
     *p_pict = pict;
     return 0;
 }

@@ -31,7 +31,7 @@ int vout_register_all ()
     /*Register all audio_output */
     //REGISTER_VO(NULL, null);
     REGISTER_VO (SDL, sdl);
-    //REGISTER_VO(FB, fb);
+    REGISTER_VO (SDL2, sdl2);
     return 0;
 }
 
@@ -40,9 +40,18 @@ int select_vo_device (dtvideo_output_t * vo, int id)
 {
     vo_operations_t **p;
     p = &first_vo;
+
+    if(id == -1) // user did not choose vo,use default one
+    {
+        if(!*p)
+            return -1;
+        vo->vout_ops = *p;
+        dt_info(TAG,"SELECT VO:%s \n",(*p)->name);
+        return 0;
+    }
+
     while (*p != NULL && (*p)->id != id)
     {
-        //printf("[%s:%d] id :%d name:%s id:%d \n",__FUNCTION__,__LINE__,(*p)->id,(*p)->name,id);
         p = &(*p)->next;
     }
     if (!*p)
@@ -51,7 +60,7 @@ int select_vo_device (dtvideo_output_t * vo, int id)
         return -1;
     }
     vo->vout_ops = *p;
-    //dtaudio_print("select--%s audio device \n",(*p)->name);
+    dt_info(TAG,"SELECT VO:%s \n",(*p)->name);
     return 0;
 }
 

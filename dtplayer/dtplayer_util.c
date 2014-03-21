@@ -43,8 +43,8 @@ int player_host_init (dtplayer_context_t * dtp_ctx)
             memset (host_para->audio_extra_data, 0, host_para->audio_extra_size);
             memcpy ((unsigned char *) host_para->audio_extra_data, astream->extradata, host_para->audio_extra_size);
         }
-        host_para->audio_filter = 0; //default non
-        host_para->audio_output = 0; //defualt alsa
+        host_para->audio_filter = -1; //default
+        host_para->audio_output = -1; //defualt
     }
     //----video ----
     if (pctrl->has_video)
@@ -83,7 +83,8 @@ int player_host_init (dtplayer_context_t * dtp_ctx)
             memset (host_para->video_extra_data, 0, host_para->video_extra_size);
             memcpy ((unsigned char *) host_para->video_extra_data, vstream->extradata, host_para->video_extra_size);
         }
-
+        host_para->video_filter = -1; //defualt
+        host_para->video_output = -1; //defualt
     }
     //----sub part------
     /* init dthost */
