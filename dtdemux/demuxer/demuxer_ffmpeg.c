@@ -1,3 +1,5 @@
+#if ENABLE_DEMUXER_FFMPEG
+
 #include "../dtdemuxer.h"
 #include "dt_error.h"
 
@@ -375,9 +377,12 @@ static int demuxer_ffmpeg_close (demuxer_wrapper * wrapper)
 
 demuxer_wrapper demuxer_ffmpeg = {
     .name = "ffmpeg demuxer",
+    .id = DEMUXER_FFMPEG, 
     .open = demuxer_ffmpeg_open,
     .read_frame = demuxer_ffmpeg_read_frame,
     .setup_info = demuxer_ffmpeg_setup_info,
     .seek_frame = demuxer_ffmpeg_seek_frame,
     .close = demuxer_ffmpeg_close
 };
+
+#endif /*ENABLE_DEMUXER_FFMPEG*/

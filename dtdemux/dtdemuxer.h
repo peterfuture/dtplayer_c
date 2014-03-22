@@ -8,9 +8,15 @@
 #include <stddef.h>
 #include <stdint.h>
 
+typedef enum{
+    DEMUXER_FFMPEG,
+    DEMUXER_UNSUPPORT,
+}demuxer_format_t;
+
 typedef struct demuxer_wrapper
 {
     char *name;
+    int id;
     int (*open) (struct demuxer_wrapper * wrapper, char *file_name, void *parent);
     int (*read_frame) (struct demuxer_wrapper * wrapper, dt_av_frame_t * frame);
     int (*setup_info) (struct demuxer_wrapper * wrapper, dt_media_info_t * info);

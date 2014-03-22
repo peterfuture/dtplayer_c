@@ -51,7 +51,7 @@ int stream_open (dtstream_context_t * stm_ctx)
     }
     stream_wrapper_t *wrapper = stm_ctx->stream;
     dt_info (TAG, "select stream:%s\n", wrapper->name);
-    ret = wrapper->open (wrapper, stm_ctx->stream_name, stm_ctx);
+    ret = wrapper->open (wrapper, stm_ctx->stream_name);
     if (ret < 0)
     {
         dt_error (TAG, "stream open failed\n");
@@ -77,5 +77,6 @@ int stream_close (dtstream_context_t *stm_ctx)
 {
     stream_wrapper_t *wrapper = stm_ctx->stream;
     wrapper->close(wrapper);
+    stream_unregister_all();
     return 0;
 }
