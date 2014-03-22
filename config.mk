@@ -2,6 +2,8 @@
 #                   MACRO                      
 #======================================================
 
+#stream
+DT_CFLAGS += -DENABLE_STREAM_FILE=1
 #demuxer
 DT_CFLAGS += -DENABLE_DEMUXER_FFMPEG=1
 
@@ -29,6 +31,8 @@ DT_CFLAGS += -DENABLE_AO_OSS=0
 #======================================================
 
 #module
+DT_STREAM=yes
+DT_STREAM_FILE=yes
 DT_DEMUXER=yes
 DT_DEMUXER_FFMPEG=yes
 DT_UTIL=yes

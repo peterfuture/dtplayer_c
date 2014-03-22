@@ -43,6 +43,11 @@ SRCS_COMMON-$(DT_UTIL) += dtutils/dt_event.c
 SRCS_COMMON-$(DT_UTIL) += dtutils/dt_buffer.c
 SRCS_COMMON-$(DT_UTIL) += dtutils/dt_queue.c
 
+#dtstream
+SRCS_COMMON-$(DT_STREAM) +=dtstream/dtstream_api.c
+SRCS_COMMON-$(DT_STREAM) +=dtstream/dtstream.c
+SRCS_COMMON-$(DT_STREAM_FILE) +=dtstream/stream/stream_file.c
+
 #dtdemuxer
 SRCS_COMMON-$(DT_DEMUXER) +=dtdemux/dtdemuxer_api.c
 SRCS_COMMON-$(DT_DEMUXER) +=dtdemux/dtdemuxer.c
@@ -89,6 +94,8 @@ OBJS_COMMON_DEBUG += $(addsuffix .debug.o, $(basename $(SRCS_COMMON)))
 DIRS =  . \
         dtcommon \
 		dtutils \
+		dtstream \
+		dtstream/stream \
 		dtdemux \
 		dtdemux/demuxer \
         dtport \
@@ -102,6 +109,7 @@ DIRS =  . \
 		dtplayer   
 #header
 INCLUDE_DIR += -I$(MAKEROOT)/dtutils 
+INCLUDE_DIR += -I$(MAKEROOT)/dtstream 
 INCLUDE_DIR += -I$(MAKEROOT)/dtdemux 
 INCLUDE_DIR += -I$(MAKEROOT)/dtaudio  
 INCLUDE_DIR += -I$(MAKEROOT)/dtvideo 

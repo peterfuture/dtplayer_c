@@ -15,6 +15,7 @@ int dtdemuxer_open (void **priv, dtdemuxer_para_t * para, void *parent)
     if (demuxer_open (dem_ctx) == -1)
     {
         dt_error (TAG, "demuxer context open failed \n");
+        free(dem_ctx);
         return -1;
     }
 

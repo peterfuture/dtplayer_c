@@ -1,4 +1,5 @@
 #include "dtdemuxer.h"
+#include "dtstream_api.h"
 
 #define TAG "DEMUXER"
 
@@ -67,6 +68,15 @@ static void dump_media_info (dt_media_info_t * info)
 int demuxer_open (dtdemuxer_context_t * dem_ctx)
 {
     int ret = 0;
+    /* open stream */
+    dtstream_para_t para;
+    para.stream_name = dem_ctx->file_name; 
+    if(dtstream_open(&dem_ctx->stream_priv,&para,dem_ctx) != DTERROR_NONE)
+    {
+        dt_error (TAG, "stream open failed \n");
+        return -1;
+    }
+
     /*register demuxer */
     demuxer_register_all ();
     if (demuxer_select (dem_ctx) == -1)
@@ -141,5 +151,7 @@ int demuxer_close (dtdemuxer_context_t * dem_ctx)
             info->sstreams[i] = NULL;
         }
 
+    /* close stream */
+    dtstream_close(dem_ctx->stream_priv);
     return 0;
 }

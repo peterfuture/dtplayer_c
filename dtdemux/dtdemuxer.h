@@ -26,6 +26,7 @@ typedef struct
     char *file_name;
     dt_media_info_t media_info;
     demuxer_wrapper *demuxer;
+    void *stream_priv;
     void *parent;
 } dtdemuxer_context_t;
 
