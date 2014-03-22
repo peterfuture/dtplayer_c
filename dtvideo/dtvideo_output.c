@@ -198,7 +198,7 @@ static void *video_output_thread (void *args)
             {
                 dt_debug (TAG, "drop frame,sys clock:%lld thispts:%lld next->pts:%lld \n", sys_clock, picture->pts, picture_pre->pts);
                 dtpicture_free (pic);
-                av_free (picture);
+                free(picture);
                 continue;
             }
         }
@@ -213,7 +213,7 @@ static void *video_output_thread (void *args)
         /*update vpts */
         dtvideo_update_pts (vo->parent);
         dtpicture_free (pic);
-        av_free (picture);
+        free(picture);
         dt_usleep (REFRESH_DURATION);
     }
   EXIT:

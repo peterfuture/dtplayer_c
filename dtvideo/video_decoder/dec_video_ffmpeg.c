@@ -18,11 +18,10 @@ static int img_convert (AVPicture * dst, int dst_pix_fmt, AVFrame * src, int src
     //pSwsCtx = sws_getContext(src_width, src_height, src_pix_fmt,dest_width, dest_height, dst_pix_fmt,SWS_BICUBIC, NULL, NULL, NULL);
     pSwsCtx = sws_getCachedContext (pSwsCtx, src_width, src_height, src->format, dest_width, dest_height, dst_pix_fmt, SWS_BICUBIC, NULL, NULL, NULL);
     sws_scale (pSwsCtx, src->data, src->linesize, 0, src_height, dst->data, dst->linesize);
-    dt_debug(TAG,"first 4 byte:%02x %02x %02x %02x data addr:%p",dst->data[0][0],dst->data[0][1],dst->data[0][2],dst->data[0][3],dst->data[0]);
-    dt_debug(TAG,"line size:%d %d %d\n",dst->linesize[0],dst->linesize[1],dst->linesize[2]);
     return 0;
 }
 
+#if 0
 static void SaveFrame (AVFrame * pFrame, int width, int height, int iFrame)
 {
     FILE *pFile;
@@ -45,6 +44,7 @@ static void SaveFrame (AVFrame * pFrame, int width, int height, int iFrame)
     // Close file
     fclose (pFile);
 }
+#endif
 
 int ffmpeg_vdec_init (dtvideo_decoder_t * decoder)
 {
