@@ -91,7 +91,7 @@ int main (int argc, char **argv)
         return -1;
     strcpy (para->file_name, argv[1]);
     para->update_cb = (void *) update_cb;
-    para->no_audio=1;
+    //para->no_audio=1;
     //para->no_video=1;
     para->width = 720;
     para->height = 480;
