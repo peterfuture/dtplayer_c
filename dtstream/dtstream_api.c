@@ -25,6 +25,20 @@ int dtstream_open (void **priv, dtstream_para_t * para, void *parent)
     return 0;
 }
 
+int64_t dtstream_tell (void *priv)
+{
+    dtstream_context_t *stm_ctx = (dtstream_context_t *) priv;
+    return stream_tell(stm_ctx);
+}
+
+int dtstream_skip (void *priv, int64_t size)
+{
+    char buf[size];
+    dtstream_context_t *stm_ctx = (dtstream_context_t *) priv;
+    stream_read(stm_ctx,buf,size);
+    return 1;
+}
+
 int dtstream_read (void *priv, char *buf,int len)
 {
     dtstream_context_t *stm_ctx = (dtstream_context_t *) priv;

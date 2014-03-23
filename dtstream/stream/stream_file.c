@@ -20,6 +20,7 @@ static int stream_file_open (stream_wrapper_t * wrapper,char *stream_name)
     int fd = -1;
     file_ctx_t *ctx = malloc(sizeof(*ctx));
     stream_ctrl_t *info = &wrapper->info;
+    memset(info,0,sizeof(*info));
     fd = open(stream_name,O_RDONLY);
     if(fd < 0)
     {
@@ -42,11 +43,18 @@ static int stream_file_open (stream_wrapper_t * wrapper,char *stream_name)
     return DTERROR_NONE;
 }
 
+static int stream_file_tell (stream_wrapper_t * wrapper)
+{
+    stream_ctrl_t *info = &wrapper->info;
+    return info->cur_pos;
+}
+
 static int stream_file_read (stream_wrapper_t * wrapper,char *buf,int len)
 {
     int r;
     file_ctx_t *ctx = (file_ctx_t *)wrapper->stream_priv;
     r = read(ctx->fd,buf,len);
+    dt_debug(TAG,"read %d byte \n",len);
     return (r <= 0) ? -1 : r;
 }
 
@@ -73,6 +81,7 @@ stream_wrapper_t stream_file = {
     .name = "File",
     .id = STREAM_FILE,
     .open = stream_file_open,
+    .tell = stream_file_tell,
     .read = stream_file_read,
     .seek = stream_file_seek,
     .close = stream_file_close,

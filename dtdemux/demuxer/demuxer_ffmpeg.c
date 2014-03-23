@@ -43,10 +43,20 @@ static const type_map_t media_map[] = {
     {"amr", MEDIA_FORMAT_AMR},
 };
 
-static int demuxer_ffmpeg_open (demuxer_wrapper * wrapper, char *file_name, void *parent)
+/* 1 select 0 non select*/
+static int demuxer_ffmpeg_probe(demuxer_wrapper_t *wrapper,void *parent)
+{
+    wrapper->parent = parent;
+    return 1;
+}
+
+static int demuxer_ffmpeg_open (demuxer_wrapper_t * wrapper)
 {
     AVFormatContext *ic = NULL;
     int err, ret;
+    
+    dtdemuxer_context_t *ctx = (dtdemuxer_context_t *)wrapper->parent;
+    char *file_name = ctx->file_name;
 
     av_register_all ();
     err = avformat_open_input (&ic, file_name, NULL, NULL);
@@ -65,7 +75,6 @@ static int demuxer_ffmpeg_open (demuxer_wrapper * wrapper, char *file_name, void
     }
 
     dt_info (TAG, "[%s:%d] start_time:%lld \n", __FUNCTION__, __LINE__, ic->start_time);
-    wrapper->parent = parent;
     return 0;
   FAIL:
     avformat_close_input (&ic);
@@ -100,7 +109,7 @@ static int64_t pts_exchange (AVPacket * avpkt, dt_media_info_t * media_info)
     return (int64_t) (avpkt->pts * exchange);
 }
 
-static int demuxer_ffmpeg_read_frame (demuxer_wrapper * wrapper, dt_av_frame_t * frame)
+static int demuxer_ffmpeg_read_frame (demuxer_wrapper_t * wrapper, dt_av_frame_t * frame)
 {
     dtdemuxer_context_t *dem_ctx = (dtdemuxer_context_t *) wrapper->parent;
     dt_media_info_t *media_info = &dem_ctx->media_info;
@@ -241,7 +250,7 @@ static int format2bps (int fmt)
     return ret;
 }
 
-static int demuxer_ffmpeg_setup_info (demuxer_wrapper * wrapper, dt_media_info_t * info)
+static int demuxer_ffmpeg_setup_info (demuxer_wrapper_t * wrapper, dt_media_info_t * info)
 {
     AVFormatContext *ic = (AVFormatContext *) wrapper->demuxer_priv;
     AVStream *pStream;
@@ -348,7 +357,7 @@ static int demuxer_ffmpeg_setup_info (demuxer_wrapper * wrapper, dt_media_info_t
     return 0;
 }
 
-static int demuxer_ffmpeg_seek_frame (demuxer_wrapper * wrapper, int timestamp)
+static int demuxer_ffmpeg_seek_frame (demuxer_wrapper_t * wrapper, int timestamp)
 {
     AVFormatContext *ic = (AVFormatContext *) wrapper->demuxer_priv;
     int seek_flags = AVSEEK_FLAG_ANY;
@@ -368,16 +377,17 @@ static int demuxer_ffmpeg_seek_frame (demuxer_wrapper * wrapper, int timestamp)
     return -1;
 }
 
-static int demuxer_ffmpeg_close (demuxer_wrapper * wrapper)
+static int demuxer_ffmpeg_close (demuxer_wrapper_t * wrapper)
 {
     AVFormatContext *ic = (AVFormatContext *) wrapper->demuxer_priv;
     avformat_close_input (&ic);
     return 0;
 }
 
-demuxer_wrapper demuxer_ffmpeg = {
+demuxer_wrapper_t demuxer_ffmpeg = {
     .name = "ffmpeg demuxer",
     .id = DEMUXER_FFMPEG, 
+    .probe = demuxer_ffmpeg_probe,
     .open = demuxer_ffmpeg_open,
     .read_frame = demuxer_ffmpeg_read_frame,
     .setup_info = demuxer_ffmpeg_setup_info,

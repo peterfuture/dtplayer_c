@@ -26,6 +26,7 @@ typedef struct stream_wrapper
     char *name;
     int id;
     int (*open) (struct stream_wrapper * wrapper,char *stream_name);
+    int64_t (*tell) (struct stream_wrapper * wrapper);
     int (*read) (struct stream_wrapper * wrapper, char *buf,int len);
     int (*seek) (struct stream_wrapper * wrapper, int64_t pos);
     int (*close) (struct stream_wrapper * wrapper);

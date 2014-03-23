@@ -9,6 +9,8 @@
 #include <stdint.h>
 
 typedef enum{
+    DEMUXER_INVALID = -1,
+    DEMUXER_AAC,
     DEMUXER_FFMPEG,
     DEMUXER_UNSUPPORT,
 }demuxer_format_t;
@@ -17,7 +19,8 @@ typedef struct demuxer_wrapper
 {
     char *name;
     int id;
-    int (*open) (struct demuxer_wrapper * wrapper, char *file_name, void *parent);
+    int (*probe) (struct demuxer_wrapper *wrapper,void *parent);
+    int (*open) (struct demuxer_wrapper * wrapper);
     int (*read_frame) (struct demuxer_wrapper * wrapper, dt_av_frame_t * frame);
     int (*setup_info) (struct demuxer_wrapper * wrapper, dt_media_info_t * info);
     int (*seek_frame) (struct demuxer_wrapper * wrapper, int timestamp);
@@ -25,13 +28,13 @@ typedef struct demuxer_wrapper
     void *demuxer_priv;         // point to priv context
     void *parent;               // point to parent, dtdemuxer_context_t
     struct demuxer_wrapper *next;
-} demuxer_wrapper;
+} demuxer_wrapper_t;
 
 typedef struct
 {
     char *file_name;
     dt_media_info_t media_info;
-    demuxer_wrapper *demuxer;
+    demuxer_wrapper_t *demuxer;
     void *stream_priv;
     void *parent;
 } dtdemuxer_context_t;

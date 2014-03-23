@@ -61,6 +61,12 @@ int stream_open (dtstream_context_t * stm_ctx)
     return 0;
 }
 
+int64_t stream_tell (dtstream_context_t *stm_ctx)
+{
+    stream_wrapper_t *wrapper = stm_ctx->stream;
+    return wrapper->tell(wrapper);
+}
+
 int stream_read (dtstream_context_t *stm_ctx, char *buf,int len)
 {
     stream_wrapper_t *wrapper = stm_ctx->stream;

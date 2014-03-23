@@ -6,14 +6,14 @@
 #define REGISTER_DEMUXER(X,x) \
     if(ENABLE_DEMUXER_##X)    \
     {                         \
-        extern demuxer_wrapper demuxer_##x; \
+        extern demuxer_wrapper_t demuxer_##x; \
         register_demuxer(&demuxer_##x);     \
     }
-static demuxer_wrapper *g_demuxer = NULL;
+static demuxer_wrapper_t *g_demuxer = NULL;
 
-static void register_demuxer (demuxer_wrapper * wrapper)
+static void register_demuxer (demuxer_wrapper_t * wrapper)
 {
-    demuxer_wrapper **p;
+    demuxer_wrapper_t **p;
     p = &g_demuxer;
     while (*p != NULL)
         p = &((*p)->next);
@@ -23,6 +23,7 @@ static void register_demuxer (demuxer_wrapper * wrapper)
 
 static void demuxer_register_all ()
 {
+    REGISTER_DEMUXER (AAC, aac);
     REGISTER_DEMUXER (FFMPEG, ffmpeg);
 }
 
@@ -36,7 +37,19 @@ static int demuxer_select (dtdemuxer_context_t * dem_ctx)
 {
     if (!g_demuxer)
         return -1;
-    dem_ctx->demuxer = g_demuxer; // select the only one
+    int score = 0;
+    demuxer_wrapper_t *entry = g_demuxer;
+    while(entry != NULL)
+    {
+        score = (entry)->probe(entry,dem_ctx);
+        if(score == 1)
+            break;
+        entry = entry->next;
+    }
+    if(!entry)
+        return -1;
+    dem_ctx->demuxer = entry;
+    dt_info(TAG,"SELECT DEMUXER:%s \n",entry->name);
     return 0;
 }
 
@@ -84,9 +97,8 @@ int demuxer_open (dtdemuxer_context_t * dem_ctx)
         dt_error (TAG, "select demuxer failed \n");
         return -1;
     }
-    demuxer_wrapper *wrapper = dem_ctx->demuxer;
-    dt_info (TAG, "select demuxer:%s\n", wrapper->name);
-    ret = wrapper->open (wrapper, dem_ctx->file_name, dem_ctx);
+    demuxer_wrapper_t *wrapper = dem_ctx->demuxer;
+    ret = wrapper->open (wrapper);
     if (ret < 0)
     {
         dt_error (TAG, "demuxer open failed\n");
@@ -102,20 +114,20 @@ int demuxer_open (dtdemuxer_context_t * dem_ctx)
 
 int demuxer_read_frame (dtdemuxer_context_t * dem_ctx, dt_av_frame_t * frame)
 {
-    demuxer_wrapper *wrapper = dem_ctx->demuxer;
+    demuxer_wrapper_t *wrapper = dem_ctx->demuxer;
     return wrapper->read_frame (wrapper, frame);
 }
 
 int demuxer_seekto (dtdemuxer_context_t * dem_ctx, int timestamp)
 {
-    demuxer_wrapper *wrapper = dem_ctx->demuxer;
+    demuxer_wrapper_t *wrapper = dem_ctx->demuxer;
     return wrapper->seek_frame (wrapper, timestamp);
 }
 
 int demuxer_close (dtdemuxer_context_t * dem_ctx)
 {
     int i = 0;
-    demuxer_wrapper *wrapper = dem_ctx->demuxer;
+    demuxer_wrapper_t *wrapper = dem_ctx->demuxer;
     wrapper->close (wrapper);
     demuxer_unregister_all ();
     /*free media info */

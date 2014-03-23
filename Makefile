@@ -52,6 +52,7 @@ SRCS_COMMON-$(DT_STREAM_FILE) +=dtstream/stream/stream_file.c
 SRCS_COMMON-$(DT_DEMUXER) +=dtdemux/dtdemuxer_api.c
 SRCS_COMMON-$(DT_DEMUXER) +=dtdemux/dtdemuxer.c
 SRCS_COMMON-$(DT_DEMUXER_FFMPEG) +=dtdemux/demuxer/demuxer_ffmpeg.c
+SRCS_COMMON-$(DT_DEMUXER_AAC) +=dtdemux/demuxer/demuxer_aac.c
 
 #dtaudio
 SRCS_COMMON-$(DT_AUDIO) += dtaudio/dtaudio_api.c
