@@ -4,12 +4,21 @@
 #include "dtplayer_util.h"
 #include "dtplayer_update.h"
 #include "dt_ini.h"
-
+#include "dtdemuxer.h"
+#include "dtaudio.h"
+#include "dtvideo.h"
 #include "pthread.h"
 
 #define TAG "PLAYER"
 
 static void *event_handle_loop (dtplayer_context_t * dtp_ctx);
+
+void player_register_all()
+{
+    demuxer_register_all();
+    audio_register_all();
+    video_register_all();
+}
 
 static void set_player_status (dtplayer_context_t * dtp_ctx, player_status_t status)
 {

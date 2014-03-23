@@ -59,6 +59,7 @@ typedef struct
     void *parent;               //dtcodec
 } dtaudio_context_t;
 
+void audio_register_all();
 int audio_read_frame (void *priv, dt_av_frame_t * frame);
 int audio_output_read (void *priv, uint8_t * buf, int size);
 int64_t audio_get_current_pts (dtaudio_context_t * actx);

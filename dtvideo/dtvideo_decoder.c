@@ -24,17 +24,11 @@ static void register_vdec (dec_video_wrapper_t * vdec)
     vdec->next = NULL;
 }
 
-static int vdec_register_all ()
+void vdec_register_all ()
 {
     //comments:video using ffmpeg decoder only
     REGISTER_VDEC (FFMPEG, ffmpeg);
-    return 0;
-}
-
-static int vdec_unregister_all ()
-{
-    first_vdec = NULL;
-    return 0;
+    return;
 }
 
 static int select_video_decoder (dtvideo_decoder_t * decoder)
@@ -149,8 +143,7 @@ int video_decoder_init (dtvideo_decoder_t * decoder)
 {
     int ret = 0;
     pthread_t tid;
-    /*register decoder */
-    vdec_register_all ();
+    
     /*select decoder */
     ret = select_video_decoder (decoder);
     if (ret < 0)
@@ -216,7 +209,5 @@ int video_decoder_stop (dtvideo_decoder_t * decoder)
         queue_free (picture_queue, (free_func) dtpicture_free);
         picture_queue = NULL;
     }
-    /*unregister adec */
-    vdec_unregister_all ();
     return 0;
 }

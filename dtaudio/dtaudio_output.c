@@ -21,14 +21,14 @@ static void register_ao (ao_operations_t * ao)
     ao->next = NULL;
 }
 
-static int aout_register_all ()
+void aout_register_all ()
 {
     /*Register all audio_output */
     REGISTER_AO (NULL, null);
     REGISTER_AO (ALSA, alsa);
     REGISTER_AO (OSS, oss);
     REGISTER_AO (SDL, sdl);
-    return 0;
+    return;
 }
 
 /*default alsa*/
@@ -169,8 +169,7 @@ int audio_output_init (dtaudio_output_t * ao, int ao_id)
 {
     int ret = 0;
     pthread_t tid;
-    /*register ao device */
-    aout_register_all ();
+    
     /*select ao device */
     ret = select_ao_device (ao, ao_id);
     if (ret < 0)

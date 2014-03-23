@@ -155,6 +155,12 @@ int video_get_out_closed (dtvideo_context_t * vctx)
 }
 
 //==Part3:Control
+void video_register_all()
+{
+    vdec_register_all();
+    vout_register_all();
+}
+
 int video_start (dtvideo_context_t * vctx)
 {
     if (vctx->video_status == VIDEO_STATUS_INITED)

@@ -90,6 +90,7 @@ static void *player_io_thread (dtplayer_context_t * dtp_ctx)
         /*io ops */
         if (frame_valid == 1)
             goto WRITE_FRAME;
+        memset(&frame,0,sizeof(dt_av_frame_t));
         ret = player_read_frame (dtp_ctx, &frame);
         if (ret == DTERROR_NONE)
             frame_valid = 1;
@@ -103,12 +104,16 @@ static void *player_io_thread (dtplayer_context_t * dtp_ctx)
             usleep (1000);
             continue;
         }
+        dt_debug (TAG, "read ok size:%d pts:%lld \n",frame.size,frame.pts);
       WRITE_FRAME:
         ret = player_write_frame (dtp_ctx, &frame);
         if (ret == DTERROR_NONE)
+        {
+            dt_debug (TAG, "player write ok \n");
             frame_valid = 0;
+        }
         else
-            dt_warning (TAG, "write frame failed , write again \n");
+            dt_debug (TAG, "write frame failed , write again \n");
     }
     while (1);
   QUIT:

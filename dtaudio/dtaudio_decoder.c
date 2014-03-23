@@ -22,17 +22,11 @@ static void register_adec (dec_audio_wrapper_t * adec)
     adec->next = NULL;
 }
 
-static int adec_register_all ()
+void adec_register_all ()
 {
     /*Register all audio_decoder */
     REGISTER_ADEC (FFMPEG, ffmpeg);
-    return 0;
-}
-
-static int adec_unregister_all ()
-{
-    first_adec = NULL;
-    return 0;
+    return;
 }
 
 static int select_audio_decoder (dtaudio_decoder_t * decoder)
@@ -107,8 +101,7 @@ static void *audio_decode_loop (void *arg)
         }
         if (decoder->status == ADEC_STATUS_EXIT)
         {
-            dt_info (TAG, "[%s:%d] receive decode loop exit cmd \n", __FUNCTION__, __LINE__);
-
+            dt_debug (TAG, "[%s:%d] receive decode loop exit cmd \n", __FUNCTION__, __LINE__);
             if (frame_data)
                 free (frame_data);
             if (rest_data)
@@ -124,7 +117,7 @@ static void *audio_decode_loop (void *arg)
             continue;
         }
         ret = audio_read_frame (decoder->parent, &frame);
-        if (ret < 0)
+        if (ret < 0 || frame.size <= 0)
         {
             usleep (1000 * 10);
             dt_debug (TAG, "[%s:%d] dtaudio decoder loop read frame failed \n", __FUNCTION__, __LINE__);
@@ -205,7 +198,6 @@ static void *audio_decode_loop (void *arg)
             {
                 dt_error (TAG, "[%s:%d] ffmpeg failed to decode this frame, just break\n", __FUNCTION__, __LINE__);
                 decoder->decode_offset += in_size;
-                continue;
             }
             continue;
         }
@@ -239,7 +231,7 @@ static void *audio_decode_loop (void *arg)
         /*write pcm */
         if (buf_space (out) < out_size)
         {
-            dt_info (TAG, "[%s:%d] output buffer do not left enough space ,space=%d level:%d outsie:%d \n", __FUNCTION__, __LINE__, buf_space (out), buf_level (out), out_size);
+            dt_debug (TAG, "[%s:%d] output buffer do not left enough space ,space=%d level:%d outsie:%d \n", __FUNCTION__, __LINE__, buf_space (out), buf_level (out), out_size);
             usleep (1000 * 10);
             goto REFILL_BUFFER;
         }
@@ -264,8 +256,6 @@ int audio_decoder_init (dtaudio_decoder_t * decoder)
 {
     int ret = 0;
     pthread_t tid;
-    /*register decoder */
-    adec_register_all ();
     /*select decoder */
     ret = select_audio_decoder (decoder);
     if (ret < 0)
@@ -331,8 +321,6 @@ int audio_decoder_stop (dtaudio_decoder_t * decoder)
     /*uninit buf */
     dtaudio_context_t *actx = (dtaudio_context_t *) decoder->parent;
     buf_release (&actx->audio_decoded_buf);
-    /*unregister adec */
-    adec_unregister_all ();
     return 0;
 }
 

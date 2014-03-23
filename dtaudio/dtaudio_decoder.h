@@ -46,6 +46,7 @@ struct dtaudio_decoder
     void *decoder_priv;         //point to avcodeccontext
 };
 
+void adec_register_all();
 int audio_decoder_init (dtaudio_decoder_t * decoder);
 int audio_decoder_release (dtaudio_decoder_t * decoder);
 int audio_decoder_stop (dtaudio_decoder_t * decoder);

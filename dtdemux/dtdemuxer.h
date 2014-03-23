@@ -2,11 +2,14 @@
 #define DEMUXER_CTRL_H
 
 #include "dt_media_info.h"
+#include "dtstream_api.h"
 #include "dt_av.h"
 
 #include <stdio.h>
 #include <stddef.h>
 #include <stdint.h>
+
+#define PROBE_BUF_SIZE 1024*1024 //1M
 
 typedef enum{
     DEMUXER_INVALID = -1,
@@ -35,10 +38,12 @@ typedef struct
     char *file_name;
     dt_media_info_t media_info;
     demuxer_wrapper_t *demuxer;
+    dt_buffer_t probe_buf;    
     void *stream_priv;
     void *parent;
 } dtdemuxer_context_t;
 
+void demuxer_register_all();
 int demuxer_open (dtdemuxer_context_t * dem_ctx);
 int demuxer_read_frame (dtdemuxer_context_t * dem_ctx, dt_av_frame_t * frame);
 int demuxer_seekto (dtdemuxer_context_t * dem_ctx, int timestamp);

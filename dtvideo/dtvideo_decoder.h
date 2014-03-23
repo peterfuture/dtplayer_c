@@ -46,6 +46,7 @@ struct dtvideo_decoder
     void *decoder_priv;
 };
 
+void vdec_register_all();
 int video_decoder_init (dtvideo_decoder_t * decoder);
 int video_decoder_release (dtvideo_decoder_t * decoder);
 int video_decoder_stop (dtvideo_decoder_t * decoder);

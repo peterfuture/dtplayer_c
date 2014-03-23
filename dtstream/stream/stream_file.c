@@ -36,35 +36,36 @@ static int stream_file_open (stream_wrapper_t * wrapper,char *stream_name)
     else
         ctx->file_size = state.st_size;  
     wrapper->stream_priv = (void *)ctx;
-    info->file_size = ctx->file_size;
+    info->stream_size = ctx->file_size;
     info->is_stream = 0;
     info->seek_support = 1;
     info->cur_pos = 0;
     return DTERROR_NONE;
 }
 
-static int stream_file_tell (stream_wrapper_t * wrapper)
+static int stream_file_read (stream_wrapper_t * wrapper,uint8_t *buf,int len)
 {
-    stream_ctrl_t *info = &wrapper->info;
-    return info->cur_pos;
-}
-
-static int stream_file_read (stream_wrapper_t * wrapper,char *buf,int len)
-{
-    int r;
     file_ctx_t *ctx = (file_ctx_t *)wrapper->stream_priv;
-    r = read(ctx->fd,buf,len);
+    stream_ctrl_t *info = &wrapper->info;
+    int r = read(ctx->fd,buf,len);
     dt_debug(TAG,"read %d byte \n",len);
+    if(r>0)
+        info->cur_pos += r;
+    if(r<=0)
+        info->eof_flag = 1;
     return (r <= 0) ? -1 : r;
 }
 
-static int stream_file_seek (stream_wrapper_t * wrapper, int64_t pos)
+static int stream_file_seek (stream_wrapper_t * wrapper, int64_t pos, int whence)
 {
     file_ctx_t *ctx = (file_ctx_t *)wrapper->stream_priv;
     stream_ctrl_t *info = &wrapper->info;
-    if(lseek(ctx->fd,pos,SEEK_SET)<0)
+    if(lseek(ctx->fd,pos,whence)<0)
         return -1;
-    info->cur_pos = pos;
+    if(whence == SEEK_SET)
+        info->cur_pos = pos;
+    if(whence == SEEK_CUR)
+        info->cur_pos += pos;
     return DTERROR_NONE;
 }
 
@@ -81,7 +82,6 @@ stream_wrapper_t stream_file = {
     .name = "File",
     .id = STREAM_FILE,
     .open = stream_file_open,
-    .tell = stream_file_tell,
     .read = stream_file_read,
     .seek = stream_file_seek,
     .close = stream_file_close,

@@ -38,6 +38,7 @@ typedef enum
 typedef enum
 {
     AUDIO_FORMAT_INVALID = -1,
+    AUDIO_FORMAT_AAC,
     AUDIO_FORMAT_UNKOWN,
 } audio_format_t;
 

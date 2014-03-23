@@ -39,6 +39,7 @@ int dtplayer_init (void **player_priv, dtplayer_para_t * para)
     int ret = 0;
     if (!para)
         return -1;
+    player_register_all();
     //dtplayer_context_t *dtp_ctx = malloc(sizeof(dtplayer_context_t));
     dtplayer_context_t *dtp_ctx = &ply_ctx;
     if (!dtp_ctx)

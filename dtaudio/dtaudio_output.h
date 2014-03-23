@@ -68,6 +68,7 @@ struct dtaudio_output
     void *parent;               //point to dtaudio_t, can used for param of pcm get interface
 };
 
+void aout_register_all();
 int audio_output_init (dtaudio_output_t * ao, int ao_id);
 int audio_output_release (dtaudio_output_t * ao);
 int audio_output_stop (dtaudio_output_t * ao);

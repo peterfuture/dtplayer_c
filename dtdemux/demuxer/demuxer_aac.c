@@ -9,46 +9,102 @@
 
 #define TAG "DEMUXER-AAC"
 
-typedef struct {
-	uint8_t *buf;
-	uint64_t size;	/// amount of time of data packets pushed to demuxer->audio (in bytes)
-	float time;	/// amount of time elapsed based upon samples_per_frame/sample_rate (in milliseconds)
-	float last_pts; /// last pts seen
-	int bitrate;	/// bitrate computed as size/time
-} aac_priv_t;
+/* 
+ * adts fixed header:
+ * syncword:                 12bit    FFF
+ * ID:                       01bit
+ * layer:                    02bit
+ * protection_absent:        01bit
+ * profile:                  02bit
+ * sampling_frequency_index: 04bit
+ * private_bit:              01bit
+ * channel_configuration:    03bit
+ * original_copy:            01bit
+ * home:                     01bit
+ *
+ * */
 
-static int aac_init(demuxer_wrapper_t *wrapper)
+/* 
+ *index  profile
+ * 0     Main Profile
+ * 1     Low Complexity profile(LC)
+ * 2     Scalable Sampling Rate Profile(SSR)
+ * 3     reserve
+ *
+ * */
+static char *aac_profile[4] = {
+    "MainProfile",
+    "LC",
+    "SSR",
+    "Reserve"
+};
+
+/*
+ *
+ * Sampling_frequency_index   samplerate
+ * 0                          96000
+ * 1                          88200
+ * 2                          64000
+ * 3                          48000
+ * 4                          44100
+ * 5                          32000
+ * 6                          24000
+ * 7                          22050
+ * 8                          16000
+ * 9                          12000
+ * 10                         11025
+ * 11                         8000
+ * 12                         7350
+ * 13                         Reserved
+ * 14                         Reserved
+ * 15                         Frequency is written explicity
+ *
+ * */
+
+int sr_index[16] = {
+    96000,
+    88200,
+    64000,
+    48000,
+    44100,
+    32000,
+    24000,
+    22050,
+    16000,
+    12000,
+    11025,
+    8000,
+    7350,
+    0,
+    0,
+    0
+};
+
+
+typedef struct{
+    uint8_t buf[8];
+    uint64_t size;
+    float time;
+    float last_pts;
+
+    int bitrate;
+    int channels;
+    int samplerate;
+    int profile;
+    int bps;
+
+    int64_t file_size;
+    int duration;
+}aac_ctx_t;
+
+static int aac_parse_frame(uint8_t *buf, int *srate, int *num)
 {
-	aac_priv_t *priv;
-
-	priv = calloc(1, sizeof(aac_priv_t));
-	if(!priv)
-		return 0;
-
-	priv->buf = malloc(8);
-	if(!priv->buf)
-	{
-		free(priv);
-		return 0;
-	}
-
-    wrapper->demuxer_priv = priv;
-	return 1;
-}
-
-/// \param srate (out) sample rate
-/// \param num (out) number of audio frames in this ADTS frame
-/// \return size of the ADTS frame in bytes
-/// aac_parse_frames needs a buffer at least 8 bytes long
-int aac_parse_frame(uint8_t *buf, int *srate, int *num)
-{
-	int i = 0, sr, fl = 0, id;
-	static int srates[] = {96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000, 0, 0, 0};
+	int i = 0, sr, fl = 0;
+	static const int srates[] = {96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000, 0, 0, 0};
 
 	if((buf[i] != 0xFF) || ((buf[i+1] & 0xF6) != 0xF0))
 		return 0;
 
-	id = (buf[i+1] >> 3) & 0x01;	//id=1 mpeg2, 0: mpeg4
 	sr = (buf[i+2] >> 2)  & 0x0F;
 	if(sr > 11)
 		return 0;
@@ -60,206 +116,300 @@ int aac_parse_frame(uint8_t *buf, int *srate, int *num)
 	return fl;
 }
 
-/// returns DEMUXER_TYPE_AAC if it finds 8 ADTS frames in 32768 bytes, 0 otherwise
 static int demuxer_aac_probe(demuxer_wrapper_t *wrapper, void *parent)
 {
-    int cnt = 0, c, len, srate, num;
-	int64_t init, probed;
-	aac_priv_t *priv;
+    dtdemuxer_context_t *ctx = (dtdemuxer_context_t *)parent;
+    wrapper->parent = parent;
+    dt_buffer_t *probe_buf = &ctx->probe_buf; 
+    int score;
+    int max_frames = 0, first_frames = 0;
+    int fsize, frames;
+    const uint8_t *buf0 = probe_buf->data;
+    const uint8_t *buf2;
+    const uint8_t *buf;
+    const uint8_t *end = buf0 + probe_buf->level - 7;
 
-    dtdemuxer_context_t *ctx = (dtdemuxer_context_t *)parent;	
-	if(! aac_init(wrapper))
-	{
-		dt_error(TAG, "COULDN'T INIT aac_demux, exit\n");
-		return 0;
-	}
+    buf = buf0;
 
-	priv = (aac_priv_t *) wrapper->demuxer_priv;
+    for(; buf < end; buf= buf2+1) {
+        buf2 = buf;
 
-	init = probed = dtstream_tell(ctx->stream_priv);
-	dt_info(TAG,"demux_aac_probe, INIT: %lld, PROBED: %lld, cnt: %d\n", init, probed, cnt);
-	while(probed-init <= 32768 && cnt < 8)
-	{
-		c = 0;
-		while(c != 0xFF)
-		{
-            if(dtstream_read(ctx->stream_priv,&c,1)<0)
-				goto fail;
-		}
-		priv->buf[0] = 0xFF;
-		if(dtstream_read(ctx->stream_priv, &(priv->buf[1]), 7) < 7)
-			goto fail;
-
-		len = aac_parse_frame(priv->buf, &srate, &num);
-		if(len > 0)
-		{
-			cnt++;
-			dtstream_skip(ctx->stream_priv, len - 8);
-		}
-		probed = dtstream_tell(ctx->stream_priv);
-	}
-
-	dtstream_seek(ctx->stream_priv, init);
-	if(cnt < 8)
-		goto fail;
-
-	//printf("demux_aac_probe, INIT: %"PRIu64", PROBED: %"PRIu64", cnt: %d\n", init, probed, cnt);
-	dt_info(TAG,"demux_aac_probe, INIT: %lld, PROBED: %lld, cnt: %d\n", init, probed, cnt);
-	return 1;
-
-fail:
-	dt_info(TAG, "demux_aac_probe, failed to detect an AAC stream\n");
-	return 0;
+        for(frames = 0; buf2 < end; frames++) {
+            uint32_t header = DT_RB16(buf2);
+            if((header&0xFFF6) != 0xFFF0)
+                break;
+            fsize = (DT_RB32(buf2 + 3) >> 13) & 0x1FFF;
+            if(fsize < 7)
+                break;
+            dt_debug(TAG,"FRAME SIZE:%d data:%x  \n",fsize,header);
+            fsize = MIN(fsize, end - buf2);
+            buf2 += fsize;
+        }
+        max_frames = MAX(max_frames, frames);
+        if(buf == buf0)
+            first_frames= frames;
+    }
+    if   (first_frames>=3) score = 100/2+1;
+    else if(max_frames>500)score = 100/2;
+    else if(max_frames>=3) score = 100/4;
+    else if(max_frames>=1) score = 1;
+    else                   score = 0;
+	dt_info(TAG,"score:%d frames:%d \n",score,frames);
+    if(score >= 50)
+        return 1;
+    else
+        return 0;
 }
 
-#if 0
-static demuxer_t* demux_aac_open(demuxer_t *demuxer)
+#define BUF_NOT_ENOUGH(b1,n,b2) (b1+n >= b2)
+static int estimate_duration(demuxer_wrapper_t *wrapper)
 {
-	sh_audio_t *sh;
-
-	sh = new_sh_audio(demuxer, 0, NULL);
-	sh->ds = demuxer->audio;
-	sh->format = mmioFOURCC('M', 'P', '4', 'A');
-	demuxer->audio->id = 0;
-	demuxer->audio->sh = sh;
-
-	demuxer->filepos = stream_tell(demuxer->stream);
-
-	return demuxer;
-}
-
-static int demux_aac_read_frame(demuxer_t *demuxer, demux_stream_t *ds)
-{
-	aac_priv_t *priv = (aac_priv_t *) demuxer->priv;
-	demux_packet_t *dp;
-	int c1, c2, len, srate, num;
+    aac_ctx_t *aac_ctx = (aac_ctx_t *)wrapper->demuxer_priv;
+    dtdemuxer_context_t *ctx = (dtdemuxer_context_t *)wrapper->parent;
+    dt_buffer_t *probe_buf = &ctx->probe_buf; 
+    const uint8_t *buf = probe_buf->data;
+    const uint8_t *buf2 = buf;
+    const uint8_t *end = buf + probe_buf->level - 7;
+    uint8_t c1,c2;
+    int len, srate, num;
 	float tm = 0;
 
-	if(demuxer->stream->eof || (demuxer->movi_end && stream_tell(demuxer->stream) >= demuxer->movi_end))
-        	return 0;
+    while(buf2 < end)
+    {
+	    c1 = c2 = 0;
+	    while(c1 != 0xFF)
+	    {
+            if(BUF_NOT_ENOUGH(buf2,1,end))
+                break;
+		    c1 = DT_RB8(buf2);
+            buf2++;
+	    }
+		if(BUF_NOT_ENOUGH(buf2,1,end))
+                break;
+        c2 = DT_RB8(buf2);
+	    if((c2 & 0xF6) != 0xF0)
+		    continue;
+        buf2++;
+	    aac_ctx->buf[0] = (unsigned char) c1;
+	    aac_ctx->buf[1] = (unsigned char) c2;
+		
+        if(BUF_NOT_ENOUGH(buf2,6,end))
+            break;
+	    memcpy(&(aac_ctx->buf[2]),buf2, 6);
+	    buf2 += 6;
+        len = aac_parse_frame(aac_ctx->buf, &srate, &num);
+	     if(BUF_NOT_ENOUGH(buf2,len,end))
+            break;
+        if(len > 0)
+	    {
+            if(srate)
+				tm = (float) (num * 1024.0/srate);
+			aac_ctx->last_pts += tm;
+            aac_ctx->size += len;
+			aac_ctx->time += tm;
+			aac_ctx->bitrate = (int) (aac_ctx->size / aac_ctx->time);
+            dt_debug(TAG,"READ ONE FRAME: len:%d size:%llu time:%f bit:%d\n",len,aac_ctx->size,aac_ctx->time,aac_ctx->bitrate);
+	        buf2 += len - 8;
+        }
+	    else
+            buf2 -= 6;
+    }
+    aac_ctx->last_pts = 0;
+    aac_ctx->size = 0;
+    aac_ctx->time = 0;
+    aac_ctx->duration = (aac_ctx->file_size >0)?(aac_ctx->file_size/aac_ctx->bitrate):-1;
+    dt_info(TAG,"AAC ESTIMATE DURATION:bitrate:%d duration:%d \n",aac_ctx->bitrate,aac_ctx->duration);
+    return 0;
+}
 
-	while(! demuxer->stream->eof)
-	{
-		c1 = c2 = 0;
-		while(c1 != 0xFF)
-		{
-			c1 = stream_read_char(demuxer->stream);
-			if(c1 < 0)
-				return 0;
-		}
-		c2 = stream_read_char(demuxer->stream);
-		if(c2 < 0)
-			return 0;
-		if((c2 & 0xF6) != 0xF0)
-			continue;
+static int demuxer_aac_open(demuxer_wrapper_t *wrapper)
+{
+    //for aac we can use probe buf directly
+    aac_ctx_t *aac_ctx = (aac_ctx_t *)malloc(sizeof(aac_ctx_t));
+    memset(aac_ctx,0,sizeof(aac_ctx_t));
+    wrapper->demuxer_priv = (void *)aac_ctx;
+    dtdemuxer_context_t *ctx = (dtdemuxer_context_t *)wrapper->parent;
+    dt_buffer_t *probe_buf = &ctx->probe_buf; 
+    const uint8_t *buf = probe_buf->data;
+    //const uint8_t *end = buf + probe_buf->level - 7;
+    uint32_t header = DT_RB16(buf);
+    if((header&0xFFF6) != 0xFFF0)
+        return -1;
+    int profile = (DT_RB8(buf+2)>>6)&0xf;
+    aac_ctx->profile = profile; 
+    dt_debug(TAG,"Profile:%s \n",aac_profile[profile]);
+    int sr = (DT_RB8(buf+2)>>2) & 0xf;
+    aac_ctx->samplerate = sr_index[sr];
+    dt_debug(TAG,"Samplerate:%d \n",sr_index[sr]);
+    int channel = (DT_RB16(buf + 2) >> 6) & 0x7;
+    aac_ctx->channels = channel;
+    dt_debug(TAG,"channel:%d \n",channel);
+    aac_ctx->bps = 16;
+    aac_ctx->file_size = dtstream_get_size(ctx->stream_priv);
+    estimate_duration(wrapper);
+    return 0;
+}
 
-		priv->buf[0] = (unsigned char) c1;
-		priv->buf[1] = (unsigned char) c2;
-		if(stream_read(demuxer->stream, &(priv->buf[2]), 6) < 6)
-			return 0;
+static int demuxer_aac_setup_info (demuxer_wrapper_t * wrapper, dt_media_info_t * info)
+{
+    dtdemuxer_context_t *ctx = (dtdemuxer_context_t *)(wrapper->parent);
+    aac_ctx_t *aac_ctx = (aac_ctx_t *)wrapper->demuxer_priv;
+    
+    /*reset vars */
+    memset (info, 0, sizeof (*info));
+    //set cur stream index -1 ,other vars have been reset to 0
+    info->cur_ast_index = -1;
+    info->cur_vst_index = -1;
+    info->cur_sst_index = -1;
 
-		len = aac_parse_frame(priv->buf, &srate, &num);
-		if(len > 0)
-		{
-			dp = new_demux_packet(len);
-			if(! dp)
+    /*get media info */
+    info->format = MEDIA_FORMAT_AAC;
+    strcpy (info->file_name, ctx->file_name);
+    info->bit_rate = aac_ctx->bitrate;
+    info->duration = aac_ctx->duration;
+    info->file_size = aac_ctx->file_size;
+
+    astream_info_t *ast_info = (astream_info_t *) malloc (sizeof (astream_info_t));
+    memset (ast_info, 0, sizeof (astream_info_t));
+    ast_info->index = 0;
+    ast_info->id = 0;
+    ast_info->channels = aac_ctx->channels;
+    ast_info->sample_rate = aac_ctx->samplerate;
+    ast_info->bps = aac_ctx->bps;
+    ast_info->duration = aac_ctx->duration;
+    ast_info->time_base.num = -1;
+    ast_info->time_base.den = -1;
+    ast_info->bit_rate = aac_ctx->bitrate;
+    ast_info->format = AUDIO_FORMAT_AAC;
+    ast_info->codec_priv = NULL;
+    info->astreams[info->ast_num] = ast_info;
+    info->ast_num++;
+        
+    info->has_audio = 1;
+    info->cur_ast_index = 0;
+    return 0;
+}
+
+static int demuxer_aac_read_frame(demuxer_wrapper_t *wrapper, dt_av_frame_t *frame)
+{
+    dtdemuxer_context_t *dem_ctx = (dtdemuxer_context_t *) wrapper->parent;
+    aac_ctx_t *aac_ctx = (aac_ctx_t *)wrapper->demuxer_priv;
+    
+	int len, srate, num;
+	float tm = 0;
+    int ret = 0;
+    uint8_t c1,c2;
+    if(dtstream_eof(dem_ctx->stream_priv))
+        return DTERROR_READ_EOF;
+
+    /* find sync word */
+    while(!dtstream_eof(dem_ctx->stream_priv))
+    {
+	    c1 = c2 = 0;
+	    while(c1 != 0xFF)
+	    {
+		    ret = dtstream_read(dem_ctx->stream_priv,&c1,1);
+		    if(ret < 0)
+			    return DTERROR_READ_FAILED;
+	    }
+		ret = dtstream_read(dem_ctx->stream_priv,&c2,1);
+	    if(ret < 0)
+            return DTERROR_READ_FAILED;
+	    if((c2 & 0xF6) != 0xF0)
+		    continue;
+	    aac_ctx->buf[0] = (unsigned char) c1;
+	    aac_ctx->buf[1] = (unsigned char) c2;
+	    if(dtstream_read(dem_ctx->stream_priv, &(aac_ctx->buf[2]), 6) < 6)
+		    return DTERROR_READ_FAILED;
+
+	    len = aac_parse_frame(aac_ctx->buf, &srate, &num);
+	    if(len > 0)
+	    {
+
+            uint8_t *data = malloc(len);
+		    if(!data)
 			{
-				mp_msg(MSGT_DEMUX, MSGL_ERR, "fill_buffer, NEW_ADD_PACKET(%d)FAILED\n", len);
-				return 0;
+			    dt_error(TAG, "read frame, NEW_PACKET(%d)FAILED\n", len);
+		        dtstream_skip(dem_ctx->stream_priv, -8);
+				return DTERROR_READ_AGAIN;
 			}
-
-
-			memcpy(dp->buffer, priv->buf, 8);
-			stream_read(demuxer->stream, &(dp->buffer[8]), len-8);
+			memcpy(data, aac_ctx->buf, 8);
+			dtstream_read(dem_ctx->stream_priv, &(data[8]), len-8);
 			if(srate)
 				tm = (float) (num * 1024.0/srate);
-			priv->last_pts += tm;
-			dp->pts = priv->last_pts;
-			//fprintf(stderr, "\nPTS: %.3f\n", dp->pts);
-			ds_add_packet(demuxer->audio, dp);
-			priv->size += len;
-			priv->time += tm;
+			aac_ctx->last_pts += tm;
+            aac_ctx->size += len;
+			aac_ctx->time += tm;
+			aac_ctx->bitrate = (int) (aac_ctx->size / aac_ctx->time);
+            dt_debug(TAG,"READ ONE FRAME: len:%d size:%llu time:%f bit:%d pts:%f \n",len,aac_ctx->size,aac_ctx->time,aac_ctx->bitrate,aac_ctx->last_pts);
+            //setup frame
+            frame->type = DT_TYPE_AUDIO;
+            frame->data = data;
+			frame->size = len;
+            frame->pts = (int64_t)(aac_ctx->last_pts * 90000);
+            frame->dts = -1;
+            frame->duration = -1;
 
-			priv->bitrate = (int) (priv->size / priv->time);
-			demuxer->filepos = stream_tell(demuxer->stream);
-
-			return len;
-		}
-		else
-			stream_skip(demuxer->stream, -6);
-	}
-
-	return 0;
+            return DTERROR_NONE;
+	    }
+	    else
+		    dtstream_skip(dem_ctx->stream_priv, -6);
+    }
+    return DTERROR_READ_EOF;
 }
 
-
-//This is an almost verbatim copy of high_res_mp3_seek(), from demux_audio.c
-static void demuxer_aac_seek_frame(demuxer_t *demuxer, float rel_seek_secs, float audio_delay, int flags)
+/*
+ * timestamp , s
+ * */
+static int demuxer_aac_seek_frame(demuxer_wrapper_t *wrapper, int timestamp)
 {
-	aac_priv_t *priv = (aac_priv_t *) demuxer->priv;
-	demux_stream_t *d_audio=demuxer->audio;
-	sh_audio_t *sh_audio=d_audio->sh;
+    dtdemuxer_context_t *dem_ctx = (dtdemuxer_context_t *) wrapper->parent;
+    aac_ctx_t *aac_ctx = (aac_ctx_t *)wrapper->demuxer_priv;
+ 
 	float time;
 
-	ds_free_packs(d_audio);
-
-	time = (flags & SEEK_ABSOLUTE) ? rel_seek_secs - priv->last_pts : rel_seek_secs;
+	time = timestamp;
 	if(time < 0)
+        return -1;
+	
+	aac_ctx->last_pts = 0;
+    dtstream_seek(dem_ctx->stream_priv,0,SEEK_SET);
+
+	int len, nf, srate, num;
+    nf = time * aac_ctx->samplerate/1024;
+    
+    while(nf > 0)
 	{
-		stream_seek(demuxer->stream, demuxer->movi_start);
-		time = priv->last_pts + time;
-		priv->last_pts = 0;
-	}
-
-	if(time > 0)
-	{
-		int len, nf, srate, num;
-
-		nf = time * sh_audio->samplerate/1024;
-
-		while(nf > 0)
+		if(dtstream_read(dem_ctx->stream_priv,aac_ctx->buf, 8) < 8)
+			break;
+		len = aac_parse_frame(aac_ctx->buf, &srate, &num);
+		if(len <= 0)
 		{
-			if(stream_read(demuxer->stream,priv->buf, 8) < 8)
-				break;
-			len = aac_parse_frame(priv->buf, &srate, &num);
-			if(len <= 0)
-			{
-				stream_skip(demuxer->stream, -7);
-				continue;
-			}
-			stream_skip(demuxer->stream, len - 8);
-			priv->last_pts += (float) (num*1024.0/srate);
-			nf -= num;
+			dtstream_skip(dem_ctx->stream_priv, -7);
+			continue;
 		}
+		dtstream_skip(dem_ctx->stream_priv, len - 8);
+		aac_ctx->last_pts += (float) (num*1024.0/srate);
+		nf -= num;
 	}
+    dt_info(TAG,"aac demuxer seek finish, last_time:%f \n",aac_ctx->last_pts); 
+    return 0;
 }
 
-static void demuxer_aac_close(demuxer_t *demuxer)
+static int demuxer_aac_close(demuxer_wrapper_t *wrapper)
 {
-	aac_priv_t *priv = (aac_priv_t *) demuxer->priv;
-
-	if(!priv)
-		return;
-
-	free(priv->buf);
-
-	free(demuxer->priv);
-
-	return;
+	return 0;
 }
-#endif
 
 demuxer_wrapper_t demuxer_aac = {
     .name = "aac demuxer",
     .id = DEMUXER_AAC, 
     .probe = demuxer_aac_probe,
-#if 0
     .open = demuxer_aac_open,
     .read_frame = demuxer_aac_read_frame,
     .setup_info = demuxer_aac_setup_info,
     .seek_frame = demuxer_aac_seek_frame,
     .close = demuxer_aac_close
-#endif
 };
 
 #endif

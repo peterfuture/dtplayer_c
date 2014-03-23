@@ -26,13 +26,13 @@ static void register_vo (vo_operations_t * vo)
     dt_info (TAG, "register vo. id:%d name:%s \n", vo->id, vo->name);
 }
 
-int vout_register_all ()
+void vout_register_all ()
 {
     /*Register all audio_output */
     //REGISTER_VO(NULL, null);
     REGISTER_VO (SDL, sdl);
     REGISTER_VO (SDL2, sdl2);
-    return 0;
+    return;
 }
 
 /*default alsa*/
@@ -226,8 +226,7 @@ int video_output_init (dtvideo_output_t * vo, int vo_id)
 {
     int ret = 0;
     pthread_t tid;
-    /*register ao device */
-    vout_register_all ();
+    
     /*select ao device */
     ret = select_vo_device (vo, vo_id);
     if (ret < 0)

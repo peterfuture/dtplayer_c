@@ -60,6 +60,7 @@ struct dtvideo_output
     void *parent;               //point to dtaudio_t, can used for param of pcm get interface
 };
 
+void vout_register_all();
 int video_output_init (dtvideo_output_t * vo, int vo_id);
 int video_output_release (dtvideo_output_t * vo);
 int video_output_stop (dtvideo_output_t * vo);

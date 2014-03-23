@@ -154,6 +154,12 @@ int audio_get_out_closed (dtaudio_context_t * actx)
 }
 
 //==Part3:Control
+void audio_register_all()
+{
+    adec_register_all();
+    aout_register_all();
+}
+
 int audio_start (dtaudio_context_t * actx)
 {
     if (actx->audio_state == AUDIO_STATUS_INITED)

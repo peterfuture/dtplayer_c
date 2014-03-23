@@ -21,16 +21,10 @@ static void register_demuxer (demuxer_wrapper_t * wrapper)
     wrapper->next = NULL;
 }
 
-static void demuxer_register_all ()
+void demuxer_register_all ()
 {
     REGISTER_DEMUXER (AAC, aac);
     REGISTER_DEMUXER (FFMPEG, ffmpeg);
-}
-
-static void demuxer_unregister_all ()
-{
-    g_demuxer = NULL;
-    return;
 }
 
 static int demuxer_select (dtdemuxer_context_t * dem_ctx)
@@ -90,8 +84,17 @@ int demuxer_open (dtdemuxer_context_t * dem_ctx)
         return -1;
     }
 
-    /*register demuxer */
-    demuxer_register_all ();
+    int64_t old_pos = dtstream_tell(dem_ctx->stream_priv);
+    ret = buf_init(&dem_ctx->probe_buf,PROBE_BUF_SIZE);
+    if(ret < 0)
+        return -1; 
+    ret = dtstream_read(dem_ctx->stream_priv,dem_ctx->probe_buf.data,PROBE_BUF_SIZE); 
+    if(ret <= 0)
+        return -1;
+    dem_ctx->probe_buf.level = ret;
+    dtstream_seek(dem_ctx->stream_priv,old_pos,SEEK_SET); 
+    
+    /* select demuxer */
     if (demuxer_select (dem_ctx) == -1)
     {
         dt_error (TAG, "select demuxer failed \n");
@@ -129,7 +132,6 @@ int demuxer_close (dtdemuxer_context_t * dem_ctx)
     int i = 0;
     demuxer_wrapper_t *wrapper = dem_ctx->demuxer;
     wrapper->close (wrapper);
-    demuxer_unregister_all ();
     /*free media info */
     dt_media_info_t *info = &(dem_ctx->media_info);
     if (info->has_audio)
@@ -162,7 +164,8 @@ int demuxer_close (dtdemuxer_context_t * dem_ctx)
             free (info->sstreams[i]);
             info->sstreams[i] = NULL;
         }
-
+    /* release probe buf */
+    buf_release(&dem_ctx->probe_buf);
     /* close stream */
     dtstream_close(dem_ctx->stream_priv);
     return 0;

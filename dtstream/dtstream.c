@@ -25,12 +25,6 @@ static void stream_register_all ()
     REGISTER_STREAM (FILE, file);
 }
 
-static void stream_unregister_all ()
-{
-    g_stream = NULL;
-    return;
-}
-
 static int stream_select (dtstream_context_t * stm_ctx)
 {
     if (!g_stream)
@@ -61,28 +55,42 @@ int stream_open (dtstream_context_t * stm_ctx)
     return 0;
 }
 
+int stream_eof (dtstream_context_t *stm_ctx)
+{
+    stream_wrapper_t *wrapper = stm_ctx->stream;
+    stream_ctrl_t *info = &wrapper->info;
+    return info->eof_flag;
+}
+
 int64_t stream_tell (dtstream_context_t *stm_ctx)
 {
     stream_wrapper_t *wrapper = stm_ctx->stream;
-    return wrapper->tell(wrapper);
+    stream_ctrl_t *info = &wrapper->info;
+    return info->cur_pos;
 }
 
-int stream_read (dtstream_context_t *stm_ctx, char *buf,int len)
+int64_t stream_get_size (dtstream_context_t *stm_ctx)
+{
+    stream_wrapper_t *wrapper = stm_ctx->stream;
+    stream_ctrl_t *info = &wrapper->info;
+    return info->stream_size;
+}
+
+int stream_read (dtstream_context_t *stm_ctx, uint8_t *buf,int len)
 {
     stream_wrapper_t *wrapper = stm_ctx->stream;
     return wrapper->read(wrapper,buf,len);
 }
 
-int stream_seek (dtstream_context_t *stm_ctx, int64_t pos)
+int stream_seek (dtstream_context_t *stm_ctx, int64_t pos,int whence)
 {
     stream_wrapper_t *wrapper = stm_ctx->stream;
-    return wrapper->seek(wrapper,pos);
+    return wrapper->seek(wrapper,pos,whence);
 }
 
 int stream_close (dtstream_context_t *stm_ctx)
 {
     stream_wrapper_t *wrapper = stm_ctx->stream;
     wrapper->close(wrapper);
-    stream_unregister_all();
     return 0;
 }

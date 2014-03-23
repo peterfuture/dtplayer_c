@@ -3,6 +3,7 @@
 #include "../dtaudio_decoder.h"
 
 //include ffmpeg header
+#include "libavformat/avformat.h"
 #include "libavcodec/avcodec.h"
 #include "libavresample/avresample.h"
 #include "libswscale/swscale.h"
@@ -10,14 +11,54 @@
 
 #define TAG "AUDIO-DECODER-FFMPEG"
 static AVFrame *frame;
+AVCodecContext *avctxp;
+
+static enum AVCodecID convert_to_id(int format)
+{
+    switch(format)
+    {
+        case AUDIO_FORMAT_AAC:
+            return AV_CODEC_ID_AAC;
+        default:
+            return 0;
+    }
+}
+
+static AVCodecContext * alloc_ffmpeg_ctx(dtaudio_decoder_t *decoder)
+{
+    AVCodecContext *ctx = avcodec_alloc_context3(NULL);
+    if(!ctx)
+        return NULL;
+    
+    ctx->codec_type = AVMEDIA_TYPE_AUDIO;
+    ctx->codec_id = convert_to_id(decoder->aparam.afmt);
+    if(ctx->codec_id == 0)
+    {
+        av_free(ctx); 
+        return NULL;
+    }
+    ctx->channels = decoder->aparam.channels;
+    ctx->sample_rate = decoder->aparam.samplerate;
+    ctx->sample_fmt = AV_SAMPLE_FMT_S16;
+    ctx->internal = NULL; 
+    //maybe ffmpeg not register
+    av_register_all ();
+    return ctx;
+}
+
 int ffmpeg_adec_init (dtaudio_decoder_t * decoder)
 {
     //select video decoder and call init
     dt_info (TAG, "FFMPEG AUDIO DECODER INIT ENTER\n");
     AVCodec *codec = NULL;
-    AVCodecContext *avctxp = (AVCodecContext *) decoder->decoder_priv;
+    if(decoder->decoder_priv)
+        avctxp = (AVCodecContext *) decoder->decoder_priv;
+    else
+        avctxp = alloc_ffmpeg_ctx(decoder); 
+    if(!avctxp)
+        return -1;
     enum AVCodecID id = avctxp->codec_id;
-    dt_info (TAG, "[%s:%d] param-- channel:%d sample:%d \n", __FUNCTION__, __LINE__, avctxp->channels, avctxp->sample_rate);
+    dt_info (TAG, "[%s:%d] param-- channel:%d sample:%d id:%d format:%d \n", __FUNCTION__, __LINE__, avctxp->channels, avctxp->sample_rate,id,decoder->aparam.afmt);
     codec = avcodec_find_decoder (id);
     if (NULL == codec)
     {
@@ -41,7 +82,6 @@ static void audio_convert (dtaudio_decoder_t * decoder, AVFrame * dst, AVFrame *
     int nb_sample;
     int dst_buf_size;
     int out_channels;
-    AVCodecContext *avctxp = (AVCodecContext *) decoder->decoder_priv;
     //for audio post processor
     //struct SwsContext *m_sws_ctx = NULL;
     struct SwrContext *m_swr_ctx = NULL;
@@ -99,7 +139,6 @@ static void audio_convert (dtaudio_decoder_t * decoder, AVFrame * dst, AVFrame *
 //1 get one frame 0 failed -1 err
 int ffmpeg_adec_decode (dtaudio_decoder_t * decoder, uint8_t * inbuf, int *inlen, uint8_t * outbuf, int *outlen)
 {
-    AVCodecContext *avctxp = (AVCodecContext *) decoder->decoder_priv;
     int got_samples = 0;
     int ret = 0;
     int data_size = 0;
@@ -147,8 +186,8 @@ int ffmpeg_adec_decode (dtaudio_decoder_t * decoder, uint8_t * inbuf, int *inlen
 
 int ffmpeg_adec_release (dtaudio_decoder_t * decoder)
 {
-    AVCodecContext *avctxp = (AVCodecContext *) decoder->decoder_priv;
     avcodec_close (avctxp);
+    avctxp = NULL;
     av_frame_free (&frame);
     return 0;
 }

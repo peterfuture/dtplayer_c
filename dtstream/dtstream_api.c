@@ -25,30 +25,46 @@ int dtstream_open (void **priv, dtstream_para_t * para, void *parent)
     return 0;
 }
 
+int64_t dtstream_get_size(void *priv)
+{
+    dtstream_context_t *stm_ctx = (dtstream_context_t *) priv;
+    return stream_get_size(stm_ctx);
+}
+
+int dtstream_eof (void *priv)
+{
+    dtstream_context_t *stm_ctx = (dtstream_context_t *) priv;
+    return stream_eof(stm_ctx);
+}
+
 int64_t dtstream_tell (void *priv)
 {
     dtstream_context_t *stm_ctx = (dtstream_context_t *) priv;
     return stream_tell(stm_ctx);
 }
 
+/*
+ * skip size byte 
+ * maybe negitive , then seek forward
+ *
+ * */
 int dtstream_skip (void *priv, int64_t size)
 {
-    char buf[size];
     dtstream_context_t *stm_ctx = (dtstream_context_t *) priv;
-    stream_read(stm_ctx,buf,size);
+    stream_seek(stm_ctx,size,SEEK_CUR);
     return 1;
 }
 
-int dtstream_read (void *priv, char *buf,int len)
+int dtstream_read (void *priv, uint8_t *buf,int len)
 {
     dtstream_context_t *stm_ctx = (dtstream_context_t *) priv;
     return stream_read(stm_ctx,buf,len);
 }
 
-int dtstream_seek (void *priv, int64_t pos)
+int dtstream_seek (void *priv, int64_t pos ,int whence)
 {
     dtstream_context_t *stm_ctx = (dtstream_context_t *) priv;
-    return stream_seek(stm_ctx,pos);
+    return stream_seek(stm_ctx,pos,whence);
 }
 
 int dtstream_close (void *priv)
