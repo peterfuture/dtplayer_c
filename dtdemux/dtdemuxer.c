@@ -78,22 +78,25 @@ int demuxer_open (dtdemuxer_context_t * dem_ctx)
     /* open stream */
     dtstream_para_t para;
     para.stream_name = dem_ctx->file_name; 
-    if(dtstream_open(&dem_ctx->stream_priv,&para,dem_ctx) != DTERROR_NONE)
+    ret = dtstream_open(&dem_ctx->stream_priv,&para,dem_ctx);
+    if(ret != DTERROR_NONE)
     {
         dt_error (TAG, "stream open failed \n");
-        return -1;
+        //return -1;
     }
-
-    int64_t old_pos = dtstream_tell(dem_ctx->stream_priv);
-    ret = buf_init(&dem_ctx->probe_buf,PROBE_BUF_SIZE);
-    if(ret < 0)
-        return -1; 
-    ret = dtstream_read(dem_ctx->stream_priv,dem_ctx->probe_buf.data,PROBE_BUF_SIZE); 
-    if(ret <= 0)
-        return -1;
-    dem_ctx->probe_buf.level = ret;
-    dtstream_seek(dem_ctx->stream_priv,old_pos,SEEK_SET); 
-    
+    else
+    {
+        //maybe we open stream failed, then we use ffmpeg only
+        int64_t old_pos = dtstream_tell(dem_ctx->stream_priv);
+        ret = buf_init(&dem_ctx->probe_buf,PROBE_BUF_SIZE);
+        if(ret < 0)
+            return -1; 
+        ret = dtstream_read(dem_ctx->stream_priv,dem_ctx->probe_buf.data,PROBE_BUF_SIZE); 
+        if(ret <= 0)
+            return -1;
+        dem_ctx->probe_buf.level = ret;
+        dtstream_seek(dem_ctx->stream_priv,old_pos,SEEK_SET); 
+    }
     /* select demuxer */
     if (demuxer_select (dem_ctx) == -1)
     {

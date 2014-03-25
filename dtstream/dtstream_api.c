@@ -17,6 +17,7 @@ int dtstream_open (void **priv, dtstream_para_t * para, void *parent)
     {
         dt_error(TAG,"STREAM CONTEXT OPEN FAILED \n");
         free(ctx);
+        *priv = NULL;
         return -1;
     }
     *priv = (void *)ctx;
@@ -70,8 +71,11 @@ int dtstream_seek (void *priv, int64_t pos ,int whence)
 int dtstream_close (void *priv)
 {
     dtstream_context_t *stm_ctx = (dtstream_context_t *) priv;
-    stream_close(stm_ctx);
-    free(stm_ctx);
+    if(stm_ctx)
+    {
+        stream_close(stm_ctx);
+        free(stm_ctx);
+    }
     priv = NULL;
     return 0;
 }
