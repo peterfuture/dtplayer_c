@@ -47,6 +47,7 @@ SRCS_COMMON-$(DT_UTIL) += dtutils/dt_queue.c
 SRCS_COMMON-$(DT_STREAM) +=dtstream/dtstream_api.c
 SRCS_COMMON-$(DT_STREAM) +=dtstream/dtstream.c
 SRCS_COMMON-$(DT_STREAM_FILE) +=dtstream/stream/stream_file.c
+SRCS_COMMON-$(DT_STREAM_FFMPEG) +=dtstream/stream/stream_ffmpeg.c
 
 #dtdemuxer
 SRCS_COMMON-$(DT_DEMUXER) +=dtdemux/dtdemuxer_api.c

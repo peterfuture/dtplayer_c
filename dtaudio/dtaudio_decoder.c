@@ -222,7 +222,7 @@ static void *audio_decode_loop (void *arg)
         decoder->pts_cache_size = out_size;
         decoder->pts_buffer_size += out_size;
         if (out_size == 0)      //get no data, maybe first time for init
-            dt_info (TAG, "GET NO PCM DECODED OUT\n");
+            dt_info (TAG, "GET NO PCM DECODED OUT,used:%d \n",used);
 
         fill_size = 0;
       REFILL_BUFFER:

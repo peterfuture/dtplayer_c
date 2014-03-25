@@ -1,5 +1,7 @@
 #include "dtstream.h"
 
+#include <unistd.h>
+
 #define TAG "STREAM"
 
 #define REGISTER_STREAM(X,x) \
@@ -20,30 +22,47 @@ static void register_stream (stream_wrapper_t * wrapper)
     wrapper->next = NULL;
 }
 
-static void stream_register_all ()
+void stream_register_all ()
 {
     REGISTER_STREAM (FILE, file);
+    REGISTER_STREAM (FFMPEG, ffmpeg);
+}
+
+static int get_stream_id(char *name)
+{
+    int ret = access(name,0);
+    if(ret ==0)
+        return STREAM_FILE;
+    return STREAM_FFMPEG; // default 
 }
 
 static int stream_select (dtstream_context_t * stm_ctx)
 {
     if (!g_stream)
         return -1;
-    stm_ctx->stream = g_stream; // select the only one
+    int id = get_stream_id(stm_ctx->stream_name);
+    stream_wrapper_t *entry = g_stream;
+    while(entry)
+    {
+        if(id == entry->id || STREAM_FFMPEG == entry->id)
+            break;
+    }
+    if(!entry)
+        return -1;
+    stm_ctx->stream = entry;
     return 0;
 }
 
 int stream_open (dtstream_context_t * stm_ctx)
 {
     int ret = 0;
-    /*register streamer */
-    stream_register_all ();
     if (stream_select (stm_ctx) == -1)
     {
         dt_error (TAG, "select stream failed \n");
         return -1;
     }
     stream_wrapper_t *wrapper = stm_ctx->stream;
+    memset(&wrapper->info,0,sizeof(stream_ctrl_t));
     dt_info (TAG, "select stream:%s\n", wrapper->name);
     ret = wrapper->open (wrapper, stm_ctx->stream_name);
     if (ret < 0)

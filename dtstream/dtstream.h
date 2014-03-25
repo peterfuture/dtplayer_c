@@ -44,6 +44,7 @@ typedef struct
     void *parent;
 } dtstream_context_t;
 
+void stream_register_all();
 int stream_open (dtstream_context_t * stm_ctx);
 int stream_eof (dtstream_context_t * stm_ctx);
 int64_t stream_tell (dtstream_context_t *stm_ctx);
