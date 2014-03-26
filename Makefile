@@ -22,9 +22,9 @@ CFLAGS  += -I/usr/include -I/usr/local/include
 LDFLAGS += -L/usr/local/lib -L/usr/lib
 
 LDFLAGS                  += -lpthread -lz -lm
-LDFLAGS-$(DT_VIDEO_SDL)  += -lSDL
-LDFLAGS-$(DT_VIDEO_SDL2) += -lSDL2 -Wl,-rpath=/usr/local/lib
-LDFLAGS-$(DT_AUDIO_ALSA) += -lasound
+LDFLAGS-$(DT__SDL)  += -lSDL
+LDFLAGS-$(DT_SDL2) += -lSDL2 -Wl,-rpath=/usr/local/lib
+LDFLAGS-$(DT_ALSA) += -lasound
 LDFLAGS                  += $(LDFLAGS-yes)
 
 COMMON_LIBS += $(COMMON_LIBS-yes)
@@ -46,14 +46,14 @@ SRCS_COMMON-$(DT_UTIL) += dtutils/dt_queue.c
 #dtstream
 SRCS_COMMON-$(DT_STREAM) +=dtstream/dtstream_api.c
 SRCS_COMMON-$(DT_STREAM) +=dtstream/dtstream.c
-SRCS_COMMON-$(DT_STREAM_FILE) +=dtstream/stream/stream_file.c
-SRCS_COMMON-$(DT_STREAM_FFMPEG) +=dtstream/stream/stream_ffmpeg.c
+SRCS_COMMON-$(DT_STREAM) +=dtstream/stream/stream_file.c
+SRCS_COMMON-$(DT_FFMPEG) +=dtstream/stream/stream_ffmpeg.c
 
 #dtdemuxer
 SRCS_COMMON-$(DT_DEMUXER) +=dtdemux/dtdemuxer_api.c
 SRCS_COMMON-$(DT_DEMUXER) +=dtdemux/dtdemuxer.c
-SRCS_COMMON-$(DT_DEMUXER_FFMPEG) +=dtdemux/demuxer/demuxer_ffmpeg.c
-SRCS_COMMON-$(DT_DEMUXER_AAC) +=dtdemux/demuxer/demuxer_aac.c
+SRCS_COMMON-$(DT_DEMUXER) +=dtdemux/demuxer/demuxer_aac.c
+SRCS_COMMON-$(DT_FFMPEG) +=dtdemux/demuxer/demuxer_ffmpeg.c
 
 #dtaudio
 SRCS_COMMON-$(DT_AUDIO) += dtaudio/dtaudio_api.c
@@ -61,17 +61,17 @@ SRCS_COMMON-$(DT_AUDIO) += dtaudio/dtaudio.c
 SRCS_COMMON-$(DT_AUDIO) += dtaudio/dtaudio_decoder.c
 SRCS_COMMON-$(DT_AUDIO) += dtaudio/dtaudio_filter.c
 SRCS_COMMON-$(DT_AUDIO) += dtaudio/dtaudio_output.c
-SRCS_COMMON-$(DT_AUDIO_FFMPEG) += dtaudio/audio_decoder/dec_audio_ffmpeg.c # dec
-SRCS_COMMON-$(DT_AUDIO_ALSA) += dtaudio/audio_out/ao_alsa.c                # out
+SRCS_COMMON-$(DT_FFMPEG) += dtaudio/audio_decoder/dec_audio_ffmpeg.c # dec
+SRCS_COMMON-$(DT_ALSA) += dtaudio/audio_out/ao_alsa.c                # out
 
 #dtvideo
 SRCS_COMMON-$(DT_VIDEO) += dtvideo/dtvideo_api.c
 SRCS_COMMON-$(DT_VIDEO) += dtvideo/dtvideo.c
 SRCS_COMMON-$(DT_VIDEO) += dtvideo/dtvideo_decoder.c
 SRCS_COMMON-$(DT_VIDEO) += dtvideo/dtvideo_output.c
-SRCS_COMMON-$(DT_VIDEO_FFMPEG) += dtvideo/video_decoder/dec_video_ffmpeg.c  #dec
-SRCS_COMMON-$(DT_VIDEO_SDL) += dtvideo/video_out/vo_sdl.c                   #out
-SRCS_COMMON-$(DT_VIDEO_SDL2)+= dtvideo/video_out/vo_sdl2.c                  #out
+SRCS_COMMON-$(DT_FFMPEG) += dtvideo/video_decoder/dec_video_ffmpeg.c  #dec
+SRCS_COMMON-$(DT_SDL) += dtvideo/video_out/vo_sdl.c                   #out
+SRCS_COMMON-$(DT_SDL2)+= dtvideo/video_out/vo_sdl2.c                  #out
 
 #dtport
 SRCS_COMMON-$(DT_PORT) += dtport/dt_packet_queue.c

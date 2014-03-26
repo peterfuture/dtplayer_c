@@ -83,7 +83,7 @@ int audio_output_stop (dtaudio_output_t * ao)
     ao->status = AO_STATUS_EXIT;
     pthread_join (ao->output_thread_pid, NULL);
     ao->aout_ops->ao_stop (ao);
-    dt_info (TAG, "[%s:%d] alsa stop ok \n", __FUNCTION__, __LINE__);
+    dt_info (TAG, "[%s:%d] aout stop ok \n", __FUNCTION__, __LINE__);
     return 0;
 }
 
