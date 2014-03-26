@@ -69,7 +69,7 @@ int dthost_init (void **host_priv, dthost_para_t * para)
     if (ret < 0)
     {
         dt_error (TAG, "[%s:%d] dthost_init failed\n", __FUNCTION__, __LINE__);
-        ret = 0;
+        ret = -1;
         goto ERR1;
     }
     *host_priv = (void *) hctx;
