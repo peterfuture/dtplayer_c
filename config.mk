@@ -60,7 +60,7 @@ else
 	DT_CFLAGS += -DENABLE_VO_SDL=0
 endif
 
-ifeq ($(DT_SDL),yes)
+ifeq ($(DT_SDL2),yes)
 	DT_CFLAGS += -DENABLE_VO_SDL2=1
 else
 	DT_CFLAGS += -DENABLE_VO_SDL2=0

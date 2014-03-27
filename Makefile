@@ -22,7 +22,7 @@ CFLAGS  += -I/usr/include -I/usr/local/include
 LDFLAGS += -L/usr/local/lib -L/usr/lib
 
 LDFLAGS                  += -lpthread -lz -lm
-LDFLAGS-$(DT__SDL)  += -lSDL
+LDFLAGS-$(DT_SDL)  += -lSDL
 LDFLAGS-$(DT_SDL2) += -lSDL2 -Wl,-rpath=/usr/local/lib
 LDFLAGS-$(DT_ALSA) += -lasound
 LDFLAGS                  += $(LDFLAGS-yes)
