@@ -7,6 +7,7 @@ DT_FFMPEG = yes
 DT_SDL = yes
 DT_SDL2 = no
 DT_ALSA = yes
+DT_FAAD = yes
 
 #module
 DT_STREAM=yes
@@ -72,6 +73,12 @@ DT_CFLAGS += -DENABLE_VO_OPENGL=0
 #audio
 DT_CFLAGS += -DENABLE_ADEC_NULL=0
 
+ifeq ($(DT_FAAD),yes)
+	DT_CFLAGS += -DENABLE_ADEC_FAAD=1
+else
+	DT_CFLAGS += -DENABLE_ADEC_FAAD=0
+endif
+
 ifeq ($(DT_FFMPEG),yes)
 	DT_CFLAGS += -DENABLE_ADEC_FFMPEG=1
 else
@@ -104,3 +111,12 @@ FFMPEGLIBS  = $(foreach part, $(FFMPEGPARTS), $(DT_FFMPEG_DIR)/$(part)/$(part).a
 
 DT_CFLAGS-$(DT_FFMPEG)   += -I$(DT_FFMPEG_DIR)
 COMMON_LIBS-$(DT_FFMPEG) += $(FFMPEGLIBS)
+
+#======================================================
+#                   EXT LIB                      
+#======================================================
+
+LDFLAGS-$(DT_SDL)  += -lSDL
+LDFLAGS-$(DT_SDL2) += -lSDL2 -Wl,-rpath=/usr/local/lib
+LDFLAGS-$(DT_ALSA) += -lasound
+LDFLAGS-$(DT_FAAD) += -lfaad

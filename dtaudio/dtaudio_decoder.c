@@ -25,6 +25,7 @@ static void register_adec (dec_audio_wrapper_t * adec)
 void adec_register_all ()
 {
     /*Register all audio_decoder */
+    REGISTER_ADEC (FAAD, faad);
     REGISTER_ADEC (FFMPEG, ffmpeg);
     return;
 }
@@ -34,7 +35,6 @@ static int select_audio_decoder (dtaudio_decoder_t * decoder)
     dec_audio_wrapper_t **p;
     dtaudio_para_t *para = &(decoder->aparam);
     p = &first_adec;
-#if 0
     while (*p != NULL)
     {
         if ((*p)->afmt != para->afmt && (*p)->afmt != AUDIO_FORMAT_UNKOWN)
@@ -42,7 +42,6 @@ static int select_audio_decoder (dtaudio_decoder_t * decoder)
         else                    //fmt found, or ffmpeg found
             break;
     }
-#endif
     if (!*p)
     {
         dt_info (DTAUDIO_LOG_TAG, "[%s:%d]no valid audio decoder found afmt:%d\n", __FUNCTION__, __LINE__, para->afmt);
@@ -186,7 +185,7 @@ static void *audio_decode_loop (void *arg)
             break;
         }
         /*decode frame */
-        used = dec_wrapper->decode_frame (decoder, in_ptr + declen, &in_size, out_ptr, &out_size);
+        used = dec_wrapper->decode_frame (dec_wrapper, in_ptr + declen, &in_size, out_ptr, &out_size);
         if (used < 0)
         {
             decoder->decode_err_cnt++;
@@ -270,8 +269,9 @@ int audio_decoder_init (dtaudio_decoder_t * decoder)
         decoder->aparam.num = decoder->aparam.den = 1;
     else
         dt_info (TAG, "[%s:%d] param: num:%d den:%d\n", __FUNCTION__, __LINE__, decoder->aparam.num, decoder->aparam.den);
-
-    ret = decoder->dec_wrapper->init (decoder);
+    
+    dec_audio_wrapper_t *wrapper = decoder->dec_wrapper;
+    ret = wrapper->init (wrapper,decoder);
     if (ret < 0)
     {
         ret = -1;
@@ -301,7 +301,7 @@ int audio_decoder_init (dtaudio_decoder_t * decoder)
   ERR2:
     buf_release (&actx->audio_decoded_buf);
   ERR1:
-    decoder->dec_wrapper->release (decoder);
+    wrapper->release (wrapper);
   ERR0:
     return ret;
 }
@@ -314,10 +314,11 @@ int audio_decoder_start (dtaudio_decoder_t * decoder)
 
 int audio_decoder_stop (dtaudio_decoder_t * decoder)
 {
+    dec_audio_wrapper_t *wrapper = decoder->dec_wrapper;
     /*Decode thread exit */
     decoder->status = ADEC_STATUS_EXIT;
     pthread_join (decoder->audio_decoder_pid, NULL);
-    decoder->dec_wrapper->release (decoder);
+    wrapper->release (wrapper);
     /*uninit buf */
     dtaudio_context_t *actx = (dtaudio_context_t *) decoder->parent;
     buf_release (&actx->audio_decoded_buf);
