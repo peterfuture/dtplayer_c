@@ -4,9 +4,10 @@
 
 #extlib
 DT_FFMPEG = yes
-DT_SDL = yes
-DT_SDL2 = no
+DT_SDL = no
+DT_SDL2 = yes
 DT_ALSA = yes
+DT_FAAD = yes
 
 #module
 DT_STREAM=yes
