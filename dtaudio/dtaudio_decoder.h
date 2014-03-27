@@ -17,14 +17,15 @@ typedef struct dtaudio_decoder dtaudio_decoder_t;
 
 typedef struct dec_audio_wrapper
 {
-    int (*init) (dtaudio_decoder_t * decoder);
-    int (*decode_frame) (dtaudio_decoder_t * decoder, uint8_t * inbuf, int *inlen, uint8_t * outbuf, int *outlen);
-    int (*release) (dtaudio_decoder_t * decoder);
+    int (*init) (struct dec_audio_wrapper * wrapper,void *parent);
+    int (*decode_frame) (struct dec_audio_wrapper * wrapper, uint8_t * inbuf, int *inlen, uint8_t * outbuf, int *outlen);
+    int (*release) (struct dec_audio_wrapper * wrapper);
     char *name;
     audio_format_t afmt;        //not used, for ffmpeg
     int type;
     void *adec_priv;
     struct dec_audio_wrapper *next;
+    void *parent;
 } dec_audio_wrapper_t;
 
 struct dtaudio_decoder

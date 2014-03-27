@@ -21,15 +21,12 @@ DT_DEBUG = -g
 CFLAGS  += -I/usr/include -I/usr/local/include
 LDFLAGS += -L/usr/local/lib -L/usr/lib
 
-LDFLAGS                  += -lpthread -lz -lm
-LDFLAGS-$(DT__SDL)  += -lSDL
-LDFLAGS-$(DT_SDL2) += -lSDL2 -Wl,-rpath=/usr/local/lib
-LDFLAGS-$(DT_ALSA) += -lasound
-LDFLAGS                  += $(LDFLAGS-yes)
+LDFLAGS += -lpthread -lz -lm
+LDFLAGS += $(LDFLAGS-yes)
 
 COMMON_LIBS += $(COMMON_LIBS-yes)
-DT_CFLAGS += $(DT_CFLAGS-yes)
-CFLAGS  += $(DT_CFLAGS)
+DT_CFLAGS   += $(DT_CFLAGS-yes)
+CFLAGS      += $(DT_CFLAGS)
 
 #======================================================
 #                   SOURCECODE
@@ -61,6 +58,7 @@ SRCS_COMMON-$(DT_AUDIO) += dtaudio/dtaudio.c
 SRCS_COMMON-$(DT_AUDIO) += dtaudio/dtaudio_decoder.c
 SRCS_COMMON-$(DT_AUDIO) += dtaudio/dtaudio_filter.c
 SRCS_COMMON-$(DT_AUDIO) += dtaudio/dtaudio_output.c
+SRCS_COMMON-$(DT_FAAD) += dtaudio/audio_decoder/dec_audio_faad.c     # dec
 SRCS_COMMON-$(DT_FFMPEG) += dtaudio/audio_decoder/dec_audio_ffmpeg.c # dec
 SRCS_COMMON-$(DT_ALSA) += dtaudio/audio_out/ao_alsa.c                # out
 

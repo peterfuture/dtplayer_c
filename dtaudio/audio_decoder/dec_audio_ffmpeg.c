@@ -46,8 +46,10 @@ static AVCodecContext * alloc_ffmpeg_ctx(dtaudio_decoder_t *decoder)
     return ctx;
 }
 
-int ffmpeg_adec_init (dtaudio_decoder_t * decoder)
+int ffmpeg_adec_init (dec_audio_wrapper_t *wrapper, void *parent)
 {
+    wrapper->parent = parent;
+    dtaudio_decoder_t *decoder = (dtaudio_decoder_t *)parent;
     //select video decoder and call init
     dt_info (TAG, "FFMPEG AUDIO DECODER INIT ENTER\n");
     AVCodec *codec = NULL;
@@ -77,7 +79,7 @@ int ffmpeg_adec_init (dtaudio_decoder_t * decoder)
     return 0;
 }
 
-static void audio_convert (dtaudio_decoder_t * decoder, AVFrame * dst, AVFrame * src)
+static void audio_convert (dtaudio_decoder_t *decoder, AVFrame * dst, AVFrame * src)
 {
     int nb_sample;
     int dst_buf_size;
@@ -88,7 +90,7 @@ static void audio_convert (dtaudio_decoder_t * decoder, AVFrame * dst, AVFrame *
     //ResampleContext *m_resample_ctx=NULL;
     enum AVSampleFormat src_fmt = avctxp->sample_fmt;
     enum AVSampleFormat dst_fmt = AV_SAMPLE_FMT_S16;
-
+    
     dst->linesize[0] = src->linesize[0];
     *dst = *src;
 
@@ -137,7 +139,7 @@ static void audio_convert (dtaudio_decoder_t * decoder, AVFrame * dst, AVFrame *
 }
 
 //1 get one frame 0 failed -1 err
-int ffmpeg_adec_decode (dtaudio_decoder_t * decoder, uint8_t * inbuf, int *inlen, uint8_t * outbuf, int *outlen)
+int ffmpeg_adec_decode (dec_audio_wrapper_t *wrapper, uint8_t * inbuf, int *inlen, uint8_t * outbuf, int *outlen)
 {
     int got_samples = 0;
     int ret = 0;
@@ -149,6 +151,7 @@ int ffmpeg_adec_decode (dtaudio_decoder_t * decoder, uint8_t * inbuf, int *inlen
     pkt.size = *inlen;
     pkt.side_data_elems = 0;
 
+    dtaudio_decoder_t *decoder = (dtaudio_decoder_t *)wrapper->parent;
     memset (&frame_tmp, 0, sizeof (frame_tmp));
     dt_debug (TAG, "start decode size:%d %02x %02x \n", pkt.size, pkt.data[0], pkt.data[1]);
     ret = avcodec_decode_audio4 (avctxp, frame, &got_samples, &pkt);
@@ -184,7 +187,7 @@ int ffmpeg_adec_decode (dtaudio_decoder_t * decoder, uint8_t * inbuf, int *inlen
     return ret;
 }
 
-int ffmpeg_adec_release (dtaudio_decoder_t * decoder)
+int ffmpeg_adec_release (dec_audio_wrapper_t *wrapper)
 {
     avcodec_close (avctxp);
     avctxp = NULL;
