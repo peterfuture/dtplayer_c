@@ -84,19 +84,42 @@ int demuxer_open (dtdemuxer_context_t * dem_ctx)
         dt_error (TAG, "stream open failed \n");
         return -1;
     }
-    
-    int64_t old_pos = dtstream_tell(dem_ctx->stream_priv);
-    dt_info(TAG,"old:%lld \n",old_pos);
-    ret = buf_init(&dem_ctx->probe_buf,PROBE_BUF_SIZE);
-    if(ret < 0)
-        return -1; 
-    ret = dtstream_read(dem_ctx->stream_priv,dem_ctx->probe_buf.data,PROBE_BUF_SIZE); 
-    if(ret <= 0)
-        return -1;
-    dem_ctx->probe_buf.level = ret;
-    ret = dtstream_seek(dem_ctx->stream_priv,old_pos,SEEK_SET); 
-    dt_info(TAG,"seek back to:%lld ret:%d \n",old_pos,ret);
-     
+   
+    char value[512];
+    int probe_enable = 0;
+    int probe_size = PROBE_BUF_SIZE;
+    if(GetEnv("DEMUXER","demuxer.probe",value) > 0)
+    {
+        probe_enable = atoi(value);
+        dt_info(TAG,"probe enable:%d \n",probe_enable);
+    }
+    else
+        dt_info(TAG,"probe enable not set, use default:%d \n",probe_enable);
+
+    if(GetEnv("DEMUXER","demuxer.probesize",value) > 0)
+    {
+        probe_size = atoi(value);
+        dt_info(TAG,"probe size:%d \n",probe_size);
+    }
+    else
+        dt_info(TAG,"probe size not set, use default:%d \n",probe_size);
+
+
+    if(probe_enable)
+    {
+        int64_t old_pos = dtstream_tell(dem_ctx->stream_priv);
+        dt_info(TAG,"old:%lld \n",old_pos);
+        ret = buf_init(&dem_ctx->probe_buf,PROBE_BUF_SIZE);
+        if(ret < 0)
+            return -1; 
+        ret = dtstream_read(dem_ctx->stream_priv,dem_ctx->probe_buf.data,probe_size); 
+        if(ret <= 0)
+            return -1;
+        dem_ctx->probe_buf.level = ret;
+        ret = dtstream_seek(dem_ctx->stream_priv,old_pos,SEEK_SET); 
+        dt_info(TAG,"seek back to:%lld ret:%d \n",old_pos,ret);
+    }
+
     /* select demuxer */
     if (demuxer_select (dem_ctx) == -1)
     {
