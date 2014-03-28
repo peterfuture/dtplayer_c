@@ -128,8 +128,9 @@ static int demuxer_aac_probe(demuxer_wrapper_t *wrapper, void *parent)
     const uint8_t *buf2;
     const uint8_t *buf;
     const uint8_t *end = buf0 + probe_buf->level - 7;
-
     buf = buf0;
+    if(probe_buf->level < 10)
+        return 0;
 
     for(; buf < end; buf= buf2+1) {
         buf2 = buf;

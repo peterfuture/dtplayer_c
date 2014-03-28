@@ -19,6 +19,7 @@ static void register_stream (stream_wrapper_t * wrapper)
     while (*p != NULL)
         p = &((*p)->next);
     *p = wrapper;
+    dt_info (TAG, "[%s:%d] register stream, name:%s fmt:%d \n", __FUNCTION__, __LINE__, (*p)->name, (*p)->id);
     wrapper->next = NULL;
 }
 
@@ -41,15 +42,18 @@ static int stream_select (dtstream_context_t * stm_ctx)
     if (!g_stream)
         return -1;
     int id = get_stream_id(stm_ctx->stream_name);
+    dt_info(TAG,"get stream id:%d \n",id);
     stream_wrapper_t *entry = g_stream;
     while(entry)
     {
         if(id == entry->id || STREAM_FFMPEG == entry->id)
             break;
+        entry = entry->next;
     }
     if(!entry)
         return -1;
     stm_ctx->stream = entry;
+    dt_info (TAG, "[%s:%d] select stream, name:%s id:%d \n", __FUNCTION__, __LINE__, entry->name, entry->id);
     return 0;
 }
 

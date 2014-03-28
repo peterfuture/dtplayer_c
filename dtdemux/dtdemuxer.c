@@ -84,8 +84,9 @@ int demuxer_open (dtdemuxer_context_t * dem_ctx)
         dt_error (TAG, "stream open failed \n");
         return -1;
     }
+    
     int64_t old_pos = dtstream_tell(dem_ctx->stream_priv);
-    dt_info(TAG,"OLD POS:%lld \n",old_pos);
+    dt_info(TAG,"old:%lld \n",old_pos);
     ret = buf_init(&dem_ctx->probe_buf,PROBE_BUF_SIZE);
     if(ret < 0)
         return -1; 
@@ -94,7 +95,7 @@ int demuxer_open (dtdemuxer_context_t * dem_ctx)
         return -1;
     dem_ctx->probe_buf.level = ret;
     ret = dtstream_seek(dem_ctx->stream_priv,old_pos,SEEK_SET); 
-    dt_info(TAG,"OLD POS:%lld ret:%d \n",old_pos,ret);
+    dt_info(TAG,"seek back to:%lld ret:%d \n",old_pos,ret);
      
     /* select demuxer */
     if (demuxer_select (dem_ctx) == -1)

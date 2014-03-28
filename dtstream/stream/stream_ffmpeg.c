@@ -20,6 +20,8 @@ static int stream_ffmpeg_open (stream_wrapper_t * wrapper,char *stream_name)
     stream_ctrl_t *info = &wrapper->info;
 
     av_register_all();
+    avformat_network_init();
+
     if (!strncmp(filename, prefix, strlen(prefix)))
         filename += strlen(prefix);
     dummy = !strncmp(filename, "rtsp:", 5);
