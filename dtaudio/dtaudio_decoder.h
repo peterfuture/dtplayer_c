@@ -15,10 +15,24 @@ typedef enum
 
 typedef struct dtaudio_decoder dtaudio_decoder_t;
 
+typedef struct{
+    uint8_t *inptr;
+    int inlen;
+    int consume;
+    uint8_t *outptr;
+    int outsize; // buffer size
+    int outlen;  // buffer level
+
+    int info_change;
+    int channels;
+    int samplerate;
+    int bps;
+}adec_ctrl_t;
+
 typedef struct dec_audio_wrapper
 {
     int (*init) (struct dec_audio_wrapper * wrapper,void *parent);
-    int (*decode_frame) (struct dec_audio_wrapper * wrapper, uint8_t * inbuf, int *inlen, uint8_t * outbuf, int *outlen);
+    int (*decode_frame) (struct dec_audio_wrapper * wrapper, adec_ctrl_t *pinfo);
     int (*release) (struct dec_audio_wrapper * wrapper);
     char *name;
     audio_format_t afmt;        //not used, for ffmpeg
@@ -42,7 +56,8 @@ struct dtaudio_decoder
     int64_t pts_last_valid;
     int pts_buffer_size;
     int pts_cache_size;
-
+    
+    adec_ctrl_t info;
     dt_buffer_t *buf_out;
     void *parent;
     void *decoder_priv;         //point to avcodeccontext

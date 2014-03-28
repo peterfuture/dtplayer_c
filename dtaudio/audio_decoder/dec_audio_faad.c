@@ -117,12 +117,12 @@ static int faad_open_dec(faad_ctx_t *this)
     return 0;
 }
 
-static int faad_decode (dec_audio_wrapper_t *wrapper, uint8_t * inbuf, int *inlen, uint8_t * outbuf, int *outlen)
+static int faad_decode (dec_audio_wrapper_t *wrapper, adec_ctrl_t *pinfo)
 {
  
     faad_ctx_t *this = (faad_ctx_t *) wrapper->adec_priv;
-    this->buffer = inbuf;
-    this->bytes_into_buffer = *inlen;
+    this->buffer = pinfo->inptr + pinfo->consume;
+    this->bytes_into_buffer = pinfo->inlen;
     this->bytes_consumed = 0; 
     
     if( !this->faad_dec)
@@ -135,9 +135,9 @@ static int faad_decode (dec_audio_wrapper_t *wrapper, uint8_t * inbuf, int *inle
     void *sample_buffer;
     NeAACDecHandle hDecoder = this->faad_dec;
     NeAACDecFrameInfo *frameInfo = &this->faad_finfo;
-    uint8_t *data = outbuf;
+    uint8_t *data = pinfo->outptr;
 
-    dt_debug(TAG,"start decoding %d data bytes...\n", *inlen);
+    dt_debug(TAG,"start decoding %d data bytes...\n", pinfo->inlen);
     
     sample_buffer = NeAACDecDecode(hDecoder, frameInfo,this->buffer, this->bytes_into_buffer);
 
@@ -150,6 +150,12 @@ static int faad_decode (dec_audio_wrapper_t *wrapper, uint8_t * inbuf, int *inle
     if ((frameInfo->error == 0) && (frameInfo->samples == 0))
         return 0;
 
+    if(pinfo->outsize < frameInfo->samples *2)
+    {
+        pinfo->outptr = realloc(pinfo->outptr,frameInfo->samples *3);
+        pinfo->outsize = frameInfo->samples *3;
+    }
+
     //set default FAAD_FMT_16BIT in faad_dec_open 
     short *sample_buffer16 = (short *)sample_buffer;
     int i;
@@ -158,7 +164,7 @@ static int faad_decode (dec_audio_wrapper_t *wrapper, uint8_t * inbuf, int *inle
         data[i*2] = (uint8_t)(sample_buffer16[i] & 0xFF);
         data[i*2+1] = (uint8_t)((sample_buffer16[i]>>8) & 0xFF);
     }
-    *outlen = frameInfo->samples * 2;
+    pinfo->outlen = frameInfo->samples * 2;
     
     return frameInfo->bytesconsumed;
 }

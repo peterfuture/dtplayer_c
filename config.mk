@@ -7,7 +7,7 @@ DT_FFMPEG = yes
 DT_SDL = yes
 DT_SDL2 = no
 DT_ALSA = yes
-DT_FAAD = yes
+DT_FAAD = no
 
 #module
 DT_STREAM=yes

@@ -71,23 +71,27 @@ static void *audio_decode_loop (void *arg)
 {
     int ret;
     dtaudio_decoder_t *decoder = (dtaudio_decoder_t *) arg;
+    dtaudio_para_t *para = &decoder->aparam;
     dt_av_frame_t frame;
     dec_audio_wrapper_t *dec_wrapper = decoder->dec_wrapper;
     dtaudio_context_t *actx = (dtaudio_context_t *) decoder->parent;
     dt_buffer_t *out = &actx->audio_decoded_buf;
     int declen, fill_size;
-
+    
     //for some type audio, can not read completly frame 
     uint8_t *frame_data = NULL; // point to frame start
     uint8_t *rest_data = NULL;
     int frame_size = 0;
     int rest_size = 0;
 
-    uint8_t *in_ptr = NULL;     // point to rest+frame
-    uint8_t out_ptr[MAX_ONE_FRAME_OUT_SIZE]; // point to decode out buf start
-    int in_size = 0;
-    int out_size = 0;
     int used;                   // used size after every decode ops
+
+    adec_ctrl_t *pinfo = &decoder->info;
+    memset(pinfo,0,sizeof(*pinfo));
+    pinfo->channels = para->channels;
+    pinfo->samplerate = para->samplerate;
+    pinfo->outptr = malloc(MAX_ONE_FRAME_OUT_SIZE);
+    pinfo->outsize = MAX_ONE_FRAME_OUT_SIZE;
 
     dt_info (TAG, "[%s:%d] AUDIO DECODE START \n", __FUNCTION__, __LINE__);
     do
@@ -166,11 +170,12 @@ static void *audio_decode_loop (void *arg)
 
         frame_size = frame.size + rest_size;
         rest_size = 0;
-        in_size = frame_size;
-        in_ptr = frame_data;
-        out_size = 0;
         used = 0;
         declen = 0;
+
+        pinfo->inptr = frame_data;
+        pinfo->inlen = frame_size;
+        pinfo->outlen = 0; 
 
         //free pkt
         frame.data = NULL;
@@ -185,7 +190,8 @@ static void *audio_decode_loop (void *arg)
             break;
         }
         /*decode frame */
-        used = dec_wrapper->decode_frame (dec_wrapper, in_ptr + declen, &in_size, out_ptr, &out_size);
+        pinfo->consume = declen;
+        used = dec_wrapper->decode_frame (dec_wrapper, pinfo);
         if (used < 0)
         {
             decoder->decode_err_cnt++;
@@ -193,34 +199,34 @@ static void *audio_decode_loop (void *arg)
              * if decoder is ffmpeg,do not restore data if decode failed
              * if decoder is not ffmpeg, restore raw stream packet if decode failed
              * */
-            if (!strcmp (decoder->dec_wrapper->name, "ffmpeg audio decoder"))
+            if (!strcmp (dec_wrapper->name, "ffmpeg audio decoder"))
             {
                 dt_error (TAG, "[%s:%d] ffmpeg failed to decode this frame, just break\n", __FUNCTION__, __LINE__);
-                decoder->decode_offset += in_size;
+                decoder->decode_offset += pinfo->inlen;
             }
             continue;
         }
         else if (used == 0)
         {
             //maybe need more data
-            rest_data = malloc (in_size);
+            rest_data = malloc (pinfo->inlen);
             if (rest_data == NULL)
             {
                 dt_error ("[%s:%d] rest_data malloc failed\n", __FUNCTION__, __LINE__);
                 rest_size = 0;  //skip this frame
                 continue;
             }
-            memcpy (rest_data, in_ptr + declen, in_size);
-            rest_size = in_size;
+            memcpy (rest_data, pinfo->inptr, pinfo->inlen);
+            rest_size = pinfo->inlen;
             dt_info (TAG, "Maybe we need more data\n");
             continue;
         }
         declen += used;
-        in_size -= used;
+        pinfo->inlen -= used;
         decoder->decode_offset += used;
-        decoder->pts_cache_size = out_size;
-        decoder->pts_buffer_size += out_size;
-        if (out_size == 0)      //get no data, maybe first time for init
+        decoder->pts_cache_size = pinfo->outlen;
+        decoder->pts_buffer_size += pinfo->outlen;
+        if (pinfo->outlen == 0)      //get no data, maybe first time for init
             dt_info (TAG, "GET NO PCM DECODED OUT,used:%d \n",used);
 
         fill_size = 0;
@@ -228,25 +234,29 @@ static void *audio_decode_loop (void *arg)
         if (decoder->status == ADEC_STATUS_EXIT)
             goto EXIT;
         /*write pcm */
-        if (buf_space (out) < out_size)
+        if (buf_space (out) < pinfo->outlen)
         {
-            dt_debug (TAG, "[%s:%d] output buffer do not left enough space ,space=%d level:%d outsie:%d \n", __FUNCTION__, __LINE__, buf_space (out), buf_level (out), out_size);
+            dt_debug (TAG, "[%s:%d] output buffer do not left enough space ,space=%d level:%d outsie:%d \n", __FUNCTION__, __LINE__, buf_space (out), buf_level (out), pinfo->outlen);
             usleep (1000 * 10);
             goto REFILL_BUFFER;
         }
-        ret = buf_put (out, out_ptr + fill_size, out_size);
+        ret = buf_put (out, pinfo->outptr + fill_size, pinfo->outlen);
         fill_size += ret;
-        out_size -= ret;
-        decoder->pts_cache_size = out_size;
-        if (out_size > 0)
+        pinfo->outlen -= ret;
+        decoder->pts_cache_size = pinfo->outlen;
+        if (pinfo->outlen > 0)
             goto REFILL_BUFFER;
 
-        if (in_size)
+        if (pinfo->inlen)
             goto DECODE_LOOP;
     }
     while (1);
   EXIT:
     dt_info (TAG, "[file:%s][%s:%d]decoder loop thread exit ok\n", __FILE__, __FUNCTION__, __LINE__);
+    /* free adec_ctrl_t buf */
+    if(pinfo->outptr)
+        free(pinfo->outptr);
+    pinfo->outlen = pinfo->outsize = 0;
     pthread_exit (NULL);
     return NULL;
 }

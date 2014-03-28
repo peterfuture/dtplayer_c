@@ -139,7 +139,7 @@ static void audio_convert (dtaudio_decoder_t *decoder, AVFrame * dst, AVFrame * 
 }
 
 //1 get one frame 0 failed -1 err
-int ffmpeg_adec_decode (dec_audio_wrapper_t *wrapper, uint8_t * inbuf, int *inlen, uint8_t * outbuf, int *outlen)
+int ffmpeg_adec_decode (dec_audio_wrapper_t *wrapper, adec_ctrl_t *pinfo)
 {
     int got_samples = 0;
     int ret = 0;
@@ -147,8 +147,8 @@ int ffmpeg_adec_decode (dec_audio_wrapper_t *wrapper, uint8_t * inbuf, int *inle
     AVFrame frame_tmp;
     //AVFrame frame;
     AVPacket pkt;
-    pkt.data = inbuf;
-    pkt.size = *inlen;
+    pkt.data = pinfo->inptr;
+    pkt.size = pinfo->inlen;
     pkt.side_data_elems = 0;
 
     dtaudio_decoder_t *decoder = (dtaudio_decoder_t *)wrapper->parent;
@@ -165,21 +165,29 @@ int ffmpeg_adec_decode (dec_audio_wrapper_t *wrapper, uint8_t * inbuf, int *inle
     if (!got_samples)           //decode return 0 
     {
         dt_error (TAG, "get no samples out \n");
-        *outlen = 0;
+        pinfo->outlen = 0;
         goto EXIT;
     }
     data_size = av_samples_get_buffer_size (frame->linesize, avctxp->channels, frame->nb_samples, avctxp->sample_fmt, 1);
     if (data_size > 0)
     {
         audio_convert (decoder, &frame_tmp, frame);
-        memcpy (outbuf, frame_tmp.data[0], frame_tmp.linesize[0]);
-        *outlen = frame_tmp.linesize[0];
+        //out frame too large, realloc out buf
+        if(pinfo->outsize < frame_tmp.linesize[0])
+        {
+            pinfo->outptr = realloc(pinfo->outptr,frame_tmp.linesize[0] * 2);
+            pinfo->outsize = frame_tmp.linesize[0] * 2;
+        }
+        
+        memcpy (pinfo->outptr, frame_tmp.data[0], frame_tmp.linesize[0]);
+        pinfo->outlen = frame_tmp.linesize[0];
     }
     else
     {
-        dt_error (TAG, "data_size invalid: size:%d outlen:%d \n", data_size, *outlen);
-        *outlen = 0;
+        dt_error (TAG, "data_size invalid: size:%d outlen:%d \n", data_size, pinfo->outlen);
+        pinfo->outlen = 0;
     }
+
   EXIT:
     if (frame_tmp.data[0])
         free (frame_tmp.data[0]);
