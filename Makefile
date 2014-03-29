@@ -21,7 +21,7 @@ DT_DEBUG = -g
 CFLAGS  += -I/usr/include -I/usr/local/include
 LDFLAGS += -L/usr/local/lib -L/usr/lib
 
-LDFLAGS += -lpthread -lz -lm
+LDFLAGS += -lpthread -lz -lm -lbz2
 LDFLAGS += $(LDFLAGS-yes)
 
 COMMON_LIBS += $(COMMON_LIBS-yes)
@@ -62,6 +62,7 @@ SRCS_COMMON-$(DT_FAAD) += dtaudio/audio_decoder/dec_audio_faad.c     # dec
 SRCS_COMMON-$(DT_FFMPEG) += dtaudio/audio_decoder/dec_audio_ffmpeg.c # dec
 SRCS_COMMON-$(DT_ALSA) += dtaudio/audio_out/ao_alsa.c                # out
 SRCS_COMMON-$(DT_SDL) += dtaudio/audio_out/ao_sdl.c                  # out
+SRCS_COMMON-$(DT_SDL2) += dtaudio/audio_out/ao_sdl2.c                # out
 
 #dtvideo
 SRCS_COMMON-$(DT_VIDEO) += dtvideo/dtvideo_api.c

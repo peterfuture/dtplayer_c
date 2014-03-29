@@ -26,6 +26,7 @@ void aout_register_all ()
     /*Register all audio_output */
     //REGISTER_AO (NULL, null);
     REGISTER_AO (SDL, sdl);
+    REGISTER_AO (SDL2, sdl2);
     REGISTER_AO (ALSA, alsa);
     REGISTER_AO (OSS, oss);
     return;

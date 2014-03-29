@@ -5,7 +5,7 @@
 //include ffmpeg header
 #include "libavformat/avformat.h"
 #include "libavcodec/avcodec.h"
-#include "libavresample/avresample.h"
+//#include "libavresample/avresample.h"
 #include "libswscale/swscale.h"
 #include "libswresample/swresample.h"
 

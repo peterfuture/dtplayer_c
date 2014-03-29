@@ -4,8 +4,8 @@
 
 #extlib
 DT_FFMPEG = yes
-DT_SDL = yes
-DT_SDL2 = no
+DT_SDL = no
+DT_SDL2 = yes
 DT_ALSA = no
 DT_FAAD = no
 
@@ -94,6 +94,12 @@ else
 	DT_CFLAGS += -DENABLE_AO_SDL=0
 endif
 
+ifeq ($(DT_SDL2),yes)
+	DT_CFLAGS += -DENABLE_AO_SDL2=1
+else
+	DT_CFLAGS += -DENABLE_AO_SDL2=0
+endif
+
 ifeq ($(DT_ALSA),yes)
 	DT_CFLAGS += -DENABLE_AO_ALSA=1
 else
@@ -106,10 +112,12 @@ endif
 
 #DT_FFMPEG_DIR = ./ffmpeg 
 FFMPEGPARTS_ALL = libavfilter libavformat libavcodec libswscale libswresample libavutil 
-FFMPEGPARTS = $(foreach part, $(FFMPEGPARTS_ALL), $(if $(wildcard $(DT_FFMPEG_DIR)/$(part)), $(part)))
-FFMPEGLIBS  = $(foreach part, $(FFMPEGPARTS), $(DT_FFMPEG_DIR)/$(part)/$(part).a)
+#FFMPEGPARTS = $(foreach part, $(FFMPEGPARTS_ALL), $(if $(wildcard $(DT_FFMPEG_DIR)/$(part)), $(part)))
+FFMPEGPARTS = $(foreach part, $(FFMPEGPARTS_ALL), $(if $(wildcard $(DT_FFMPEG_DIR)/lib), $(part)))
+#FFMPEGLIBS  = $(foreach part, $(FFMPEGPARTS), $(DT_FFMPEG_DIR)/$(part)/$(part).a)
+FFMPEGLIBS  = $(foreach part, $(FFMPEGPARTS), $(DT_FFMPEG_DIR)/lib/$(part).a)
 
-DT_CFLAGS-$(DT_FFMPEG)   += -I$(DT_FFMPEG_DIR)
+DT_CFLAGS-$(DT_FFMPEG)   += -I$(DT_FFMPEG_DIR)/include
 COMMON_LIBS-$(DT_FFMPEG) += $(FFMPEGLIBS)
 
 #======================================================
