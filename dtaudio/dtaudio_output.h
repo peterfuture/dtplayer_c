@@ -11,24 +11,24 @@
 
 #define LOG_TAG "DTAUDIO-OUTPUT"
 #define PCM_WRITE_SIZE 1024
-typedef struct dtaudio_output dtaudio_output_t;
 
-typedef struct _ao_t
+typedef struct ao_wrapper
 {
     int id;
     char *name;
 
-    int (*ao_init) (dtaudio_output_t * ao);
-    int (*ao_start) (dtaudio_output_t * ao);
-    int (*ao_pause) (dtaudio_output_t * ao);
-    int (*ao_resume) (dtaudio_output_t * ao);
-    int (*ao_stop) (dtaudio_output_t * ao);
-      int64_t (*ao_latency) (dtaudio_output_t * ao);
-    int (*ao_level) (dtaudio_output_t * ao);
-    int (*ao_write) (dtaudio_output_t * ao, uint8_t * buf, int size);
-    void *handle;
-    struct _ao_t *next;
-} ao_operations_t;
+    int (*ao_init) (struct ao_wrapper * wrapper, void *parent);
+    int (*ao_start) (struct ao_wrapper *wrapper);
+    int (*ao_pause) (struct ao_wrapper * wrapper);
+    int (*ao_resume) (struct ao_wrapper * wrapper);
+    int (*ao_stop) (struct ao_wrapper *wrapper);
+    int64_t (*ao_latency) (struct ao_wrapper *wrapper);
+    int (*ao_level) (struct ao_wrapper *wrapper);
+    int (*ao_write) (struct ao_wrapper *wrapper, uint8_t * buf, int size);
+    struct ao_wrapper *next;
+    void *ao_priv;
+    void *parent;
+} ao_wrapper_t;
 
 #define dtao_format_t ao_id_t
 
@@ -55,18 +55,18 @@ typedef struct
     int aout_buf_level;
 } ao_state_t;
 
-struct dtaudio_output
+typedef struct dtaudio_output
 {
     /*para */
     dtaudio_para_t para;
-    ao_operations_t *aout_ops;
+    ao_wrapper_t *aout_ops;
     ao_status_t status;
     pthread_t output_thread_pid;
     ao_state_t state;
 
     uint64_t last_valid_latency;
     void *parent;               //point to dtaudio_t, can used for param of pcm get interface
-};
+}dtaudio_output_t;
 
 void aout_register_all();
 int audio_output_init (dtaudio_output_t * ao, int ao_id);

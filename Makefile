@@ -61,6 +61,7 @@ SRCS_COMMON-$(DT_AUDIO) += dtaudio/dtaudio_output.c
 SRCS_COMMON-$(DT_FAAD) += dtaudio/audio_decoder/dec_audio_faad.c     # dec
 SRCS_COMMON-$(DT_FFMPEG) += dtaudio/audio_decoder/dec_audio_ffmpeg.c # dec
 SRCS_COMMON-$(DT_ALSA) += dtaudio/audio_out/ao_alsa.c                # out
+SRCS_COMMON-$(DT_SDL) += dtaudio/audio_out/ao_sdl.c                  # out
 
 #dtvideo
 SRCS_COMMON-$(DT_VIDEO) += dtvideo/dtvideo_api.c

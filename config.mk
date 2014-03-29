@@ -6,7 +6,7 @@
 DT_FFMPEG = yes
 DT_SDL = yes
 DT_SDL2 = no
-DT_ALSA = yes
+DT_ALSA = no
 DT_FAAD = no
 
 #module
@@ -89,7 +89,7 @@ DT_CFLAGS += -DENABLE_AO_NULL=0
 DT_CFLAGS += -DENABLE_AO_OSS=0
 
 ifeq ($(DT_SDL),yes)
-	DT_CFLAGS += -DENABLE_AO_SDL=0
+	DT_CFLAGS += -DENABLE_AO_SDL=1
 else
 	DT_CFLAGS += -DENABLE_AO_SDL=0
 endif
