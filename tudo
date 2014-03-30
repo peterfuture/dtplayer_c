@@ -1,8 +1,15 @@
+TODO
+----------------------------------------
+dtp_gui
+make dtplayer stable
+
+Milestone
+----------------------------------------
+time:2014-03-30
+
 release version 1.0
 
 add sdl2 support(av)
 add file stream sample code
-add mp3 demuxer sample code
-add libmad decoder sample code
-
-fix bugs meet from now to release time
+add aac demuxer sample code
+add libfaad decoder sample code

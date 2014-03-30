@@ -17,9 +17,9 @@ User can also remove ffmpeg dependence through modifing config.mk (set DT_FFMPEG
 Compile
 ========
 
-1 install sdl1.0 or sdl2.0
+1 install sdl1.0 or sdl2.0(default)
 
-2 install ffmpeg & EXPORT DT_FFMPEG_DIR = FFMPEG_INSTALL_PATH
+2 install ffmpeg & EXPORT DT_FFMPEG_DIR = FFMPEG_INSTALL_PATH(use default path /usr/local if not set)
 
 3 make
 
