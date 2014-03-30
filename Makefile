@@ -129,7 +129,10 @@ ALL_DIRS     = $(call ADDSUFFIXES,$(1),$(DIRS))
 EXESUF             = .exe 
 PRG-$(DTM_PLAYER)  += dtm_player$(EXESUF)
 PRG-$(DTM_PLAYER)  += dtm_player_g$(EXESUF)
-ALL_PRG += $(PRG-yes)
+ALL_PRG += libdtp.a $(PRG-yes)
+
+#libdtp.a
+OBJS_DTLIB_DEP = $(OBJS_COMMON_RELEASE) $(COMMON_LIBS)
 
 #dtm player
 SRCS_DTPLAYER   += dtm_player.c version.c
@@ -144,18 +147,31 @@ all: $(ALL_PRG)
 	@echo build $(ALL_PRG) done
 	@echo =====================================================
 
-dtm_player$(EXESUF): $(DTM_PLAYER_DEPS_RELEASE)
+libdtp.a: $(OBJS_DTLIB_DEP)
+	@$(AR) rcs $@ $^
+	@echo =====================================================
+	@echo build $@ done
+	@echo =====================================================
+
+dtm_player2$(EXESUF): $(DTM_PLAYER_DEPS_RELEASE)
 	@$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 	@$(STRIP) $@	
 	@echo =====================================================
 	@echo build $@ done
 	@echo =====================================================
 
-dtm_player_g$(EXESUF): $(DTM_PLAYER_DEPS_DEBUG)
-	@$(CC) $(CFLAGS) -g -o $@ $^ $(LDFLAGS)  
+dtm_player$(EXESUF): $(OBJS_DTPLAYER_RELEASE) libdtp.a $(COMMON_LIBS)
+	@$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+	@$(STRIP) $@	
+	@echo =====================================================
+	@echo build $@ done
+	@echo =====================================================
+
+dtm_player_g$(EXESUF): $(OBJS_DTPLAYER_DEBUG) libdtp.a $(COMMON_LIBS)
+	@$(CC) $(CFLAGS) -g -o $@ $^ $(LDFLAGS)
 	@echo =====================================================
 	@echo build $@ done
 	@echo =====================================================
 
 clean:
-	-rm -f $(call ALL_DIRS,/*.o /*.d /*.a /*.ho /*~ /*.exe)
+	-rm -f $(call ALL_DIRS,/*.o /*.so /*.a /*.d /*.a /*.ho /*~ /*.exe)
