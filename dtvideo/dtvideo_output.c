@@ -30,8 +30,12 @@ void vout_register_all ()
 {
     /*Register all audio_output */
     //REGISTER_VO(NULL, null);
+#ifdef ENABLE_VO_SDL
     REGISTER_VO (SDL, sdl);
+#endif
+#ifdef ENABLE_VO_SDL2
     REGISTER_VO (SDL2, sdl2);
+#endif
     return;
 }
 

@@ -1,4 +1,4 @@
-#if ENABLE_ADEC_FFMPEG
+#ifdef ENABLE_ADEC_FFMPEG
 
 #include "../dtaudio_decoder.h"
 

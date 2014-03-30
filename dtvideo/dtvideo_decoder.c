@@ -27,7 +27,9 @@ static void register_vdec (dec_video_wrapper_t * vdec)
 void vdec_register_all ()
 {
     //comments:video using ffmpeg decoder only
+#ifdef ENABLE_VDEC_FFMPEG
     REGISTER_VDEC (FFMPEG, ffmpeg);
+#endif
     return;
 }
 

@@ -1,4 +1,4 @@
-#if ENABLE_STREAM_FFMPEG
+#ifdef ENABLE_STREAM_FFMPEG
 
 #include "dtstream.h"
 #include "dt_error.h"

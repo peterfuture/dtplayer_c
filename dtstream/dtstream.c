@@ -26,7 +26,9 @@ static void register_stream (stream_wrapper_t * wrapper)
 void stream_register_all ()
 {
     REGISTER_STREAM (FILE, file);
+#ifdef ENABLE_STREAM_FFMPEG
     REGISTER_STREAM (FFMPEG, ffmpeg);
+#endif
 }
 
 static int get_stream_id(char *name)

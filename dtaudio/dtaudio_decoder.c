@@ -25,8 +25,13 @@ static void register_adec (dec_audio_wrapper_t * adec)
 void adec_register_all ()
 {
     /*Register all audio_decoder */
+#ifdef ENABLE_ADEC_FAAD
     REGISTER_ADEC (FAAD, faad);
+#endif
+
+#ifdef ENABLE_ADEC_FFMPEG
     REGISTER_ADEC (FFMPEG, ffmpeg);
+#endif
     return;
 }
 

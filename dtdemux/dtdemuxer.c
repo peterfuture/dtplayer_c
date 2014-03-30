@@ -24,7 +24,9 @@ static void register_demuxer (demuxer_wrapper_t * wrapper)
 void demuxer_register_all ()
 {
     REGISTER_DEMUXER (AAC, aac);
+#ifdef ENABLE_DEMUXER_FFMPEG
     REGISTER_DEMUXER (FFMPEG, ffmpeg);
+#endif
 }
 
 static int demuxer_select (dtdemuxer_context_t * dem_ctx)

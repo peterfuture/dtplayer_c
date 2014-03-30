@@ -1,4 +1,4 @@
-#if ENABLE_AO_SDL
+#ifdef ENABLE_AO_SDL
 
 #include "dtaudio_output.h"
 #include "dt_buffer.h"

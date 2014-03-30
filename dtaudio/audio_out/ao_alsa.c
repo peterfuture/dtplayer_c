@@ -1,4 +1,4 @@
-#if ENABLE_AO_ALSA
+#ifdef ENABLE_AO_ALSA
 
 #include "../dtaudio_output.h"
 #include <alsa/asoundlib.h>

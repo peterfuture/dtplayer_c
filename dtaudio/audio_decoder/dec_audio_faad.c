@@ -1,4 +1,4 @@
-#if ENABLE_ADEC_FAAD
+#ifdef ENABLE_ADEC_FAAD
 
 #include "../dtaudio_decoder.h"
 

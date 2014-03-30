@@ -1,4 +1,4 @@
-#if ENABLE_DEMUXER_FFMPEG
+#ifdef ENABLE_DEMUXER_FFMPEG
 
 #include "../dtdemuxer.h"
 #include "dt_error.h"

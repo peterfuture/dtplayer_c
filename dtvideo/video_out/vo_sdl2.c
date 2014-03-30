@@ -1,4 +1,4 @@
-#if ENABLE_VO_SDL2
+#ifdef ENABLE_VO_SDL2
 
 #include "../dtvideo_output.h"
 #include <SDL2/SDL.h>

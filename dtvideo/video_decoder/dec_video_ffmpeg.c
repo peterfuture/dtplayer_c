@@ -1,4 +1,4 @@
-#if ENABLE_VDEC_FFMPEG
+#ifdef ENABLE_VDEC_FFMPEG
 
 /*
  *video decoder interface using ffmpeg
