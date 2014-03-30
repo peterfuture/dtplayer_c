@@ -17,11 +17,13 @@ User can also remove ffmpeg dependence through modifing config.mk (set DT_FFMPEG
 Compile
 ========
 
-1 install sdl1.0 or sdl2.0(default)
+1 install sdl2.0
 
-2 install ffmpeg & EXPORT DT_FFMPEG_DIR = FFMPEG_INSTALL_PATH(use default path /usr/local if not set)
+2 install ffmpeg & libav
 
 3 make
+
+for more details, refer to http://blog.csdn.net/u011350110/article/details/22585323
 
 Test
 ========
