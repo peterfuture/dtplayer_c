@@ -20,6 +20,8 @@ typedef struct
     int audio_format;
     int audio_channel;
     int audio_samplerate;
+    int audio_dst_channels;
+    int audio_dst_samplerate;
     int audio_bitrate;
     int audio_sample_fmt;
     int audio_codec_id;

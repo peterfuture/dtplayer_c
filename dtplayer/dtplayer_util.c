@@ -5,6 +5,8 @@
 int player_host_init (dtplayer_context_t * dtp_ctx)
 {
     int ret;
+    char value[512];
+    
     dthost_para_t *host_para = &dtp_ctx->host_para;
     player_ctrl_t *pctrl = &dtp_ctx->ctrl_info;
     memset (host_para, 0, sizeof (dthost_para_t));
@@ -29,6 +31,20 @@ int player_host_init (dtplayer_context_t * dtp_ctx)
         host_para->audio_format = astream->format;
         host_para->audio_channel = astream->channels;
         host_para->audio_samplerate = astream->sample_rate;
+        int downmix = 0;
+        if(GetEnv("AUDIO","audio.downmix",value) > 0)
+        {
+            downmix = atoi(value);
+            dt_info(TAG,"downmix:%d \n",downmix);
+        }
+        else
+            dt_info(TAG,"downmix:not found \n");
+
+        if(downmix)
+            host_para->audio_dst_channels = (astream->channels>2)?2:astream->channels;
+        else    
+            host_para->audio_dst_channels = astream->channels;
+        host_para->audio_dst_samplerate = astream->sample_rate;
         host_para->audio_bitrate = astream->bit_rate;
         host_para->audio_sample_fmt = astream->bps;
 

@@ -60,7 +60,8 @@ int ffmpeg_adec_init (dec_audio_wrapper_t *wrapper, void *parent)
     if(!avctxp)
         return -1;
     enum AVCodecID id = avctxp->codec_id;
-    dt_info (TAG, "[%s:%d] param-- channel:%d sample:%d id:%d format:%d \n", __FUNCTION__, __LINE__, avctxp->channels, avctxp->sample_rate,id,decoder->aparam.afmt);
+    dt_info (TAG, "[%s:%d] param-- src channel:%d sample:%d id:%d format:%d \n", __FUNCTION__, __LINE__, avctxp->channels, avctxp->sample_rate,id,decoder->aparam.afmt);
+    dt_info (TAG, "[%s:%d] param-- dst channels:%d samplerate:%d \n", __FUNCTION__, __LINE__, decoder->aparam.dst_channels,decoder->aparam.dst_samplerate);
     codec = avcodec_find_decoder (id);
     if (NULL == codec)
     {
@@ -95,7 +96,7 @@ static void audio_convert (dtaudio_decoder_t *decoder, AVFrame * dst, AVFrame * 
     *dst = *src;
 
     dst->data[0] = NULL;
-    out_channels = decoder->aparam.channels > 2 ? 2 : decoder->aparam.channels;
+    out_channels = decoder->aparam.dst_channels;
     nb_sample = frame->nb_samples;
     dst_buf_size = nb_sample * av_get_bytes_per_sample (dst_fmt) * out_channels;
     dst->data[0] = (uint8_t *) av_malloc (dst_buf_size);

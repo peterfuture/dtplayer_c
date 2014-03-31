@@ -7,8 +7,8 @@
 #define AUDIO_EXTRADATA_SIZE 4096
 typedef struct
 {
-    int channels;
-    int samplerate;
+    int channels,dst_channels;
+    int samplerate,dst_samplerate;
     int data_width;
     int bps;
     int num, den;

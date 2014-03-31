@@ -367,6 +367,8 @@ int host_init (dthost_context_t * hctx)
         audio_para.afmt = host_para->audio_format;
         audio_para.bps = host_para->audio_sample_fmt;
         audio_para.channels = host_para->audio_channel;
+        audio_para.dst_channels = host_para->audio_dst_channels;
+        audio_para.dst_samplerate = host_para->audio_dst_samplerate;
         audio_para.data_width = host_para->audio_sample_fmt;
         audio_para.samplerate = host_para->audio_samplerate;
         audio_para.num = host_para->audio_num;

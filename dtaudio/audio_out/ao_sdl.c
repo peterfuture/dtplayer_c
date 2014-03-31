@@ -37,7 +37,7 @@ static int ao_sdl_init (ao_wrapper_t *wrapper, void *parent)
         return -1;
     }
     memset(ctx,0,sizeof(*ctx));
-    if(buf_init(&ctx->dbt,ppara->samplerate * 4 / 10) < 0) // 100ms
+    if(buf_init(&ctx->dbt,ppara->dst_samplerate * 4 / 10) < 0) // 100ms
     {
         ret = -1;
         goto FAIL;
@@ -49,9 +49,9 @@ static int ao_sdl_init (ao_wrapper_t *wrapper, void *parent)
 
     SDL_AudioSpec *pwanted = &ctx->wanted;
     //set audio paras
-    pwanted->freq = ppara->samplerate;       // sample rate
+    pwanted->freq = ppara->dst_samplerate;       // sample rate
     pwanted->format = AUDIO_S16;             // bps
-    pwanted->channels = ppara->channels;     // channels
+    pwanted->channels = ppara->dst_channels;     // channels
     pwanted->samples = SDL_AUDIO_BUFFER_SIZE;// samples every time
     pwanted->callback = sdl_cb;              // callback
     pwanted->userdata = wrapper;
@@ -105,8 +105,8 @@ static int64_t ao_sdl_get_latency (ao_wrapper_t *wrapper)
     unsigned int sample_num;
     uint64_t latency;
     float pts_ratio = 0.0;
-    pts_ratio = (double) 90000 / ao->para.samplerate;
-    sample_num = level / (ao->para.channels * ao->para.bps / 8);
+    pts_ratio = (double) 90000 / ao->para.dst_samplerate;
+    sample_num = level / (ao->para.dst_channels * ao->para.bps / 8);
     latency = (sample_num * pts_ratio);
     return latency;
 }

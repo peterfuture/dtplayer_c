@@ -355,7 +355,7 @@ int64_t audio_decoder_get_pts (dtaudio_decoder_t * decoder)
 
     if (decoder->status == ADEC_STATUS_IDLE || decoder->status == ADEC_STATUS_EXIT)
         return -1;
-    channels = decoder->aparam.channels;
+    channels = decoder->aparam.dst_channels;
     sample_rate = decoder->aparam.samplerate;
     bps = decoder->aparam.bps;
     pts_ratio = (float) DTAUDIO_PTS_FREQ / sample_rate;
