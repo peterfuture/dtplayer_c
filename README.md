@@ -28,13 +28,16 @@ for more details, refer to http://blog.csdn.net/u011350110/article/details/22585
 Test
 ========
 
-./dtm_player url
+./dtm_player.exe url
 
-Bug Report
+Help
 =========
-peter_future@outlook.com
 
-Blog
-=========
-http://blog.csdn.net/u011350110/article/details/10718661
+bug report: peter_future@outlook.com 
+
+blog: http://blog.csdn.net/u011350110
+
+bbs: http://avboost.com/
+
+wiki: http://wiki.avplayer.org/Dtplayer
 
