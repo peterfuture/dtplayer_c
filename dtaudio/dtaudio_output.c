@@ -173,7 +173,7 @@ static void *audio_output_thread (void *args)
 
         rlen -= wlen;
         if (rlen > 0)
-            memcpy (buffer, buffer + wlen, rlen);
+            memmove (buffer, buffer + wlen, rlen);
         wlen = 0;
     }
   EXIT:

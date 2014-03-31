@@ -98,7 +98,7 @@ int buf_get (dt_buffer_t * dbt, uint8_t * out, int size)
         goto QUIT;
 
     }
-    else if (len < (dbt->data + dbt->size - dbt->rd_ptr))
+    else if (len <= (int)(dbt->data + dbt->size - dbt->rd_ptr))
     {
         memcpy (out, dbt->rd_ptr, len);
         dbt->rd_ptr += len;
@@ -108,7 +108,7 @@ int buf_get (dt_buffer_t * dbt, uint8_t * out, int size)
     }
     else
     {
-        int tail_len = (dbt->data + dbt->size - dbt->rd_ptr);
+        int tail_len = (int)(dbt->data + dbt->size - dbt->rd_ptr);
         memcpy (out, dbt->rd_ptr, tail_len);
         memcpy (out + tail_len, dbt->data, len - tail_len);
         dbt->rd_ptr = dbt->data + len - tail_len;
@@ -131,7 +131,7 @@ int buf_put (dt_buffer_t * dbt, uint8_t * in, int size)
     }
 
     len = MIN (dbt->size - dbt->level, size);
-    if (dbt->wr_ptr <= dbt->rd_ptr)
+    if (dbt->wr_ptr < dbt->rd_ptr)
     {
         memcpy (dbt->wr_ptr, in, len);
         dbt->wr_ptr += len;
@@ -139,7 +139,7 @@ int buf_put (dt_buffer_t * dbt, uint8_t * in, int size)
         goto QUIT;
 
     }
-    else if (len < (dbt->data + dbt->size - dbt->wr_ptr))
+    else if (len <= (int)(dbt->data + dbt->size - dbt->wr_ptr))
     {
         memcpy (dbt->wr_ptr, in, len);
         dbt->wr_ptr += len;
@@ -149,7 +149,7 @@ int buf_put (dt_buffer_t * dbt, uint8_t * in, int size)
     }
     else
     {
-        int tail_len = (dbt->data + dbt->size - dbt->wr_ptr);
+        int tail_len = (int)(dbt->data + dbt->size - dbt->wr_ptr);
         memcpy (dbt->wr_ptr, in, tail_len);
         memcpy (dbt->data, in + tail_len, len - tail_len);
         dbt->wr_ptr = dbt->data + len - tail_len;
