@@ -1,5 +1,3 @@
-#ifdef ENABLE_STREAM_FFMPEG
-
 #include "dtstream.h"
 #include "dt_error.h"
 
@@ -79,5 +77,3 @@ stream_wrapper_t stream_ffmpeg = {
     .seek = stream_ffmpeg_seek,
     .close = stream_ffmpeg_close,
 };
-
-#endif

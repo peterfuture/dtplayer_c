@@ -1,5 +1,3 @@
-#ifdef ENABLE_DEMUXER_FFMPEG
-
 #include "../dtdemuxer.h"
 #include "dt_error.h"
 
@@ -394,5 +392,3 @@ demuxer_wrapper_t demuxer_ffmpeg = {
     .seek_frame = demuxer_ffmpeg_seek_frame,
     .close = demuxer_ffmpeg_close
 };
-
-#endif /*ENABLE_DEMUXER_FFMPEG*/

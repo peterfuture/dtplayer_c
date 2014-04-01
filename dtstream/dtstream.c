@@ -5,7 +5,6 @@
 #define TAG "STREAM"
 
 #define REGISTER_STREAM(X,x) \
-    if(ENABLE_STREAM_##X)    \
     {                         \
         extern stream_wrapper_t stream_##x; \
         register_stream(&stream_##x);     \

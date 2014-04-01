@@ -4,7 +4,6 @@
 #define TAG "AUDIO-OUT"
 //#define DTAUDIO_DUMP_PCM 1
 #define REGISTER_AO(X, x)	 	\
-	if( ENABLE_AO_##X ) 		\
 	{							\
 		extern ao_wrapper_t ao_##x##_ops; 	\
 		register_ao(&ao_##x##_ops); 	\

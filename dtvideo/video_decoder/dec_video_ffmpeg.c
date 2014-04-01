@@ -1,5 +1,3 @@
-#ifdef ENABLE_VDEC_FFMPEG
-
 /*
  *video decoder interface using ffmpeg
  * */
@@ -150,5 +148,3 @@ dec_video_wrapper_t vdec_ffmpeg_ops = {
     .decode_frame = ffmpeg_vdec_decode,
     .release = ffmpeg_vdec_release,
 };
-
-#endif /*ENABLE_VDEC_FFMPEG*/

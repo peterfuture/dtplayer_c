@@ -1,5 +1,3 @@
-#ifdef ENABLE_AO_ALSA
-
 #include "../dtaudio_output.h"
 #include <alsa/asoundlib.h>
 
@@ -357,4 +355,3 @@ ao_wrapper_t ao_alsa_ops = {
     .ao_latency = ao_alsa_get_latency,
     .ao_level = ao_alsa_level,
 };
-#endif /* ENABLE_AO_ALSA */

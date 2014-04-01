@@ -1,5 +1,3 @@
-#ifdef ENABLE_ADEC_FAAD
-
 #include "../dtaudio_decoder.h"
 
 #include <faad.h>
@@ -189,5 +187,3 @@ dec_audio_wrapper_t adec_faad_ops = {
     .decode_frame = faad_decode,
     .release = faad_release,
 };
-
-#endif /*ENABLE_ADEC_FAAD*/

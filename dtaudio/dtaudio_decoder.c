@@ -4,7 +4,6 @@
 #define TAG "AUDIO-DEC"
 
 #define REGISTER_ADEC(X,x)	 	\
-	if( ENABLE_ADEC_##X ) 		\
 	{							\
 		extern dec_audio_wrapper_t adec_##x##_ops; 	\
 		register_adec(&adec_##x##_ops); 	\

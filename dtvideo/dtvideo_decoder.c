@@ -6,7 +6,6 @@
 #define TAG "VIDEO-DEC"
 
 #define REGISTER_VDEC(X,x)	 	\
-	if( ENABLE_VDEC_##X ) 		\
 	{							\
 		extern dec_video_wrapper_t vdec_##x##_ops; 	\
 		register_vdec(&vdec_##x##_ops); 	\

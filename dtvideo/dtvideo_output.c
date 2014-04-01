@@ -5,7 +5,6 @@
 #define TAG "VIDEO-OUT"
 
 #define REGISTER_VO(X, x)	 	\
-	if( ENABLE_VO_##X ) 		\
 	{							\
 		extern vo_operations_t vo_##x##_ops; \
 		register_vo(&vo_##x##_ops); \

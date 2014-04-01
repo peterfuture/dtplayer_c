@@ -4,7 +4,6 @@
 #define TAG "DEMUXER"
 
 #define REGISTER_DEMUXER(X,x) \
-    if(ENABLE_DEMUXER_##X)    \
     {                         \
         extern demuxer_wrapper_t demuxer_##x; \
         register_demuxer(&demuxer_##x);     \

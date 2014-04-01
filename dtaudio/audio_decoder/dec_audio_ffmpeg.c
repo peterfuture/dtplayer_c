@@ -1,5 +1,3 @@
-#ifdef ENABLE_ADEC_FFMPEG
-
 #include "../dtaudio_decoder.h"
 
 //include ffmpeg header
@@ -212,5 +210,3 @@ dec_audio_wrapper_t adec_ffmpeg_ops = {
     .decode_frame = ffmpeg_adec_decode,
     .release = ffmpeg_adec_release,
 };
-
-#endif /*ENABLE_ADEC_FFMPEG*/

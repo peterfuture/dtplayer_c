@@ -1,5 +1,3 @@
-#ifdef ENABLE_VO_SDL
-
 #include "../dtvideo_output.h"
 
 #include <SDL/SDL.h>
@@ -97,5 +95,3 @@ vo_operations_t vo_sdl_ops = {
     .vo_stop = vo_sdl_stop,
     .vo_render = vo_sdl_render,
 };
-
-#endif /* ENABLE_VO_SDL */

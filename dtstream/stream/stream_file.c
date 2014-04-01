@@ -1,5 +1,3 @@
-#if ENABLE_STREAM_FILE
-
 #include "dtstream.h"
 #include "dt_error.h"
 
@@ -86,5 +84,3 @@ stream_wrapper_t stream_file = {
     .seek = stream_file_seek,
     .close = stream_file_close,
 };
-
-#endif /*ENABLE_STREAM_FILE*/
