@@ -35,7 +35,7 @@ Help
 
 bug report: peter_future@outlook.com 
 
-blog: http://blog.csdn.net/u011350110
+blog: http://blog.csdn.net/dtplayer
 
 bbs: http://avboost.com/
 
