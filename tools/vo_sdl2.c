@@ -17,7 +17,7 @@ typedef struct{
 static int vo_sdl2_init (vo_wrapper_t *wrapper, void *parent)
 {
     wrapper->parent = parent;
-    sdl2_ctx_t *ctx = malloc(sizeof(sdl2_ctx_t));
+    sdl2_ctx_t *ctx = (sdl2_ctx_t *)malloc(sizeof(*ctx));
     memset(ctx,0,sizeof(*ctx));
     dt_lock_init (&ctx->vo_mutex, NULL);
     wrapper->handle = (void *)ctx;
@@ -135,6 +135,7 @@ static int vo_sdl2_stop (vo_wrapper_t *wrapper)
         SDL_DestroyWindow(ctx->win);
         SDL_QuitSubSystem(SDL_INIT_VIDEO);
     }
+    ctx->sdl_inited = 0;
     dt_unlock (&ctx->vo_mutex);
     free(ctx);
     wrapper->handle = NULL;

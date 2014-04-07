@@ -1,0 +1,67 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+DT_MSG_DELIM	version.c	1;"	d	file:
+EVENT_H	event.h	2;"	d
+EVENT_INVALID	event.h	/^    EVENT_INVALID = -1,$/;"	e	enum:__anon2
+EVENT_NONE	event.h	/^    EVENT_NONE,$/;"	e	enum:__anon2
+EVENT_PAUSE	event.h	/^    EVENT_PAUSE,$/;"	e	enum:__anon2
+EVENT_RESUME	event.h	/^    EVENT_RESUME,$/;"	e	enum:__anon2
+EVENT_SEEK	event.h	/^    EVENT_SEEK,$/;"	e	enum:__anon2
+EVENT_STOP	event.h	/^    EVENT_STOP,$/;"	e	enum:__anon2
+SDL_AUDIO_BUFFER_SIZE	ao_sdl2.c	8;"	d	file:
+TAG	ao_sdl2.c	6;"	d	file:
+TAG	dt_player.c	13;"	d	file:
+TAG	vo_sdl2.c	6;"	d	file:
+VERSION_H	version.h	2;"	d
+__anon1::dh	vo_sdl2.c	/^    int dx,dy,dw,dh;$/;"	m	struct:__anon1	file:	access:public
+__anon1::dw	vo_sdl2.c	/^    int dx,dy,dw,dh;$/;"	m	struct:__anon1	file:	access:public
+__anon1::dx	vo_sdl2.c	/^    int dx,dy,dw,dh;$/;"	m	struct:__anon1	file:	access:public
+__anon1::dy	vo_sdl2.c	/^    int dx,dy,dw,dh;$/;"	m	struct:__anon1	file:	access:public
+__anon1::ren	vo_sdl2.c	/^    SDL_Renderer *ren;$/;"	m	struct:__anon1	file:	access:public
+__anon1::sdl_inited	vo_sdl2.c	/^    int sdl_inited;$/;"	m	struct:__anon1	file:	access:public
+__anon1::tex	vo_sdl2.c	/^    SDL_Texture *tex;$/;"	m	struct:__anon1	file:	access:public
+__anon1::vo_mutex	vo_sdl2.c	/^    dt_lock_t vo_mutex;$/;"	m	struct:__anon1	file:	access:public
+__anon1::win	vo_sdl2.c	/^    SDL_Window *win;$/;"	m	struct:__anon1	file:	access:public
+__anon3::dbt	ao_sdl2.c	/^    dt_buffer_t dbt;$/;"	m	struct:__anon3	file:	access:public
+__anon3::wanted	ao_sdl2.c	/^    SDL_AudioSpec wanted;     \/\/ config audio$/;"	m	struct:__anon3	file:	access:public
+ao_sdl2_get_latency	ao_sdl2.c	/^static int64_t ao_sdl2_get_latency (ao_wrapper_t *wrapper)$/;"	f	file:	signature:(ao_wrapper_t *wrapper)
+ao_sdl2_init	ao_sdl2.c	/^static int ao_sdl2_init (ao_wrapper_t *wrapper, void *parent)$/;"	f	file:	signature:(ao_wrapper_t *wrapper, void *parent)
+ao_sdl2_level	ao_sdl2.c	/^static int ao_sdl2_level(ao_wrapper_t *wrapper)$/;"	f	file:	signature:(ao_wrapper_t *wrapper)
+ao_sdl2_ops	ao_sdl2.c	/^ao_wrapper_t ao_sdl2_ops = {$/;"	v
+ao_sdl2_pause	ao_sdl2.c	/^static int ao_sdl2_pause (ao_wrapper_t *wrapper)$/;"	f	file:	signature:(ao_wrapper_t *wrapper)
+ao_sdl2_play	ao_sdl2.c	/^static int ao_sdl2_play (ao_wrapper_t *wrapper, uint8_t * buf, int size)$/;"	f	file:	signature:(ao_wrapper_t *wrapper, uint8_t * buf, int size)
+ao_sdl2_resume	ao_sdl2.c	/^static int ao_sdl2_resume (ao_wrapper_t *wrapper)$/;"	f	file:	signature:(ao_wrapper_t *wrapper)
+ao_sdl2_stop	ao_sdl2.c	/^static int ao_sdl2_stop (ao_wrapper_t * wrapper)$/;"	f	file:	signature:(ao_wrapper_t * wrapper)
+dbt	ao_sdl2.c	/^    dt_buffer_t dbt;$/;"	m	struct:__anon3	file:	access:public
+dh	vo_sdl2.c	/^    int dx,dy,dw,dh;$/;"	m	struct:__anon1	file:	access:public
+dw	vo_sdl2.c	/^    int dx,dy,dw,dh;$/;"	m	struct:__anon1	file:	access:public
+dx	vo_sdl2.c	/^    int dx,dy,dw,dh;$/;"	m	struct:__anon1	file:	access:public
+dy	vo_sdl2.c	/^    int dx,dy,dw,dh;$/;"	m	struct:__anon1	file:	access:public
+exit_flag	dt_player.c	/^static int exit_flag = 0;$/;"	v	file:
+get_event	event.c	/^player_event_t get_event (int *arg)$/;"	f	signature:(int *arg)
+main	dt_player.c	/^int main (int argc, char **argv)$/;"	f	signature:(int argc, char **argv)
+player_event_t	event.h	/^}player_event_t;$/;"	t	typeref:enum:__anon2
+ren	vo_sdl2.c	/^    SDL_Renderer *ren;$/;"	m	struct:__anon1	file:	access:public
+sdl2_cb	ao_sdl2.c	/^static void sdl2_cb(void *userdata,uint8_t *buf,int size)$/;"	f	file:	signature:(void *userdata,uint8_t *buf,int size)
+sdl2_ctx_t	vo_sdl2.c	/^}sdl2_ctx_t;$/;"	t	typeref:struct:__anon1	file:
+sdl2_pre_init	vo_sdl2.c	/^static int sdl2_pre_init (dtvideo_output_t * vo)$/;"	f	file:	signature:(dtvideo_output_t * vo)
+sdl_ao_ctx_t	ao_sdl2.c	/^}sdl_ao_ctx_t;$/;"	t	typeref:struct:__anon3	file:
+sdl_inited	vo_sdl2.c	/^    int sdl_inited;$/;"	m	struct:__anon1	file:	access:public
+show_usage	version.c	/^void show_usage ()$/;"	f
+show_usage	version.h	/^void show_usage ();$/;"	p	signature:()
+tex	vo_sdl2.c	/^    SDL_Texture *tex;$/;"	m	struct:__anon1	file:	access:public
+update_cb	dt_player.c	/^int update_cb (player_state_t * state)$/;"	f	signature:(player_state_t * state)
+version_info	version.c	/^void version_info (void)$/;"	f	signature:(void)
+version_info	version.h	/^void version_info (void);$/;"	p	signature:(void)
+version_tags	version.c	/^static char *version_tags = "";$/;"	v	file:
+vo_mutex	vo_sdl2.c	/^    dt_lock_t vo_mutex;$/;"	m	struct:__anon1	file:	access:public
+vo_sdl2_init	vo_sdl2.c	/^static int vo_sdl2_init (vo_wrapper_t *wrapper, void *parent)$/;"	f	file:	signature:(vo_wrapper_t *wrapper, void *parent)
+vo_sdl2_ops	vo_sdl2.c	/^vo_wrapper_t vo_sdl2_ops = {$/;"	v
+vo_sdl2_render	vo_sdl2.c	/^static int vo_sdl2_render (vo_wrapper_t *wrapper, AVPicture_t * pict)$/;"	f	file:	signature:(vo_wrapper_t *wrapper, AVPicture_t * pict)
+vo_sdl2_stop	vo_sdl2.c	/^static int vo_sdl2_stop (vo_wrapper_t *wrapper)$/;"	f	file:	signature:(vo_wrapper_t *wrapper)
+wanted	ao_sdl2.c	/^    SDL_AudioSpec wanted;     \/\/ config audio$/;"	m	struct:__anon3	file:	access:public
+win	vo_sdl2.c	/^    SDL_Window *win;$/;"	m	struct:__anon1	file:	access:public

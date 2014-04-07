@@ -1,0 +1,15 @@
+#ifndef EVENT_H
+#define EVENT_H
+
+typedef enum{
+    EVENT_INVALID = -1,
+    EVENT_NONE,
+    EVENT_PAUSE,
+    EVENT_RESUME,
+    EVENT_STOP,
+    EVENT_SEEK,
+}player_event_t;
+
+player_event_t get_event (int *arg);
+
+#endif
