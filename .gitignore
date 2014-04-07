@@ -1,6 +1,7 @@
 # Object files
 *.o
 *.ko
+*~
 
 # Libraries
 *.lib
@@ -11,6 +12,7 @@
 *.so
 *.so.*
 *.dylib
+tags
 
 # Executables
 *.exe
