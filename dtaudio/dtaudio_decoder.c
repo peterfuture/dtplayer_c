@@ -5,15 +5,15 @@
 
 #define REGISTER_ADEC(X,x)	 	\
 	{							\
-		extern dec_audio_wrapper_t adec_##x##_ops; 	\
-		register_adec(&adec_##x##_ops); 	\
+		extern ad_wrapper_t ad_##x##_ops; 	\
+		register_adec(&ad_##x##_ops); 	\
 	}
-static dec_audio_wrapper_t *first_adec = NULL;
+static ad_wrapper_t *g_ad = NULL;
 
-static void register_adec (dec_audio_wrapper_t * adec)
+static void register_adec (ad_wrapper_t * adec)
 {
-    dec_audio_wrapper_t **p;
-    p = &first_adec;
+    ad_wrapper_t **p;
+    p = &g_ad;
     while (*p != NULL)
         p = &(*p)->next;
     *p = adec;
@@ -36,9 +36,9 @@ void adec_register_all ()
 
 static int select_audio_decoder (dtaudio_decoder_t * decoder)
 {
-    dec_audio_wrapper_t **p;
+    ad_wrapper_t **p;
     dtaudio_para_t *para = &(decoder->aparam);
-    p = &first_adec;
+    p = &g_ad;
     while (*p != NULL)
     {
         if ((*p)->afmt != para->afmt && (*p)->afmt != AUDIO_FORMAT_UNKOWN)
@@ -51,7 +51,7 @@ static int select_audio_decoder (dtaudio_decoder_t * decoder)
         dt_info (DTAUDIO_LOG_TAG, "[%s:%d]no valid audio decoder found afmt:%d\n", __FUNCTION__, __LINE__, para->afmt);
         return -1;
     }
-    decoder->dec_wrapper = *p;
+    decoder->wrapper = *p;
     dt_info (TAG, "[%s:%d] select--%s audio decoder \n", __FUNCTION__, __LINE__, (*p)->name);
     return 0;
 }
@@ -77,7 +77,7 @@ static void *audio_decode_loop (void *arg)
     dtaudio_decoder_t *decoder = (dtaudio_decoder_t *) arg;
     dtaudio_para_t *para = &decoder->aparam;
     dt_av_frame_t frame;
-    dec_audio_wrapper_t *dec_wrapper = decoder->dec_wrapper;
+    ad_wrapper_t *wrapper = decoder->wrapper;
     dtaudio_context_t *actx = (dtaudio_context_t *) decoder->parent;
     dt_buffer_t *out = &actx->audio_decoded_buf;
     int declen, fill_size;
@@ -195,7 +195,7 @@ static void *audio_decode_loop (void *arg)
         }
         /*decode frame */
         pinfo->consume = declen;
-        used = dec_wrapper->decode_frame (dec_wrapper, pinfo);
+        used = wrapper->decode_frame (wrapper, pinfo);
         if (used < 0)
         {
             decoder->decode_err_cnt++;
@@ -203,7 +203,7 @@ static void *audio_decode_loop (void *arg)
              * if decoder is ffmpeg,do not restore data if decode failed
              * if decoder is not ffmpeg, restore raw stream packet if decode failed
              * */
-            if (!strcmp (dec_wrapper->name, "ffmpeg audio decoder"))
+            if (!strcmp (wrapper->name, "ffmpeg audio decoder"))
             {
                 dt_error (TAG, "[%s:%d] ffmpeg failed to decode this frame, just break\n", __FUNCTION__, __LINE__);
                 decoder->decode_offset += pinfo->inlen;
@@ -284,7 +284,7 @@ int audio_decoder_init (dtaudio_decoder_t * decoder)
     else
         dt_info (TAG, "[%s:%d] param: num:%d den:%d\n", __FUNCTION__, __LINE__, decoder->aparam.num, decoder->aparam.den);
     
-    dec_audio_wrapper_t *wrapper = decoder->dec_wrapper;
+    ad_wrapper_t *wrapper = decoder->wrapper;
     ret = wrapper->init (wrapper,decoder);
     if (ret < 0)
     {
@@ -328,7 +328,7 @@ int audio_decoder_start (dtaudio_decoder_t * decoder)
 
 int audio_decoder_stop (dtaudio_decoder_t * decoder)
 {
-    dec_audio_wrapper_t *wrapper = decoder->dec_wrapper;
+    ad_wrapper_t *wrapper = decoder->wrapper;
     /*Decode thread exit */
     decoder->status = ADEC_STATUS_EXIT;
     pthread_join (decoder->audio_decoder_pid, NULL);

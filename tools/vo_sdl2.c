@@ -1,4 +1,4 @@
-#include "../dtvideo_output.h"
+#include "dtvideo_output.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_render.h>
 #include <stdio.h>
@@ -17,7 +17,6 @@ typedef struct{
 static int vo_sdl2_init (vo_wrapper_t *wrapper, void *parent)
 {
     wrapper->parent = parent;
-
     sdl2_ctx_t *ctx = malloc(sizeof(sdl2_ctx_t));
     memset(ctx,0,sizeof(*ctx));
     dt_lock_init (&ctx->vo_mutex, NULL);
@@ -92,11 +91,11 @@ static void SaveFrame (AVPicture_t * pFrame, int width, int height, int iFrame)
 }
 #endif
 
-static int vo_sdl2_render (vo_wrapper_t * wrapper, AVPicture_t * pict)
+static int vo_sdl2_render (vo_wrapper_t *wrapper, AVPicture_t * pict)
 {
     int ret = 0;
-    dtvideo_output_t *vo = (dtvideo_output_t *)wrapper->parent;
     sdl2_ctx_t *ctx = (sdl2_ctx_t *)wrapper->handle;
+    dtvideo_output_t *vo = (dtvideo_output_t *)wrapper->parent;
     if(!ctx->sdl_inited)
     {
         ret = sdl2_pre_init(vo);
@@ -127,7 +126,6 @@ static int vo_sdl2_render (vo_wrapper_t * wrapper, AVPicture_t * pict)
 
 static int vo_sdl2_stop (vo_wrapper_t *wrapper)
 {
-    dtvideo_output_t *vo = (dtvideo_output_t *)wrapper->parent;
     sdl2_ctx_t *ctx = (sdl2_ctx_t *)wrapper->handle;
     dt_lock (&ctx->vo_mutex);
     if(ctx->sdl_inited) 
@@ -139,7 +137,7 @@ static int vo_sdl2_stop (vo_wrapper_t *wrapper)
     }
     dt_unlock (&ctx->vo_mutex);
     free(ctx);
-    vo->vout_ops->handle = NULL;
+    wrapper->handle = NULL;
     dt_info (TAG, "stop vo sdl\n");
     return 0;
 }

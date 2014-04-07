@@ -25,7 +25,7 @@ typedef struct{
 
 } faad_ctx_t;
 
-static int faad_init (dec_audio_wrapper_t *wrapper,void *parent)
+static int faad_init (ad_wrapper_t *wrapper,void *parent)
 {
     wrapper->parent = parent;
     faad_ctx_t *this = (faad_ctx_t *)malloc(sizeof(faad_ctx_t));
@@ -115,7 +115,7 @@ static int faad_open_dec(faad_ctx_t *this)
     return 0;
 }
 
-static int faad_decode (dec_audio_wrapper_t *wrapper, adec_ctrl_t *pinfo)
+static int faad_decode (ad_wrapper_t *wrapper, adec_ctrl_t *pinfo)
 {
  
     faad_ctx_t *this = (faad_ctx_t *) wrapper->adec_priv;
@@ -167,7 +167,7 @@ static int faad_decode (dec_audio_wrapper_t *wrapper, adec_ctrl_t *pinfo)
     return frameInfo->bytesconsumed;
 }
 
-static int faad_release (dec_audio_wrapper_t * wrapper)
+static int faad_release (ad_wrapper_t * wrapper)
 {
     faad_ctx_t *this = (faad_ctx_t *)wrapper->adec_priv;
     if(!this)
@@ -179,7 +179,7 @@ static int faad_release (dec_audio_wrapper_t * wrapper)
     return 0;
 }
 
-dec_audio_wrapper_t adec_faad_ops = {
+ad_wrapper_t ad_faad_ops = {
     .name = "faad audio decoder",
     .afmt = AUDIO_FORMAT_AAC,
     .type = DT_TYPE_AUDIO,

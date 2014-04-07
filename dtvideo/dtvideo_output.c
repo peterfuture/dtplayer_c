@@ -6,23 +6,41 @@
 
 #define REGISTER_VO(X, x)	 	\
 	{							\
-		extern vo_operations_t vo_##x##_ops; \
+		extern vo_wrapper_t vo_##x##_ops; \
 		register_vo(&vo_##x##_ops); \
 	}
 
 static int64_t last_time = -1;
 
-static vo_operations_t *first_vo = NULL;
+static vo_wrapper_t *g_vo = NULL;
 
-static void register_vo (vo_operations_t * vo)
+static void register_vo (vo_wrapper_t * vo)
 {
-    vo_operations_t **p;
-    p = &first_vo;
+    vo_wrapper_t **p;
+    p = &g_vo;
     while (*p != NULL)
-        p = &(*p)->next;
+        p = &((*p)->next);
     *p = vo;
     vo->next = NULL;
     dt_info (TAG, "register vo. id:%d name:%s \n", vo->id, vo->name);
+}
+
+void vout_register_ext (vo_wrapper_t * vo)
+{
+    vo_wrapper_t **p;
+    p = &g_vo;
+    if(*p == NULL)
+    {
+        *p = vo;
+        vo->next = NULL;
+    }
+    else
+    {
+        vo->next = *p;
+        *p = vo;
+    }
+    
+    dt_info (TAG, "register ext vo. id:%d name:%s \n", vo->id, vo->name);
 }
 
 void vout_register_all ()
@@ -32,8 +50,10 @@ void vout_register_all ()
 #ifdef ENABLE_VO_SDL
     REGISTER_VO (SDL, sdl);
 #endif
+#if 0
 #ifdef ENABLE_VO_SDL2
     REGISTER_VO (SDL2, sdl2);
+#endif
 #endif
     return;
 }
@@ -41,14 +61,14 @@ void vout_register_all ()
 /*default alsa*/
 int select_vo_device (dtvideo_output_t * vo, int id)
 {
-    vo_operations_t **p;
-    p = &first_vo;
+    vo_wrapper_t **p;
+    p = &g_vo;
 
     if(id == -1) // user did not choose vo,use default one
     {
         if(!*p)
             return -1;
-        vo->vout_ops = *p;
+        vo->wrapper = *p;
         dt_info(TAG,"SELECT VO:%s \n",(*p)->name);
         return 0;
     }
@@ -62,7 +82,7 @@ int select_vo_device (dtvideo_output_t * vo, int id)
         dt_error (TAG, "no valid vo device found\n");
         return -1;
     }
-    vo->vout_ops = *p;
+    vo->wrapper = *p;
     dt_info(TAG,"SELECT VO:%s \n",(*p)->name);
     return 0;
 }
@@ -88,9 +108,10 @@ int video_output_resume (dtvideo_output_t * vo)
 
 int video_output_stop (dtvideo_output_t * vo)
 {
+    vo_wrapper_t *wrapper = vo->wrapper;
     vo->status = VO_STATUS_EXIT;
     pthread_join (vo->output_thread_pid, NULL);
-    vo->vout_ops->vo_stop (vo);
+    wrapper->vo_stop (wrapper);
     dt_info (TAG, "[%s:%d] vout stop ok \n", __FUNCTION__, __LINE__);
     return 0;
 }
@@ -121,6 +142,7 @@ int video_output_get_level (dtvideo_output_t * ao)
 static void *video_output_thread (void *args)
 {
     dtvideo_output_t *vo = (dtvideo_output_t *) args;
+    vo_wrapper_t *wrapper = vo->wrapper;
     int ret, wlen;
     ret = wlen = 0;
     AVPicture_t *picture_pre;
@@ -206,7 +228,7 @@ static void *video_output_thread (void *args)
             }
         }
         /*display picture & update vpts */
-        ret = vo->vout_ops->vo_render (vo, pic);
+        ret = wrapper->vo_render (wrapper, pic);
         if (ret < 0)
         {
             printf ("frame toggle failed! \n");
@@ -229,12 +251,13 @@ int video_output_init (dtvideo_output_t * vo, int vo_id)
 {
     int ret = 0;
     pthread_t tid;
-    
+        
     /*select ao device */
     ret = select_vo_device (vo, vo_id);
     if (ret < 0)
         return -1;
-    vo->vout_ops->vo_init (vo);
+    vo_wrapper_t *wrapper = vo->wrapper;
+    wrapper->vo_init (wrapper,vo);
     dt_info (TAG, "[%s:%d] video output init success\n", __FUNCTION__, __LINE__);
 
     /*start aout pthread */

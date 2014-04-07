@@ -1,5 +1,9 @@
-#include "dtplayer/dtplayer_api.h"
-#include "dtplayer/dtplayer.h"
+#include "dtplayer_api.h"
+#include "dtplayer.h"
+#include "dtaudio.h"
+#include "dtaudio_output.h"
+#include "dtvideo.h"
+#include "dtvideo_output.h"
 
 #include "version.h"
 
@@ -84,6 +88,12 @@ int main (int argc, char **argv)
         show_usage ();
         return 0;
     }
+
+    player_register_all();
+    extern ao_wrapper_t ao_sdl2_ops;
+    register_ext_ao(&ao_sdl2_ops);
+    extern vo_wrapper_t vo_sdl2_ops;
+    register_ext_vo(&vo_sdl2_ops); 
 
     void *player_priv;
     dtplayer_para_t *para = dtplayer_alloc_para ();

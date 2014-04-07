@@ -16,10 +16,15 @@ static void *event_handle_loop (dtplayer_context_t * dtp_ctx);
 
 void player_register_all()
 {
-    stream_register_all();
-    demuxer_register_all();
-    audio_register_all();
-    video_register_all();
+    static int register_ok = 0;
+    if(!register_ok)
+    {
+        stream_register_all();
+        demuxer_register_all();
+        audio_register_all();
+        video_register_all();
+        register_ok = 1;
+    }
 }
 
 static void set_player_status (dtplayer_context_t * dtp_ctx, player_status_t status)

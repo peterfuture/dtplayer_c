@@ -16,7 +16,7 @@ typedef struct ao_wrapper
 {
     int id;
     char *name;
-
+    
     int (*ao_init) (struct ao_wrapper * wrapper, void *parent);
     int (*ao_start) (struct ao_wrapper *wrapper);
     int (*ao_pause) (struct ao_wrapper * wrapper);
@@ -69,6 +69,8 @@ typedef struct dtaudio_output
 }dtaudio_output_t;
 
 void aout_register_all();
+void aout_register_ext(ao_wrapper_t *ao);
+
 int audio_output_init (dtaudio_output_t * ao, int ao_id);
 int audio_output_release (dtaudio_output_t * ao);
 int audio_output_stop (dtaudio_output_t * ao);

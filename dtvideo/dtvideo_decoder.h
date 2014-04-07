@@ -13,23 +13,25 @@ typedef enum
     VDEC_STATUS_EXIT
 } vdec_status_t;
 
-typedef struct dtvideo_decoder dtvideo_decoder_t;
-
-typedef struct video_decoder_operation
+typedef struct vd_wrapper
 {
-    int (*init) (dtvideo_decoder_t * decoder);
-    int (*decode_frame) (dtvideo_decoder_t * decoder, dt_av_frame_t * frame, AVPicture_t ** pic);
-    int (*release) (dtvideo_decoder_t * decoder);
     char *name;
     video_format_t vfmt;        // not used, for ffmpeg
     int type;
-    struct video_decoder_operation *next;
-} dec_video_wrapper_t;
 
-struct dtvideo_decoder
+    int (*init) (struct vd_wrapper *wrapper, void *parent);
+    int (*decode_frame) (struct vd_wrapper *wrapper, dt_av_frame_t * frame, AVPicture_t ** pic);
+    int (*release) (struct vd_wrapper *wrapper);
+    
+    void *vd_priv;
+    struct vd_wrapper *next;
+    void *parent;
+} vd_wrapper_t;
+
+typedef struct dtvideo_decoder
 {
     dtvideo_para_t para;
-    dec_video_wrapper_t *dec_wrapper;
+    vd_wrapper_t *wrapper;
     pthread_t video_decoder_pid;
     vdec_status_t status;
     int decode_err_cnt;
@@ -44,7 +46,7 @@ struct dtvideo_decoder
     dt_buffer_t *buf_out;
     void *parent;
     void *decoder_priv;
-};
+}dtvideo_decoder_t;
 
 void vdec_register_all();
 int video_decoder_init (dtvideo_decoder_t * decoder);

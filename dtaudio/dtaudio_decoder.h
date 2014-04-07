@@ -13,8 +13,6 @@ typedef enum
     ADEC_STATUS_EXIT
 } adec_status_t;
 
-typedef struct dtaudio_decoder dtaudio_decoder_t;
-
 typedef struct{
     uint8_t *inptr;
     int inlen;
@@ -29,23 +27,23 @@ typedef struct{
     int bps;
 }adec_ctrl_t;
 
-typedef struct dec_audio_wrapper
+typedef struct ad_wrapper
 {
-    int (*init) (struct dec_audio_wrapper * wrapper,void *parent);
-    int (*decode_frame) (struct dec_audio_wrapper * wrapper, adec_ctrl_t *pinfo);
-    int (*release) (struct dec_audio_wrapper * wrapper);
+    int (*init) (struct ad_wrapper * wrapper,void *parent);
+    int (*decode_frame) (struct ad_wrapper * wrapper, adec_ctrl_t *pinfo);
+    int (*release) (struct ad_wrapper * wrapper);
     char *name;
     audio_format_t afmt;        //not used, for ffmpeg
     int type;
-    void *adec_priv;
-    struct dec_audio_wrapper *next;
+    void *ad_priv;
+    struct ad_wrapper *next;
     void *parent;
-} dec_audio_wrapper_t;
+} ad_wrapper_t;
 
-struct dtaudio_decoder
+typedef struct dtaudio_decoder
 {
     dtaudio_para_t aparam;
-    dec_audio_wrapper_t *dec_wrapper;
+    ad_wrapper_t *wrapper;
     pthread_t audio_decoder_pid;
     adec_status_t status;
     int decode_err_cnt;
@@ -61,7 +59,7 @@ struct dtaudio_decoder
     dt_buffer_t *buf_out;
     void *parent;
     void *decoder_priv;         //point to avcodeccontext
-};
+}dtaudio_decoder_t;
 
 void adec_register_all();
 int audio_decoder_init (dtaudio_decoder_t * decoder);

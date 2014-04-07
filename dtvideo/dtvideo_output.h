@@ -8,19 +8,18 @@
 #include <unistd.h>
 #include <string.h>
 
-typedef struct dtvideo_output dtvideo_output_t;
-
-typedef struct _vo_t
+typedef struct vo_wrapper
 {
     int id;
     char *name;
 
-    int (*vo_init) (dtvideo_output_t * ao);
-    int (*vo_stop) (dtvideo_output_t * ao);
-    int (*vo_render) (dtvideo_output_t * ao, AVPicture_t * pic);
+    int (*vo_init) (struct vo_wrapper *wrapper, void *parent);
+    int (*vo_stop) (struct vo_wrapper *wrapper);
+    int (*vo_render) (struct vo_wrapper *wrapper, AVPicture_t * pic);
     void *handle;
-    struct _vo_t *next;
-} vo_operations_t;
+    struct vo_wrapper *next;
+    void *parent;
+} vo_wrapper_t;
 
 typedef enum
 {
@@ -47,20 +46,22 @@ typedef struct
     int vout_buf_level;
 } vo_state_t;
 
-struct dtvideo_output
+typedef struct dtvideo_output
 {
     /*param */
     dtvideo_para_t para;
-    vo_operations_t *vout_ops;
+    vo_wrapper_t *wrapper;
     vo_status_t status;
     pthread_t output_thread_pid;
     vo_state_t state;
 
     uint64_t last_valid_latency;
     void *parent;               //point to dtaudio_t, can used for param of pcm get interface
-};
+}dtvideo_output_t;
 
 void vout_register_all();
+void vout_register_ext(vo_wrapper_t *vo);
+
 int video_output_init (dtvideo_output_t * vo, int vo_id);
 int video_output_release (dtvideo_output_t * vo);
 int video_output_stop (dtvideo_output_t * vo);

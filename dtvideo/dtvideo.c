@@ -2,7 +2,7 @@
 #include "dthost_api.h"
 
 #define TAG "VIDEO-MGT"
-//==Part1:Data IO Relative
+
 /*read frame from dtport*/
 int dtvideo_read_frame (void *priv, dt_av_frame_t * frame)
 {
@@ -42,7 +42,6 @@ AVPicture_t *dtvideo_output_pre_read (void *priv)
     return queue_pre_pop_head (picture_queue);
 }
 
-//==Part2: PTS&STATUS Relative
 int dtvideo_get_avdiff (void *priv)
 {
     dtvideo_context_t *vctx = (dtvideo_context_t *) priv;
@@ -154,11 +153,15 @@ int video_get_out_closed (dtvideo_context_t * vctx)
     return 1;
 }
 
-//==Part3:Control
 void video_register_all()
 {
     vdec_register_all();
     vout_register_all();
+}
+
+void register_ext_vo(vo_wrapper_t *vo)
+{
+   vout_register_ext(vo); 
 }
 
 int video_start (dtvideo_context_t * vctx)

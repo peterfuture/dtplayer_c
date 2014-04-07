@@ -20,6 +20,23 @@ static void register_ao (ao_wrapper_t * ao)
     ao->next = NULL;
 }
 
+void aout_register_ext (ao_wrapper_t * ao)
+{
+    ao_wrapper_t **p;
+    p = &g_ao;
+
+    if(*p == NULL)
+    {
+        *p = ao;
+        ao->next = NULL;
+    }
+    else
+    {
+        ao->next = *p;
+        *p = ao;
+    }
+}
+
 void aout_register_all ()
 {
     /*Register all audio_output */
@@ -27,8 +44,10 @@ void aout_register_all ()
 #ifdef ENABLE_AO_SDL
     REGISTER_AO (SDL, sdl);
 #endif
+#if 0
 #ifdef ENABLE_AO_SDL2
     REGISTER_AO (SDL2, sdl2);
+#endif
 #endif
 #ifdef ENABLE_AO_ALSA
     REGISTER_AO (ALSA, alsa);

@@ -44,7 +44,7 @@ static AVCodecContext * alloc_ffmpeg_ctx(dtaudio_decoder_t *decoder)
     return ctx;
 }
 
-int ffmpeg_adec_init (dec_audio_wrapper_t *wrapper, void *parent)
+int ffmpeg_adec_init (ad_wrapper_t *wrapper, void *parent)
 {
     wrapper->parent = parent;
     dtaudio_decoder_t *decoder = (dtaudio_decoder_t *)parent;
@@ -138,7 +138,7 @@ static void audio_convert (dtaudio_decoder_t *decoder, AVFrame * dst, AVFrame * 
 }
 
 //1 get one frame 0 failed -1 err
-int ffmpeg_adec_decode (dec_audio_wrapper_t *wrapper, adec_ctrl_t *pinfo)
+int ffmpeg_adec_decode (ad_wrapper_t *wrapper, adec_ctrl_t *pinfo)
 {
     int got_samples = 0;
     int ret = 0;
@@ -194,7 +194,7 @@ int ffmpeg_adec_decode (dec_audio_wrapper_t *wrapper, adec_ctrl_t *pinfo)
     return ret;
 }
 
-int ffmpeg_adec_release (dec_audio_wrapper_t *wrapper)
+int ffmpeg_adec_release (ad_wrapper_t *wrapper)
 {
     avcodec_close (avctxp);
     avctxp = NULL;
@@ -202,7 +202,7 @@ int ffmpeg_adec_release (dec_audio_wrapper_t *wrapper)
     return 0;
 }
 
-dec_audio_wrapper_t adec_ffmpeg_ops = {
+ad_wrapper_t ad_ffmpeg_ops = {
     .name = "ffmpeg audio decoder",
     .afmt = AUDIO_FORMAT_UNKOWN, //support all afmt
     .type = DT_TYPE_AUDIO,

@@ -157,7 +157,7 @@ static int demuxer_ffmpeg_read_frame (demuxer_wrapper_t * wrapper, dt_av_frame_t
     frame->pts = pts_exchange (&avpkt, media_info);
     frame->dts = avpkt.dts;
     frame->duration = avpkt.duration;
-    if(frame->type == AVMEDIA_TYPE_AUDIO)
+    if(frame->type == (int)AVMEDIA_TYPE_AUDIO)
         dt_debug(TAG,"GET AUDIO FRAME, pts:%lld \n",frame->pts);
     else
         dt_debug(TAG,"GET VIDEO FRAME, pts:%llx \n",frame->pts);

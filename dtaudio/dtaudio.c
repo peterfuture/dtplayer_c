@@ -160,6 +160,11 @@ void audio_register_all()
     aout_register_all();
 }
 
+void register_ext_ao(ao_wrapper_t *ao)
+{
+    aout_register_ext(ao);
+}
+
 int audio_start (dtaudio_context_t * actx)
 {
     if (actx->audio_state == AUDIO_STATUS_INITED)

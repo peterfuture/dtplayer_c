@@ -55,6 +55,8 @@ typedef struct
 } dtvideo_context_t;
 
 void video_register_all();
+void register_ext_vo(vo_wrapper_t *vo);
+
 int dtvideo_read_frame (void *priv, dt_av_frame_t * frame);
 AVPicture_t *dtvideo_output_read (void *priv);
 AVPicture_t *dtvideo_output_pre_read (void *priv);
