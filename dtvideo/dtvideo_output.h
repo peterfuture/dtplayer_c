@@ -18,6 +18,7 @@ typedef struct vo_wrapper
     int (*vo_render) (struct vo_wrapper *wrapper, AVPicture_t * pic);
     void *handle;
     struct vo_wrapper *next;
+    void *vo_priv;
     void *parent;
 } vo_wrapper_t;
 
@@ -38,6 +39,7 @@ typedef enum _VO_ID_
     VO_ID_GL,
     VO_ID_DIRECTX,
     VO_ID_SDL2,
+    VO_ID_EX, // vo router
 } dt_vo_t;
 
 typedef struct

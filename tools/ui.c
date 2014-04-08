@@ -1,7 +1,21 @@
-#include "event.h"
-
+#include "ui.h"
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_thread.h>
+
+int sdl2_init();
+int sdl2_stop();
+
+int ui_init()
+{
+    sdl2_init();    
+    return 0;
+}
+
+int ui_stop()
+{
+    sdl2_stop(); 
+    return 0;
+}
+
 
 player_event_t get_event (int *arg)
 {

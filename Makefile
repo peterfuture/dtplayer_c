@@ -58,7 +58,7 @@ SRCS_COMMON-$(DT_AUDIO) += dtaudio/dtaudio.c
 SRCS_COMMON-$(DT_AUDIO) += dtaudio/dtaudio_decoder.c
 SRCS_COMMON-$(DT_AUDIO) += dtaudio/dtaudio_filter.c
 SRCS_COMMON-$(DT_AUDIO) += dtaudio/dtaudio_output.c
-SRCS_COMMON-$(DT_FAAD) += dtaudio/audio_decoder/dec_audio_faad.c     # dec
+SRCS_COMMON-$(DT_FAAD) += dtaudio/audio_decoder/ad_faad.c     # dec
 SRCS_COMMON-$(DT_FFMPEG) += dtaudio/audio_decoder/ad_ffmpeg.c        # dec
 SRCS_COMMON-$(DT_ALSA) += dtaudio/audio_out/ao_alsa.c                # out
 SRCS_COMMON-$(DT_SDL) += dtaudio/audio_out/ao_sdl.c                  # out
@@ -138,7 +138,7 @@ OBJS_DTLIB_DEP = $(OBJS_COMMON_DEBUG)
 ALL_PRG += $(DTLIB)
 
 #dtm player
-SRCS_DTPLAYER   += tools/dt_player.c tools/event.c tools/version.c tools/ao_sdl2.c tools/vo_sdl2.c
+SRCS_DTPLAYER   += tools/dt_player.c tools/ui.c tools/render.c tools/version.c tools/ao_sdl2.c tools/vo_sdl2.c
 OBJS_DTPLAYER_RELEASE   += $(addsuffix .o, $(basename $(SRCS_DTPLAYER)))
 DTM_PLAYER_DEPS_RELEASE  = $(OBJS_DTPLAYER_RELEASE)  $(DTLIB) $(COMMON_LIBS)
 OBJS_DTPLAYER_DEBUG   += $(addsuffix .debug.o, $(basename $(SRCS_DTPLAYER)))

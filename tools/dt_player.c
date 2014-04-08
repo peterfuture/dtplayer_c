@@ -1,14 +1,9 @@
 #include "version.h"
-#include "event.h"
+#include "render.h"
+#include "ui.h"
 
 #include "dtplayer_api.h"
 #include "dtplayer.h"
-#include "dtaudio.h"
-#include "dtaudio_output.h"
-#include "dtvideo.h"
-#include "dtvideo_output.h"
-
-#include <SDL2/SDL.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -40,12 +35,9 @@ int main (int argc, char **argv)
     }
 
     player_register_all();
-    
-    //register ext ao & vo
-    extern ao_wrapper_t ao_sdl2_ops;
-    register_ext_ao(&ao_sdl2_ops);
-    extern vo_wrapper_t vo_sdl2_ops;
-    register_ext_vo(&vo_sdl2_ops); 
+
+    ui_init();    
+    render_init();
 
     void *player_priv;
     dtplayer_para_t *para = dtplayer_alloc_para ();
@@ -64,14 +56,6 @@ int main (int argc, char **argv)
     dtplayer_release_para (para);
     dtplayer_start (player_priv);
 
-    //init sdl early
-#if 0
-    int flags = SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER;
-    if (SDL_Init (flags)) {
-        dt_error(TAG,"SDL2 INIT FAILED \n");
-        return -1;
-    }
-#endif
     //event handle
     player_event_t event = EVENT_NONE;
     int arg = -1;
@@ -106,7 +90,9 @@ int main (int argc, char **argv)
         }
 
     }
-    
+
+    render_stop();
+    ui_stop(); 
     dt_info ("", "QUIT DTPLAYER-TEST\n");
     return 0;
 }

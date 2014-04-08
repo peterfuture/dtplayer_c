@@ -14,21 +14,12 @@ typedef struct{
     int sdl_inited;
 }sdl2_ctx_t;
 
-static int vo_sdl2_init (vo_wrapper_t *wrapper, void *parent)
-{
-    wrapper->parent = parent;
-    sdl2_ctx_t *ctx = (sdl2_ctx_t *)malloc(sizeof(*ctx));
-    memset(ctx,0,sizeof(*ctx));
-    dt_lock_init (&ctx->vo_mutex, NULL);
-    wrapper->handle = (void *)ctx;
-    dt_info (TAG, "sdl2 init OK\n");
-    return 0;
-}
+static sdl2_ctx_t sdl2_ctx;
 
-static int sdl2_pre_init (dtvideo_output_t * vo)
+/* create win for dtplayer */
+static int sdl2_pre_init (sdl2_ctx_t *ctx)
 {
     int flags;
-    sdl2_ctx_t *ctx = (sdl2_ctx_t *)vo->wrapper->handle;
     
     putenv ("SDL_VIDEO_WINDOW_POS=center");
     putenv ("SDL_VIDEO_CENTERED=1");
@@ -36,9 +27,11 @@ static int sdl2_pre_init (dtvideo_output_t * vo)
         SDL_Init(SDL_INIT_VIDEO);
    
     ctx->dx = ctx->dy = 0;
-    ctx->dw = vo->para.d_width;
-    ctx->dh = vo->para.d_height;
-   
+    //ctx->dw = vo->para.d_width;
+    //ctx->dh = vo->para.d_height;
+    ctx->dw = 720;
+    ctx->dh = 480;
+
     flags = SDL_WINDOW_SHOWN; 
     ctx->win = SDL_CreateWindow("dtplayer",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,ctx->dw,ctx->dh,flags);
     if(ctx->win == NULL)
@@ -66,42 +59,60 @@ static int sdl2_pre_init (dtvideo_output_t * vo)
     return 0;
 }
 
-#if 0
-static void SaveFrame (AVPicture_t * pFrame, int width, int height, int iFrame)
+int sdl2_init()
 {
-    FILE *pFile;
-    char szFilename[32];
-    int y;
-
-    // Open file
-    sprintf (szFilename, "frame%d.ppm", iFrame);
-    pFile = fopen (szFilename, "wb");
-    if (pFile == NULL)
-        return;
-
-    // Write header
-    fprintf (pFile, "P6\n%d %d\n255\n", width, height);
-
-    // Write pixel data
-    for (y = 0; y < height; y++)
-        fwrite (pFrame->data[0] + y * pFrame->linesize[0], 1, width * 3, pFile);
-
-    // Close file
-    fclose (pFile);
+    int flags = 0;
+    flags = SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER;
+    if (SDL_Init (flags)) {
+        dt_info(TAG,"UI INIT FAILED \n");
+        return -1;
+    }
+    memset(&sdl2_ctx,0,sizeof(sdl2_ctx_t));
+    dt_lock_init (&sdl2_ctx.vo_mutex, NULL);
+    return 0;
 }
+
+int sdl2_stop()
+{
+    sdl2_ctx_t *ctx = &sdl2_ctx;
+    dt_lock (&ctx->vo_mutex);
+    if(ctx->sdl_inited) 
+    {
+        SDL_DestroyTexture(ctx->tex);
+        SDL_DestroyRenderer(ctx->ren); 
+        SDL_DestroyWindow(ctx->win);
+        SDL_QuitSubSystem(SDL_INIT_VIDEO);
+    }
+    ctx->sdl_inited = 0;
+    dt_unlock (&ctx->vo_mutex);
+    return 0;
+}
+
+
+static int vo_sdl2_init (vo_wrapper_t *wrapper, void *parent)
+{
+    wrapper->parent = parent;
+#if 0
+    sdl2_ctx_t *ctx = (sdl2_ctx_t *)malloc(sizeof(*ctx));
+    memset(ctx,0,sizeof(*ctx));
+    dt_lock_init (&ctx->vo_mutex, NULL);
 #endif
+    wrapper->handle = (void *)&sdl2_ctx;
+    dt_info (TAG, "sdl2 init OK\n");
+    return 0;
+}
 
 static int vo_sdl2_render (vo_wrapper_t *wrapper, AVPicture_t * pict)
 {
     int ret = 0;
     sdl2_ctx_t *ctx = (sdl2_ctx_t *)wrapper->handle;
-    dtvideo_output_t *vo = (dtvideo_output_t *)wrapper->parent;
+    
     if(!ctx->sdl_inited)
     {
-        ret = sdl2_pre_init(vo);
+        ret = sdl2_pre_init(ctx);
         ctx->sdl_inited = !ret;
     }
-
+    
     dt_lock (&ctx->vo_mutex);
 
     SDL_Rect dst;
@@ -116,28 +127,12 @@ static int vo_sdl2_render (vo_wrapper_t *wrapper, AVPicture_t * pict)
     SDL_RenderCopy(ctx->ren,ctx->tex,&dst,&dst);
     SDL_RenderPresent(ctx->ren);
 
-    //add event poll, avoid window fade
-    static SDL_Event event;
-    SDL_PollEvent(&event);
-    
     dt_unlock (&ctx->vo_mutex);
     return 0;
 }
 
 static int vo_sdl2_stop (vo_wrapper_t *wrapper)
 {
-    sdl2_ctx_t *ctx = (sdl2_ctx_t *)wrapper->handle;
-    dt_lock (&ctx->vo_mutex);
-    if(ctx->sdl_inited) 
-    {
-        SDL_DestroyTexture(ctx->tex);
-        SDL_DestroyRenderer(ctx->ren); 
-        SDL_DestroyWindow(ctx->win);
-        SDL_QuitSubSystem(SDL_INIT_VIDEO);
-    }
-    ctx->sdl_inited = 0;
-    dt_unlock (&ctx->vo_mutex);
-    free(ctx);
     wrapper->handle = NULL;
     dt_info (TAG, "stop vo sdl\n");
     return 0;

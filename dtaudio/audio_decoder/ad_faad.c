@@ -32,7 +32,7 @@ static int faad_init (ad_wrapper_t *wrapper,void *parent)
     if(!this)
         return -1;
     memset(this,0,sizeof(*this));
-    wrapper->adec_priv = this;
+    wrapper->ad_priv = this;
     
     return 0;
 }
@@ -118,7 +118,7 @@ static int faad_open_dec(faad_ctx_t *this)
 static int faad_decode (ad_wrapper_t *wrapper, adec_ctrl_t *pinfo)
 {
  
-    faad_ctx_t *this = (faad_ctx_t *) wrapper->adec_priv;
+    faad_ctx_t *this = (faad_ctx_t *) wrapper->ad_priv;
     this->buffer = pinfo->inptr + pinfo->consume;
     this->bytes_into_buffer = pinfo->inlen;
     this->bytes_consumed = 0; 
@@ -169,13 +169,13 @@ static int faad_decode (ad_wrapper_t *wrapper, adec_ctrl_t *pinfo)
 
 static int faad_release (ad_wrapper_t * wrapper)
 {
-    faad_ctx_t *this = (faad_ctx_t *)wrapper->adec_priv;
+    faad_ctx_t *this = (faad_ctx_t *)wrapper->ad_priv;
     if(!this)
         return 0;
     if(this->faad_dec)
         NeAACDecClose(this->faad_dec);
     free(this);
-    wrapper->adec_priv = NULL;
+    wrapper->ad_priv = NULL;
     return 0;
 }
 

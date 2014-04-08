@@ -1,5 +1,5 @@
-#ifndef EVENT_H
-#define EVENT_H
+#ifndef UI_H
+#define UI_H
 
 typedef enum{
     EVENT_INVALID = -1,
@@ -11,5 +11,6 @@ typedef enum{
 }player_event_t;
 
 player_event_t get_event (int *arg);
-
+int ui_init();
+int ui_stop();
 #endif
