@@ -57,7 +57,7 @@ int audio_drop (dtaudio_context_t * actx, int64_t target_pts)
     int64_t diff = target_pts - audio_get_first_pts (actx);
 
     int diff_time = diff / 90;
-    if (diff_time > AV_DROP_THRESHOLD)
+    if (diff_time > AVSYNC_DROP_THRESHOLD)
     {
         dt_info (TAG, "DIFF EXCEED %d ms, do not drop!\n", diff_time);
         return 0;
@@ -67,7 +67,9 @@ int audio_drop (dtaudio_context_t * actx, int64_t target_pts)
     int bps = actx->audio_param.bps;
     int size = (diff * sample_rate * bps * channel / 8) / 90000;
 
-    dt_info (TAG, "[%s:%d]Target:%lld ,Need to drop :%d pcm \n", __FUNCTION__, __LINE__, target_pts, size);
+    size = size - size%16;
+
+    dt_info (TAG, "[%s:%d]Target:%lld(diff: %d MS) ,Need to drop :%d pcm \n", __FUNCTION__, __LINE__, target_pts, diff_time, size);
     int read_size_once = 1024;
     uint8_t buf[1024];
     int rlen = 0;
@@ -89,7 +91,7 @@ int audio_drop (dtaudio_context_t * actx, int64_t target_pts)
         pts = audio_get_current_pts (actx);
         if (pts >= target_pts)
             break;
-        dt_debug (TAG, "read :%d pcm left:%d pts:%lld \n", rlen, size, pts);
+        dt_info (TAG, "read :%d pcm left:%d pts:%lld \n", rlen, size, pts);
     }
     audio_update_pts ((void *) actx);
     dt_info (TAG, "drop finish,size:%d left. \n", size);

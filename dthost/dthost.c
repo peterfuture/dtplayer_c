@@ -6,9 +6,6 @@
 #include "unistd.h"
 
 #define TAG "host-MGT"
-#define AVSYNC_THRESHOLD 100    //ms
-#define AVSYNC_THRESHOLD_MAX  3*1000 //ms
-#define AVSYNC_DROP_THRESHOLD  10*1000 //ms
 
 //==Part1:PTS Relative
 int host_sync_enable (dthost_context_t * hctx)
@@ -179,20 +176,23 @@ int host_start (dthost_context_t * hctx)
 
     int drop_flag = 0;
     int av_diff_ms = abs (hctx->pts_video - hctx->pts_audio) / 90;
-    if (av_diff_ms > 10 * 1000)
+    if (av_diff_ms > AVSYNC_DROP_THRESHOLD)
     {
-        dt_info (TAG, "FIRST AV DIFF EXCEED 10S,DO NOT DROP\n");
+        dt_info (TAG, "FIRST AV DIFF EXCEED % MS,DO NOT DROP\n",AVSYNC_DROP_THRESHOLD);
         hctx->sync_mode = DT_SYNC_VIDEO_MASTER;
     }
-    drop_flag = (av_diff_ms > 100 && av_diff_ms < AVSYNC_DROP_THRESHOLD); // exceed 100ms
-    if (!host_sync_enable (hctx))
-        drop_flag = 0;
-    if (drop_flag)
+    else
     {
-        if (hctx->pts_audio > hctx->pts_video)
-            dtvideo_drop (hctx->video_priv, hctx->pts_audio);
-        else
-            dtaudio_drop (hctx->audio_priv, hctx->pts_video);
+        drop_flag = (av_diff_ms > 100 && av_diff_ms < AVSYNC_DROP_THRESHOLD);
+        if (!host_sync_enable (hctx))
+            drop_flag = 0;
+        if (drop_flag)
+        {
+            if (hctx->pts_audio > hctx->pts_video)
+                dtvideo_drop (hctx->video_priv, hctx->pts_audio);
+            else
+                dtaudio_drop (hctx->audio_priv, hctx->pts_video);
+        }
     }
     dt_info (TAG, "apts:%lld vpts:%lld \n", hctx->pts_audio, hctx->pts_video);
 

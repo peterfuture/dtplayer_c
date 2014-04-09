@@ -49,5 +49,5 @@ void player_update_state (dtplayer_context_t * dtp_ctx)
     calc_cur_time (dtp_ctx, &host_state);
 
     /*show info */
-    dt_info (TAG, "Abuflevel:%d vbuflevel:%d cur_time:%lld(s) %lld(ms) duration:%lld(s) \n ", host_state.abuf_level, host_state.vbuf_level, play_stat->cur_time, play_stat->cur_time_ms, dtp_ctx->media_info->duration);
+    dt_debug (TAG, "Abuflevel:%d vbuflevel:%d cur_time:%lld(s) %lld(ms) duration:%lld(s) \n ", host_state.abuf_level, host_state.vbuf_level, play_stat->cur_time, play_stat->cur_time_ms, dtp_ctx->media_info->duration);
 }

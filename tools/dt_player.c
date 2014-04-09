@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define TAG "DTM-PLAYER"
+#define TAG "DT-PLAYER"
 
 static int exit_flag = 0;
 
@@ -20,6 +20,7 @@ int update_cb (player_state_t * state)
         exit_flag = 1;
     }
     dt_debug (TAG, "UPDATECB CURSTATUS:%x \n", state->cur_status);
+    dt_info(TAG,"CUR TIME %d S \n",state->cur_time);
     return 0;
 }
 

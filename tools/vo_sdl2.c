@@ -62,7 +62,7 @@ static int sdl2_pre_init (sdl2_ctx_t *ctx)
 int sdl2_init()
 {
     int flags = 0;
-    flags = SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER;
+    flags = SDL_INIT_VIDEO | SDL_INIT_AUDIO;
     if (SDL_Init (flags)) {
         dt_info(TAG,"UI INIT FAILED \n");
         return -1;
@@ -92,11 +92,6 @@ int sdl2_stop()
 static int vo_sdl2_init (vo_wrapper_t *wrapper, void *parent)
 {
     wrapper->parent = parent;
-#if 0
-    sdl2_ctx_t *ctx = (sdl2_ctx_t *)malloc(sizeof(*ctx));
-    memset(ctx,0,sizeof(*ctx));
-    dt_lock_init (&ctx->vo_mutex, NULL);
-#endif
     wrapper->handle = (void *)&sdl2_ctx;
     dt_info (TAG, "sdl2 init OK\n");
     return 0;
@@ -120,6 +115,24 @@ static int vo_sdl2_render (vo_wrapper_t *wrapper, AVPicture_t * pict)
     dst.y = ctx->dy;
     dst.w = ctx->dw;
     dst.h = ctx->dh;
+
+    if(ctx->ren)
+        SDL_DestroyRenderer(ctx->ren); 
+    ctx->ren = SDL_CreateRenderer(ctx->win,-1,0);
+    if(ctx->ren == NULL)
+    {
+        dt_error(TAG,"SDL_CreateRenderer Error:%s \n",SDL_GetError());
+        return 1;
+    }
+    if(ctx->tex)    
+        SDL_DestroyTexture(ctx->tex);
+    //ctx->tex = SDL_CreateTexture(ctx->ren,SDL_PIXELFORMAT_YV12,SDL_TEXTUREACCESS_STATIC,ctx->dw,ctx->dh);
+    ctx->tex = SDL_CreateTexture(ctx->ren,SDL_PIXELFORMAT_YV12,SDL_TEXTUREACCESS_STREAMING,ctx->dw,ctx->dh);
+    if(ctx->tex == NULL)
+    {
+        dt_error(TAG,"SDL_CreateTexture Error:%s \n",SDL_GetError());
+        return 1;
+    }
 
     SDL_UpdateYUVTexture(ctx->tex,NULL, pict->data[0], pict->linesize[0],  pict->data[1], pict->linesize[1],  pict->data[2], pict->linesize[2]);
     //SDL_UpdateTexture(ctx->tex, &dst, pict->data[0], pict->linesize[0]);
