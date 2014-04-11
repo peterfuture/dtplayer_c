@@ -18,11 +18,13 @@ static void register_demuxer (demuxer_wrapper_t * wrapper)
         p = &((*p)->next);
     *p = wrapper;
     wrapper->next = NULL;
+    dt_info(TAG,"REGISTER DEMUXER:%s \n",wrapper->name);
 }
 
 void demuxer_register_all ()
 {
     REGISTER_DEMUXER (AAC, aac);
+    REGISTER_DEMUXER (TS, ts);
 #ifdef ENABLE_DEMUXER_FFMPEG
     REGISTER_DEMUXER (FFMPEG, ffmpeg);
 #endif
@@ -36,7 +38,7 @@ static int demuxer_select (dtdemuxer_context_t * dem_ctx)
     demuxer_wrapper_t *entry = g_demuxer;
     while(entry != NULL)
     {
-        score = (entry)->probe(entry,dem_ctx);
+        score = (entry)->probe(entry,&(dem_ctx->probe_buf));
         if(score == 1)
             break;
         entry = entry->next;
@@ -128,6 +130,7 @@ int demuxer_open (dtdemuxer_context_t * dem_ctx)
         return -1;
     }
     demuxer_wrapper_t *wrapper = dem_ctx->demuxer;
+    wrapper->parent = dem_ctx;
     ret = wrapper->open (wrapper);
     if (ret < 0)
     {

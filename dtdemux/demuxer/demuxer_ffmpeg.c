@@ -42,9 +42,8 @@ static const type_map_t media_map[] = {
 };
 
 /* 1 select 0 non select*/
-static int demuxer_ffmpeg_probe(demuxer_wrapper_t *wrapper,void *parent)
+static int demuxer_ffmpeg_probe(demuxer_wrapper_t *wrapper,dt_buffer_t *buf)
 {
-    wrapper->parent = parent;
     return 1;
 }
 

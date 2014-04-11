@@ -14,6 +14,7 @@
 typedef enum{
     DEMUXER_INVALID = -1,
     DEMUXER_AAC,
+    DEMUXER_TS,
     DEMUXER_FFMPEG,
     DEMUXER_UNSUPPORT,
 }demuxer_format_t;
@@ -22,7 +23,8 @@ typedef struct demuxer_wrapper
 {
     char *name;
     int id;
-    int (*probe) (struct demuxer_wrapper *wrapper,void *parent);
+    //int (*probe) (struct demuxer_wrapper *wrapper,void *parent);
+    int (*probe) (struct demuxer_wrapper *wrapper,dt_buffer_t *buf);
     int (*open) (struct demuxer_wrapper * wrapper);
     int (*read_frame) (struct demuxer_wrapper * wrapper, dt_av_frame_t * frame);
     int (*setup_info) (struct demuxer_wrapper * wrapper, dt_media_info_t * info);

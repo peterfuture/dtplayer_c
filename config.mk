@@ -9,11 +9,12 @@ DT_VERSION = v1.0
 #======================================================
 
 #extlib
-DT_FFMPEG = yes
+DT_FFMPEG = no
 DT_SDL = no
 DT_SDL2 = yes
 DT_ALSA = no
-DT_FAAD = no
+DT_FAAD = yes
+DT_TSDEMUX = yes
 
 #module
 DT_STREAM=yes
@@ -43,6 +44,8 @@ endif
 
 #demuxer
 DT_CFLAGS += -DENABLE_DEMUXER_AAC=1
+DT_CFLAGS += -DENABLE_DEMUXER_TS=1
+
 ifeq ($(DT_FFMPEG),yes)
 	DT_CFLAGS += -DENABLE_DEMUXER_FFMPEG=1
 endif

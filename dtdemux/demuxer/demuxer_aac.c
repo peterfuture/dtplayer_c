@@ -114,11 +114,8 @@ static int aac_parse_frame(uint8_t *buf, int *srate, int *num)
 	return fl;
 }
 
-static int demuxer_aac_probe(demuxer_wrapper_t *wrapper, void *parent)
+static int demuxer_aac_probe(demuxer_wrapper_t *wrapper, dt_buffer_t *probe_buf)
 {
-    dtdemuxer_context_t *ctx = (dtdemuxer_context_t *)parent;
-    wrapper->parent = parent;
-    dt_buffer_t *probe_buf = &ctx->probe_buf; 
     int score;
     int max_frames = 0, first_frames = 0;
     int fsize, frames;
