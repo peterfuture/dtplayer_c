@@ -16,49 +16,6 @@ typedef struct{
 
 static sdl2_ctx_t sdl2_ctx;
 
-/* create win for dtplayer */
-static int sdl2_pre_init (sdl2_ctx_t *ctx)
-{
-    int flags;
-    
-    putenv ("SDL_VIDEO_WINDOW_POS=center");
-    putenv ("SDL_VIDEO_CENTERED=1");
-    if (!SDL_WasInit(SDL_INIT_VIDEO))
-        SDL_Init(SDL_INIT_VIDEO);
-   
-    ctx->dx = ctx->dy = 0;
-    //ctx->dw = vo->para.d_width;
-    //ctx->dh = vo->para.d_height;
-    ctx->dw = 720;
-    ctx->dh = 480;
-
-    flags = SDL_WINDOW_SHOWN; 
-    ctx->win = SDL_CreateWindow("dtplayer",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,ctx->dw,ctx->dh,flags);
-    if(ctx->win == NULL)
-    {
-        dt_error(TAG,"SDL_CreateWindow Error:%s \n",SDL_GetError());
-        return -1;
-    }
-    flags = SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED; 
-    ctx->ren = SDL_CreateRenderer(ctx->win,-1,0);
-    if(ctx->ren == NULL)
-    {
-        dt_error(TAG,"SDL_CreateRenderer Error:%s \n",SDL_GetError());
-        return 1;
-    }
-    
-    ctx->tex = SDL_CreateTexture(ctx->ren,SDL_PIXELFORMAT_YV12,SDL_TEXTUREACCESS_STATIC,ctx->dw,ctx->dh);
-    //ctx->tex = SDL_CreateTexture(ctx->ren,SDL_PIXELFORMAT_YV12,SDL_TEXTUREACCESS_STREAMING,ctx->dw,ctx->dh);
-    if(ctx->tex == NULL)
-    {
-        dt_error(TAG,"SDL_CreateTexture Error:%s \n",SDL_GetError());
-        return 1;
-    }
-
-    dt_info (TAG, "sdl2 pre init OK\n");
-    return 0;
-}
-
 int sdl2_init()
 {
     int flags = 0;
@@ -68,6 +25,20 @@ int sdl2_init()
         return -1;
     }
     memset(&sdl2_ctx,0,sizeof(sdl2_ctx_t));
+    flags = SDL_WINDOW_SHOWN; 
+    sdl2_ctx_t *ctx = &sdl2_ctx;
+    ctx->dx = ctx->dy = 0;
+    //ctx->dw = vo->para.d_width;
+    //ctx->dh = vo->para.d_height;
+    ctx->dw = 720;
+    ctx->dh = 480;
+    ctx->win = SDL_CreateWindow("dtplayer",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,ctx->dw,ctx->dh,flags);
+    if(ctx->win == NULL)
+    {
+        dt_error(TAG,"SDL_CreateWindow Error:%s \n",SDL_GetError());
+        return 1;
+    }
+    dt_info(TAG,"CREATE WIN OK\n");
     dt_lock_init (&sdl2_ctx.vo_mutex, NULL);
     return 0;
 }
@@ -81,8 +52,8 @@ int sdl2_stop()
         SDL_DestroyTexture(ctx->tex);
         SDL_DestroyRenderer(ctx->ren); 
         SDL_DestroyWindow(ctx->win);
-        SDL_QuitSubSystem(SDL_INIT_VIDEO);
     }
+    SDL_Quit();
     ctx->sdl_inited = 0;
     dt_unlock (&ctx->vo_mutex);
     return 0;
@@ -99,14 +70,7 @@ static int vo_sdl2_init (vo_wrapper_t *wrapper, void *parent)
 
 static int vo_sdl2_render (vo_wrapper_t *wrapper, AVPicture_t * pict)
 {
-    int ret = 0;
     sdl2_ctx_t *ctx = (sdl2_ctx_t *)wrapper->handle;
-    
-    if(!ctx->sdl_inited)
-    {
-        ret = sdl2_pre_init(ctx);
-        ctx->sdl_inited = !ret;
-    }
     
     dt_lock (&ctx->vo_mutex);
 
@@ -116,23 +80,11 @@ static int vo_sdl2_render (vo_wrapper_t *wrapper, AVPicture_t * pict)
     dst.w = ctx->dw;
     dst.h = ctx->dh;
 
-    if(ctx->ren)
-        SDL_DestroyRenderer(ctx->ren); 
-    ctx->ren = SDL_CreateRenderer(ctx->win,-1,0);
-    if(ctx->ren == NULL)
-    {
-        dt_error(TAG,"SDL_CreateRenderer Error:%s \n",SDL_GetError());
-        return 1;
-    }
-    if(ctx->tex)    
-        SDL_DestroyTexture(ctx->tex);
-    //ctx->tex = SDL_CreateTexture(ctx->ren,SDL_PIXELFORMAT_YV12,SDL_TEXTUREACCESS_STATIC,ctx->dw,ctx->dh);
-    ctx->tex = SDL_CreateTexture(ctx->ren,SDL_PIXELFORMAT_YV12,SDL_TEXTUREACCESS_STREAMING,ctx->dw,ctx->dh);
-    if(ctx->tex == NULL)
-    {
-        dt_error(TAG,"SDL_CreateTexture Error:%s \n",SDL_GetError());
-        return 1;
-    }
+    if(!ctx->ren)
+        ctx->ren = SDL_CreateRenderer(ctx->win,-1,0);
+    if(!ctx->tex)    
+        ctx->tex = SDL_CreateTexture(ctx->ren,SDL_PIXELFORMAT_YV12,SDL_TEXTUREACCESS_STATIC,ctx->dw,ctx->dh);
+    //ctx->tex = SDL_CreateTexture(ctx->ren,SDL_PIXELFORMAT_YV12,SDL_TEXTUREACCESS_STREAMING,ctx->dw,ctx->dh);
 
     SDL_UpdateYUVTexture(ctx->tex,NULL, pict->data[0], pict->linesize[0],  pict->data[1], pict->linesize[1],  pict->data[2], pict->linesize[2]);
     //SDL_UpdateTexture(ctx->tex, &dst, pict->data[0], pict->linesize[0]);
@@ -146,6 +98,17 @@ static int vo_sdl2_render (vo_wrapper_t *wrapper, AVPicture_t * pict)
 
 static int vo_sdl2_stop (vo_wrapper_t *wrapper)
 {
+    sdl2_ctx_t *ctx = (sdl2_ctx_t *)wrapper->handle;
+    if(ctx->ren)
+    {
+        SDL_DestroyRenderer(ctx->ren);
+        ctx->ren = NULL;
+    }
+    if(ctx->tex)
+    {
+        SDL_DestroyTexture(ctx->tex);
+        ctx->tex = NULL;
+    }
     wrapper->handle = NULL;
     dt_info (TAG, "stop vo sdl\n");
     return 0;

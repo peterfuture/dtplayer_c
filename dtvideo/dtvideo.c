@@ -69,7 +69,7 @@ int video_drop (dtvideo_context_t * vctx, int64_t target_pts)
 {
     int64_t diff = target_pts - video_get_first_pts (vctx);
     int diff_time = diff / 90;
-    if (diff_time > AV_DROP_THRESHOLD)
+    if (diff_time > AVSYNC_DROP_THRESHOLD)
     {
         dt_info (TAG, "diff time exceed %d ms, do not drop!\n", diff_time);
         return 0;
