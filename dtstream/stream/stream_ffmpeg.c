@@ -8,6 +8,10 @@
 
 static const char prefix[] = "ffmpeg://";
 
+#ifndef AVSEEK_SIZE 
+#define AVSEEK_SIZE 0x10000
+#endif
+
 static int stream_ffmpeg_open (stream_wrapper_t * wrapper,char *stream_name)
 {
     const char *filename = stream_name;
@@ -50,6 +54,13 @@ static int stream_ffmpeg_seek (stream_wrapper_t * wrapper, int64_t pos, int when
 {
     AVIOContext *ctx = (AVIOContext *)wrapper->stream_priv;
     stream_ctrl_t *info = &wrapper->info;
+    
+    if(whence == AVSEEK_SIZE)
+    {
+        dt_debug(TAG,"REQUEST STREAM SIZE:%lld \n",info->stream_size);
+        return info->stream_size;
+    }
+
     if (avio_seek(ctx, pos, whence) < 0) {
         info->eof_flag = 1;
         return -1;

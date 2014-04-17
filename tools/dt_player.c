@@ -67,7 +67,7 @@ int main (int argc, char **argv)
         event = get_event(&arg);
         if(event == EVENT_NONE)
         {
-            usleep(100000);
+            usleep(1000);
             continue;
         }
         

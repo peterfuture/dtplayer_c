@@ -87,7 +87,7 @@ int demuxer_open (dtdemuxer_context_t * dem_ctx)
     }
    
     char value[512];
-    int probe_enable = 0;
+    int probe_enable = 1;
     int probe_size = PROBE_BUF_SIZE;
     if(GetEnv("DEMUXER","demuxer.probe",value) > 0)
     {

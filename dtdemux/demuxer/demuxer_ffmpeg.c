@@ -2,9 +2,13 @@
 #include "dt_error.h"
 
 #include "libavformat/avformat.h"
-#define TAG "DEMUX-FFMPEG"
+#include "libavformat/avio.h"
 
 #include <string.h>
+
+#define TAG "DEMUX-FFMPEG"
+
+#define FFMPEG_BUF_SIZE 1024*10 // 60k
 
 typedef struct
 {
@@ -41,6 +45,23 @@ static const type_map_t media_map[] = {
     {"amr", MEDIA_FORMAT_AMR},
 };
 
+typedef struct{
+    struct AVFormatContext *ic;
+    void *stream_ext;
+    uint8_t *buf;
+}ffmpeg_ctx_t;
+
+
+static int read_packet(void *opaque,uint8_t *buf,int size)
+{
+    return dtstream_read(opaque,buf,size);
+}
+
+static int64_t seek_packet(void *opaque,int64_t offset,int whence)
+{
+    return dtstream_seek(opaque,offset,whence);
+}
+
 /* 1 select 0 non select*/
 static int demuxer_ffmpeg_probe(demuxer_wrapper_t *wrapper,void *parent)
 {
@@ -50,19 +71,39 @@ static int demuxer_ffmpeg_probe(demuxer_wrapper_t *wrapper,void *parent)
 
 static int demuxer_ffmpeg_open (demuxer_wrapper_t * wrapper)
 {
-    AVFormatContext *ic = NULL;
     int err, ret;
     
     dtdemuxer_context_t *ctx = (dtdemuxer_context_t *)wrapper->parent;
     char *file_name = ctx->file_name;
 
-    av_register_all ();
-    err = avformat_open_input (&ic, file_name, NULL, NULL);
-    if (err < 0)
-        return -1;
+    ffmpeg_ctx_t *ffmpeg_ctx = (ffmpeg_ctx_t *)malloc(sizeof(*ffmpeg_ctx));
 
+    av_register_all ();
+    AVFormatContext *ic = avformat_alloc_context();
+    AVInputFormat *iformat = NULL;
+    /*register ext stream, ffmpeg will use */
+    //==================================================
+    ffmpeg_ctx->stream_ext = ctx->stream_priv;
+    ffmpeg_ctx->buf = (uint8_t *)malloc(FFMPEG_BUF_SIZE);
+    AVIOContext *io_ctx = avio_alloc_context(ffmpeg_ctx->buf,FFMPEG_BUF_SIZE,0,ffmpeg_ctx->stream_ext,read_packet,NULL,seek_packet);
+    io_ctx->write_flag = 0;
+    ret = av_probe_input_buffer(io_ctx, &iformat, "", NULL, 0, 0);
+    if (ret < 0)
+    {
+        dt_error(TAG,"av_probe_input_buffer call failed!\n");
+        return -1;
+    }
+    dt_debug(TAG,"av_probe_input_buffer OK, %s \n",iformat->name);
+    ic->pb = io_ctx;
+    //===================================================
+
+    err = avformat_open_input (&ic, file_name, ic->iformat, NULL);
+    if(err < 0)
+    {
+        dt_error(TAG,"avformat_open_input failed \n");
+        return -1;
+    }
     dt_info (TAG, "[%s:%d] avformat_open_input ok\n", __FUNCTION__, __LINE__);
-    wrapper->demuxer_priv = (void *) ic;
 
     err = avformat_find_stream_info (ic, NULL);
     if (err < 0)
@@ -71,6 +112,10 @@ static int demuxer_ffmpeg_open (demuxer_wrapper_t * wrapper)
         ret = -1;
         goto FAIL;
     }
+    
+    av_dump_format(ic,0,NULL,0);
+    ffmpeg_ctx->ic = ic;
+    wrapper->demuxer_priv = (void *) ffmpeg_ctx;
 
     dt_info (TAG, "[%s:%d] start_time:%lld \n", __FUNCTION__, __LINE__, ic->start_time);
     return 0;
@@ -120,7 +165,8 @@ static int demuxer_ffmpeg_read_frame (demuxer_wrapper_t * wrapper, dt_av_frame_t
     int cur_vidx = (has_video) ? media_info->vstreams[media_info->cur_vst_index]->index : -1;
     int cur_sidx = (has_sub) ? media_info->sstreams[media_info->cur_sst_index]->index : -1;
 
-    AVFormatContext *ic = (AVFormatContext *) wrapper->demuxer_priv;
+    ffmpeg_ctx_t *ctx = (ffmpeg_ctx_t *)wrapper->demuxer_priv;
+    AVFormatContext *ic = ctx->ic;
     AVPacket avpkt;
     int ret = av_read_frame (ic, &avpkt);
     if (ret < 0)
@@ -255,7 +301,8 @@ static int format2bps (int fmt)
 
 static int demuxer_ffmpeg_setup_info (demuxer_wrapper_t * wrapper, dt_media_info_t * info)
 {
-    AVFormatContext *ic = (AVFormatContext *) wrapper->demuxer_priv;
+    ffmpeg_ctx_t *ctx = (ffmpeg_ctx_t *)wrapper->demuxer_priv;
+    AVFormatContext *ic = ctx->ic;
     AVStream *pStream;
     AVCodecContext *pCodec;
     vstream_info_t *vst_info;
@@ -362,9 +409,9 @@ static int demuxer_ffmpeg_setup_info (demuxer_wrapper_t * wrapper, dt_media_info
 
 static int demuxer_ffmpeg_seek_frame (demuxer_wrapper_t * wrapper, int timestamp)
 {
-    AVFormatContext *ic = (AVFormatContext *) wrapper->demuxer_priv;
+    ffmpeg_ctx_t *ctx = (ffmpeg_ctx_t *)wrapper->demuxer_priv;
+    AVFormatContext *ic = ctx->ic;
     int seek_flags = AVSEEK_FLAG_ANY;
-
     int64_t seek_target = timestamp * 1000000;
     int64_t seek_min = (seek_target > 0) ? seek_target - timestamp + 2 : INT64_MIN;
     int64_t seek_max = (seek_target < 0) ? seek_target - timestamp - 2 : INT64_MAX;
@@ -382,8 +429,14 @@ static int demuxer_ffmpeg_seek_frame (demuxer_wrapper_t * wrapper, int timestamp
 
 static int demuxer_ffmpeg_close (demuxer_wrapper_t * wrapper)
 {
-    AVFormatContext *ic = (AVFormatContext *) wrapper->demuxer_priv;
-    avformat_close_input (&ic);
+    ffmpeg_ctx_t *ctx = (ffmpeg_ctx_t *)wrapper->demuxer_priv;
+    AVFormatContext *ic = ctx->ic;
+    if(ic)
+        avformat_close_input (&ic);
+    if(ctx->buf)
+        free(ctx->buf);
+    free(ctx);
+    wrapper->demuxer_priv = NULL;
     return 0;
 }
 
