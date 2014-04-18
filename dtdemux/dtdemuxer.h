@@ -9,7 +9,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define PROBE_BUF_SIZE 1024*1024 //1M
+#define PROBE_BUF_SIZE 1024*1024*10 //1M
 
 typedef enum{
     DEMUXER_INVALID = -1,

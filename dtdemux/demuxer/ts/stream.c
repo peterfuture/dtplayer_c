@@ -63,17 +63,15 @@ ts_stream_create(const ts_options_t *opts)
 int
 ts_stream_read_packetf(ts_stream_t *stream, ts_packet_t *packet, FILE *src)
 {
-	size_t c, plen, bp, prepad;
+	size_t c, plen, bp;
 	int n;
 	uint8_t buf[192], *bufp;
 
 	plen = TS_PACKET_LENGTH;
 	bufp = buf;
-	prepad = 0;
 	if(stream->opts->timecode)
 	{
 		plen += sizeof(uint32_t);
-		prepad += sizeof(uint32_t);
 	}
 	if(stream->opts->prepad)
 	{
@@ -163,43 +161,23 @@ ts_stream_read_packetf(ts_stream_t *stream, ts_packet_t *packet, FILE *src)
 				return -1;
 			}
 	}
-	return ts_stream_read_packet(stream, packet, buf, prepad);
+	return ts_stream_read_packet(stream, packet, buf);
 }
 
 int
-ts_stream_read_packet(ts_stream_t *stream, ts_packet_t *packet, const uint8_t *bufp, size_t prepad)
+ts_stream_read_packet(ts_stream_t *stream, ts_packet_t *packet, const uint8_t *bufp)
 {
 	memset(packet, 0, sizeof(ts_packet_t));
-	if(TS_PACKET_LENGTH + prepad > sizeof(packet->payload))
-	{
-		/* Packet too big for buffer */
-		return -1;
-	}
-	memcpy(packet->payload, bufp, TS_PACKET_LENGTH + prepad);
-	packet->prepad = prepad;
-	packet->payloadlen = TS_PACKET_LENGTH + prepad;
-	packet->plstart = packet->plofs = prepad;
-	bufp = &(packet->payload[prepad]);
-	packet->sync = bufp[0];
-	if(TS_SYNC_BYTE != packet->sync)
-	{
-		/* Invalid packet */
-		fprintf(stderr, "%s: invalid sync byte at start of packet (expected 0x47, found 0x%02x)\n", stream->opts->filename, packet->sync);
-		return -1;
-	}
 	packet->stream = stream;
 	stream->seq++;
 	if(stream->opts->timecode)
 	{
-		if(prepad != sizeof(uint32_t))
-		{
-			fprintf(stderr, "%s: Internal error: timecode option specified but prepad was not the correct size\n", stream->opts->filename);
-			return -1;
-		}
-		packet->timecode = (packet->payload[0] << 24) | (packet->payload[1] << 16) | (packet->payload[2] << 8) | packet->payload[3];
+		packet->timecode = (bufp[0] << 24) | (bufp[1] << 16) | (bufp[2] << 8) | bufp[3];
+		bufp += 4;
 	}
+	packet->sync = bufp[0];
 	bufp++; /* Skip sync byte */
-	packet->plofs++;
+//	printf("flags = %02x\n", bufp[0]);
 	packet->transerr = (bufp[0] & 0x80) >> 7;
 	packet->unitstart = (bufp[0] & 0x40) >> 6;
 	packet->priority = (bufp[0] & 0x20) >> 5;
@@ -209,7 +187,34 @@ ts_stream_read_packet(ts_stream_t *stream, ts_packet_t *packet, const uint8_t *b
 	packet->haspd = (bufp[2] & 0x10) >> 4;
 	packet->continuity = bufp[2] & 0x0f;
 	bufp += 3;
-	packet->plofs += 3;
 	packet->payloadlen = 184;
+	memcpy(packet->payload, bufp, packet->payloadlen);
 	return ts__packet_decode(packet);
+}
+
+int
+ts_stream_fill_packet(ts_stream_t *stream, ts_packet_t *packet, const uint8_t *bufp)
+{
+	memset(packet, 0, sizeof(ts_packet_t));
+	packet->stream = stream;
+	stream->seq++;
+	if(stream->opts->timecode)
+	{
+		packet->timecode = (bufp[0] << 24) | (bufp[1] << 16) | (bufp[2] << 8) | bufp[3];
+		bufp += 4;
+	}
+	packet->sync = bufp[0];
+	bufp++; 
+	packet->transerr = (bufp[0] & 0x80) >> 7;
+	packet->unitstart = (bufp[0] & 0x40) >> 6;
+	packet->priority = (bufp[0] & 0x20) >> 5;
+	packet->pid = ((bufp[0] & 0x1f) << 8) | bufp[1];
+	packet->sc = (bufp[2] & 0xc0) >> 6;
+	packet->hasaf = (bufp[2] & 0x20) >> 5;
+	packet->haspd = (bufp[2] & 0x10) >> 4;
+	packet->continuity = bufp[2] & 0x0f;
+	bufp += 3;
+	packet->payloadlen = 184;
+	memcpy(packet->payload, bufp, packet->payloadlen);
+	return 1;
 }
