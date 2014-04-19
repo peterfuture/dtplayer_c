@@ -216,5 +216,35 @@ ts_stream_fill_packet(ts_stream_t *stream, ts_packet_t *packet, const uint8_t *b
 	bufp += 3;
 	packet->payloadlen = 184;
 	memcpy(packet->payload, bufp, packet->payloadlen);
-	return 1;
+
+    packet->pts = -1;
+    packet->dts = -1;
+    if(packet->payloadlen > 0 && packet->unitstart)
+    {
+        uint8_t *pcrbuf = packet->payload;
+        int len = pcrbuf[0];
+		if(len <= 0 || len > 183)	//broken from the stream layer or invalid
+            goto QUIT;
+
+        pcrbuf++;
+		int flags = pcrbuf[0];
+		int has_pcr;
+		has_pcr = flags & 0x10;
+        pcrbuf++;
+        if(!has_pcr)
+            goto QUIT;
+			
+        int64_t pcr = -1;
+        int64_t pcr_ext = -1;
+        unsigned int v = 0;
+	    //v = (uint32_t)pcrbuf[3]<<24 | pcrbuf[2]<<16 |	pcrbuf[1]<<8 |pcrbuf[0];
+	    v = (uint32_t)pcrbuf[0]<<24 | pcrbuf[1]<<16 |	pcrbuf[2]<<8 |pcrbuf[3];
+        pcr = ((int64_t)v<<1) | (pcrbuf[4] >> 7);
+		pcr_ext = (pcrbuf[4] & 0x01) << 8;
+		pcr_ext |= pcrbuf[5];
+        packet->pts = pcr;
+        //printf("get pts:%lld \n",pcr);
+    }
+QUIT: 
+    return 0;
 }

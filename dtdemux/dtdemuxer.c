@@ -90,7 +90,7 @@ int demuxer_open (dtdemuxer_context_t * dem_ctx)
    
     char value[512];
     int probe_enable = 0;
-    int probe_size = PROBE_BUF_SIZE;
+    int probe_size = dtstream_local(dem_ctx->stream_priv)?PROBE_LOCAL_SIZE:PROBE_STREAM_SIZE;
     if(GetEnv("DEMUXER","demuxer.probe",value) > 0)
     {
         probe_enable = atoi(value);
@@ -112,7 +112,7 @@ int demuxer_open (dtdemuxer_context_t * dem_ctx)
     {
         int64_t old_pos = dtstream_tell(dem_ctx->stream_priv);
         dt_info(TAG,"old:%lld \n",old_pos);
-        ret = buf_init(&dem_ctx->probe_buf,PROBE_BUF_SIZE);
+        ret = buf_init(&dem_ctx->probe_buf,probe_size);
         if(ret < 0)
             return -1; 
         ret = dtstream_read(dem_ctx->stream_priv,dem_ctx->probe_buf.data,probe_size); 

@@ -100,6 +100,13 @@ int64_t stream_get_size (dtstream_context_t *stm_ctx)
     return info->stream_size;
 }
 
+int stream_local (dtstream_context_t *stm_ctx)
+{
+    stream_wrapper_t *wrapper = stm_ctx->stream;
+    stream_ctrl_t *info = &wrapper->info;
+    return !(info->is_stream);
+}
+
 int stream_read (dtstream_context_t *stm_ctx, uint8_t *buf,int len)
 {
     stream_wrapper_t *wrapper = stm_ctx->stream;

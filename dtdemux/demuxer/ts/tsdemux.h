@@ -166,6 +166,26 @@ struct ts_pidinfo_struct
 	uint16_t pmtpid; /* PID of the programme this PES relates to */
 	uint8_t stype;   /* Stream type from the PMT */
 	uint8_t streamid;
+
+    //es info
+#if 0
+    int bitrate;
+    
+    int channels;
+    int samplerate;
+    int bps;
+
+    int width;
+    int height;
+    
+    int extra_size;
+    uint8_t extradata[1024];
+
+    int64_t first_pts;
+    int64_t last_pts;
+    int duration;
+    int size;
+#endif
 };
 
 struct ts_adapt_struct
@@ -227,6 +247,8 @@ struct ts_packet_struct
 	size_t payloadlen;
 	size_t plofs;
 	uint8_t payload[184]; /* If haspd is set */
+    int64_t pts;
+    int64_t dts;
 };
 
 struct ts_streamtype_struct
