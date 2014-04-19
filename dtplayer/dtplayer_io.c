@@ -71,6 +71,15 @@ static void *player_io_thread (dtplayer_context_t * dtp_ctx)
     dt_av_frame_t frame;
     int frame_valid = 0;
     int ret = 0;
+    
+    char value[512];
+    int dump_mode = 0;
+    if(GetEnv("PLAYER","dump.mode",value) > 0)
+    {
+        dump_mode = atoi(value);
+        dt_info(TAG,"dump mode:%d 0 nodump 1dumpaudio 2dumpvideo \n",dump_mode);
+    }
+    
     do
     {
         usleep (10000);
@@ -111,6 +120,20 @@ static void *player_io_thread (dtplayer_context_t * dtp_ctx)
         {
             dt_debug (TAG, "player write ok \n");
             frame_valid = 0;
+
+            if(frame.type == DT_TYPE_AUDIO && dump_mode == 1)
+            {
+                FILE *fp = fopen("./raw_audio.out","ab+");
+                fwrite(frame.data,1,frame.size,fp);
+                fclose(fp);
+            }
+            if(frame.type == DT_TYPE_VIDEO && dump_mode == 2)
+            {
+                FILE *fp = fopen("./raw_video.out","ab+");
+                fwrite(frame.data,1,frame.size,fp);
+                fclose(fp);
+            }
+
         }
         else
             dt_debug (TAG, "write frame failed , write again \n");
