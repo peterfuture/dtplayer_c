@@ -9,11 +9,11 @@ DT_VERSION = v1.0
 #======================================================
 
 #extlib
-DT_FFMPEG = no
+DT_FFMPEG = yes
 DT_SDL = no
 DT_SDL2 = yes
 DT_ALSA = no
-DT_FAAD = yes
+DT_FAAD = no
 DT_TSDEMUX = yes
 
 #module
