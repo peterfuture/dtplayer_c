@@ -781,15 +781,22 @@ skip:
             if (buf_size > 0 && es->buffer) {
                 if (es->data_index > 0 && es->data_index + buf_size > es->total_size) 
                 {
-                    dt_error(TAG,"ES DATA EXCEED TOTAL SIZE \n");
-                    //if(es->total_size < MAX_PES_PAYLOAD && es->pes_header_size + es->data_index == es->total_size + PES_START_SIZE)
+                   
+#if 1 // just for test
+                    int idx = 0;
+                    printf("payloda exceed total, data_index:%d buf_size:%d total:%d \n ",es->data_index,buf_size,es->total_size);
+                    for(idx=0;idx<buf_size;idx++)
                     {
-                        uint8_t *tmp_buf = malloc(es->total_size + buf_size);
-                        memcpy(tmp_buf,es->buffer,es->data_index);
-                        free(es->buffer);
-                        es->buffer = tmp_buf;
-                        es->total_size = es->data_index + buf_size;
+                        printf("%02x ",buf[idx]);
                     }
+                    printf(" \n");
+#endif
+                    uint8_t *tmp_buf = malloc(es->total_size + buf_size);
+                    memcpy(tmp_buf,es->buffer,es->data_index);
+                    free(es->buffer);
+                    es->buffer = tmp_buf;
+                    es->total_size = es->data_index + buf_size;
+                    
                 } else if (es->data_index == 0 &&
                            buf_size > es->total_size) {
                     // pes packet size is < ts size packet and pes data is padded with 0xff
