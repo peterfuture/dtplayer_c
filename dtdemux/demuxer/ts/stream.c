@@ -242,7 +242,7 @@ ts_stream_fill_packet(ts_stream_t *stream, ts_packet_t *packet, const uint8_t *b
         pcr = ((int64_t)v<<1) | (pcrbuf[4] >> 7);
 		pcr_ext = (pcrbuf[4] & 0x01) << 8;
 		pcr_ext |= pcrbuf[5];
-        packet->pts = pcr;
+        packet->pts = (pcr *300 + pcr_ext)/300;
         //printf("get pts:%lld \n",pcr);
     }
 QUIT: 
