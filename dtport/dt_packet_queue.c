@@ -118,7 +118,7 @@ int packet_queue_flush (dt_packet_queue_t * queue)
 {
     dt_packet_list_t *list1, *list2;
     while (queue->nmutex)
-        usleep (1000);
+        usleep (100);
     queue->nmutex = 1;
     for (list1 = queue->first; list1 != NULL; list1 = list2)
     {

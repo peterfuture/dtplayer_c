@@ -150,7 +150,7 @@ static void *audio_output_thread (void *args)
             goto EXIT;
         if (ao->status == AO_STATUS_IDLE || ao->status == AO_STATUS_PAUSE)
         {
-            usleep (1000);
+            usleep (100);
             continue;
         }
 

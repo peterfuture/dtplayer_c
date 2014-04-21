@@ -88,7 +88,7 @@ int video_drop (dtvideo_context_t * vctx, int64_t target_pts)
                 dt_info (TAG, "3s read nothing, quit drop video\n");
                 break;
             }
-            usleep (10000);
+            usleep (100);
             continue;
         }
         drop_count = 300;

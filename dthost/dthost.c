@@ -161,7 +161,7 @@ int host_start (dthost_context_t * hctx)
             video_start_flag = !((first_vpts = dtvideo_get_first_pts (hctx->video_priv)) == -1);
         if (audio_start_flag && video_start_flag)
             break;
-        usleep (1000);
+        usleep (100);
         if(print_cnt-- == 0)
         {
             dt_info (TAG, "audio:%d video:%d \n", audio_start_flag, video_start_flag);
@@ -186,6 +186,17 @@ int host_start (dthost_context_t * hctx)
         drop_flag = (av_diff_ms > 100 && av_diff_ms < AVSYNC_DROP_THRESHOLD);
         if (!host_sync_enable (hctx))
             drop_flag = 0;
+        
+        //env set dropable
+        char value[512];
+        int drop_enable = 1;
+        if(GetEnv("HOST","drop.enable",value) > 0)
+        {
+            drop_enable = atoi(value);
+            dt_info(TAG,"HOST.drop.enable = %d \n",drop_enable);
+            if(drop_enable == 0)
+                drop_flag = 0;
+        }
         if (drop_flag)
         {
             if (hctx->pts_audio > hctx->pts_video)

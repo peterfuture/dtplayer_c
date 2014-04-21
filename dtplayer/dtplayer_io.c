@@ -43,7 +43,7 @@ int pause_io_thread (dtplayer_context_t * dtp_ctx)
 {
     dtp_ctx->io_loop.flag = IO_FLAG_PAUSE;
     while (dtp_ctx->io_loop.status != IO_LOOP_PAUSED)
-        usleep (1000);
+        usleep (100);
     dtp_ctx->io_loop.flag = IO_FLAG_NULL;
 
     return 0;
@@ -73,7 +73,7 @@ static void *player_io_thread (dtplayer_context_t * dtp_ctx)
     int ret = 0;
     do
     {
-        usleep (10000);
+        usleep (100);
         if (io_ctl->flag == IO_FLAG_PAUSE)
             io_ctl->status = IO_LOOP_PAUSED;
         if (io_ctl->status == IO_LOOP_QUIT)
@@ -84,7 +84,7 @@ static void *player_io_thread (dtplayer_context_t * dtp_ctx)
             if (frame_valid == 1)
                 free (frame.data);
             frame_valid = 0;
-            usleep (10000);
+            usleep (100);
             continue;
         }
         /*io ops */
@@ -101,7 +101,7 @@ static void *player_io_thread (dtplayer_context_t * dtp_ctx)
                 io_ctl->status = IO_LOOP_QUIT;
                 dtp_ctx->ctrl_info.eof_flag = 1;
             }
-            usleep (1000);
+            usleep (100);
             continue;
         }
         dt_debug (TAG, "read ok size:%d pts:%lld \n",frame.size,frame.pts);

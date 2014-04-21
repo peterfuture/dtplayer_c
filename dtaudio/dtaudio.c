@@ -82,7 +82,7 @@ int audio_drop (dtaudio_context_t * actx, int64_t target_pts)
         {
             if (drop_count-- == 0)
                 break;
-            usleep (1000);
+            usleep (100);
             continue;
         }
         drop_count = 50;
@@ -233,7 +233,7 @@ static void *event_handle_loop (void *args)
         event = dt_get_event (server);
         if (!event)
         {
-            usleep (10000);
+            usleep (100);
             continue;
         }
 

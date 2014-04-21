@@ -68,7 +68,7 @@ static void *video_decode_loop (void *arg)
         if (decoder->status == VDEC_STATUS_IDLE)
         {
             dt_info (TAG, "[%s:%d] Idle status ,please wait \n", __FUNCTION__, __LINE__);
-            usleep (1000);
+            usleep (100);
             continue;
         }
         if (decoder->status == VDEC_STATUS_EXIT)
@@ -80,7 +80,7 @@ static void *video_decode_loop (void *arg)
         /*read frame */
         if (!decoder->parent)
         {
-            usleep (1000);
+            usleep (100);
             continue;
         }
 
@@ -93,7 +93,7 @@ static void *video_decode_loop (void *arg)
         ret = dtvideo_read_frame (decoder->parent, &frame);
         if (ret < 0)
         {
-            usleep (1000);
+            usleep (100);
             dt_debug (TAG, "[%s:%d] dtaudio decoder loop read frame failed \n", __FUNCTION__, __LINE__);
             continue;
         }
