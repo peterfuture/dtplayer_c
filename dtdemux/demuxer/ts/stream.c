@@ -198,45 +198,88 @@ ts_stream_fill_packet(ts_stream_t *stream, ts_packet_t *packet, const uint8_t *b
 	memset(packet, 0, sizeof(ts_packet_t));
 	packet->stream = stream;
 	stream->seq++;
-	if(stream->opts->timecode)
-	{
-		packet->timecode = (bufp[0] << 24) | (bufp[1] << 16) | (bufp[2] << 8) | bufp[3];
-		bufp += 4;
-	}
+	
 	packet->sync = bufp[0];
-	bufp++; 
-	packet->transerr = (bufp[0] & 0x80) >> 7;
-	packet->unitstart = (bufp[0] & 0x40) >> 6;
-	packet->priority = (bufp[0] & 0x20) >> 5;
-	packet->pid = ((bufp[0] & 0x1f) << 8) | bufp[1];
-	packet->sc = (bufp[2] & 0xc0) >> 6;
-	packet->hasaf = (bufp[2] & 0x20) >> 5;
-	packet->haspd = (bufp[2] & 0x10) >> 4;
-	packet->continuity = bufp[2] & 0x0f;
-	bufp += 3;
-   
-	packet->payloadlen = 184;
-	memcpy(packet->payload, bufp, packet->payloadlen);
+	packet->transerr = (bufp[1] & 0x80) >> 7;
+	packet->unitstart = (bufp[1] & 0x40) >> 6;
+	packet->priority = (bufp[1] & 0x20) >> 5;
+	packet->pid = ((bufp[1] & 0x1f) << 8) | bufp[2];
+	packet->sc = (bufp[3] & 0xc0) >> 6;
+	packet->hasaf = (bufp[3] & 0x20) >> 5;
+	packet->haspd = (bufp[3] & 0x10) >> 4;
+	packet->continuity = bufp[3] & 0x0f;
+
+
+    if(packet->pid == 0x1FFF)
+    {
+        //skip
+        return 0;
+    }
+
+//	packet->payloadlen = 184;
+//	memcpy(packet->payload, bufp, packet->payloadlen);
     
     packet->pts = -1;
     packet->dts = -1;
-    if(!packet->hasaf)
-        goto QUIT;
-    if(packet->payloadlen > 0 && packet->unitstart)
+    
+    int adap_len = 0;
+    uint8_t *adap_data = NULL;
+	int adapation_field_contrl = (bufp[3] & 0x30) >> 4;
+    
+    switch(adapation_field_contrl)
     {
-        uint8_t *pcrbuf = packet->payload;
+        case 0:
+            //printf("no ad, no payload \n");
+            packet->payloadlen = 0;
+            break;
+        case 1:
+            //printf("payload only \n");
+            adap_len = 0;
+            packet->payloadlen = 184;
+    	    memcpy(packet->payload, bufp+4, packet->payloadlen);
+            break;
+        case 2:
+            //printf("adaption only \n");
+            adap_len = bufp[4];
+            //printf("adaption only len:%d \n",adap_len);
+            if(adap_len >0)
+                adap_data = bufp + 4;
+            packet->payloadlen = 0;
+            break;
+        case 3:
+            //printf("adaption and payload \n");
+            adap_len = bufp[4];
+            if(adap_len >0)
+                adap_data = bufp + 4;
+            packet->payloadlen = 188 - 5 - adap_len;
+    	    memcpy(packet->payload, bufp+5+adap_len, packet->payloadlen);
+            break;
+        default:
+            printf("err case \n");
+            packet->payloadlen = 0;
+            break;
+    }
+    
+    //get pts info
+    //if(adap_len > 0 && packet->unitstart)
+    if(adap_len > 0)
+    {
+        uint8_t *pcrbuf = adap_data;
         int len = pcrbuf[0];
 		if(len <= 0 || len > 183)	//broken from the stream layer or invalid
+        {
             goto QUIT;
-
+        }
         pcrbuf++;
 		int flags = pcrbuf[0];
 		int has_pcr;
 		has_pcr = flags & 0x10;
         pcrbuf++;
         if(!has_pcr)
+        {
+            //printf("do not have pcr flag \n");
             goto QUIT;
-			
+        }	
         int64_t pcr = -1;
         int64_t pcr_ext = -1;
         unsigned int v = 0;
@@ -246,7 +289,7 @@ ts_stream_fill_packet(ts_stream_t *stream, ts_packet_t *packet, const uint8_t *b
 		pcr_ext = (pcrbuf[4] & 0x01) << 8;
 		pcr_ext |= pcrbuf[5];
         packet->pts = (pcr *300 + pcr_ext)/300;
-        //printf("get pts:%lld \n",pcr);
+        //printf("get pts:%lld pid:%x\n",pcr,packet->pid);
     }
 QUIT: 
     return 0;

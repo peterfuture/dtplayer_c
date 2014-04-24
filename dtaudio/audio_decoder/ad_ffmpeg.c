@@ -17,6 +17,9 @@ static enum AVCodecID convert_to_id(int format)
     {
         case AUDIO_FORMAT_AAC:
             return AV_CODEC_ID_AAC;
+        case AUDIO_FORMAT_AC3:
+            return AV_CODEC_ID_AC3;
+
         default:
             return 0;
     }

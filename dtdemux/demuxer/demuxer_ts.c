@@ -273,6 +273,9 @@ static int ts_type_convert(int type)
             break;
         case ES_TYPE_AAC:
              ret = AUDIO_FORMAT_AAC;
+        case ES_TYPE_AC3:
+             ret = AUDIO_FORMAT_AC3;
+         
              break;
         default:
              break;
@@ -382,7 +385,11 @@ static int ts_open(demuxer_wrapper_t *wrapper)
 			    case PST_INTERACTIVE: printf(" interactive"); break;
 			    case PST_CC: printf(" closed captioning"); break;
 			    case PST_IP: printf(" Internet Protocol"); break;
-			    case PST_SI: printf(" stream information"); break;
+			    case PST_SI: printf(" stream information"); 
+                    ts_ctx->es_info[ts_ctx->es_num] = info;
+                    ts_ctx->es_num++;
+                    printf("\n");
+                    break;
 			    case PST_NI: printf(" network information"); break;
 		    }
 	    }
@@ -412,17 +419,28 @@ static int ts_open(demuxer_wrapper_t *wrapper)
     for(idx = 0;idx< ts_ctx->es_num;idx++)
     {
         tmp = ts_ctx->es_info[idx];
+        if(tmp->subtype == PST_SI)
+        {
+            pid_tmp = tmp->pid;
+            goto PID_FOUND;
+        }
+    }
+    for(idx = 0;idx< ts_ctx->es_num;idx++)
+    {
+        tmp = ts_ctx->es_info[idx];
+
         if(tmp->subtype == PST_VIDEO)
         {
             pid_tmp = tmp->pid;
-            break;
         }
+
         if(tmp->subtype == PST_AUDIO && ts_ctx->video_num == 0)
         {
             pid_tmp = tmp->pid;
             break;
         }
     }
+PID_FOUND:
     if(pid_tmp == -1)
     {
         dt_error(TAG,"FAILED TO GET INFO\n");
@@ -450,7 +468,7 @@ static int ts_open(demuxer_wrapper_t *wrapper)
             if(packet.pts == -1)
                 goto NEXT_PKT;
             first_pts = packet.pts;
-            dt_info(TAG,"Find first pcr :%lld %lld %02x %02x\n",packet.pts,first_pts,packet.payload[0],packet.payload[1]);
+            dt_info(TAG,"Find first pcr :%lld %lld \n",packet.pts,first_pts);
             break;
             //demuxer->reference_clock = (double)pcr/(double)27000000.0;
 		}
@@ -461,7 +479,7 @@ NEXT_PKT:
     if(first_pts == -1)
         return 0;
     //find last pts
-    if(ts_ctx->filesize > buf_size)
+    if(ts_ctx->filesize < buf_size)
         return -1;
     pos = ts_ctx->filesize - buf_size;
     ret = dtstream_seek(ctx->stream_priv,pos,SEEK_SET);
@@ -612,7 +630,7 @@ static int setup_frame(pes_t *es, dt_av_frame_t *frame,int type)
     frame->pts = es->pts;
     frame->dts = es->dts;
     frame->duration = -1;
-    dt_info(TAG,"GET ONEFRAME \n");
+    dt_debug(TAG,"GET ONEFRAME \n");
 
     es->data_index = 0;
     es->pts = es->dts = -1;
@@ -728,7 +746,8 @@ skip:
                 es->data_index += len;
                 buf += len;
                 buf_size -= len;
-                if (es->data_index == es->pes_header_size) {
+                if (es->data_index == es->pes_header_size) 
+                {
                     const uint8_t *r;
                     unsigned int flags, pes_ext, skip;
 
@@ -746,38 +765,40 @@ skip:
                         r += 5;
                     }
                     es->extended_stream_id = -1;
-                    if (flags & 0x01) { /* PES extension */
+                    if (flags & 0x01) 
+                    { /* PES extension */
                         pes_ext = *r++;
-                    /* Skip PES private data, program packet sequence counter and P-STD buffer */
-                    skip  = (pes_ext >> 4) & 0xb;
-                    skip += skip & 0x9;
-                    r    += skip;
-                    if ((pes_ext & 0x41) == 0x01 &&
+                        /* Skip PES private data, program packet sequence counter and P-STD buffer */
+                        skip  = (pes_ext >> 4) & 0xb;
+                        skip += skip & 0x9;
+                        r    += skip;
+                        if ((pes_ext & 0x41) == 0x01 &&
                         (r + 2) <= (es->header + es->pes_header_size)) {
                         /* PES extension 2 */
                         if ((r[0] & 0x7f) > 0 && (r[1] & 0x80) == 0)
                             es->extended_stream_id = r[1];
+                        }
+                    }
+
+                    /* we got the full header. We parse it and get the payload */
+                    es->state = TS_PAYLOAD;
+                    dt_debug(TAG,"ENTER PESHEADER_FILL FROM PESHEADER \n");
+                    es->data_index = 0;
+                
+                    if (es->stream_type == 0x12 && buf_size > 0) {
+                        //fixme need to drop header
+                        dt_info(TAG,"WARN you need to drop header \n");
+                    }
+                    if (es->stream_type == 0x15 && buf_size >= 5) {
+                        /* skip metadata access unit header */
+                        es->pes_header_size += 5;
+                        buf += 5;
+                        buf_size -= 5;
+                        dt_info(TAG,"STREAM TYPE:%d \n",es->stream_type);
                     }
                 }
-
-                /* we got the full header. We parse it and get the payload */
-                es->state = TS_PAYLOAD;
-                dt_debug(TAG,"ENTER PESHEADER_FILL FROM PESHEADER \n");
-                es->data_index = 0;
-                
-                if (es->stream_type == 0x12 && buf_size > 0) {
-                //fixme need to drop header
-                }
-                if (es->stream_type == 0x15 && buf_size >= 5) {
-                    /* skip metadata access unit header */
-                    es->pes_header_size += 5;
-                    buf += 5;
-                    buf_size -= 5;
-                    dt_info(TAG,"STREAM TYPE:%d \n",es->stream_type);
-                }
-            }
-            break;
-        case TS_PAYLOAD:
+                break;
+            case TS_PAYLOAD:
             if (buf_size > 0 && es->buffer) {
                 if (es->data_index > 0 && es->data_index + buf_size > es->total_size) 
                 {
@@ -805,7 +826,7 @@ skip:
                 }
                 memcpy(es->buffer + es->data_index, buf, buf_size);
                 es->data_index += buf_size;
-                dt_info(TAG,"copy payload SIZE:%d size:%d \n",buf_size,es->data_index);
+                dt_debug(TAG,"copy payload SIZE:%d size:%d \n",buf_size,es->data_index);
             }
             buf_size = 0;
             break;
@@ -857,7 +878,7 @@ static int ts_read_frame(demuxer_wrapper_t *wrapper, dt_av_frame_t *frame)
         {
             int type = (packet.pid == apid)?DT_TYPE_AUDIO:DT_TYPE_VIDEO;
             ret = handle_ts_pkt(ts_ctx,&packet,frame,type);
-            dt_info(TAG,"HANDLE_TS_PKT RET:%d \n",ret);
+            dt_debug(TAG,"HANDLE_TS_PKT RET:%d \n",ret);
             if(ret = 1) // got one frame
                 return DTERROR_NONE;
         }
