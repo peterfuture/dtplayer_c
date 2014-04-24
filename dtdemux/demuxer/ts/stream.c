@@ -214,11 +214,14 @@ ts_stream_fill_packet(ts_stream_t *stream, ts_packet_t *packet, const uint8_t *b
 	packet->haspd = (bufp[2] & 0x10) >> 4;
 	packet->continuity = bufp[2] & 0x0f;
 	bufp += 3;
+   
 	packet->payloadlen = 184;
 	memcpy(packet->payload, bufp, packet->payloadlen);
-
+    
     packet->pts = -1;
     packet->dts = -1;
+    if(!packet->hasaf)
+        goto QUIT;
     if(packet->payloadlen > 0 && packet->unitstart)
     {
         uint8_t *pcrbuf = packet->payload;
