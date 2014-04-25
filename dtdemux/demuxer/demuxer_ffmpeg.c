@@ -63,9 +63,8 @@ static int64_t seek_packet(void *opaque,int64_t offset,int whence)
 }
 
 /* 1 select 0 non select*/
-static int demuxer_ffmpeg_probe(demuxer_wrapper_t *wrapper,void *parent)
+static int demuxer_ffmpeg_probe(demuxer_wrapper_t *wrapper,dt_buffer_t *buf)
 {
-    wrapper->parent = parent;
     return 1;
 }
 

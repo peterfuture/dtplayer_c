@@ -14,6 +14,7 @@ DT_SDL = no
 DT_SDL2 = yes
 DT_ALSA = no
 DT_FAAD = no
+DT_TSDEMUX = no
 
 #module
 DT_STREAM=yes
@@ -43,6 +44,11 @@ endif
 
 #demuxer
 DT_CFLAGS += -DENABLE_DEMUXER_AAC=1
+
+ifeq ($(DT_TSDEMUX),yes)
+	DT_CFLAGS += -DENABLE_DEMUXER_TS=1
+endif
+
 ifeq ($(DT_FFMPEG),yes)
 	DT_CFLAGS += -DENABLE_DEMUXER_FFMPEG=1
 endif

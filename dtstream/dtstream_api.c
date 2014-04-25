@@ -32,6 +32,12 @@ int64_t dtstream_get_size(void *priv)
     return stream_get_size(stm_ctx);
 }
 
+int dtstream_local(void *priv)
+{
+    dtstream_context_t *stm_ctx = (dtstream_context_t *) priv;
+    return stream_local(stm_ctx);
+}
+
 int dtstream_eof (void *priv)
 {
     dtstream_context_t *stm_ctx = (dtstream_context_t *) priv;

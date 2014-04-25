@@ -32,6 +32,7 @@ typedef enum
 typedef enum
 {
     VIDEO_FORMAT_INVALID = -1,
+    VIDEO_FORMAT_H264,
     VIDEO_FORMAT_UNKOWN,
 } video_format_t;
 
@@ -39,6 +40,7 @@ typedef enum
 {
     AUDIO_FORMAT_INVALID = -1,
     AUDIO_FORMAT_AAC,
+    AUDIO_FORMAT_AC3,
     AUDIO_FORMAT_UNKOWN,
 } audio_format_t;
 

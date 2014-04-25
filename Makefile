@@ -50,7 +50,18 @@ SRCS_COMMON-$(DT_FFMPEG) +=dtstream/stream/stream_ffmpeg.c
 SRCS_COMMON-$(DT_DEMUXER) +=dtdemux/dtdemuxer_api.c
 SRCS_COMMON-$(DT_DEMUXER) +=dtdemux/dtdemuxer.c
 SRCS_COMMON-$(DT_DEMUXER) +=dtdemux/demuxer/demuxer_aac.c
-SRCS_COMMON-$(DT_FFMPEG) +=dtdemux/demuxer/demuxer_ffmpeg.c
+SRCS_COMMON-$(DT_FFMPEG)  +=dtdemux/demuxer/demuxer_ffmpeg.c
+SRCS_COMMON-$(DT_TSDEMUX) +=dtdemux/demuxer/demuxer_ts.c
+
+SRCS_COMMON-$(DT_TSDEMUX) +=dtdemux/demuxer/demuxer_ts.c
+SRCS_COMMON-$(DT_TSDEMUX) +=dtdemux/demuxer/ts/cat.c
+SRCS_COMMON-$(DT_TSDEMUX) +=dtdemux/demuxer/ts/pat.c
+SRCS_COMMON-$(DT_TSDEMUX) +=dtdemux/demuxer/ts/pmt.c
+SRCS_COMMON-$(DT_TSDEMUX) +=dtdemux/demuxer/ts/packet.c
+SRCS_COMMON-$(DT_TSDEMUX) +=dtdemux/demuxer/ts/stream.c
+SRCS_COMMON-$(DT_TSDEMUX) +=dtdemux/demuxer/ts/table.c
+SRCS_COMMON-$(DT_TSDEMUX) +=dtdemux/demuxer/ts/pid.c
+SRCS_COMMON-$(DT_TSDEMUX) +=dtdemux/demuxer/ts/types.c
 
 #dtaudio
 SRCS_COMMON-$(DT_AUDIO) += dtaudio/dtaudio_api.c
@@ -58,11 +69,10 @@ SRCS_COMMON-$(DT_AUDIO) += dtaudio/dtaudio.c
 SRCS_COMMON-$(DT_AUDIO) += dtaudio/dtaudio_decoder.c
 SRCS_COMMON-$(DT_AUDIO) += dtaudio/dtaudio_filter.c
 SRCS_COMMON-$(DT_AUDIO) += dtaudio/dtaudio_output.c
-SRCS_COMMON-$(DT_FAAD) += dtaudio/audio_decoder/ad_faad.c     # dec
+SRCS_COMMON-$(DT_FAAD) += dtaudio/audio_decoder/ad_faad.c            # dec
 SRCS_COMMON-$(DT_FFMPEG) += dtaudio/audio_decoder/ad_ffmpeg.c        # dec
 SRCS_COMMON-$(DT_ALSA) += dtaudio/audio_out/ao_alsa.c                # out
 SRCS_COMMON-$(DT_SDL) += dtaudio/audio_out/ao_sdl.c                  # out
-#SRCS_COMMON-$(DT_SDL2) += dtaudio/audio_out/ao_sdl2.c                # out
 
 #dtvideo
 SRCS_COMMON-$(DT_VIDEO) += dtvideo/dtvideo_api.c
@@ -71,7 +81,6 @@ SRCS_COMMON-$(DT_VIDEO) += dtvideo/dtvideo_decoder.c
 SRCS_COMMON-$(DT_VIDEO) += dtvideo/dtvideo_output.c
 SRCS_COMMON-$(DT_FFMPEG) += dtvideo/video_decoder/vd_ffmpeg.c         #dec
 SRCS_COMMON-$(DT_SDL) += dtvideo/video_out/vo_sdl.c                   #out
-#SRCS_COMMON-$(DT_SDL2)+= dtvideo/video_out/vo_sdl2.c                  #out
 
 #dtport
 SRCS_COMMON-$(DT_PORT) += dtport/dt_packet_queue.c
