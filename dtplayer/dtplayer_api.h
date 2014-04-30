@@ -39,7 +39,7 @@ typedef struct
 
 typedef struct dtplayer_para
 {
-    char file_name[FILE_NAME_MAX_LENGTH];
+    char *file_name;
     int video_index;
     int audio_index;
     int sub_index;
@@ -58,7 +58,7 @@ typedef struct dtplayer_para
 
 dtplayer_para_t *dtplayer_alloc_para ();
 int dtplayer_release_para (dtplayer_para_t * para);
-int dtplayer_init (void **priv, dtplayer_para_t * para);
+void *dtplayer_init (dtplayer_para_t * para);
 int dtplayer_start (void *player_priv);
 int dtplayer_pause (void *player_priv);
 int dtplayer_resume (void *player_priv);

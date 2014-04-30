@@ -44,13 +44,13 @@ int main (int argc, char **argv)
     dtplayer_para_t *para = dtplayer_alloc_para ();
     if (!para)
         return -1;
-    strcpy (para->file_name, argv[1]);
+    para->file_name = argv[1];
     para->update_cb = (void *) update_cb;
     //para->no_audio=1;
     //para->no_video=1;
     para->width = 720;
     para->height = 480;
-    ret = dtplayer_init (&player_priv, para);
+    player_priv = dtplayer_init (para);
     if (ret < 0)
         return -1;
 

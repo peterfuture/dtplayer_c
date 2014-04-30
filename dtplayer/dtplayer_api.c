@@ -34,7 +34,7 @@ int dtplayer_release_para (dtplayer_para_t * para)
     return 0;
 }
 
-int dtplayer_init (void **player_priv, dtplayer_para_t * para)
+void *dtplayer_init (dtplayer_para_t * para)
 {
     int ret = 0;
     if (!para)
@@ -52,6 +52,7 @@ int dtplayer_init (void **player_priv, dtplayer_para_t * para)
 
     /*init server for player and process */
     dt_event_server_init ();
+    dt_info(TAG,"start playing :%s \n",para->file_name);
     /*init player */
     ret = player_init (dtp_ctx);
     if (ret < 0)
@@ -59,8 +60,7 @@ int dtplayer_init (void **player_priv, dtplayer_para_t * para)
         dt_error (TAG, "PLAYER INIT FAILED \n");
         return -1;
     }
-    *player_priv = dtp_ctx;
-    return 0;
+    return dtp_ctx;
 }
 
 int dtplayer_start (void *player_priv)
