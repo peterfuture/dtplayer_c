@@ -7,7 +7,7 @@
 
 %.o: %.c
 	@echo CC $@ 
-	@$(CC) $(CFLAGS) -c -o $@ $< 
+	@$(CC) $(CFLAGS) -shared -fPIC -c -o $@ $< 
 
 %.o: %.cpp
 	$(CC) $(CXXFLAGS) -c -o $@ $<

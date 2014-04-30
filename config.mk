@@ -108,7 +108,7 @@ endif
 
 FFMPEGPARTS_ALL = libavfilter libavformat libavcodec libswscale libswresample libavutil 
 FFMPEGPARTS = $(foreach part, $(FFMPEGPARTS_ALL), $(if $(wildcard $(DT_FFMPEG_DIR)/lib), $(part)))
-FFMPEGLIBS  = $(foreach part, $(FFMPEGPARTS), $(DT_FFMPEG_DIR)/lib/$(part).a)
+FFMPEGLIBS  = $(foreach part, $(FFMPEGPARTS), $(DT_FFMPEG_DIR)/lib/$(part).so)
 
 DT_CFLAGS-$(DT_FFMPEG)   += -I$(DT_FFMPEG_DIR)/include
 COMMON_LIBS-$(DT_FFMPEG) += $(FFMPEGLIBS)

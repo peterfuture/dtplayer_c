@@ -142,16 +142,19 @@ PRG-$(DTM_PLAYER)  += dtplayer_g$(EXESUF)
 ALL_PRG += $(PRG-yes)
 
 #libdtp.a
-DTLIB = libdtp.a
-OBJS_DTLIB_DEP = $(OBJS_COMMON_DEBUG)
-ALL_PRG += $(DTLIB)
+DTLIB_DEBUG = libdtp.a
+DTLIB_RELEASE = libdtp.so
+
+OBJS_DTLIB_DEP_DEBUG = $(OBJS_COMMON_DEBUG)
+OBJS_DTLIB_DEP_RELEASE = $(OBJS_COMMON_RELEASE)
+ALL_PRG += $(DTLIB_DEBUG) $(DTLIB_RELEASE)
 
 #dtm player
 SRCS_DTPLAYER   += tools/dt_player.c tools/ui.c tools/render.c tools/version.c tools/ao_sdl2.c tools/vo_sdl2.c
 OBJS_DTPLAYER_RELEASE   += $(addsuffix .o, $(basename $(SRCS_DTPLAYER)))
-DTM_PLAYER_DEPS_RELEASE  = $(OBJS_DTPLAYER_RELEASE)  $(DTLIB) $(COMMON_LIBS)
+DTM_PLAYER_DEPS_RELEASE  = $(OBJS_DTPLAYER_RELEASE) $(DTLIB_RELEASE)
 OBJS_DTPLAYER_DEBUG   += $(addsuffix .debug.o, $(basename $(SRCS_DTPLAYER)))
-DTM_PLAYER_DEPS_DEBUG  = $(OBJS_DTPLAYER_DEBUG)  $(DTLIB) $(COMMON_LIBS)
+DTM_PLAYER_DEPS_DEBUG  = $(OBJS_DTPLAYER_DEBUG)  $(DTLIB_DEBUG) $(COMMON_LIBS)
 
 
 all: $(ALL_PRG)
@@ -159,7 +162,14 @@ all: $(ALL_PRG)
 	@echo build $(ALL_PRG) done
 	@echo =====================================================
 
-libdtp.a: $(OBJS_DTLIB_DEP)
+libdtp.so: $(OBJS_DTLIB_DEP_RELEASE) $(COMMON_LIBS) 
+	@$(CC) -shared -fPIC -o $@ $^ $(LDFLAGS)
+	@echo =====================================================
+	@echo build $@ done
+	@echo =====================================================
+
+
+libdtp.a: $(OBJS_DTLIB_DEP_DEBUG)
 	@$(AR) rcs $@ $^
 	@echo =====================================================
 	@echo build $@ done
