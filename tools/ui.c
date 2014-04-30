@@ -1,24 +1,33 @@
 #include "ui.h"
+
+#ifdef ENABLE_VO_SDL2 
 #include <SDL2/SDL.h>
 
 int sdl2_init();
 int sdl2_stop();
 
+#endif
+
 int ui_init()
 {
+#ifdef ENABLE_VO_SDL2 
     sdl2_init();    
+#endif
     return 0;
 }
 
 int ui_stop()
 {
+#ifdef ENABLE_VO_SDL2 
     sdl2_stop(); 
+#endif
     return 0;
 }
 
 
 player_event_t get_event (int *arg)
 {
+#ifdef ENABLE_VO_SDL2 
     SDL_Event event;
     SDL_WaitEvent(&event);
     switch (event.type) 
@@ -77,6 +86,7 @@ player_event_t get_event (int *arg)
         default:
             break;
     }
+#endif
     return EVENT_NONE;
 }
 

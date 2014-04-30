@@ -6,23 +6,36 @@
 #include "dtvideo_output.h"
 
 /*---------------------------------------------------------- */
-
+#ifdef ENABLE_VO_SDL2
 extern vo_wrapper_t vo_sdl2_ops;
+#endif
 
 static int vo_ex_init (vo_wrapper_t *wrapper, void *parent)
 {
+    int ret = 0;
     wrapper->parent = parent;
-    return vo_sdl2_ops.vo_init(&vo_sdl2_ops,parent);  
+#ifdef ENABLE_VO_SDL2 
+    ret = vo_sdl2_ops.vo_init(&vo_sdl2_ops,parent);  
+#endif
+    return ret; 
 }
 
 static int vo_ex_render (vo_wrapper_t *wrapper, AVPicture_t * pict)
 {
-    return vo_sdl2_ops.vo_render(&vo_sdl2_ops,pict);  
+    int ret = 0;
+#ifdef ENABLE_VO_SDL2
+    ret = vo_sdl2_ops.vo_render(&vo_sdl2_ops,pict);
+#endif
+    return ret;
 }
 
 static int vo_ex_stop (vo_wrapper_t *wrapper)
 {
-    return vo_sdl2_ops.vo_stop(&vo_sdl2_ops);
+    int ret = 0;
+#ifdef ENABLE_VO_SDL2
+    ret = vo_sdl2_ops.vo_stop(&vo_sdl2_ops);
+#endif
+    return ret;
 }
 
 vo_wrapper_t vo_ex_ops = {
@@ -36,42 +49,71 @@ vo_wrapper_t vo_ex_ops = {
 
 
 /*---------------------------------------------------------- */
-
+#ifdef ENABLE_VO_SDL2 
 extern ao_wrapper_t ao_sdl2_ops;
+#endif
 
 static int ao_ex_init (ao_wrapper_t *wrapper, void *parent)
 {
-    return ao_sdl2_ops.ao_init(&ao_sdl2_ops,parent);
+    int ret = 0;
+#ifdef ENABLE_VO_SDL2 
+    ret = ao_sdl2_ops.ao_init(&ao_sdl2_ops,parent);
+#endif
+    return ret;
 }
 
 static int ao_ex_play (ao_wrapper_t *wrapper, uint8_t * buf, int size)
 {
-    return ao_sdl2_ops.ao_write(&ao_sdl2_ops,buf,size);
+    int ret = 0;
+#ifdef ENABLE_VO_SDL2 
+    ret = ao_sdl2_ops.ao_write(&ao_sdl2_ops,buf,size);
+#endif
+    return ret;
 }
 
 static int ao_ex_pause (ao_wrapper_t *wrapper)
 {
-    return ao_sdl2_ops.ao_pause(&ao_sdl2_ops);
+    int ret = 0;
+#ifdef ENABLE_VO_SDL2 
+    ret = ao_sdl2_ops.ao_pause(&ao_sdl2_ops);
+#endif
+    return ret;
 }
 
 static int ao_ex_resume (ao_wrapper_t *wrapper)
 {
-    return ao_sdl2_ops.ao_resume(&ao_sdl2_ops);
+    int ret = 0;
+#ifdef ENABLE_VO_SDL2 
+    ret = ao_sdl2_ops.ao_resume(&ao_sdl2_ops);
+#endif
+    return ret;
 }
 
 static int ao_ex_level(ao_wrapper_t *wrapper)
 {
-    return ao_sdl2_ops.ao_level(&ao_sdl2_ops);
+    int ret = 0;
+#ifdef ENABLE_VO_SDL2 
+    ret = ao_sdl2_ops.ao_level(&ao_sdl2_ops);
+#endif
+    return ret;
 }
 
 static int64_t ao_ex_get_latency (ao_wrapper_t *wrapper)
 {
-    return ao_sdl2_ops.ao_latency(&ao_sdl2_ops);
+    int ret = 0;
+#ifdef ENABLE_VO_SDL2 
+    ret = ao_sdl2_ops.ao_latency(&ao_sdl2_ops);
+#endif
+    return ret;
 }
 
 static int ao_ex_stop (ao_wrapper_t * wrapper)
 {
-    return ao_sdl2_ops.ao_stop(&ao_sdl2_ops);
+    int ret = 0;
+#ifdef ENABLE_VO_SDL2 
+    ret = ao_sdl2_ops.ao_stop(&ao_sdl2_ops);
+#endif
+    return ret;
 }
 
 ao_wrapper_t ao_ex_ops = {
