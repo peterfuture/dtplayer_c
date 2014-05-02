@@ -86,8 +86,8 @@ static int vo_sdl2_render (vo_wrapper_t *wrapper, AVPicture_t * pict)
         ctx->tex = SDL_CreateTexture(ctx->ren,SDL_PIXELFORMAT_YV12,SDL_TEXTUREACCESS_STATIC,ctx->dw,ctx->dh);
     //ctx->tex = SDL_CreateTexture(ctx->ren,SDL_PIXELFORMAT_YV12,SDL_TEXTUREACCESS_STREAMING,ctx->dw,ctx->dh);
 
-    SDL_UpdateYUVTexture(ctx->tex,NULL, pict->data[0], pict->linesize[0],  pict->data[1], pict->linesize[1],  pict->data[2], pict->linesize[2]);
-    //SDL_UpdateTexture(ctx->tex, &dst, pict->data[0], pict->linesize[0]);
+    //SDL_UpdateYUVTexture(ctx->tex,NULL, pict->data[0], pict->linesize[0],  pict->data[1], pict->linesize[1],  pict->data[2], pict->linesize[2]);
+    SDL_UpdateTexture(ctx->tex, &dst, pict->data[0], pict->linesize[0]);
     SDL_RenderClear(ctx->ren);
     SDL_RenderCopy(ctx->ren,ctx->tex,&dst,&dst);
     SDL_RenderPresent(ctx->ren);

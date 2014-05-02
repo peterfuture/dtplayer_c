@@ -19,9 +19,9 @@ CFLAGS  += -Wall
 DT_DEBUG = -g
 
 CFLAGS  += -I/usr/include -I/usr/local/include
-LDFLAGS += -L/usr/local/lib -L/usr/lib
+LDFLAGS += -L/usr/local/lib -L/usr/lib -L./
 
-LDFLAGS += -lpthread -lz -lm -lbz2
+LDFLAGS += -lpthread -lm 
 LDFLAGS += $(LDFLAGS-yes)
 
 COMMON_LIBS += $(COMMON_LIBS-yes)
