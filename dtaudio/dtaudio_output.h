@@ -18,7 +18,7 @@ typedef struct ao_wrapper
     char *name;
     dtaudio_para_t para;
     
-    int (*ao_init) ();
+    int (*ao_init) (dtaudio_para_t *para);
     int (*ao_start) ();
     int (*ao_pause) ();
     int (*ao_resume) ();
