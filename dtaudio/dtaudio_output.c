@@ -18,6 +18,7 @@ static void register_ao (ao_wrapper_t * ao)
         p = &((*p)->next);
     *p = ao;
     ao->next = NULL;
+    dt_info(TAG,"register ao:%s \n",ao->name);
 }
 
 void aout_register_ext (ao_wrapper_t * ao)
@@ -35,6 +36,7 @@ void aout_register_ext (ao_wrapper_t * ao)
         ao->next = *p;
         *p = ao;
     }
+    dt_info(TAG,"register ext ao:%s \n",ao->name);
 }
 
 void aout_register_all ()
@@ -64,7 +66,7 @@ static int select_ao_device (dtaudio_output_t * ao, int id)
     ao_wrapper_t **p;
     p = &g_ao;
 
-    if(id == -1) // user did not choose vo,use default one
+    if(id == -1) // user did not choose ao,use default one
     {
         if(!*p)
             return -1;

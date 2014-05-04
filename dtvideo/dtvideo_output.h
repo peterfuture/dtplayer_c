@@ -32,13 +32,13 @@ typedef enum
 typedef enum _VO_ID_
 {
     VO_ID_EXAMPLE = -1,
+    VO_ID_EX,            // ex vo need set to 0 default
     VO_ID_SDL,
     VO_ID_X11,
     VO_ID_FB,
     VO_ID_GL,
     VO_ID_DIRECTX,
     VO_ID_SDL2,
-    VO_ID_EX, // vo router
 } dt_vo_t;
 
 typedef struct

@@ -12,7 +12,7 @@ DT_VERSION = v1.0
 DT_FFMPEG = yes
 DT_SDL = no
 DT_SDL2 = yes
-DT_ALSA = no
+DT_ALSA = yes
 DT_FAAD = no
 DT_TSDEMUX = no
 

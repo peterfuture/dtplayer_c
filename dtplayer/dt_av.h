@@ -228,11 +228,11 @@ enum DT_AVPixelFormat
 typedef enum _AO_ID_
 {
     AO_ID_EXAMPLE = -1,
+    AO_ID_EX,                   // ex ao set to 0 default
     AO_ID_ALSA,                 // 0 default
     AO_ID_SDL,
     AO_ID_OSS,
     AO_ID_DSOUND,
-    AO_ID_EX,
 } dtao_format_t;
 
 /*subtitle part*/

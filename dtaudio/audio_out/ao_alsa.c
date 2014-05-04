@@ -18,6 +18,9 @@ typedef struct{
     int bps;
 }alsa_ctx_t;
 
+ao_wrapper_t ao_alsa_ops;
+static ao_wrapper_t *wrapper = &ao_alsa_ops;
+
 static snd_pcm_format_t format_to_alsa (int fmt)
 {
     switch (fmt)
@@ -35,11 +38,9 @@ static snd_pcm_format_t format_to_alsa (int fmt)
     }
 }
 
-static int ao_alsa_init (ao_wrapper_t *wrapper, void *parent)
+static int ao_alsa_init (dtaudio_para_t *para)
 {
-    dtaudio_output_t *ao = (dtaudio_output_t *)parent; 
-    wrapper->parent = parent;
-
+    memcpy(&wrapper->para,para,sizeof(dtaudio_para_t));
     snd_pcm_t *alsa_handle;
     snd_pcm_hw_params_t *alsa_hwparams;
     snd_pcm_sw_params_t *alsa_swparams;
@@ -51,9 +52,9 @@ static int ao_alsa_init (ao_wrapper_t *wrapper, void *parent)
         return -1;
     wrapper->ao_priv = ctx;
 
-    int afmt = format_to_alsa (ao->para.bps);
-    uint32_t channels = ao->para.channels;
-    uint32_t sr = ao->para.samplerate;
+    int afmt = format_to_alsa (wrapper->para.bps);
+    uint32_t channels = wrapper->para.dst_channels;
+    uint32_t sr = wrapper->para.dst_samplerate;
     int bytes_per_sample = snd_pcm_format_physical_width (afmt) *channels / 8;
    
     int err = 0;
@@ -183,26 +184,25 @@ static int ao_alsa_init (ao_wrapper_t *wrapper, void *parent)
     ctx->buf_threshold = bytes_per_sample * sr * DEFAULT_TIME_SIZE / 1000;
     dt_info (TAG, "alsa audio init ok! outburst:%d thres:%d \n", ctx->trunk_size,ctx->buf_threshold);
     ctx->handle = alsa_handle;
-    ctx->channels = ao->para.channels;
-    ctx->bps = ao->para.bps;
-    ctx->samplerate = ao->para.samplerate;
+    ctx->channels = wrapper->para.dst_channels;
+    ctx->bps = wrapper->para.bps;
+    ctx->samplerate = wrapper->para.dst_samplerate;
     return 0;
 }
 
-static int ao_alsa_level (ao_wrapper_t *wrapper)
+static int ao_alsa_level ()
 {
     alsa_ctx_t *ctx = (alsa_ctx_t *)wrapper->ao_priv;
     return ctx->buf_level;
 }
 
 #define ALSA_RESERVE_THRESHOLD 10*1024
-static int ao_alsa_play (ao_wrapper_t * wrapper, uint8_t * buf, int size)
+static int ao_alsa_play (uint8_t * buf, int size)
 {
     alsa_ctx_t *ctx = (alsa_ctx_t *)wrapper->ao_priv;
     snd_pcm_t *alsa_handle = (snd_pcm_t *) ctx->handle;
-    dtaudio_output_t *ao = (dtaudio_output_t *)wrapper->parent; 
     
-    int bytes_per_sample = ao->para.bps * ao->para.channels / 8;
+    int bytes_per_sample = wrapper->para.bps * wrapper->para.dst_channels / 8;
     int num_frames = size / bytes_per_sample;
     snd_pcm_sframes_t res = 0;
     uint8_t *data = buf;
@@ -272,7 +272,7 @@ static int ao_alsa_space (alsa_ctx_t *ctx)
     return ret;
 }
 
-static int ao_alsa_pause (ao_wrapper_t *wrapper)
+static int ao_alsa_pause ()
 {
     alsa_ctx_t *ctx = (alsa_ctx_t *)wrapper->ao_priv;
     snd_pcm_t *handle = (snd_pcm_t *) ctx->handle;
@@ -289,7 +289,7 @@ static int ao_alsa_pause (ao_wrapper_t *wrapper)
     return 0;
 }
 
-static int ao_alsa_resume (ao_wrapper_t *wrapper)
+static int ao_alsa_resume ()
 {
     alsa_ctx_t *ctx = (alsa_ctx_t *)wrapper->ao_priv;
     snd_pcm_t *handle = (snd_pcm_t *) ctx->handle;
@@ -306,25 +306,24 @@ static int ao_alsa_resume (ao_wrapper_t *wrapper)
     return 0;
 }
 
-static int64_t ao_alsa_get_latency (ao_wrapper_t *wrapper)
+static int64_t ao_alsa_get_latency ()
 {
     alsa_ctx_t *ctx = (alsa_ctx_t *)wrapper->ao_priv;
-    dtaudio_output_t *ao = (dtaudio_output_t *)wrapper->parent;
 
     unsigned int sample_num;
     uint64_t latency, latency_s;
     
     ctx->buf_level = ctx->buf_size - ao_alsa_space (ctx);
-    sample_num = ctx->buf_level / (ao->para.channels * ao->para.bps / 8);
+    sample_num = ctx->buf_level / (wrapper->para.dst_channels * wrapper->para.bps / 8);
     
-    float pts_ratio = (double) 90000 / ao->para.samplerate;
+    float pts_ratio = (double) 90000 / wrapper->para.samplerate;
     latency = (sample_num * pts_ratio);
     latency_s = latency/90000;
 
     dt_debug (TAG, "[%s:%d]==alsa_level:%d thres:%d sample_num:%d buffersize:%d latency:%llu latency_s:%llu \n", __FUNCTION__, __LINE__, ctx->buf_level, ctx->buf_threshold, sample_num, ctx->buf_size, latency, latency_s);
     return latency;
 }
-static int ao_alsa_stop (ao_wrapper_t *wrapper)
+static int ao_alsa_stop ()
 {
     alsa_ctx_t *ctx = (alsa_ctx_t *)wrapper->ao_priv;
     if(!ctx)
