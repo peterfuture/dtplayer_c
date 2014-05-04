@@ -54,65 +54,67 @@ vo_wrapper_t vo_ex_ops = {
 extern ao_wrapper_t ao_sdl2_ops;
 #endif
 
-static int ao_ex_init (ao_wrapper_t *wrapper, void *parent)
+ao_wrapper_t ao_ex_ops;
+ao_wrapper_t *ao_wrapper = &ao_ex_ops;
+static int ao_ex_init (dtaudio_para_t *para)
 {
     int ret = 0;
 #ifdef ENABLE_VO_SDL2 
-    ret = ao_sdl2_ops.ao_init(&ao_sdl2_ops,parent);
+    ret = ao_sdl2_ops.ao_init(para);
 #endif
     return ret;
 }
 
-static int ao_ex_play (ao_wrapper_t *wrapper, uint8_t * buf, int size)
+static int ao_ex_play (uint8_t * buf, int size)
 {
     int ret = 0;
 #ifdef ENABLE_VO_SDL2 
-    ret = ao_sdl2_ops.ao_write(&ao_sdl2_ops,buf,size);
+    ret = ao_sdl2_ops.ao_write(buf,size);
 #endif
     return ret;
 }
 
-static int ao_ex_pause (ao_wrapper_t *wrapper)
+static int ao_ex_pause ()
 {
     int ret = 0;
 #ifdef ENABLE_VO_SDL2 
-    ret = ao_sdl2_ops.ao_pause(&ao_sdl2_ops);
+    ret = ao_sdl2_ops.ao_pause();
 #endif
     return ret;
 }
 
-static int ao_ex_resume (ao_wrapper_t *wrapper)
+static int ao_ex_resume ()
 {
     int ret = 0;
 #ifdef ENABLE_VO_SDL2 
-    ret = ao_sdl2_ops.ao_resume(&ao_sdl2_ops);
+    ret = ao_sdl2_ops.ao_resume();
 #endif
     return ret;
 }
 
-static int ao_ex_level(ao_wrapper_t *wrapper)
+static int ao_ex_level()
 {
     int ret = 0;
 #ifdef ENABLE_VO_SDL2 
-    ret = ao_sdl2_ops.ao_level(&ao_sdl2_ops);
+    ret = ao_sdl2_ops.ao_level();
 #endif
     return ret;
 }
 
-static int64_t ao_ex_get_latency (ao_wrapper_t *wrapper)
+static int64_t ao_ex_get_latency ()
 {
     int ret = 0;
 #ifdef ENABLE_VO_SDL2 
-    ret = ao_sdl2_ops.ao_latency(&ao_sdl2_ops);
+    ret = ao_sdl2_ops.ao_latency();
 #endif
     return ret;
 }
 
-static int ao_ex_stop (ao_wrapper_t * wrapper)
+static int ao_ex_stop ()
 {
     int ret = 0;
 #ifdef ENABLE_VO_SDL2 
-    ret = ao_sdl2_ops.ao_stop(&ao_sdl2_ops);
+    ret = ao_sdl2_ops.ao_stop();
 #endif
     return ret;
 }

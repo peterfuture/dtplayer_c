@@ -16,18 +16,18 @@ typedef struct ao_wrapper
 {
     int id;
     char *name;
+    dtaudio_para_t para;
     
-    int (*ao_init) (struct ao_wrapper * wrapper, void *parent);
-    int (*ao_start) (struct ao_wrapper *wrapper);
-    int (*ao_pause) (struct ao_wrapper * wrapper);
-    int (*ao_resume) (struct ao_wrapper * wrapper);
-    int (*ao_stop) (struct ao_wrapper *wrapper);
-    int64_t (*ao_latency) (struct ao_wrapper *wrapper);
-    int (*ao_level) (struct ao_wrapper *wrapper);
-    int (*ao_write) (struct ao_wrapper *wrapper, uint8_t * buf, int size);
+    int (*ao_init) ();
+    int (*ao_start) ();
+    int (*ao_pause) ();
+    int (*ao_resume) ();
+    int (*ao_stop) ();
+    int64_t (*ao_latency) ();
+    int (*ao_level) ();
+    int (*ao_write) (uint8_t * buf, int size);
     struct ao_wrapper *next;
     void *ao_priv;
-    void *parent;
 } ao_wrapper_t;
 
 #define dtao_format_t ao_id_t

@@ -12,6 +12,9 @@ typedef struct{
     dt_buffer_t dbt;
 }sdl_ao_ctx_t;
 
+ao_wrapper_t ao_sdl2_ops;
+ao_wrapper_t *wrapper = &ao_sdl2_ops;
+
 static void sdl2_cb(void *userdata,uint8_t *buf,int size)
 {
     ao_wrapper_t *wrapper = (ao_wrapper_t *)userdata;
@@ -22,12 +25,10 @@ static void sdl2_cb(void *userdata,uint8_t *buf,int size)
     return;
 }
 
-static int ao_sdl2_init (ao_wrapper_t *wrapper, void *parent)
+static int ao_sdl2_init (dtaudio_para_t *para)
 {
     int ret = 0;
-    dtaudio_output_t *ao = (dtaudio_output_t *)parent;
-    dtaudio_para_t *ppara = &ao->para;
-    wrapper->parent = parent;
+    memcpy(&wrapper->para,para,sizeof(dtaudio_para_t));
     sdl_ao_ctx_t *ctx = malloc(sizeof(*ctx));
     if(!ctx)
     {
@@ -35,7 +36,7 @@ static int ao_sdl2_init (ao_wrapper_t *wrapper, void *parent)
         return -1;
     }
     memset(ctx,0,sizeof(*ctx));
-    if(buf_init(&ctx->dbt,ppara->dst_samplerate * 4 / 10) < 0) // 100ms
+    if(buf_init(&ctx->dbt,para->dst_samplerate * 4 / 10) < 0) // 100ms
     {
         ret = -1;
         goto FAIL;
@@ -47,14 +48,14 @@ static int ao_sdl2_init (ao_wrapper_t *wrapper, void *parent)
 
     SDL_AudioSpec *pwanted = &ctx->wanted;
     //set audio paras
-    pwanted->freq = ppara->dst_samplerate;       // sample rate
+    pwanted->freq = para->dst_samplerate;       // sample rate
     pwanted->format = AUDIO_S16;             // bps
-    pwanted->channels = ppara->dst_channels;     // channels
+    pwanted->channels = para->dst_channels;     // channels
     pwanted->samples = SDL_AUDIO_BUFFER_SIZE;// samples every time
     pwanted->callback = sdl2_cb;              // callback
     pwanted->userdata = wrapper;
    
-    dt_info(TAG,"sr:%d channels:%d \n",ppara->dst_samplerate,ppara->dst_channels);
+    dt_info(TAG,"sr:%d channels:%d \n",para->dst_samplerate,para->dst_channels);
 
     if (SDL_OpenAudio(pwanted, NULL)<0)      // open audio device
     {
@@ -72,46 +73,45 @@ FAIL:
     return ret;
 }
 
-static int ao_sdl2_play (ao_wrapper_t *wrapper, uint8_t * buf, int size)
+static int ao_sdl2_play (uint8_t * buf, int size)
 {
     sdl_ao_ctx_t *ctx = (sdl_ao_ctx_t *)wrapper->ao_priv;
     return buf_put(&ctx->dbt,buf,size);
 }
 
-static int ao_sdl2_pause (ao_wrapper_t *wrapper)
+static int ao_sdl2_pause ()
 {
     SDL_PauseAudio(1);
     return 0;
 }
 
-static int ao_sdl2_resume (ao_wrapper_t *wrapper)
+static int ao_sdl2_resume ()
 {
     SDL_PauseAudio(0);
     return 0;
 }
 
-static int ao_sdl2_level(ao_wrapper_t *wrapper)
+static int ao_sdl2_level()
 {
     sdl_ao_ctx_t *ctx = (sdl_ao_ctx_t *)wrapper->ao_priv;
     return ctx->dbt.level;
 }
 
-static int64_t ao_sdl2_get_latency (ao_wrapper_t *wrapper)
+static int64_t ao_sdl2_get_latency ()
 {
     sdl_ao_ctx_t *ctx = (sdl_ao_ctx_t *)wrapper->ao_priv;
-    dtaudio_output_t *ao = (dtaudio_output_t *)wrapper->parent;
     
     int level = buf_level(&ctx->dbt);
     unsigned int sample_num;
     uint64_t latency;
     float pts_ratio = 0.0;
-    pts_ratio = (double) 90000 / ao->para.dst_samplerate;
-    sample_num = level / (ao->para.dst_channels * ao->para.bps / 8);
+    pts_ratio = (double) 90000 / wrapper->para.dst_samplerate;
+    sample_num = level / (wrapper->para.dst_channels * wrapper->para.bps / 8);
     latency = (sample_num * pts_ratio);
     return latency;
 }
 
-static int ao_sdl2_stop (ao_wrapper_t * wrapper)
+static int ao_sdl2_stop ()
 {
     if(wrapper->ao_priv)
     {
