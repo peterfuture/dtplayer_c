@@ -13,7 +13,7 @@ typedef struct{
 }sdl_ao_ctx_t;
 
 ao_wrapper_t ao_sdl2_ops;
-ao_wrapper_t *wrapper = &ao_sdl2_ops;
+static ao_wrapper_t *wrapper = &ao_sdl2_ops;
 
 static void sdl2_cb(void *userdata,uint8_t *buf,int size)
 {
