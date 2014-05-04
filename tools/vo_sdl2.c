@@ -5,6 +5,8 @@
 
 #define TAG "VO-SDL2"
 
+vo_wrapper_t vo_sdl2_ops;
+
 typedef struct{
     SDL_Window *win;
     SDL_Renderer *ren;
@@ -60,18 +62,20 @@ int sdl2_stop()
 }
 
 
-static int vo_sdl2_init (vo_wrapper_t *wrapper, void *parent)
+static int vo_sdl2_init ()
 {
-    wrapper->parent = parent;
-    wrapper->handle = (void *)&sdl2_ctx;
+
+    vo_wrapper_t *wrap = &vo_sdl2_ops;
+    wrap->handle = (void *)&sdl2_ctx;
     dt_info (TAG, "sdl2 init OK\n");
     return 0;
 }
 
-static int vo_sdl2_render (vo_wrapper_t *wrapper, AVPicture_t * pict)
+static int vo_sdl2_render (AVPicture_t * pict)
 {
-    sdl2_ctx_t *ctx = (sdl2_ctx_t *)wrapper->handle;
+    vo_wrapper_t *wrap = &vo_sdl2_ops;
     
+    sdl2_ctx_t *ctx = (sdl2_ctx_t *)wrap->handle;
     dt_lock (&ctx->vo_mutex);
 
     SDL_Rect dst;
@@ -96,9 +100,10 @@ static int vo_sdl2_render (vo_wrapper_t *wrapper, AVPicture_t * pict)
     return 0;
 }
 
-static int vo_sdl2_stop (vo_wrapper_t *wrapper)
+static int vo_sdl2_stop ()
 {
-    sdl2_ctx_t *ctx = (sdl2_ctx_t *)wrapper->handle;
+    vo_wrapper_t *wrap = &vo_sdl2_ops;
+    sdl2_ctx_t *ctx = (sdl2_ctx_t *)wrap->handle;
     if(ctx->ren)
     {
         SDL_DestroyRenderer(ctx->ren);
@@ -109,7 +114,7 @@ static int vo_sdl2_stop (vo_wrapper_t *wrapper)
         SDL_DestroyTexture(ctx->tex);
         ctx->tex = NULL;
     }
-    wrapper->handle = NULL;
+    wrap->handle = NULL;
     dt_info (TAG, "stop vo sdl\n");
     return 0;
 }

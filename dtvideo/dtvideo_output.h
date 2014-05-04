@@ -13,13 +13,12 @@ typedef struct vo_wrapper
     int id;
     char *name;
 
-    int (*vo_init) (struct vo_wrapper *wrapper, void *parent);
-    int (*vo_stop) (struct vo_wrapper *wrapper);
-    int (*vo_render) (struct vo_wrapper *wrapper, AVPicture_t * pic);
+    int (*vo_init) ();
+    int (*vo_stop) ();
+    int (*vo_render) (AVPicture_t * pic);
     void *handle;
     struct vo_wrapper *next;
     void *vo_priv;
-    void *parent;
 } vo_wrapper_t;
 
 typedef enum

@@ -38,14 +38,14 @@ void *dtplayer_init (dtplayer_para_t * para)
 {
     int ret = 0;
     if (!para)
-        return -1;
+        return NULL;
     player_register_all();
     //dtplayer_context_t *dtp_ctx = malloc(sizeof(dtplayer_context_t));
     dtplayer_context_t *dtp_ctx = &ply_ctx;
     if (!dtp_ctx)
     {
         dt_error (TAG, "dtplayer context malloc failed \n");
-        return -1;
+        return NULL;
     }
     memset (dtp_ctx, 0, sizeof (*dtp_ctx));
     memcpy (&dtp_ctx->player_para, para, sizeof (dtplayer_para_t));
@@ -58,7 +58,7 @@ void *dtplayer_init (dtplayer_para_t * para)
     if (ret < 0)
     {
         dt_error (TAG, "PLAYER INIT FAILED \n");
-        return -1;
+        return NULL;
     }
     return dtp_ctx;
 }

@@ -10,30 +10,31 @@
 extern vo_wrapper_t vo_sdl2_ops;
 #endif
 
-static int vo_ex_init (vo_wrapper_t *wrapper, void *parent)
+vo_wrapper_t vo_ex_ops;
+
+static int vo_ex_init ()
 {
     int ret = 0;
-    wrapper->parent = parent;
 #ifdef ENABLE_VO_SDL2 
-    ret = vo_sdl2_ops.vo_init(&vo_sdl2_ops,parent);  
+    ret = vo_sdl2_ops.vo_init();  
 #endif
     return ret; 
 }
 
-static int vo_ex_render (vo_wrapper_t *wrapper, AVPicture_t * pict)
+static int vo_ex_render (AVPicture_t * pict)
 {
     int ret = 0;
 #ifdef ENABLE_VO_SDL2
-    ret = vo_sdl2_ops.vo_render(&vo_sdl2_ops,pict);
+    ret = vo_sdl2_ops.vo_render(pict);
 #endif
     return ret;
 }
 
-static int vo_ex_stop (vo_wrapper_t *wrapper)
+static int vo_ex_stop ()
 {
     int ret = 0;
 #ifdef ENABLE_VO_SDL2
-    ret = vo_sdl2_ops.vo_stop(&vo_sdl2_ops);
+    ret = vo_sdl2_ops.vo_stop();
 #endif
     return ret;
 }
