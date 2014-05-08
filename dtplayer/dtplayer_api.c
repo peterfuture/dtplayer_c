@@ -50,8 +50,6 @@ void *dtplayer_init (dtplayer_para_t * para)
     memset (dtp_ctx, 0, sizeof (*dtp_ctx));
     memcpy (&dtp_ctx->player_para, para, sizeof (dtplayer_para_t));
 
-    /*init server for player and process */
-    dt_event_server_init ();
     dt_info(TAG,"start playing :%s \n",para->file_name);
     /*init player */
     ret = player_init (dtp_ctx);
@@ -65,12 +63,12 @@ void *dtplayer_init (dtplayer_para_t * para)
 
 int dtplayer_start (void *player_priv)
 {
-    event_t *event = dt_alloc_event ();
-    event->next = NULL;
-    event->server_id = EVENT_SERVER_PLAYER;
-    event->type = PLAYER_EVENT_START;
-    dt_send_event (event);
-    return 0;
+    /*init service */
+    dt_event_server_init ();
+    
+    dtplayer_context_t *dtp_ctx = (dtplayer_context_t *)player_priv;
+    int ret = player_start(dtp_ctx); 
+    return ret;
 }
 
 int dtplayer_pause (void *player_priv)

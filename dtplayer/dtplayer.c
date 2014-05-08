@@ -60,14 +60,10 @@ static int player_server_release (dtplayer_context_t * dtp_ctx)
 int player_init (dtplayer_context_t * dtp_ctx)
 {
     int ret = 0;
-    pthread_t tid;
     set_player_status (dtp_ctx, PLAYER_STATUS_INIT_ENTER);
     dt_info (TAG, "[%s:%d] START PLAYER INIT\n", __FUNCTION__, __LINE__);
     dtp_ctx->file_name = dtp_ctx->player_para.file_name;
     dtp_ctx->update_cb = dtp_ctx->player_para.update_cb;
-
-    /* init server */
-    player_server_init (dtp_ctx);
 
     dtdemuxer_para_t demux_para;
     demux_para.file_name = dtp_ctx->file_name;
@@ -151,15 +147,6 @@ int player_init (dtplayer_context_t * dtp_ctx)
     ctrl_info->width = para->width;
     ctrl_info->height = para->height;
 
-    /*create event loop */
-    ret = pthread_create (&tid, NULL, (void *) &event_handle_loop, (void *) dtp_ctx);
-    if (ret == -1)
-    {
-        dt_error (TAG "file:%s [%s:%d] player io thread start failed \n", __FILE__, __FUNCTION__, __LINE__);
-        goto ERR2;
-    }
-    dt_info (TAG, "[%s:%d] create event handle loop thread id = %lu\n", __FUNCTION__, __LINE__, tid);
-    dtp_ctx->event_loop_id = tid;
     dt_info (TAG, "[%s:%d] END PLAYER INIT, RET = %d\n", __FUNCTION__, __LINE__, ret);
     set_player_status (dtp_ctx, PLAYER_STATUS_INIT_EXIT);
     player_handle_cb (dtp_ctx);
@@ -176,8 +163,22 @@ int player_init (dtplayer_context_t * dtp_ctx)
 int player_start (dtplayer_context_t * dtp_ctx)
 {
     int ret = 0;
+    pthread_t tid;
 
     set_player_status (dtp_ctx, PLAYER_STATUS_START);
+
+    /* init & start player server first */
+    player_server_init (dtp_ctx);
+    ret = pthread_create (&tid, NULL, (void *) &event_handle_loop, (void *) dtp_ctx);
+    if (ret == -1)
+    {
+        dt_error (TAG "file:%s [%s:%d] player io thread start failed \n", __FILE__, __FUNCTION__, __LINE__);
+        player_server_release (dtp_ctx);
+        goto ERR3;
+    }
+    dt_info (TAG, "[%s:%d] create event handle loop thread id = %lu\n", __FUNCTION__, __LINE__, tid);
+    dtp_ctx->event_loop_id = tid;
+
     ret = player_host_init (dtp_ctx);
     if (ret < 0)
     {
@@ -198,6 +199,7 @@ int player_start (dtplayer_context_t * dtp_ctx)
         set_player_status (dtp_ctx, PLAYER_STATUS_ERROR);
         goto ERR1;
     }
+
     dt_info (TAG, "PLAYER START OK\n");
     set_player_status (dtp_ctx, PLAYER_STATUS_RUNNING);
     player_handle_cb (dtp_ctx);
