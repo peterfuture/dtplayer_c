@@ -33,6 +33,7 @@ typedef struct
 
     int64_t cur_time_ms;
     int64_t cur_time;
+    int64_t full_time;
 
     int64_t start_time;
 } player_state_t;

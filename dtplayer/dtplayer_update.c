@@ -18,6 +18,10 @@ static int calc_cur_time (dtplayer_context_t * dtp_ctx, host_state_t * host_stat
         ctrl_info->first_time = host_state->cur_systime;
         dt_info (TAG, "SET FIRST TIME:%lld \n", ctrl_info->first_time);
     }
+
+    if(play_stat->full_time == 0)
+        play_stat->full_time = dtp_ctx->media_info->duration;
+
     //int64_t sys_time =(host_state->cur_systime>play_stat->start_time)?(host_state->cur_systime - play_stat->start_time):host_state->cur_systime;
     int64_t sys_time = (host_state->cur_systime > ctrl_info->first_time) ? (host_state->cur_systime - ctrl_info->first_time) : host_state->cur_systime;
     play_stat->cur_time = sys_time / 90000;

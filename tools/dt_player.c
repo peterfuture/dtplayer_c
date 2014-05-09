@@ -20,7 +20,7 @@ int update_cb (player_state_t * state)
         exit_flag = 1;
     }
     dt_debug (TAG, "UPDATECB CURSTATUS:%x \n", state->cur_status);
-    dt_info(TAG,"CUR TIME %d S \n",state->cur_time);
+    dt_info(TAG,"CUR TIME %lld S  FULL TIME:%lld  \n",state->cur_time,state->full_time);
     return 0;
 }
 
