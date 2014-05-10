@@ -104,7 +104,12 @@ int dtplayer_stop (void *player_priv)
 
     /*need to wait until player stop ok */
     dt_info (TAG, "EVENT_LOOP_ID:%lu \n", dtp_ctx->event_loop_id);
-    pthread_join (dtp_ctx->event_loop_id, NULL);
+	
+	//comments: after sending quit cmd
+	//player will enter quit process
+	//here has no need to block ,player will 
+	//exit after receiving quit status through update_cb in dtplayer.c
+	//pthread_join (dtp_ctx->event_loop_id, NULL);
     return 0;
 }
 
