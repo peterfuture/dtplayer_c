@@ -151,8 +151,6 @@ int player_init (dtplayer_context_t * dtp_ctx)
     set_player_status (dtp_ctx, PLAYER_STATUS_INIT_EXIT);
     player_handle_cb (dtp_ctx);
     return 0;
-  ERR2:
-    dtdemuxer_close (dtp_ctx->demuxer_priv);
   ERR1:
     player_server_release (dtp_ctx);
     set_player_status (dtp_ctx, PLAYER_STATUS_ERROR);

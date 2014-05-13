@@ -21,8 +21,8 @@ static sdl2_ctx_t sdl2_ctx;
 int sdl2_init()
 {
     int flags = 0;
-    flags = SDL_INIT_VIDEO | SDL_INIT_AUDIO;
-    if (SDL_Init (flags)) {
+    
+    if (SDL_Init (SDL_INIT_VIDEO)) {
         dt_info(TAG,"UI INIT FAILED \n");
         return -1;
     }
@@ -34,6 +34,8 @@ int sdl2_init()
     //ctx->dh = vo->para.d_height;
     ctx->dw = 720;
     ctx->dh = 480;
+    
+    //sdl create win here, For audio only file need a sdl window to contrl too
     ctx->win = SDL_CreateWindow("dtplayer",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,ctx->dw,ctx->dh,flags);
     if(ctx->win == NULL)
     {
@@ -49,14 +51,9 @@ int sdl2_stop()
 {
     sdl2_ctx_t *ctx = &sdl2_ctx;
     dt_lock (&ctx->vo_mutex);
-    if(ctx->sdl_inited) 
-    {
-        SDL_DestroyTexture(ctx->tex);
-        SDL_DestroyRenderer(ctx->ren); 
+    if(ctx->win)
         SDL_DestroyWindow(ctx->win);
-    }
-    SDL_Quit();
-    ctx->sdl_inited = 0;
+    SDL_QuitSubSystem(SDL_INIT_VIDEO);
     dt_unlock (&ctx->vo_mutex);
     return 0;
 }
@@ -114,6 +111,7 @@ static int vo_sdl2_stop ()
         SDL_DestroyTexture(ctx->tex);
         ctx->tex = NULL;
     }
+    ctx->sdl_inited = 0;
     wrap->handle = NULL;
     dt_info (TAG, "stop vo sdl\n");
     return 0;

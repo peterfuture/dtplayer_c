@@ -67,7 +67,7 @@ int main (int argc, char **argv)
         event = get_event(&arg);
         if(event == EVENT_NONE)
         {
-            usleep(1000);
+            usleep(100);
             continue;
         }
         
@@ -84,6 +84,7 @@ int main (int argc, char **argv)
                 break;
             case EVENT_STOP:
                 dtplayer_stop (player_priv);
+                goto QUIT_CHECK;
                 break;
             default:
                 dt_info(TAG,"UNKOWN CMD, IGNORE \n");
@@ -91,7 +92,12 @@ int main (int argc, char **argv)
         }
 
     }
-
+QUIT_CHECK:
+    while(!exit_flag)
+    {
+        usleep(100);
+        break;
+    }
     render_stop();
     ui_stop(); 
     dt_info ("", "QUIT DTPLAYER-TEST\n");
