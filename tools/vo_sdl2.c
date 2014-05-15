@@ -84,7 +84,7 @@ static int vo_sdl2_render (AVPicture_t * pict)
     if(!ctx->ren)
         ctx->ren = SDL_CreateRenderer(ctx->win,-1,0);
     if(!ctx->tex)    
-        ctx->tex = SDL_CreateTexture(ctx->ren,SDL_PIXELFORMAT_YV12,SDL_TEXTUREACCESS_STATIC,ctx->dw,ctx->dh);
+        ctx->tex = SDL_CreateTexture(ctx->ren,SDL_PIXELFORMAT_RGB24,SDL_TEXTUREACCESS_STATIC,ctx->dw,ctx->dh);
     //ctx->tex = SDL_CreateTexture(ctx->ren,SDL_PIXELFORMAT_YV12,SDL_TEXTUREACCESS_STREAMING,ctx->dw,ctx->dh);
 
     //SDL_UpdateYUVTexture(ctx->tex,NULL, pict->data[0], pict->linesize[0],  pict->data[1], pict->linesize[1],  pict->data[2], pict->linesize[2]);
