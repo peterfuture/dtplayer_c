@@ -33,7 +33,9 @@ Test
 Help
 =========
 
-bug report: peter_future@outlook.com 
+Email: peter_future@outlook.com 
+
+QQ: peter_future@outlook.com
 
 blog: http://blog.csdn.net/dtplayer
 
