@@ -30,6 +30,13 @@ Test
 
 ./dtm_player.exe url
 
+Demo Repo
+========
+
+node-dtplayer: https://github.com/peterfuture/node-dtplayer
+
+DTTV:https://github.com/peterfuture/DTTV
+
 Help
 =========
 
