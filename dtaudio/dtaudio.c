@@ -91,7 +91,7 @@ int audio_drop (dtaudio_context_t * actx, int64_t target_pts)
         pts = audio_get_current_pts (actx);
         if (pts >= target_pts)
             break;
-        dt_info (TAG, "read :%d pcm left:%d pts:%lld \n", rlen, size, pts);
+        dt_debug (TAG, "read :%d pcm left:%d pts:%lld \n", rlen, size, pts);
     }
     audio_update_pts ((void *) actx);
     dt_info (TAG, "drop finish,size:%d left. \n", size);
