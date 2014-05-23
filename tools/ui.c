@@ -29,8 +29,8 @@ player_event_t get_event (int *arg)
 {
 #ifdef ENABLE_VO_SDL2 
     SDL_Event event;
-    //SDL_WaitEvent(&event);
-    SDL_PollEvent(&event);
+    SDL_WaitEvent(&event);
+    //SDL_PollEvent(&event);
     switch (event.type) 
     {
         case SDL_KEYDOWN:

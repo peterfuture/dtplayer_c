@@ -27,6 +27,7 @@ int update_cb (player_state_t * state)
 int main (int argc, char **argv)
 {
     int ret = 0;
+    exit_flag = 0;
     version_info ();
     if (argc < 2)
     {

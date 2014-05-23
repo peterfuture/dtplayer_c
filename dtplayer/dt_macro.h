@@ -15,7 +15,7 @@
 /*CODEC*/
 
 /*HOST*/
-#define AVSYNC_THRESHOLD 100    //ms
+#define AVSYNC_THRESHOLD 150    //ms
 #define AVSYNC_THRESHOLD_MAX  3*1000 //ms
 #define AVSYNC_DROP_THRESHOLD  30*1000 //ms
 

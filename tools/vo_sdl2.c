@@ -51,8 +51,12 @@ int sdl2_stop()
 {
     sdl2_ctx_t *ctx = &sdl2_ctx;
     dt_lock (&ctx->vo_mutex);
+    
     if(ctx->win)
+    {
         SDL_DestroyWindow(ctx->win);
+        ctx->win = NULL;
+    }
     SDL_QuitSubSystem(SDL_INIT_VIDEO);
     dt_unlock (&ctx->vo_mutex);
     return 0;
