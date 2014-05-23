@@ -37,7 +37,7 @@ int dtdemuxer_read_frame (void *priv, dt_av_frame_t * frame)
     return demuxer_read_frame (dem_ctx, frame);
 }
 
-int dtdemuxer_seekto (void *priv, int timestamp)
+int dtdemuxer_seekto (void *priv, int64_t timestamp)
 {
     dtdemuxer_context_t *dem_ctx = (dtdemuxer_context_t *) priv;
     return demuxer_seekto (dem_ctx, timestamp);

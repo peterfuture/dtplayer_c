@@ -154,7 +154,7 @@ int demuxer_read_frame (dtdemuxer_context_t * dem_ctx, dt_av_frame_t * frame)
     return wrapper->read_frame (wrapper, frame);
 }
 
-int demuxer_seekto (dtdemuxer_context_t * dem_ctx, int timestamp)
+int demuxer_seekto (dtdemuxer_context_t * dem_ctx, int64_t timestamp)
 {
     demuxer_wrapper_t *wrapper = dem_ctx->demuxer;
     return wrapper->seek_frame (wrapper, timestamp);

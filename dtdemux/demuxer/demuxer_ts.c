@@ -887,7 +887,7 @@ static int ts_read_frame(demuxer_wrapper_t *wrapper, dt_av_frame_t *frame)
     return DTERROR_READ_EOF;
 }
 
-static int ts_seek_frame(demuxer_wrapper_t *wrapper, int timestamp)
+static int ts_seek_frame(demuxer_wrapper_t *wrapper, int64_t timestamp)
 {
     return 0;
 }

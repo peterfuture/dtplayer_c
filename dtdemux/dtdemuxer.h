@@ -29,7 +29,7 @@ typedef struct demuxer_wrapper
     int (*open) (struct demuxer_wrapper * wrapper);
     int (*read_frame) (struct demuxer_wrapper * wrapper, dt_av_frame_t * frame);
     int (*setup_info) (struct demuxer_wrapper * wrapper, dt_media_info_t * info);
-    int (*seek_frame) (struct demuxer_wrapper * wrapper, int timestamp);
+    int (*seek_frame) (struct demuxer_wrapper * wrapper, int64_t timestamp); // us
     int (*close) (struct demuxer_wrapper * wrapper);
     void *demuxer_priv;         // point to priv context
     void *parent;               // point to parent, dtdemuxer_context_t
@@ -49,7 +49,7 @@ typedef struct
 void demuxer_register_all();
 int demuxer_open (dtdemuxer_context_t * dem_ctx);
 int demuxer_read_frame (dtdemuxer_context_t * dem_ctx, dt_av_frame_t * frame);
-int demuxer_seekto (dtdemuxer_context_t * dem_ctx, int timestamp);
+int demuxer_seekto (dtdemuxer_context_t * dem_ctx, int64_t timestamp);
 int demuxer_close (dtdemuxer_context_t * dem_ctx);
 
 #endif

@@ -355,9 +355,9 @@ static int demuxer_aac_read_frame(demuxer_wrapper_t *wrapper, dt_av_frame_t *fra
 }
 
 /*
- * timestamp , s
+ * timestamp , us
  * */
-static int demuxer_aac_seek_frame(demuxer_wrapper_t *wrapper, int timestamp)
+static int demuxer_aac_seek_frame(demuxer_wrapper_t *wrapper, int64_t timestamp)
 {
     dtdemuxer_context_t *dem_ctx = (dtdemuxer_context_t *) wrapper->parent;
     aac_ctx_t *aac_ctx = (aac_ctx_t *)wrapper->demuxer_priv;
@@ -372,7 +372,7 @@ static int demuxer_aac_seek_frame(demuxer_wrapper_t *wrapper, int timestamp)
     dtstream_seek(dem_ctx->stream_priv,0,SEEK_SET);
 
 	int len, nf, srate, num;
-    nf = time * aac_ctx->samplerate/1024;
+    nf = time/1000000 * aac_ctx->samplerate/1024;
     
     while(nf > 0)
 	{

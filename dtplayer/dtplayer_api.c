@@ -113,6 +113,7 @@ int dtplayer_stop (void *player_priv)
     return 0;
 }
 
+// seek to cur_time + s_time
 int dtplayer_seek (void *player_priv, int s_time)
 {
     dtplayer_context_t *dtp_ctx = (dtplayer_context_t *) player_priv;
@@ -134,6 +135,29 @@ int dtplayer_seek (void *player_priv, int s_time)
 
     return 0;
 }
+
+// seek to cur_time + s_time
+int dtplayer_seekto (void *player_priv, int s_time)
+{
+    dtplayer_context_t *dtp_ctx = (dtplayer_context_t *) player_priv;
+
+    //get current time
+    int64_t full_time = dtp_ctx->media_info->duration;
+    int seek_time = s_time;
+    if (seek_time < 0)
+        seek_time = 0;
+    if (seek_time > full_time)
+        seek_time = full_time;
+    event_t *event = dt_alloc_event ();
+    event->next = NULL;
+    event->server_id = EVENT_SERVER_PLAYER;
+    event->type = PLAYER_EVENT_SEEK;
+    event->para.np = seek_time;
+    dt_send_event (event);
+
+    return 0;
+}
+
 
 int dtplayer_get_states (void *player_priv, player_state_t * state)
 {

@@ -64,7 +64,8 @@ int dtplayer_start (void *player_priv);
 int dtplayer_pause (void *player_priv);
 int dtplayer_resume (void *player_priv);
 int dtplayer_stop (void *player_priv);
-int dtplayer_seek (void *player_priv, int s_time);
+int dtplayer_seek (void *player_priv, int s_time); // seek to cur_time + s_time
+int dtplayer_seekto (void *player_priv, int s_time); // seek to s_time
 int dtplayer_get_states (void *player_priv, player_state_t * state);
 
 #endif
