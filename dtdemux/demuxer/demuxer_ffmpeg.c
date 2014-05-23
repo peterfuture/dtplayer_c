@@ -412,6 +412,8 @@ static int demuxer_ffmpeg_seek_frame (demuxer_wrapper_t * wrapper, int timestamp
     AVFormatContext *ic = ctx->ic;
     int seek_flags = AVSEEK_FLAG_ANY;
     int64_t seek_target = timestamp * 1000000;
+    if(ic->start_time != AV_NOPTS_VALUE)
+        seek_target += ic->start_time;
     int64_t seek_min = (seek_target > 0) ? seek_target - timestamp + 2 : INT64_MIN;
     int64_t seek_max = (seek_target < 0) ? seek_target - timestamp - 2 : INT64_MAX;
     int64_t ret = avformat_seek_file (ic, -1, seek_min, seek_target, seek_max, seek_flags);
