@@ -56,7 +56,19 @@ int main (int argc, char **argv)
         return -1;
 
     dtplayer_release_para (para);
-    dtplayer_start (player_priv);
+    
+	//get media info
+	dt_media_info_t info;
+	ret = dtplayer_get_mediainfo(player_priv, &info);	
+	if(ret < 0)
+	{
+		dt_info(TAG,"Get mediainfo failed, quit \n");
+		return -1;
+	}
+	dt_info(TAG,"Get Media Info Ok,filesize:%lld fulltime:%lld S \n",info.file_size,info.duration);
+
+
+	dtplayer_start (player_priv);
 
     //event handle
     player_event_t event = EVENT_NONE;

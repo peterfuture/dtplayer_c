@@ -273,6 +273,14 @@ int player_seekto (dtplayer_context_t * dtp_ctx, int seek_time)
     return 0;
 }
 
+int player_get_mediainfo (dtplayer_context_t * dtp_ctx, dt_media_info_t *info)
+{
+	if(!dtp_ctx->media_info)
+		return -1;
+	memcpy(info,dtp_ctx->media_info,sizeof(dt_media_info_t));
+	return 0;
+}
+
 int player_stop (dtplayer_context_t * dtp_ctx)
 {
     dt_info (TAG, "PLAYER STOP STATUS SET\n");

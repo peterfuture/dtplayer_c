@@ -158,6 +158,11 @@ int dtplayer_seekto (void *player_priv, int s_time)
     return 0;
 }
 
+int dtplayer_get_mediainfo(void *player_priv, dt_media_info_t *info)
+{
+    dtplayer_context_t *dtp_ctx = (dtplayer_context_t *) player_priv;
+	return player_get_mediainfo(dtp_ctx, info);
+}
 
 int dtplayer_get_states (void *player_priv, player_state_t * state)
 {
