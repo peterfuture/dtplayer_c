@@ -9,31 +9,6 @@
 
 static dtplayer_context_t ply_ctx;
 
-dtplayer_para_t *dtplayer_alloc_para ()
-{
-    dtplayer_para_t *para = (dtplayer_para_t *) malloc (sizeof (dtplayer_para_t));
-    if (!para)
-    {
-        dt_info (TAG, "DTPLAYER PARA ALLOC FAILED \n");
-        return NULL;
-    }
-    para->no_audio = para->no_video = para->no_sub = -1;
-    para->height = para->width = -1;
-    para->loop_mode = 0;
-    para->audio_index = para->video_index = para->sub_index = -1;
-    para->update_cb = NULL;
-    para->sync_enable = -1;
-    return para;
-}
-
-int dtplayer_release_para (dtplayer_para_t * para)
-{
-    if (para)
-        free (para);
-    para = NULL;
-    return 0;
-}
-
 void *dtplayer_init (dtplayer_para_t * para)
 {
     int ret = 0;

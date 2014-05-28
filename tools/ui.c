@@ -24,8 +24,7 @@ int ui_stop()
     return 0;
 }
 
-
-player_event_t get_event (int *arg)
+player_event_t get_event (int *arg,ply_ctx_t *ctx)
 {
 #ifdef ENABLE_VO_SDL2 
     SDL_Event event;
@@ -58,22 +57,22 @@ player_event_t get_event (int *arg)
                 case SDLK_w:
                     break;
                 case SDLK_PAGEUP:
-                    *arg = 600.0;
+                    *arg = ctx->cur_time + 600;
                     return EVENT_SEEK;
                 case SDLK_PAGEDOWN:
-                    *arg = -600.0;
+                    *arg = ctx->cur_time - 600;
                     return EVENT_SEEK;
                 case SDLK_LEFT:
-                    *arg = -10.0;
+                    *arg = ctx->cur_time - 10;
                     return EVENT_SEEK;
                 case SDLK_RIGHT:
-                    *arg = 10.0;
+                    *arg = ctx->cur_time + 10;
                     return EVENT_SEEK;
                 case SDLK_UP:
-                    *arg = 60.0;
+                    *arg = ctx->cur_time + 60;
                     return EVENT_SEEK;
                 case SDLK_DOWN:
-                    *arg = -60.0;
+                    *arg = ctx->cur_time - 60;
                     return EVENT_SEEK;
                 default:
                     break;

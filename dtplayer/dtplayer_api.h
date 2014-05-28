@@ -58,8 +58,6 @@ typedef struct dtplayer_para
     int (*update_cb) (player_state_t * sta);
 } dtplayer_para_t;
 
-dtplayer_para_t *dtplayer_alloc_para ();
-int dtplayer_release_para (dtplayer_para_t * para);
 void *dtplayer_init (dtplayer_para_t * para);
 int dtplayer_start (void *player_priv);
 int dtplayer_pause (void *player_priv);
