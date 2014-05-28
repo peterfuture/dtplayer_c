@@ -80,6 +80,36 @@ player_event_t get_event (int *arg,ply_ctx_t *ctx)
             break;
         case SDL_MOUSEBUTTONDOWN:
         case SDL_MOUSEMOTION:
+            {
+                double x;
+                double incr, pos, frac;
+                if (event.type == SDL_MOUSEBUTTONDOWN)
+                    x = event.button.x;
+                else 
+                {
+                    if (event.motion.state != SDL_PRESSED)
+                        break;
+                    x = event.motion.x;
+                }
+                int64_t ts;
+                int ns, hh, mm, ss;
+                int tns, thh, tmm, tss;
+                tns  = ctx->duration / 1000000LL;
+                thh  = tns / 3600;
+                tmm  = (tns % 3600) / 60;
+                tss  = (tns % 60);
+                frac = x / ctx->disp_width;
+                ns   = frac * tns;
+                hh   = ns / 3600;
+                mm   = (ns % 3600) / 60;
+                ss   = (ns % 60);
+                fprintf(stderr, "Seek to %2.0f%% (%2d:%02d:%02d) of total duration (%2d:%02d:%02d)       \n", frac*100,
+                    hh, mm, ss, thh, tmm, tss);
+                ts = frac * ctx->duration;
+                *arg = ts;
+                return EVENT_SEEK;
+            }
+
             break;
         case SDL_QUIT:
             return EVENT_STOP;
