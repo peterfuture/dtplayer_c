@@ -411,7 +411,7 @@ static int demuxer_ffmpeg_seek_frame (demuxer_wrapper_t * wrapper, int64_t times
     ffmpeg_ctx_t *ctx = (ffmpeg_ctx_t *)wrapper->demuxer_priv;
     AVFormatContext *ic = ctx->ic;
 
-    int seek_flags = AVSEEK_FLAG_BACKWARD; //seek key frame as default
+    int seek_flags = 0; //seek key frame as default
 
     char value[512];
     if(GetEnv("DEMUXER","demuxer.seek_keyframe",value) > 0)
