@@ -60,6 +60,9 @@ static int player_server_release (dtplayer_context_t * dtp_ctx)
 int player_init (dtplayer_context_t * dtp_ctx)
 {
     int ret = 0;
+    dtplayer_para_t *para = &dtp_ctx->player_para;
+    player_ctrl_t *ctrl_info = &dtp_ctx->ctrl_info;
+    
     set_player_status (dtp_ctx, PLAYER_STATUS_INIT_ENTER);
     dt_info (TAG, "[%s:%d] START PLAYER INIT\n", __FUNCTION__, __LINE__);
     dtp_ctx->file_name = dtp_ctx->player_para.file_name;
@@ -75,15 +78,83 @@ int player_init (dtplayer_context_t * dtp_ctx)
     }
     dtp_ctx->media_info = dtdemuxer_get_media_info (dtp_ctx->demuxer_priv);
 
-    /* setup player ctrl info */
+    /* setup player ctrl info 
+     * 
+     * have two ways to contrl, priority as follows
+     * para
+     * sys_set.ini
+     *
+     * */
+
+    //first parse ini file
     char value[512];
-    dtplayer_para_t *para = &dtp_ctx->player_para;
-    player_ctrl_t *ctrl_info = &dtp_ctx->ctrl_info;
+    
+    ctrl_info->sync_enable = (int)(ctrl_info->has_audio && ctrl_info->has_video); // default
+    if (GetEnv ("PLAYER", "player.syncenable", value) > 0)
+        ctrl_info->sync_enable = atoi (value);
+    
+    ctrl_info->has_audio = dtp_ctx->media_info->has_audio;
+    ctrl_info->has_video = dtp_ctx->media_info->has_video;
+    ctrl_info->has_sub = dtp_ctx->media_info->has_sub;
+    dt_info (TAG, "initial setting, has audio:%d has video:%d has sub:%d \n", ctrl_info->has_audio, ctrl_info->has_video, ctrl_info->has_sub);
+
+
+    if (GetEnv ("PLAYER", "player.noaudio", value) > 0)
+    {
+        if(atoi(value) == 1)
+            ctrl_info->has_audio = 0;
+    }
+    if (GetEnv ("PLAYER", "player.novideo", value) > 0)
+    {
+        if(atoi(value) == 1)
+            ctrl_info->has_video = 0;
+    }
+    if (GetEnv ("PLAYER", "player.nosub", value) > 0)
+    {
+        if(atoi(value) == 1)
+            ctrl_info->has_sub = 0;
+    }
+    dt_info (TAG, "after ini setting, has audio:%d has video:%d has sub:%d \n", ctrl_info->has_audio, ctrl_info->has_video, ctrl_info->has_sub);
+
+
+    //then use para update contrl info
+    if (para->sync_enable != -1)
+        ctrl_info->sync_enable = para->sync_enable;
+
+    if(para->no_audio != -1)
+        ctrl_info->has_audio = (!para->no_audio);
+    if(para->no_video != -1)
+        ctrl_info->has_video = (!para->no_video);
+    if(para->no_sub != -1)
+        ctrl_info->has_sub = (!para->no_sub);
+
+    if(para->audio_index != -1)
+        ctrl_info->cur_ast_index = dtp_ctx->media_info->cur_ast_index = para->audio_index;
+    else
+        ctrl_info->cur_ast_index = dtp_ctx->media_info->cur_ast_index;
+
+    if(para->video_index != -1)
+        ctrl_info->cur_vst_index = dtp_ctx->media_info->cur_vst_index = para->video_index;
+    else
+        ctrl_info->cur_vst_index = dtp_ctx->media_info->cur_vst_index; 
+
+    if(para->sub_index != -1)
+        ctrl_info->cur_sst_index = dtp_ctx->media_info->cur_sst_index = para->sub_index;
+    else
+        ctrl_info->cur_sst_index = dtp_ctx->media_info->cur_sst_index;
+
+    dt_info (TAG, "ast_idx:%d vst_idx:%d sst_idx:%d \n", ctrl_info->cur_ast_index, ctrl_info->cur_vst_index, ctrl_info->cur_sst_index);
+
+    //Fixme cur index valid check ...
+
+    //other info setup
     ctrl_info->start_time = dtp_ctx->media_info->start_time;
     ctrl_info->first_time = -1;
-    ctrl_info->has_audio = (para->no_audio == -1) ? dtp_ctx->media_info->has_audio : (!para->no_audio);
-    ctrl_info->has_video = (para->no_video == -1) ? dtp_ctx->media_info->has_video : (!para->no_video);
-    ctrl_info->has_sub = (para->no_sub == -1) ? dtp_ctx->media_info->has_sub : (!para->no_sub);
+    ctrl_info->width = para->width;
+    ctrl_info->height = para->height;
+
+
+    //invalid check
 
     if (!ctrl_info->has_audio && !ctrl_info->has_video)
     {
@@ -91,67 +162,20 @@ int player_init (dtplayer_context_t * dtp_ctx)
         return -1;
     }
 
-    int sync_enable_ini = -1;
-    if (GetEnv ("PLAYER", "player.syncenable", value) > 0)
-        sync_enable_ini = atoi (value);
-    if (para->sync_enable != -1)
-        ctrl_info->sync_enable = para->sync_enable;
-    else
-        ctrl_info->sync_enable = (sync_enable_ini == -1) ? (ctrl_info->has_audio && ctrl_info->has_video) : sync_enable_ini;
-
-    ctrl_info->cur_ast_index = (para->audio_index == -1) ? dtp_ctx->media_info->cur_ast_index : para->audio_index;
-    ctrl_info->cur_vst_index = (para->video_index == -1) ? dtp_ctx->media_info->cur_vst_index : para->video_index;
-    ctrl_info->cur_sst_index = (para->sub_index == -1) ? dtp_ctx->media_info->cur_sst_index : para->sub_index;
-    dt_info (TAG, "ast_idx:%d vst_idx:%d sst_idx:%d \n", ctrl_info->cur_ast_index, ctrl_info->cur_vst_index, ctrl_info->cur_sst_index);
-
-    int no_audio_ini = -1;
-    int no_video_ini = -1;
-    int no_sub_ini = -1;
-    if (GetEnv ("PLAYER", "player.noaudio", value) > 0)
-        no_audio_ini = atoi (value);
-    if (GetEnv ("PLAYER", "player.novideo", value) > 0)
-        no_video_ini = atoi (value);
-    if (GetEnv ("PLAYER", "player.nosub", value) > 0)
-        no_sub_ini = atoi (value);
-    dt_info (TAG, "ini noaudio:%d novideo:%d nosub:%d \n", no_audio_ini, no_video_ini, no_sub_ini);
-
-    if (para->no_audio != -1)
-        ctrl_info->has_audio = !para->no_audio;
-    else
-        ctrl_info->has_audio = (no_audio_ini == -1) ? dtp_ctx->media_info->has_audio : !no_audio_ini;
-    if (para->no_video != -1)
-        ctrl_info->has_video = !para->no_video;
-    else
-        ctrl_info->has_video = (no_video_ini == -1) ? dtp_ctx->media_info->has_video : !no_video_ini;
-    if (para->no_sub != -1)
-        ctrl_info->has_sub = !para->no_sub;
-    else
-        ctrl_info->has_sub = (no_sub_ini) ? dtp_ctx->media_info->has_sub : !no_sub_ini;
-
-    if (!ctrl_info->has_audio)
-        ctrl_info->cur_ast_index = -1;
-    if (!ctrl_info->has_video)
-        ctrl_info->cur_vst_index = -1;
-    if (!ctrl_info->has_sub)
-        ctrl_info->cur_sst_index = -1;
-
+    //updte mediainfo --
+    //
     ctrl_info->has_sub = 0;     // do not support sub for now 
-    dtp_ctx->media_info->no_audio = !ctrl_info->has_audio;
-    dtp_ctx->media_info->no_video = !ctrl_info->has_video;
-    dtp_ctx->media_info->no_sub = !ctrl_info->has_sub;
-
+    dtp_ctx->media_info->disable_audio = !ctrl_info->has_audio;
+    dtp_ctx->media_info->disable_video = !ctrl_info->has_video;
+    dtp_ctx->media_info->disable_sub = !ctrl_info->has_sub;
     dt_info (TAG, "Finally, ctrl info, audio:%d video:%d sub:%d \n", ctrl_info->has_audio, ctrl_info->has_video, ctrl_info->has_sub);
-    dt_info (TAG, "Finally, no audio:%d no video:%d no sub:%d \n", dtp_ctx->media_info->no_audio, dtp_ctx->media_info->no_video, dtp_ctx->media_info->no_sub);
 
-    /*dest width height */
-    ctrl_info->width = para->width;
-    ctrl_info->height = para->height;
 
     dt_info (TAG, "[%s:%d] END PLAYER INIT, RET = %d\n", __FUNCTION__, __LINE__, ret);
     set_player_status (dtp_ctx, PLAYER_STATUS_INIT_EXIT);
     player_handle_cb (dtp_ctx);
     return 0;
-  ERR1:
+ERR1:
     player_server_release (dtp_ctx);
     set_player_status (dtp_ctx, PLAYER_STATUS_ERROR);
     player_handle_cb (dtp_ctx);
