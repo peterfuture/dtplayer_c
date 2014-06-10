@@ -33,9 +33,9 @@ Test
 Demo Repo
 ========
 
-node-dtplayer: https://github.com/peterfuture/node-dtplayer
+dttv-desktop:https://github.com/peterfuture/dttv-desktop
 
-DTTV:https://github.com/peterfuture/DTTV
+dttv-android:https://github.com/peterfuture/dttv-android
 
 Help
 =========

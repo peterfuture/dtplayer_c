@@ -156,9 +156,9 @@ static int demuxer_ffmpeg_read_frame (demuxer_wrapper_t * wrapper, dt_av_frame_t
     dtdemuxer_context_t *dem_ctx = (dtdemuxer_context_t *) wrapper->parent;
     dt_media_info_t *media_info = &dem_ctx->media_info;
 
-    int has_audio = (media_info->no_audio) ? 0 : media_info->has_audio;
-    int has_video = (media_info->no_video) ? 0 : media_info->has_video;
-    int has_sub = (media_info->no_sub) ? 0 : media_info->has_sub;
+    int has_audio = (media_info->disable_audio) ? 0 : media_info->has_audio;
+    int has_video = (media_info->disable_video) ? 0 : media_info->has_video;
+    int has_sub = (media_info->disable_sub) ? 0 : media_info->has_sub;
 
     int cur_aidx = (has_audio) ? media_info->astreams[media_info->cur_ast_index]->index : -1;
     int cur_vidx = (has_video) ? media_info->vstreams[media_info->cur_vst_index]->index : -1;
@@ -410,7 +410,16 @@ static int demuxer_ffmpeg_seek_frame (demuxer_wrapper_t * wrapper, int64_t times
 {
     ffmpeg_ctx_t *ctx = (ffmpeg_ctx_t *)wrapper->demuxer_priv;
     AVFormatContext *ic = ctx->ic;
-    int seek_flags = AVSEEK_FLAG_ANY;
+
+    int seek_flags = 0; //seek key frame as default
+
+    char value[512];
+    if(GetEnv("DEMUXER","demuxer.seek_keyframe",value) > 0)
+    {
+        seek_flags = (atoi(value)==0)?AVSEEK_FLAG_ANY:AVSEEK_FLAG_BACKWARD;
+        dt_info(TAG,"seek keyframe enabled:%d \n",atoi(value));
+    }
+    
     int64_t seek_target = timestamp;
     int64_t seek_min = (seek_target > 0) ? seek_target - timestamp + 2 : INT64_MIN;
     int64_t seek_max = (seek_target < 0) ? seek_target - timestamp - 2 : INT64_MAX;

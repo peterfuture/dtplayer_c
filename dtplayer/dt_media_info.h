@@ -74,15 +74,15 @@ typedef struct
 
     unsigned int nb_stream;
     int has_video;
-    int no_video;
+    int disable_video;
     int vst_num;
     int cur_vst_index;
     int has_audio;
-    int no_audio;
+    int disable_audio;
     int ast_num;
     int cur_ast_index;
     int has_sub;
-    int no_sub;
+    int disable_sub;
     int sst_num;
     int cur_sst_index;
 
