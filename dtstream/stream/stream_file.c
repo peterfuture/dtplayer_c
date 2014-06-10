@@ -80,7 +80,7 @@ static int stream_file_seek (stream_wrapper_t * wrapper, int64_t pos, int whence
 
 static int stream_file_close (stream_wrapper_t * wrapper)
 {
-    file_ctx_t *ctx = malloc(sizeof(*ctx));
+    file_ctx_t *ctx = (file_ctx_t *)wrapper->stream_priv;
     close(ctx->fd);
     free(ctx);
     wrapper->stream_priv = NULL;

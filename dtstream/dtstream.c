@@ -69,6 +69,24 @@ int stream_open (dtstream_context_t * stm_ctx)
     stream_wrapper_t *wrapper = stm_ctx->stream;
     memset(&wrapper->info,0,sizeof(stream_ctrl_t));
     dt_info (TAG, "select stream:%s\n", wrapper->name);
+
+    //stream buffer eanble check
+    char value[512];
+    int buffer_enable = 0;
+    if(GetEnv("STREAM","stream.buffer",value) > 0)
+    {
+        buffer_enable = atoi(value);
+        dt_info(TAG,"buffer enable:%d \n",buffer_enable);
+    }
+    else
+        dt_info(TAG,"buffer enable not set, use default:%d \n",buffer_enable);
+    if(buffer_enable)
+    {
+        extern stream_wrapper_t stream_buffer;
+        wrapper->stream_priv = stm_ctx->stream;
+        wrapper = &stream_buffer;
+    }
+    
     ret = wrapper->open (wrapper, stm_ctx->stream_name);
     if (ret < 0)
     {
