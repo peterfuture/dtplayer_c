@@ -83,10 +83,10 @@ int stream_open (dtstream_context_t * stm_ctx)
     if(buffer_enable)
     {
         extern stream_wrapper_t stream_buffer;
-        wrapper->stream_priv = stm_ctx->stream;
         wrapper = &stream_buffer;
+        wrapper->stream_priv = stm_ctx->stream;
+        stm_ctx->stream = wrapper;
     }
-    
     ret = wrapper->open (wrapper, stm_ctx->stream_name);
     if (ret < 0)
     {

@@ -34,7 +34,7 @@ typedef struct{
     stream_wrapper_t *wrapper; // point to real stream
 }streambuf_ctx_t;
 
-static void *data_fill_thread (stream_wrapper_t * wrapper);
+static void *data_fill_thread (streambuf_ctx_t * ctx);
 
 static int create_fill_thread (streambuf_ctx_t * ctx)
 {
@@ -59,6 +59,7 @@ int pause_fill_thread (streambuf_ctx_t * ctx)
     while (ctx->status != ST_BUFFER_PAUSED)
         usleep (100);
     ctx->flag = ST_FLAG_NULL;
+    dt_info(TAG,"pause fill thread ok \n");
     return 0;
 }
 
@@ -66,6 +67,7 @@ int resume_fill_thread (streambuf_ctx_t * ctx)
 {
     ctx->flag = ST_FLAG_NULL;
     ctx->status = ST_BUFFER_RUNNING;
+    dt_info(TAG,"resume fill thread ok \n");
     return 0;
 }
 
@@ -77,9 +79,8 @@ int stop_fill_thread (streambuf_ctx_t * ctx)
     return 0;
 }
 
-static void *data_fill_thread (stream_wrapper_t * wrapper)
+static void *data_fill_thread (streambuf_ctx_t * ctx)
 {
-    streambuf_ctx_t *ctx = (streambuf_ctx_t *)wrapper->stream_priv;
     stream_wrapper_t *real_st = ctx->wrapper;
     dt_buffer_t *sbuf = &ctx->sbuf;
   
@@ -89,7 +90,7 @@ static void *data_fill_thread (stream_wrapper_t * wrapper)
 
     do
     {
-        usleep (100);
+        usleep (10000);
         
         if(ctx->flag == ST_FLAG_PAUSE)
             ctx->status = ST_BUFFER_PAUSED;
@@ -104,6 +105,7 @@ static void *data_fill_thread (stream_wrapper_t * wrapper)
         {
             rlen = 0;
             buf_reinit(sbuf);
+            dt_info(TAG,"paused thread, reset rlen and sbuf\n");
             continue;
         }
 
@@ -112,17 +114,22 @@ static void *data_fill_thread (stream_wrapper_t * wrapper)
             rlen = real_st->read(real_st,tmp_bufp,READ_PER_TIME);
             if(rlen < 0)
             {
-                ctx->eof = 1;
-                ctx->status = ST_BUFFER_QUIT;
+                rlen = 0;
+                ctx->eof = 1; // eof will not quit poll thread
+                ctx->status = ST_BUFFER_IDLE;
                 ctx->flag = ST_FLAG_NULL;
                 dt_info(TAG,"read eof quit poll thread \n");
-                goto QUIT;
+                continue;
+                //goto QUIT;
             }
-            dt_debug (TAG, "read ok size:%d \n",rlen);
+            dt_debug(TAG, "read ok size:%d \n",rlen);
         }
         
         if(buf_space(sbuf) < rlen)
+        {
+            usleep(100000);
             continue;
+        }
         wlen = buf_put(sbuf,tmp_bufp,rlen); 
         if (wlen == 0)
             continue;
@@ -148,6 +155,7 @@ static int stream_buffer_open (stream_wrapper_t * wrapper,char *stream_name)
 
     //open real stream
     stream_wrapper_t *real_st = (stream_wrapper_t *)wrapper->stream_priv;
+    dt_debug(TAG,"Enter stream buffer open,name:%s \n",real_st->name);
     ret = real_st->open(real_st,stream_name);
     if(ret != DTERROR_NONE)
     {
@@ -157,7 +165,7 @@ static int stream_buffer_open (stream_wrapper_t * wrapper,char *stream_name)
     memcpy(info,&real_st->info,sizeof(stream_ctrl_t));
     
     // ctx
-    streambuf_ctx_t *ctx = malloc(sizeof(streambuf_ctx_t));
+    streambuf_ctx_t *ctx = (streambuf_ctx_t *)malloc(sizeof(streambuf_ctx_t));
     if(!ctx)
     {
         dt_info(TAG,"streambuf_ctx_t malloc failed, ret\n");
@@ -182,7 +190,6 @@ static int stream_buffer_open (stream_wrapper_t * wrapper,char *stream_name)
     if(ret != DTERROR_NONE)
     {
         ret = DTERROR_FAIL;
-        
         goto ERR1;
     }
     wrapper->stream_priv = ctx;
@@ -209,14 +216,19 @@ static int stream_buffer_read (stream_wrapper_t * wrapper,uint8_t *buf,int len)
     stream_ctrl_t *info = &wrapper->info;
     dt_buffer_t *sbuf = &ctx->sbuf;
 
+    int level = buf_level(sbuf);
+    if(level == 0)
+        return 0;
     int r = buf_get(sbuf,buf,len);
-    dt_info(TAG,"read %d byte \n",r);
+    dt_debug(TAG,"read %d byte \n",r);
     if(r>0)
         info->cur_pos += r;
     if(r<=0 && ctx->eof == 1)
     {
-        info->eof_flag = 1;
-        return -1;
+        if(ctx->eof == 1)
+            info->eof_flag = 1;
+        else
+            r=0;
     }
     return r;
 }
@@ -226,17 +238,15 @@ static int stream_buffer_seek (stream_wrapper_t * wrapper, int64_t pos, int when
     int ret = 0;
     streambuf_ctx_t *ctx = (streambuf_ctx_t *)wrapper->stream_priv;
     stream_wrapper_t *real_st = ctx->wrapper;
-    stream_ctrl_t *info = &wrapper->info;
-    dt_buffer_t *sbuf = &ctx->sbuf;
 
     pause_fill_thread(ctx);
     
-    ret ==real_st->seek(real_st,pos,whence);
+    ret =real_st->seek(real_st,pos,whence);
     if(ret != DTERROR_NONE)
         dt_error(TAG,"SEEK FAILED \n");
-    
+    ctx->eof = 0;    
     resume_fill_thread(ctx);
-
+    usleep(3*1000000);
     return ret;
 }
 
@@ -244,12 +254,10 @@ static int stream_buffer_close (stream_wrapper_t * wrapper)
 {
     streambuf_ctx_t *ctx = (streambuf_ctx_t *)wrapper->stream_priv;
     stream_wrapper_t *real_st = ctx->wrapper;
-    stream_ctrl_t *info = &wrapper->info;
-    dt_buffer_t *sbuf = &ctx->sbuf;
 
     stop_fill_thread(ctx);
     real_st->close(real_st);
-    buf_release(ctx);
+    buf_release(&ctx->sbuf);
     return 0;
 }
 

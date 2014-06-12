@@ -46,7 +46,7 @@ static int parse_cmd(int argc,char **argv,dtplayer_para_t *para)
     //para->no_video=1;
     para->width = ply_ctx.disp_width;
     para->height = ply_ctx.disp_height;
-
+    return 0;
 }
 
 int main (int argc, char **argv)

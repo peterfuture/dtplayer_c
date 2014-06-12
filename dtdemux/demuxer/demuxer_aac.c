@@ -230,7 +230,10 @@ static int demuxer_aac_open(demuxer_wrapper_t *wrapper)
     //const uint8_t *end = buf + probe_buf->level - 7;
     uint32_t header = DT_RB16(buf);
     if((header&0xFFF6) != 0xFFF0)
+    {
+        dt_info(TAG,"NOT aac file\n");
         return -1;
+    }
     int profile = (DT_RB8(buf+2)>>6)&0xf;
     aac_ctx->profile = profile; 
     dt_debug(TAG,"Profile:%s \n",aac_profile[profile]);

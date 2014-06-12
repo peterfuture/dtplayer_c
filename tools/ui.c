@@ -82,7 +82,7 @@ player_event_t get_event (int *arg,ply_ctx_t *ctx)
         case SDL_MOUSEMOTION:
             {
                 double x;
-                double incr, pos, frac;
+                double frac;
                 if (event.type == SDL_MOUSEBUTTONDOWN)
                     x = event.button.x;
                 else 

@@ -1,6 +1,8 @@
 #include "dtdemuxer.h"
 #include "dtstream_api.h"
 
+#include <unistd.h>
+
 #define TAG "DEMUXER"
 
 #define REGISTER_DEMUXER(X,x) \
@@ -110,18 +112,52 @@ int demuxer_open (dtdemuxer_context_t * dem_ctx)
     else
         dt_info(TAG,"probe size not set, use default:%d \n",probe_size);
 
-
     if(probe_enable)
     {
         int64_t old_pos = dtstream_tell(dem_ctx->stream_priv);
         dt_info(TAG,"old:%lld \n",old_pos);
         ret = buf_init(&dem_ctx->probe_buf,probe_size);
         if(ret < 0)
-            return -1; 
-        ret = dtstream_read(dem_ctx->stream_priv,dem_ctx->probe_buf.data,probe_size); 
-        if(ret <= 0)
             return -1;
-        dem_ctx->probe_buf.level = ret;
+        //buffer data for probe
+        int total = probe_size;
+        int rtotal = 0;
+        int rlen = 0;
+        int retry = 100;
+        const int read_once = 10240;
+        uint8_t tmp_buf[read_once]; 
+        do{
+            
+            rlen = dtstream_read(dem_ctx->stream_priv,tmp_buf,read_once); 
+            if(rlen < 0) // err
+                return -1;
+            if(rlen >0)
+                retry = 20;
+            else
+            {
+                usleep(100000); // total time :20 * 100000 = 10s
+                retry--;
+            }
+            if(retry == 0)
+            {
+                dt_info(TAG,"retry 100 times, total:%d  \n",total);
+                if((probe_size-total) == 0)
+                    return -1;
+                else
+                    break;
+            }
+            dt_debug(TAG,"total:%d rtotal:%d rlen:%d \n",total,rtotal,rlen);
+            if(rlen == 0)
+                continue;
+            if(buf_put(&dem_ctx->probe_buf,tmp_buf,rlen) == 0) // full
+                break;
+            rtotal += rlen;
+            total -= rlen;
+            if(total == 0)
+                break;
+        }while(1);
+
+        dt_info(TAG,"buffered %d bytes for probe \n",probe_size - total);
         ret = dtstream_seek(dem_ctx->stream_priv,old_pos,SEEK_SET); 
         dt_info(TAG,"seek back to:%lld ret:%d \n",old_pos,ret);
     }
