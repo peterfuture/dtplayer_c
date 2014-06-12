@@ -113,7 +113,7 @@ static void *player_io_thread (dtplayer_context_t * dtp_ctx)
             usleep (100);
             continue;
         }
-        dt_debug (TAG, "read ok size:%d pts:%lld \n",frame.size,frame.pts);
+        dt_debug(TAG, "read ok size:%d pts:%lld \n",frame.size,frame.pts);
       WRITE_FRAME:
         ret = player_write_frame (dtp_ctx, &frame);
         if (ret == DTERROR_NONE)

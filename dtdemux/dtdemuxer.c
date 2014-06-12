@@ -129,8 +129,13 @@ int demuxer_open (dtdemuxer_context_t * dem_ctx)
         do{
             
             rlen = dtstream_read(dem_ctx->stream_priv,tmp_buf,read_once); 
-            if(rlen < 0) // err
-                return -1;
+            if(rlen < 0) // read eof
+            {
+                if((probe_size-total)==0)
+                    return -1;
+                else
+                    break;
+            }
             if(rlen >0)
                 retry = 20;
             else

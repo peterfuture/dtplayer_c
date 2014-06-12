@@ -62,7 +62,7 @@ static int stream_file_seek (stream_wrapper_t * wrapper, int64_t pos, int whence
 {
     file_ctx_t *ctx = (file_ctx_t *)wrapper->stream_priv;
     stream_ctrl_t *info = &wrapper->info;
-        
+    info->eof_flag = 0; 
     if(whence == AVSEEK_SIZE)
     {
         dt_debug(TAG,"REQUEST STREAM SIZE:%lld \n",info->stream_size);

@@ -238,7 +238,8 @@ static int stream_buffer_seek (stream_wrapper_t * wrapper, int64_t pos, int when
     int ret = 0;
     streambuf_ctx_t *ctx = (streambuf_ctx_t *)wrapper->stream_priv;
     stream_wrapper_t *real_st = ctx->wrapper;
-
+    stream_ctrl_t *info = &wrapper->info;
+    info->eof_flag = 0;
     pause_fill_thread(ctx);
     
     ret =real_st->seek(real_st,pos,whence);
