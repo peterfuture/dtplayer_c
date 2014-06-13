@@ -198,6 +198,7 @@ int demuxer_read_frame (dtdemuxer_context_t * dem_ctx, dt_av_frame_t * frame)
 int demuxer_seekto (dtdemuxer_context_t * dem_ctx, int64_t timestamp)
 {
     demuxer_wrapper_t *wrapper = dem_ctx->demuxer;
+    dt_info(TAG,"Enter seek \n");
     return wrapper->seek_frame (wrapper, timestamp);
 }
 
