@@ -11,7 +11,7 @@ typedef enum{
     STREAM_INVALID = -1,
     STREAM_FILE,
     STREAM_FFMPEG,
-    STREAM_BUFFER,
+    STREAM_CACHE, // online video only
     STREAM_UNSUPPORT
 }stream_format_t;
 

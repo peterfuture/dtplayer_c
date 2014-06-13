@@ -24,7 +24,7 @@ static void register_stream (stream_wrapper_t * wrapper)
 
 void stream_register_all ()
 {
-//    REGISTER_STREAM (FILE, file);
+    REGISTER_STREAM (FILE, file);
 #ifdef ENABLE_STREAM_FFMPEG
     REGISTER_STREAM (FFMPEG, ffmpeg);
 #endif
@@ -72,18 +72,18 @@ int stream_open (dtstream_context_t * stm_ctx)
 
     //stream buffer eanble check
     char value[512];
-    int buffer_enable = 0;
-    if(GetEnv("STREAM","stream.buffer",value) > 0)
+    int cache_enable = 0;
+    if(GetEnv("STREAM","stream.cache",value) > 0)
     {
-        buffer_enable = atoi(value);
-        dt_info(TAG,"buffer enable:%d \n",buffer_enable);
+        cache_enable = atoi(value);
+        dt_info(TAG,"cache enable:%d \n",cache_enable);
     }
     else
-        dt_info(TAG,"buffer enable not set, use default:%d \n",buffer_enable);
-    if(buffer_enable)
+        dt_info(TAG,"cache enable not set, use default:%d \n",cache_enable);
+    if(cache_enable)
     {
-        extern stream_wrapper_t stream_buffer;
-        wrapper = &stream_buffer;
+        extern stream_wrapper_t stream_cache;
+        wrapper = &stream_cache;
         wrapper->stream_priv = stm_ctx->stream;
         stm_ctx->stream = wrapper;
     }
