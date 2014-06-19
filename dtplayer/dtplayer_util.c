@@ -88,12 +88,12 @@ int player_host_init (dtplayer_context_t * dtp_ctx)
             host_para->video_fps = vstream->time_base.den / (double) vstream->time_base.num;
         host_para->video_rate = (int) (90000 / host_para->video_fps);
 
-        host_para->audio_extra_size = vstream->extradata_size;
+        host_para->video_extra_size = vstream->extradata_size;
         host_para->video_src_pixfmt = vstream->pix_fmt;
 
         host_para->vctx_priv = vstream->codec_priv;
 
-        dt_info (TAG, "[%s:%d]format:%d width:%d height:%d fmt:%d rate:%d ratio:%d fps:%g \n", __FUNCTION__, __LINE__, host_para->video_format, host_para->video_src_width, host_para->video_src_height, host_para->video_src_pixfmt, host_para->video_rate, host_para->video_ratio, host_para->video_fps);
+        dt_info (TAG, "[%s:%d]format:%d width:%d height:%d fmt:%d rate:%d ratio:%d fps:%g extra_size:%d\n", __FUNCTION__, __LINE__, host_para->video_format, host_para->video_src_width, host_para->video_src_height, host_para->video_src_pixfmt, host_para->video_rate, host_para->video_ratio, host_para->video_fps,host_para->video_extra_size);
         if (host_para->video_extra_size > 0)
         {
             memset (host_para->video_extra_data, 0, host_para->video_extra_size);
