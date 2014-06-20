@@ -123,7 +123,7 @@ ifeq ($(DT_FFMPEG_ANDROID_DIR),)
 	#DT_FFMPEG_DIR = /usr/local/#default ffmpeg install dir 
 endif
 
-FFMPEGLIBS  = $(DT_FFMPEG_DIR)/libffmpeg.so
+FFMPEGLIBS  = $(DT_FFMPEG_ANDROID_DIR)/libffmpeg.so
 
 DT_CFLAGS-$(DT_FFMPEG)   += -I$(DT_FFMPEG_ANDROID_DIR)/include
 COMMON_LIBS-$(DT_FFMPEG) += $(FFMPEGLIBS)
