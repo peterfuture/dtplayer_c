@@ -147,7 +147,7 @@ LDFLAGS-$(DT_FAAD) += -lfaad
 
 %.o: %.c
 	@echo CC $@ 
-	$(CC) $(CFLAGS) -shared -fPIC -c -o $@ $< 
+	@$(CC) $(CFLAGS) -shared -fPIC -c -o $@ $< 
 
 %.o: %.cpp
 	$(CC) $(CXXFLAGS) -c -o $@ $<
