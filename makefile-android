@@ -16,6 +16,7 @@ AR=arm-linux-androideabi-ar
 STRIP=arm-linux-androideabi-strip
 
 CFLAGS  += -Wall 
+LDFLAGS += -lm -lz 
 DT_DEBUG = -g
 
 
@@ -123,7 +124,7 @@ ifeq ($(DT_FFMPEG_ANDROID_DIR),)
 	#DT_FFMPEG_DIR = /usr/local/#default ffmpeg install dir 
 endif
 
-FFMPEGLIBS  = $(DT_FFMPEG_ANDROID_DIR)/libffmpeg.so
+FFMPEGLIBS  = $(DT_FFMPEG_ANDROID_DIR)/libffmpeg.a
 
 DT_CFLAGS-$(DT_FFMPEG)   += -I$(DT_FFMPEG_ANDROID_DIR)/include
 COMMON_LIBS-$(DT_FFMPEG) += $(FFMPEGLIBS)
@@ -293,7 +294,7 @@ ALL_DIRS     = $(call ADDSUFFIXES,$(1),$(DIRS))
 #                   TARGET BUILD                      
 #======================================================
 EXESUF             = .exe 
-PRG-$(DTM_PLAYER)  += dtplayer$(EXESUF)
+#PRG-$(DTM_PLAYER)  += dtplayer$(EXESUF)
 PRG-$(DTM_PLAYER)  += dtplayer_g$(EXESUF)
 ALL_PRG += $(PRG-yes)
 
