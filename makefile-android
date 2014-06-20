@@ -24,7 +24,7 @@ DT_DEBUG = -g
 #======================================================
 
 #extlib
-DT_FFMPEG = no
+DT_FFMPEG = yes
 DT_SDL = no
 DT_SDL2 = no
 DT_ALSA = no
@@ -118,16 +118,14 @@ endif
 #======================================================
 
 #export DT_FFMPEG_DIR at first
-ifeq ($(DT_FFMPEG_DIR),)
+ifeq ($(DT_FFMPEG_ANDROID_DIR),)
 	@echo "not found ffmpeg"
 	#DT_FFMPEG_DIR = /usr/local/#default ffmpeg install dir 
 endif
 
-FFMPEGPARTS_ALL = libavfilter libavformat libavcodec libswscale libswresample libavutil 
-FFMPEGPARTS = $(foreach part, $(FFMPEGPARTS_ALL), $(if $(wildcard $(DT_FFMPEG_DIR)/lib), $(part)))
-FFMPEGLIBS  = $(foreach part, $(FFMPEGPARTS), $(DT_FFMPEG_DIR)/lib/$(part).so)
+FFMPEGLIBS  = $(DT_FFMPEG_DIR)/libffmpeg.so
 
-DT_CFLAGS-$(DT_FFMPEG)   += -I$(DT_FFMPEG_DIR)/include
+DT_CFLAGS-$(DT_FFMPEG)   += -I$(DT_FFMPEG_ANDROID_DIR)/include
 COMMON_LIBS-$(DT_FFMPEG) += $(FFMPEGLIBS)
 
 #======================================================
@@ -149,7 +147,7 @@ LDFLAGS-$(DT_FAAD) += -lfaad
 
 %.o: %.c
 	@echo CC $@ 
-	@$(CC) $(CFLAGS) -shared -fPIC -c -o $@ $< 
+	$(CC) $(CFLAGS) -shared -fPIC -c -o $@ $< 
 
 %.o: %.cpp
 	$(CC) $(CXXFLAGS) -c -o $@ $<
