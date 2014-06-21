@@ -37,7 +37,7 @@ Android
 
 3 ./build-for-android.sh
 
-Target: libdtp.a
+Target: dtplayer_g.exe libdtp.a
 
 for more details, refer to http://blog.csdn.net/u011350110/article/details/22585323
 
