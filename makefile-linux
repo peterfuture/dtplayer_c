@@ -38,6 +38,8 @@ DTM_SERVER=
 #                   MACRO                      
 #======================================================
 
+DT_CFLAGS += -DENABLE_LINUX=1
+
 #stream
 DT_CFLAGS += -DENABLE_STREAM_FILE=1
 ifeq ($(DT_FFMPEG),yes)

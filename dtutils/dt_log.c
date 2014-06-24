@@ -5,6 +5,14 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
+#if ENABLE_ANDROID
+
+//android , done in log.h
+
+#endif
+
+#if ENABLE_LINUX
+
 #define LOG_INI_FILE "./sys_set.ini"
 
 static int dt_log_level = DT_LOG_INFO;
@@ -131,4 +139,6 @@ int main ()
     dt_warning ("TEST", "this is warning level test \n");
     return;
 }
+#endif
+
 #endif

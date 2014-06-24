@@ -16,7 +16,7 @@ AR=arm-linux-androideabi-ar
 STRIP=arm-linux-androideabi-strip
 
 CFLAGS  += -Wall 
-LDFLAGS += -lm -lz 
+LDFLAGS += -lm -lz  -llog
 DT_DEBUG = -g
 
 
@@ -51,6 +51,8 @@ DTM_SERVER=
 #======================================================
 #                   MACRO                      
 #======================================================
+
+DT_CFLAGS += -DENABLE_ANDROID=1
 
 #stream
 DT_CFLAGS += -DENABLE_STREAM_FILE=1
