@@ -345,7 +345,8 @@ int host_init (dthost_context_t * hctx)
         video_para.s_height = host_para->video_src_height;
         video_para.s_pixfmt = host_para->video_src_pixfmt;
         //video_para.d_pixfmt = DTAV_PIX_FMT_YUV420P;
-        video_para.d_pixfmt = DTAV_PIX_FMT_RGB24;
+        //video_para.d_pixfmt = DTAV_PIX_FMT_RGB24;
+        video_para.d_pixfmt = DTAV_PIX_FMT_RGB565LE;
         video_para.rate = host_para->video_rate;
         video_para.ratio = host_para->video_ratio;
         video_para.fps = host_para->video_fps;
