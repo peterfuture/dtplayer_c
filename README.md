@@ -31,7 +31,9 @@ Target: dtplayer.exe dtplayer_g.exe libdtp.so libdtp.a
 Android
 ----------------
 
-1 install ffmpeg for android
+1 install ffmpeg for android (refer to https://github.com/peterfuture/FFmpeg-Android)
+
+2 export DT_FFMPEG_ANDROID_DIR=/PATH/TO/FFmpeg-Android/build/ffmpeg/armv7
 
 2 patch -p1 < ffmpeg-dtp-android.patch
 
@@ -44,7 +46,7 @@ for more details, refer to http://blog.csdn.net/u011350110/article/details/22585
 [Test]
 ========
 
-./dtm_player.exe url
+./dt_player.exe url
 
 [Demo Repo]
 ========
