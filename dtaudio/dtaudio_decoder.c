@@ -212,7 +212,7 @@ static void *audio_decode_loop (void *arg)
             }
             continue;
         }
-        else if (used == 0)
+        else if (used == 0 && pinfo->outlen == 0) // used == 0 && out == 0 means need more data
         {
             //maybe need more data
             rest_data = malloc (pinfo->inlen);
