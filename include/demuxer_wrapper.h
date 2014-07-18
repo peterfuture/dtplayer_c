@@ -2,7 +2,6 @@
 #define DEMUXER_WRAPPER_H
 
 #include "dt_media_info.h"
-#include "dtstream_para.h"
 #include "dt_av.h"
 
 #include <stdio.h>
