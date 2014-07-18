@@ -1,12 +1,7 @@
 #ifndef DTSTREAM_API_H
 #define DTSTREAM_API_H
 
-#include "dt_av.h"
-
-typedef struct
-{
-    char *stream_name;
-} dtstream_para_t;
+#include "dtstream_para.h"
 
 int dtstream_open (void **priv, dtstream_para_t * para, void *parent);
 int dtstream_eof (void *priv);

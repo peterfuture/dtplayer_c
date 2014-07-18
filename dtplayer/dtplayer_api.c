@@ -9,6 +9,36 @@
 
 static dtplayer_context_t ply_ctx;
 
+void dtplayer_register_ex_stream(stream_wrapper_t *wrapper)
+{
+
+}
+
+void dtplayer_register_ex_demuxer(demuxer_wrapper_t *wrapper)
+{
+
+}
+
+void dtplayer_register_ex_ao(ao_wrapper_t *wrapper)
+{
+
+}
+
+void dtplayer_register_ex_ad(ad_wrapper_t *wrapper)
+{
+
+}
+
+void dtplayer_register_ex_vo(vo_wrapper_t *wrapper)
+{
+
+}
+
+void dtplayer_register_ex_vd(vd_wrapper_t *wrapper)
+{
+
+}
+
 void *dtplayer_init (dtplayer_para_t * para)
 {
     int ret = 0;

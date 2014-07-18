@@ -49,6 +49,18 @@ static int parse_cmd(int argc,char **argv,dtplayer_para_t *para)
     return 0;
 }
 
+static void register_ex_all()
+{
+/*  
+    player_register_ex_stream();
+    player_register_ex_demuxer();
+    player_register_ex_ao();
+    player_register_ex_ad();
+    player_register_ex_vo();
+    player_register_ex_vd();
+    */
+}
+
 int main (int argc, char **argv)
 {
     int ret = 0;
@@ -64,6 +76,7 @@ int main (int argc, char **argv)
     ply_ctx.disp_height = 480;
 
     player_register_all();
+    register_ex_all();
 
     ui_init();    
     render_init();
