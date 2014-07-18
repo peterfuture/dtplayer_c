@@ -246,7 +246,7 @@ static int media_format_convert (const char *name)
 
 }
 
-audio_format_t audio_format_convert (enum AVCodecID id)
+audio_format_t audio_format_convert (enum CodecID id)
 {
     audio_format_t format = AUDIO_FORMAT_INVALID;
     switch (id)
@@ -259,7 +259,7 @@ audio_format_t audio_format_convert (enum AVCodecID id)
     return format;
 }
 
-static int video_format_convert (enum AVCodecID id)
+static int video_format_convert (enum CodecID id)
 {
     video_format_t format;
     switch (id)

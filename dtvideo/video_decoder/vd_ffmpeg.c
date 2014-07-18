@@ -54,7 +54,7 @@ int ffmpeg_vdec_init (vd_wrapper_t *wrapper, void *parent)
     AVCodec *codec = NULL;
     AVCodecContext *avctxp = (AVCodecContext *) decoder->decoder_priv;
     avctxp->thread_count = 1;   //do not use multi thread,may crash
-    enum AVCodecID id = avctxp->codec_id;
+    enum CodecID id = avctxp->codec_id;
     codec = avcodec_find_decoder (id);
     if (NULL == codec)
     {
@@ -68,7 +68,7 @@ int ffmpeg_vdec_init (vd_wrapper_t *wrapper, void *parent)
     }
     dt_info (TAG, " [%s:%d] ffmpeg dec init ok \n", __FUNCTION__, __LINE__);
     //alloc one frame for decode
-    frame = av_frame_alloc ();
+    frame = avcodec_alloc_frame ();
     return 0;
 }
 
@@ -115,7 +115,7 @@ int ffmpeg_vdec_decode (vd_wrapper_t *wrapper, dt_av_frame_t * dt_frame, AVPictu
     pkt.pts = dt_frame->pts;
     pkt.dts = dt_frame->dts;
     pkt.side_data_elems = 0;
-    pkt.buf = NULL;
+    //pkt.buf = NULL;
     avcodec_decode_video2 (avctxp, frame, &got_picture, &pkt);
     if (got_picture)
     {
@@ -126,7 +126,7 @@ int ffmpeg_vdec_decode (vd_wrapper_t *wrapper, dt_av_frame_t * dt_frame, AVPictu
             ret = 1;
         //dt_info(TAG,"==got picture pts:%llu timestamp:%lld \n",frame->pkt_pts,frame->best_effort_timestamp);
     }
-    av_frame_unref (frame);
+    //av_frame_unref (frame);
     //no need to free dt_frame
     //will be freed outside
     return ret;
@@ -137,7 +137,7 @@ int ffmpeg_vdec_release (vd_wrapper_t *wrapper)
     dtvideo_decoder_t *decoder = (dtvideo_decoder_t *)wrapper->parent; 
     AVCodecContext *avctxp = (AVCodecContext *) decoder->decoder_priv;
     avcodec_close (avctxp);
-    av_frame_free (&frame);
+    av_free (&frame);
     if (pSwsCtx)
         sws_freeContext (pSwsCtx);
     pSwsCtx = NULL;

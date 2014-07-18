@@ -279,6 +279,7 @@ DIRS =  . \
         dtplayer \
 		tools   
 #header
+INCLUDE_DIR += -I$(MAKEROOT)/include
 INCLUDE_DIR += -I$(MAKEROOT)/dtutils 
 INCLUDE_DIR += -I$(MAKEROOT)/dtstream 
 INCLUDE_DIR += -I$(MAKEROOT)/dtdemux 

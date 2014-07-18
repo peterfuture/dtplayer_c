@@ -11,14 +11,14 @@
 static AVFrame *frame;
 AVCodecContext *avctxp;
 
-static enum AVCodecID convert_to_id(int format)
+static enum CodecID convert_to_id(int format)
 {
     switch(format)
     {
         case AUDIO_FORMAT_AAC:
-            return AV_CODEC_ID_AAC;
+            return CODEC_ID_AAC;
         case AUDIO_FORMAT_AC3:
-            return AV_CODEC_ID_AC3;
+            return CODEC_ID_AC3;
 
         default:
             return 0;
@@ -60,7 +60,7 @@ int ffmpeg_adec_init (ad_wrapper_t *wrapper, void *parent)
         avctxp = alloc_ffmpeg_ctx(decoder); 
     if(!avctxp)
         return -1;
-    enum AVCodecID id = avctxp->codec_id;
+    enum CodecID id = avctxp->codec_id;
     dt_info (TAG, "[%s:%d] param-- src channel:%d sample:%d id:%d format:%d \n", __FUNCTION__, __LINE__, avctxp->channels, avctxp->sample_rate,id,decoder->aparam.afmt);
     dt_info (TAG, "[%s:%d] param-- dst channels:%d samplerate:%d \n", __FUNCTION__, __LINE__, decoder->aparam.dst_channels,decoder->aparam.dst_samplerate);
     codec = avcodec_find_decoder (id);
@@ -77,7 +77,7 @@ int ffmpeg_adec_init (ad_wrapper_t *wrapper, void *parent)
     }
     dt_info (TAG, "[%s:%d] ffmpeg dec init ok \n", __FUNCTION__, __LINE__);
     //alloc one frame for decode
-    frame = av_frame_alloc ();
+    frame = avcodec_alloc_frame ();
     return 0;
 }
 
@@ -201,7 +201,7 @@ int ffmpeg_adec_release (ad_wrapper_t *wrapper)
 {
     avcodec_close (avctxp);
     avctxp = NULL;
-    av_frame_free (&frame);
+    av_free (&frame);
     return 0;
 }
 
