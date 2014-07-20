@@ -18,15 +18,34 @@ static int pts_mode = 0; //pts calc mode, 0: calc with pts 1: calc with duration
 
 static vd_wrapper_t *g_vd = NULL;
 
-static void register_vdec (vd_wrapper_t * vdec)
+static void register_vdec (vd_wrapper_t * vd)
 {
     vd_wrapper_t **p;
     p = &g_vd;
     while (*p != NULL)
         p = &(*p)->next;
-    *p = vdec;
+    *p = vd;
     dt_info (TAG, "[%s:%d] register vdec, name:%s fmt:%d \n", __FUNCTION__, __LINE__, (*p)->name, (*p)->vfmt);
-    vdec->next = NULL;
+    vd->next = NULL;
+}
+
+void register_vdec_ext(vd_wrapper_t *vd)
+{
+    vd_wrapper_t **p;
+    p = &g_vd;
+    if(*p == NULL)
+    {
+        *p = vd;
+        vd->next = NULL;
+    }
+    else
+    {
+        vd->next = *p;
+        *p = vd;
+    }
+    
+    dt_info (TAG, "[%s:%d]register ext vd. vfmt:%d name:%s \n",__FUNCTION__,__LINE__,vd->vfmt, vd->name);
+
 }
 
 void vdec_register_all ()
@@ -41,10 +60,19 @@ void vdec_register_all ()
 static int select_video_decoder (dtvideo_decoder_t * decoder)
 {
     vd_wrapper_t **p;
+    dtvideo_para_t *para = &(decoder->para);
     p = &g_vd;
-    if (!*p)
+    while(*p != NULL)
     {
-        dt_error (TAG, "[%s:%d] select no video decoder \n", __FUNCTION__, __LINE__);
+        if((*p)->vfmt == VIDEO_FORMAT_UNKOWN)
+            break;
+        if((*p)->vfmt == para->vfmt)
+            break;
+        p = &(*p)->next;
+    }
+    if(*p == NULL)
+    {
+        dt_info (TAG, "[%s:%d]no valid video decoder found vfmt:%d\n", __FUNCTION__, __LINE__, para->vfmt);
         return -1;
     }
     decoder->wrapper = *p;

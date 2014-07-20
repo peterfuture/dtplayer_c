@@ -264,8 +264,12 @@ static int video_format_convert (enum AVCodecID id)
     video_format_t format;
     switch (id)
     {
+    case AV_CODEC_ID_H264:
+        format = VIDEO_FORMAT_H264;
+        break;
     default:
-        format = VIDEO_FORMAT_UNKOWN;
+            format = VIDEO_FORMAT_UNKOWN;
+            break;
     }
     dt_info (TAG, "[video_format_convert]video codec_id=0x%x format=%d\n", id, format);
     return format;

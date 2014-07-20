@@ -36,7 +36,7 @@ void dtplayer_register_ex_vo(vo_wrapper_t *wrapper)
 
 void dtplayer_register_ex_vd(vd_wrapper_t *wrapper)
 {
-
+    register_ext_vd(wrapper);
 }
 
 void *dtplayer_init (dtplayer_para_t * para)

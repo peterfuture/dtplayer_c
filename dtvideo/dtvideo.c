@@ -159,6 +159,11 @@ void video_register_all()
     vout_register_all();
 }
 
+void register_ext_vd(vd_wrapper_t *vd)
+{
+   register_vdec_ext(vd); 
+}
+
 void register_ext_vo(vo_wrapper_t *vo)
 {
    vout_register_ext(vo); 

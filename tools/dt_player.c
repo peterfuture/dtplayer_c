@@ -1,6 +1,12 @@
 #include "dt_player.h"
 #include "version.h"
 #include "render.h"
+#include "stream_wrapper.h"
+#include "demuxer_wrapper.h"
+#include "ao_wrapper.h"
+#include "ad_wrapper.h"
+#include "vo_wrapper.h"
+#include "vd_wrapper.h"
 #include "ui.h"
 
 #include "dtplayer_api.h"
@@ -49,16 +55,15 @@ static int parse_cmd(int argc,char **argv,dtplayer_para_t *para)
     return 0;
 }
 
+extern vd_wrapper_t vd_ex_ops;
 static void register_ex_all()
 {
-/*  
-    player_register_ex_stream();
-    player_register_ex_demuxer();
-    player_register_ex_ao();
-    player_register_ex_ad();
-    player_register_ex_vo();
-    player_register_ex_vd();
-    */
+    //player_register_ex_stream();
+    //player_register_ex_demuxer();
+    //player_register_ex_ao();
+    //player_register_ex_ad();
+    //player_register_ex_vo();
+    dtplayer_register_ex_vd(&vd_ex_ops);
 }
 
 int main (int argc, char **argv)
