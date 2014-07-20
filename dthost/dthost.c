@@ -74,7 +74,7 @@ int host_update_apts (dthost_context_t * hctx, int64_t apts)
         return 0;
     if (host_sync_enable (hctx))
     {
-        dt_info (TAG, "[%s:%d] correct sys time apts:%lld vpts:%lld sys_time:%lld AVDIFF:%d ASDIFF:%d\n", __FUNCTION__, __LINE__, apts, vpts, sys_time, avdiff, asdiff);
+        dt_info (TAG, "[%s:%d] correct sys time apts:%llx vpts:%llx sys_time:%llx AVDIFF:%llx ASDIFF:%llx\n", __FUNCTION__, __LINE__, apts, vpts, sys_time, avdiff, asdiff);
         hctx->sys_time = apts;
     }
     return 0;

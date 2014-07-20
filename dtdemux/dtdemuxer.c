@@ -57,10 +57,10 @@ static int demuxer_select (dtdemuxer_context_t * dem_ctx)
 
 static void dump_media_info (dt_media_info_t * info)
 {
-    dt_info (TAG, "|====================MEDIA INFO====================|\n", info->file_name);
+    dt_info (TAG, "|====================MEDIA INFO====================|");
     dt_info (TAG, "|file_name:%s\n", info->file_name);
-    dt_info (TAG, "|file_size:%d \n", info->file_size);
-    dt_info (TAG, "|duration:%d bitrate:%d\n", info->duration, info->bit_rate);
+    dt_info (TAG, "|file_size:%lld \n", info->file_size);
+    dt_info (TAG, "|duration:%lld bitrate:%d\n", info->duration, info->bit_rate);
     dt_info (TAG, "|has video:%d has audio:%d has sub:%d\n", info->has_video, info->has_audio, info->has_sub);
     dt_info (TAG, "|video stream info,num:%d\n", info->vst_num);
     int i = 0;
@@ -77,7 +77,7 @@ static void dump_media_info (dt_media_info_t * info)
     }
 
     dt_info (TAG, "|subtitle stream num:%d\n", info->sst_num);
-    dt_info (TAG, "|================================================|\n", info->file_name);
+    dt_info (TAG, "|================================================|\n");
 }
 
 int demuxer_open (dtdemuxer_context_t * dem_ctx)

@@ -151,7 +151,7 @@ static void *video_decode_loop (void *arg)
         if (frame.pts >= 0 && decoder->pts_first == -1)
         {
             //we will use first pts to estimate pts
-            dt_info (TAG, "[%s:%d]first frame decoded ok, pts:0x%x dts:0x%x duration:%d size:%d\n", __FUNCTION__, __LINE__, frame.pts, frame.dts, frame.duration, frame.size);
+            dt_info (TAG, "[%s:%d]first frame decoded ok, pts:0x%llx dts:0x%llx duration:%d size:%d\n", __FUNCTION__, __LINE__, frame.pts, frame.dts, frame.duration, frame.size);
             decoder->pts_first = pts_exchange (decoder, picture->pts);
             decoder->pts_current = decoder->pts_first;
         }

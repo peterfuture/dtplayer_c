@@ -60,7 +60,7 @@ int dt_event_server_init ()
         return -1;
     }
     server_mgt.transport_loop_id = tid;
-    dt_info (TAG, "TRANSTROP LOOP CREATE OK, TID:%d \n", tid);
+    dt_info (TAG, "TRANSTROP LOOP CREATE OK, TID:%u \n", (unsigned)tid);
     return 0;
 }
 
