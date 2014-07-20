@@ -48,7 +48,7 @@ index 9334fc3..7515855 100644
  }
  
 diff --git a/dtdemux/demuxer/demuxer_ffmpeg.c b/dtdemux/demuxer/demuxer_ffmpeg.c
-index 98eab30..b9bbed3 100644
+index f69b845..7af1814 100644
 --- a/dtdemux/demuxer/demuxer_ffmpeg.c
 +++ b/dtdemux/demuxer/demuxer_ffmpeg.c
 @@ -246,7 +246,7 @@ static int media_format_convert (const char *name)
@@ -60,7 +60,7 @@ index 98eab30..b9bbed3 100644
  {
      audio_format_t format = AUDIO_FORMAT_INVALID;
      switch (id)
-@@ -259,7 +259,7 @@ audio_format_t audio_format_convert (enum AVCodecID id)
+@@ -259,12 +259,12 @@ audio_format_t audio_format_convert (enum AVCodecID id)
      return format;
  }
  
@@ -69,6 +69,12 @@ index 98eab30..b9bbed3 100644
  {
      video_format_t format;
      switch (id)
+     {
+-    case AV_CODEC_ID_H264:
++    case CODEC_ID_H264:
+         format = VIDEO_FORMAT_H264;
+         break;
+     default:
 diff --git a/dtvideo/video_decoder/vd_ffmpeg.c b/dtvideo/video_decoder/vd_ffmpeg.c
 index d99990c..477f72a 100644
 --- a/dtvideo/video_decoder/vd_ffmpeg.c
