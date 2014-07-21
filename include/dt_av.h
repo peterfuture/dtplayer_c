@@ -33,6 +33,7 @@ typedef struct dt_av_frame
     int64_t pts;
     int64_t dts;
     int duration;
+    int key_frame; // flag from ffmpeg
     dt_media_type_t type;
 } dt_av_frame_t;
 

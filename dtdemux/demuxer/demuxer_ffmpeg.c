@@ -202,10 +202,11 @@ static int demuxer_ffmpeg_read_frame (demuxer_wrapper_t * wrapper, dt_av_frame_t
     frame->pts = pts_exchange (&avpkt, media_info);
     frame->dts = avpkt.dts;
     frame->duration = avpkt.duration;
+    frame->key_frame = avpkt.flags & AV_PKT_FLAG_KEY;
     if(frame->type == (int)AVMEDIA_TYPE_AUDIO)
         dt_debug(TAG,"GET AUDIO FRAME, pts:%lld \n",frame->pts);
     else
-        dt_debug(TAG,"GET VIDEO FRAME, pts:%llx \n",frame->pts);
+        dt_info(TAG,"GET VIDEO FRAME, pts:%llx key:%d\n",frame->pts,frame->key_frame);
     
     dt_debug (TAG, "read ok,frame size:%d %02x %02x %02x %02x addr:%p\n", frame->size, frame->data[0], frame->data[1], frame->data[2], frame->data[3], frame->data);
     dt_debug (TAG, "SIDE_DATA_ELEMENT:%d \n", avpkt.side_data_elems);
