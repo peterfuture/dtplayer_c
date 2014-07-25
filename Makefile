@@ -47,7 +47,7 @@ ifeq ($(DT_FFMPEG),yes)
 endif
 
 #demuxer
-DT_CFLAGS += -DENABLE_DEMUXER_AAC=1
+#DT_CFLAGS += -DENABLE_DEMUXER_AAC=0
 
 ifeq ($(DT_TSDEMUX),yes)
 	DT_CFLAGS += -DENABLE_DEMUXER_TS=1

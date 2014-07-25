@@ -341,6 +341,11 @@ static int demuxer_ffmpeg_setup_info (demuxer_wrapper_t * wrapper, dt_media_info
         pCodec = pStream->codec;
         if (pCodec->codec_type == AVMEDIA_TYPE_VIDEO)
         {
+
+            //for some mp3 have video, just skip
+            if(info->format == MEDIA_FORMAT_MP3)
+                continue;
+
             vst_info = (vstream_info_t *) malloc (sizeof (vstream_info_t));
             memset (vst_info, 0, sizeof (vstream_info_t));
             vst_info->index = pStream->index;

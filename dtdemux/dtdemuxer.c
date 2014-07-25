@@ -25,7 +25,9 @@ static void register_demuxer (demuxer_wrapper_t * wrapper)
 
 void demuxer_register_all ()
 {
+#ifdef ENABLE_DEMUXER_AAC
     REGISTER_DEMUXER (AAC, aac);
+#endif
 #ifdef ENABLE_DEMUXER_TS
     REGISTER_DEMUXER (TS, ts);
 #endif
