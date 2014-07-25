@@ -126,7 +126,14 @@ ifeq ($(DT_FFMPEG_ANDROID_DIR),)
 	#DT_FFMPEG_DIR = /usr/local/#default ffmpeg install dir 
 endif
 
-FFMPEGLIBS  = $(DT_FFMPEG_ANDROID_DIR)/libffmpeg.a
+#use separate module
+FFMPEGPARTS_ALL = libavformat libavcodec libswscale libswresample libavutil 
+FFMPEGPARTS = $(foreach part, $(FFMPEGPARTS_ALL), $(if $(wildcard $(DT_FFMPEG_ANDROID_DIR)/lib), $(part)))
+FFMPEGLIBS  = $(foreach part, $(FFMPEGPARTS), $(DT_FFMPEG_ANDROID_DIR)/lib/$(part).a)
+
+#use libffmpeg.a
+#FFMPEGLIBS  = $(DT_FFMPEG_ANDROID_DIR)/libffmpeg.a
+
 
 DT_CFLAGS-$(DT_FFMPEG)   += -I$(DT_FFMPEG_ANDROID_DIR)/include
 COMMON_LIBS-$(DT_FFMPEG) += $(FFMPEGLIBS)
@@ -327,6 +334,7 @@ all: $(ALL_PRG)
 
 libdtp.so: $(OBJS_DTLIB_DEP_RELEASE) $(COMMON_LIBS) 
 	@$(CC) -shared -fPIC -o $@ $^ $(LDFLAGS)
+	@$(STRIP) $@
 	@echo =====================================================
 	@echo build $@ done
 	@echo =====================================================
