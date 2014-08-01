@@ -114,7 +114,7 @@ int dtplayer_stop (void *player_priv)
 	//player will enter quit process
 	//here has no need to block ,player will 
 	//exit after receiving quit status through update_cb in dtplayer.c
-	//pthread_join (dtp_ctx->event_loop_id, NULL);
+	pthread_join (dtp_ctx->event_loop_id, NULL);
     return 0;
 }
 
