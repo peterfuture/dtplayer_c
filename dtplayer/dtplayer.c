@@ -63,6 +63,13 @@ int player_init (dtplayer_context_t * dtp_ctx)
     dtplayer_para_t *para = &dtp_ctx->player_para;
     player_ctrl_t *ctrl_info = &dtp_ctx->ctrl_info;
     
+    if(get_player_status(dtp_ctx) >= PLAYER_STATUS_INIT_ENTER)
+    {
+        dt_error(TAG,"player already inited \n");
+        return 0;
+    }
+
+
     set_player_status (dtp_ctx, PLAYER_STATUS_INIT_ENTER);
     dt_info (TAG, "[%s:%d] START PLAYER INIT\n", __FUNCTION__, __LINE__);
     dtp_ctx->file_name = dtp_ctx->player_para.file_name;
@@ -186,6 +193,13 @@ int player_start (dtplayer_context_t * dtp_ctx)
 {
     int ret = 0;
     pthread_t tid;
+
+
+    if(get_player_status(dtp_ctx) >= PLAYER_STATUS_START)
+    {
+        dt_error(TAG,"player already started \n");
+        return 0;
+    }
 
     set_player_status (dtp_ctx, PLAYER_STATUS_START);
 

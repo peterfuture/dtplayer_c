@@ -231,10 +231,11 @@ int audio_output_init (dtaudio_output_t * ao, int ao_id)
 
 int64_t audio_output_get_latency (dtaudio_output_t * ao)
 {
-    if (ao->status == AO_STATUS_IDLE)
+    if (ao->status == AO_STATUS_IDLE || ao->status == AO_STATUS_EXIT)
         return 0;
     if (ao->status == AO_STATUS_PAUSE)
         return ao->last_valid_latency;
+    
     ao_wrapper_t *wrapper = ao->aout_ops;
     ao->last_valid_latency = wrapper->ao_latency ();
     return ao->last_valid_latency;

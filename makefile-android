@@ -127,7 +127,7 @@ ifeq ($(DT_FFMPEG_ANDROID_DIR),)
 endif
 
 #use separate module
-FFMPEGPARTS_ALL = libavformat libavcodec libswscale libswresample libavutil 
+FFMPEGPARTS_ALL = libavfilter libavformat libavcodec libswscale libswresample libavutil 
 FFMPEGPARTS = $(foreach part, $(FFMPEGPARTS_ALL), $(if $(wildcard $(DT_FFMPEG_ANDROID_DIR)/lib), $(part)))
 FFMPEGLIBS  = $(foreach part, $(FFMPEGPARTS), $(DT_FFMPEG_ANDROID_DIR)/lib/$(part).a)
 
