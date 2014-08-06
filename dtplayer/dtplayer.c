@@ -299,15 +299,20 @@ int player_seekto (dtplayer_context_t * dtp_ctx, int seek_time)
     player_host_init (dtp_ctx);
     resume_io_thread (dtp_ctx);
     player_host_start (dtp_ctx);
+    
     set_player_status (dtp_ctx, PLAYER_STATUS_SEEK_EXIT);
     player_handle_cb (dtp_ctx);
     set_player_status (dtp_ctx, PLAYER_STATUS_RUNNING);
+    player_handle_cb (dtp_ctx);
     return 0;
   FAIL:
     //seek fail, continue running
     resume_io_thread (dtp_ctx);
     player_host_resume (dtp_ctx);
+    set_player_status (dtp_ctx, PLAYER_STATUS_SEEK_EXIT);
+    player_handle_cb (dtp_ctx);
     set_player_status (dtp_ctx, PLAYER_STATUS_RUNNING);
+    player_handle_cb (dtp_ctx);
     return 0;
 }
 
