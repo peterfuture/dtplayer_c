@@ -173,12 +173,12 @@ static int demuxer_ffmpeg_read_frame (demuxer_wrapper_t * wrapper, dt_av_frame_t
         if (AVERROR (EAGAIN) != ret)
         {
             /*if the return is EAGAIN,we need to try more times */
-            dt_warning (TAG, "[%s:%d]av_read_frame return (%d)\n", __FUNCTION__, __LINE__, ret);
+            dt_info (TAG, "[%s:%d]av_read_frame return (%d)\n", __FUNCTION__, __LINE__, ret);
 
-            if (AVERROR_EOF != ret)
-                return DTERROR_READ_FAILED;
-            else
+            if (AVERROR_EOF == ret || ret == -1)
                 return DTERROR_READ_EOF;
+            else
+                return DTERROR_READ_FAILED;
         }
         return DTERROR_READ_AGAIN;
     }
