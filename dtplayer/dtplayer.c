@@ -289,6 +289,7 @@ int player_seekto (dtplayer_context_t * dtp_ctx, int seek_time)
     set_player_status (dtp_ctx, PLAYER_STATUS_SEEK_ENTER);
     pause_io_thread (dtp_ctx);
     player_host_pause (dtp_ctx);
+    
 
     int64_t start_time = (ctrl_info->first_time != -1)?ctrl_info->first_time : ctrl_info->start_time;
     int64_t target_time = seek_time * 1000000 + start_time; 
@@ -300,6 +301,7 @@ int player_seekto (dtplayer_context_t * dtp_ctx, int seek_time)
     resume_io_thread (dtp_ctx);
     player_host_start (dtp_ctx);
     
+    player_update_state (dtp_ctx);
     set_player_status (dtp_ctx, PLAYER_STATUS_SEEK_EXIT);
     player_handle_cb (dtp_ctx);
     set_player_status (dtp_ctx, PLAYER_STATUS_RUNNING);
