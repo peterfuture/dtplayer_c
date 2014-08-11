@@ -7,5 +7,6 @@ int start_io_thread (dtplayer_context_t * dtp_ctx);
 int pause_io_thread (dtplayer_context_t * dtp_ctx);
 int resume_io_thread (dtplayer_context_t * dtp_ctx);
 int stop_io_thread (dtplayer_context_t * dtp_ctx);
+int io_thread_running (dtplayer_context_t * dtp_ctx);
 
 #endif

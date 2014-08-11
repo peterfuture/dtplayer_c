@@ -287,7 +287,8 @@ int player_seekto (dtplayer_context_t * dtp_ctx, int seek_time)
     if (get_player_status (dtp_ctx) < PLAYER_STATUS_INIT_EXIT)
         return -1;
     set_player_status (dtp_ctx, PLAYER_STATUS_SEEK_ENTER);
-    pause_io_thread (dtp_ctx);
+    if(io_thread_running(dtp_ctx))
+        pause_io_thread (dtp_ctx);
     player_host_pause (dtp_ctx);
     
 
@@ -298,7 +299,10 @@ int player_seekto (dtplayer_context_t * dtp_ctx, int seek_time)
         goto FAIL;
     player_host_stop (dtp_ctx);
     player_host_init (dtp_ctx);
-    resume_io_thread (dtp_ctx);
+    if(io_thread_running(dtp_ctx)) // maybe io thread already quit
+        resume_io_thread (dtp_ctx);
+    else
+        start_io_thread(dtp_ctx);
     player_host_start (dtp_ctx);
     
     player_update_state (dtp_ctx);
@@ -310,7 +314,8 @@ int player_seekto (dtplayer_context_t * dtp_ctx, int seek_time)
   FAIL:
     //seek fail, continue running
     resume_io_thread (dtp_ctx);
-    player_host_resume (dtp_ctx);
+    if(io_thread_running(dtp_ctx))
+        player_host_resume (dtp_ctx);
     set_player_status (dtp_ctx, PLAYER_STATUS_SEEK_EXIT);
     player_handle_cb (dtp_ctx);
     set_player_status (dtp_ctx, PLAYER_STATUS_RUNNING);

@@ -65,6 +65,11 @@ int stop_io_thread (dtplayer_context_t * dtp_ctx)
     return 0;
 }
 
+int io_thread_running(dtplayer_context_t *dtp_ctx)
+{
+    return (dtp_ctx->io_loop.status != IO_LOOP_QUIT);
+}
+
 static void *player_io_thread (dtplayer_context_t * dtp_ctx)
 {
     io_loop_t *io_ctl = &dtp_ctx->io_loop;
