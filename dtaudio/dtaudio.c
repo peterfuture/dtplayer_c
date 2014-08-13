@@ -187,6 +187,10 @@ int audio_pause (dtaudio_context_t * actx)
         audio_output_pause (audio_out);
         actx->audio_state = AUDIO_STATUS_PAUSED;
     }
+    else
+    {
+        dt_error (TAG, "[%s:%d]audio pause failed , status invalid \n", __FUNCTION__, __LINE__);
+    }
     return 0;
 }
 
@@ -203,7 +207,7 @@ int audio_resume (dtaudio_context_t * actx)
 
 int audio_stop (dtaudio_context_t * actx)
 {
-    if (actx->audio_state > AUDIO_STATUS_INITED)
+    if (actx->audio_state >= AUDIO_STATUS_INITED)
     {
         dtaudio_output_t *audio_out = &actx->audio_out;
         audio_output_stop (audio_out);
@@ -212,6 +216,10 @@ int audio_stop (dtaudio_context_t * actx)
         dtaudio_decoder_t *audio_decoder = &actx->audio_dec;
         audio_decoder_stop (audio_decoder);
         actx->audio_state = AUDIO_STATUS_STOP;
+    }
+    else
+    {
+        dt_info (TAG, "[%s:%d] dtaudio no need stop\n", __FUNCTION__, __LINE__);
     }
     return 0;
 }

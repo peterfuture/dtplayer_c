@@ -158,7 +158,7 @@ int dtplayer_seekto (void *player_priv, int s_time)
     event->server_id = EVENT_SERVER_PLAYER;
     event->type = PLAYER_EVENT_SEEK;
     event->para.np = seek_time;
-    dt_send_event (event);
+    dt_send_event_sync (event);
 
     return 0;
 }

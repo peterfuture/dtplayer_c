@@ -66,7 +66,7 @@ int player_init (dtplayer_context_t * dtp_ctx)
     if(get_player_status(dtp_ctx) >= PLAYER_STATUS_INIT_ENTER)
     {
         dt_error(TAG,"player already inited \n");
-        return 0;
+        goto ERR0;
     }
 
 
@@ -166,7 +166,7 @@ int player_init (dtplayer_context_t * dtp_ctx)
     if (!ctrl_info->has_audio && !ctrl_info->has_video)
     {
         dt_info (TAG, "HAVE NO A-V STREAM \n");
-        return -1;
+        goto ERR1;
     }
 
     //updte mediainfo --
@@ -184,6 +184,7 @@ int player_init (dtplayer_context_t * dtp_ctx)
     return 0;
 ERR1:
     player_server_release (dtp_ctx);
+ERR0:
     set_player_status (dtp_ctx, PLAYER_STATUS_ERROR);
     player_handle_cb (dtp_ctx);
     return -1;
@@ -303,16 +304,17 @@ int player_seekto (dtplayer_context_t * dtp_ctx, int seek_time)
         resume_io_thread (dtp_ctx);
     else
         start_io_thread(dtp_ctx);
-    player_host_start (dtp_ctx);
     
     player_update_state (dtp_ctx);
     set_player_status (dtp_ctx, PLAYER_STATUS_SEEK_EXIT);
     player_handle_cb (dtp_ctx);
-    set_player_status (dtp_ctx, PLAYER_STATUS_RUNNING);
-    player_handle_cb (dtp_ctx);
+//    player_host_start (dtp_ctx);
+//    set_player_status (dtp_ctx, PLAYER_STATUS_RUNNING);
+//    player_handle_cb (dtp_ctx);
     return 0;
   FAIL:
     //seek fail, continue running
+    dt_error(TAG,"[%s:%d] seek failed, continue playing \n",__FUNCTION__,__LINE__);
     resume_io_thread (dtp_ctx);
     if(io_thread_running(dtp_ctx))
         player_host_resume (dtp_ctx);
@@ -338,6 +340,26 @@ int player_stop (dtplayer_context_t * dtp_ctx)
     return 0;
 }
 
+static char * get_event_name(int cmd)
+{
+    switch(cmd)
+    {
+    case PLAYER_EVENT_START:
+        return "player_event_start";
+    case PLAYER_EVENT_PAUSE:
+        return "player_event_pause";
+    case PLAYER_EVENT_RESUME:
+        return "player_event_resume";
+    case PLAYER_EVENT_STOP:
+        return "player_event_stop";
+    case PLAYER_EVENT_SEEK:
+        return "player_event_seek";
+    default:
+        return "unkown cmd";
+    }
+    return "null";
+}
+
 static int player_handle_event (dtplayer_context_t * dtp_ctx)
 {
     event_server_t *server = (event_server_t *) dtp_ctx->player_server;
@@ -348,7 +370,7 @@ static int player_handle_event (dtplayer_context_t * dtp_ctx)
         dt_debug (TAG, "GET EVENT NULL \n");
         return 0;
     }
-    dt_info (TAG, "GET EVENT:%d \n", event->type);
+    dt_info (TAG, "GET EVENT:%d %s\n", event->type,get_event_name(event->type));
     switch (event->type)
     {
     case PLAYER_EVENT_START:
@@ -384,6 +406,21 @@ static void *event_handle_loop (dtplayer_context_t * dtp_ctx)
         player_handle_event (dtp_ctx);
         if (get_player_status (dtp_ctx) == PLAYER_STATUS_STOP)
             goto QUIT;
+        //process trick seek
+        if(get_player_status(dtp_ctx) == PLAYER_STATUS_SEEK_EXIT)
+        {
+            usleep(20*1000);
+            event_server_t *server = (event_server_t *) dtp_ctx->player_server;
+            event_t *event = dt_peek_event (server);
+            if(event != NULL && event->type == PLAYER_EVENT_SEEK)
+            {
+                dt_info(TAG,"execute queue seekto event \n");
+                continue;
+            }
+            player_host_start (dtp_ctx);
+            set_player_status (dtp_ctx, PLAYER_STATUS_RUNNING);
+        }
+
         usleep (300 * 1000);    // 1/3s update
         if (get_player_status (dtp_ctx) != PLAYER_STATUS_RUNNING)
             continue;

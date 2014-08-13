@@ -99,16 +99,18 @@ static void *video_decode_loop (void *arg)
 
     do
     {
+        //exit check before idle, maybe recieve exit cmd in idle status
+        if (decoder->status == VDEC_STATUS_EXIT)
+        {
+            dt_info (TAG, "[%s:%d] receive decode loop exit cmd \n", __FUNCTION__, __LINE__);
+            break;
+        }
+
         if (decoder->status == VDEC_STATUS_IDLE)
         {
             dt_info (TAG, "[%s:%d] Idle status ,please wait \n", __FUNCTION__, __LINE__);
             usleep (100);
             continue;
-        }
-        if (decoder->status == VDEC_STATUS_EXIT)
-        {
-            dt_info (TAG, "[%s:%d] receive decode loop exit cmd \n", __FUNCTION__, __LINE__);
-            break;
         }
 
         /*read frame */

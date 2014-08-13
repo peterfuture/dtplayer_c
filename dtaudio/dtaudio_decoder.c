@@ -102,13 +102,8 @@ static void *audio_decode_loop (void *arg)
     dt_info (TAG, "[%s:%d] AUDIO DECODE START \n", __FUNCTION__, __LINE__);
     do
     {
-        if (decoder->status == ADEC_STATUS_IDLE)
-        {
-            dt_info (TAG, "[%s:%d] Idle status ,please wait \n", __FUNCTION__, __LINE__);
-            usleep (100);
-            continue;
-        }
-        if (decoder->status == ADEC_STATUS_EXIT)
+        //maybe receive exit cmd in idle status, so exit prior to idle
+        if (decoder->status == ADEC_STATUS_EXIT) 
         {
             dt_debug (TAG, "[%s:%d] receive decode loop exit cmd \n", __FUNCTION__, __LINE__);
             if (frame_data)
@@ -116,6 +111,13 @@ static void *audio_decode_loop (void *arg)
             if (rest_data)
                 free (rest_data);
             break;
+        }
+
+        if (decoder->status == ADEC_STATUS_IDLE)
+        {
+            dt_info (TAG, "[%s:%d] Idle status ,please wait \n", __FUNCTION__, __LINE__);
+            usleep (100);
+            continue;
         }
 
         /*read frame */
@@ -338,6 +340,7 @@ int audio_decoder_stop (dtaudio_decoder_t * decoder)
     /*uninit buf */
     dtaudio_context_t *actx = (dtaudio_context_t *) decoder->parent;
     buf_release (&actx->audio_decoded_buf);
+    dt_info (DTAUDIO_LOG_TAG, "audio decoder stop ok\n");
     return 0;
 }
 

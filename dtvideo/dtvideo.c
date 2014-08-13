@@ -207,7 +207,7 @@ int video_resume (dtvideo_context_t * vctx)
 
 int video_stop (dtvideo_context_t * vctx)
 {
-    if (vctx->video_status > VIDEO_STATUS_INITED)
+    if (vctx->video_status >= VIDEO_STATUS_INITED)
     {
         dtvideo_output_t *video_out = &vctx->video_out;
         video_output_stop (video_out);

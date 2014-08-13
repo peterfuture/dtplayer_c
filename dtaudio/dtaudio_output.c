@@ -115,7 +115,6 @@ int audio_output_stop (dtaudio_output_t * ao)
     pthread_join (ao->output_thread_pid, NULL);
     ao_wrapper_t *wrapper = ao->aout_ops;
     wrapper->ao_stop ();
-    dt_info (TAG, "[%s:%d] aout stop ok \n", __FUNCTION__, __LINE__);
     return 0;
 }
 

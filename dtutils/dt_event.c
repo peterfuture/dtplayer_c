@@ -28,6 +28,7 @@ static dt_server_mgt_t server_mgt;
 static event_server_t main_server;
 
 static void *event_transport_loop ();
+static int dt_transport_event (event_t * event, dt_server_mgt_t * mgt);
 
 int dt_event_server_init ()
 {
@@ -208,6 +209,20 @@ event_t *dt_alloc_event ()
     return event;
 }
 
+int dt_send_event_sync (event_t * event)
+{
+    dt_server_mgt_t *mgt = &server_mgt;
+    event_server_t *server_hub = mgt->server;
+    if (!server_hub)
+    {
+        dt_error (TAG, "EVENT SEND FAILED \n");
+        return -1;
+    }
+    dt_transport_event (event, mgt);
+    dt_debug (TAG, "EVENT:%d BYPASS SEND OK \n");
+    return 0;
+}
+
 int dt_send_event (event_t * event)
 {
     dt_server_mgt_t *mgt = &server_mgt;
@@ -256,6 +271,20 @@ int dt_add_event (event_t * event, event_server_t * server)
     server_hub->event_count++;
     dt_unlock (&server_hub->event_lock);
     return 0;
+}
+
+event_t *dt_peek_event (event_server_t * server)
+{
+    event_t *entry = NULL;
+    dt_lock (&server->event_lock);
+    if (server->event_count > 0)
+    {
+        entry = server->event;
+    }
+    dt_unlock (&server->event_lock);
+    if (entry != NULL)
+        dt_info (TAG, "PEEK EVENT:%d From Server:%s \n", entry->type, server->name);
+    return entry;
 }
 
 event_t *dt_get_event (event_server_t * server)
@@ -319,10 +348,12 @@ static void *event_transport_loop ()
     {
         if (mgt->exit_flag)
             goto QUIT;
-        usleep (1000);
         event = dt_get_event (server_hub);
         if (!event)
+        {
+            usleep (10*1000);
             continue;
+        }
         dt_transport_event (event, mgt);
     }
     while (1);
