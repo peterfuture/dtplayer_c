@@ -419,6 +419,8 @@ static void *event_handle_loop (dtplayer_context_t * dtp_ctx)
             }
             player_host_start (dtp_ctx);
             set_player_status (dtp_ctx, PLAYER_STATUS_RUNNING);
+            player_update_state (dtp_ctx);
+            player_handle_cb (dtp_ctx);
         }
 
         usleep (300 * 1000);    // 1/3s update
