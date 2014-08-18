@@ -308,9 +308,20 @@ int player_seekto (dtplayer_context_t * dtp_ctx, int seek_time)
     player_update_state (dtp_ctx);
     set_player_status (dtp_ctx, PLAYER_STATUS_SEEK_EXIT);
     player_handle_cb (dtp_ctx);
-//    player_host_start (dtp_ctx);
-//    set_player_status (dtp_ctx, PLAYER_STATUS_RUNNING);
-//    player_handle_cb (dtp_ctx);
+
+    //check if another seek event comming soom
+    event_server_t *server = (event_server_t *) dtp_ctx->player_server;
+    event_t *event = dt_peek_event (server);
+    if(event != NULL && event->type == PLAYER_EVENT_SEEK)
+    {
+        dt_info(TAG,"execute queue seekto event \n");
+        return 0;
+    }
+    player_host_start (dtp_ctx);
+    set_player_status (dtp_ctx, PLAYER_STATUS_RUNNING);
+    player_update_state (dtp_ctx);
+    player_handle_cb (dtp_ctx);
+
     return 0;
   FAIL:
     //seek fail, continue running
@@ -364,7 +375,7 @@ static int player_handle_event (dtplayer_context_t * dtp_ctx)
 {
     event_server_t *server = (event_server_t *) dtp_ctx->player_server;
     event_t *event = dt_get_event (server);
-
+START:
     if (!event)
     {
         dt_debug (TAG, "GET EVENT NULL \n");
@@ -396,6 +407,14 @@ static int player_handle_event (dtplayer_context_t * dtp_ctx)
         free (event);
         event = NULL;
     }
+
+    //check if still have event
+    event = dt_peek_event (server);
+    if(event)
+    {
+        event = dt_get_event (server);
+        goto START;
+    }
     return 0;
 }
 
@@ -406,23 +425,6 @@ static void *event_handle_loop (dtplayer_context_t * dtp_ctx)
         player_handle_event (dtp_ctx);
         if (get_player_status (dtp_ctx) == PLAYER_STATUS_STOP)
             goto QUIT;
-        //process trick seek
-        if(get_player_status(dtp_ctx) == PLAYER_STATUS_SEEK_EXIT)
-        {
-            usleep(20*1000);
-            event_server_t *server = (event_server_t *) dtp_ctx->player_server;
-            event_t *event = dt_peek_event (server);
-            if(event != NULL && event->type == PLAYER_EVENT_SEEK)
-            {
-                dt_info(TAG,"execute queue seekto event \n");
-                continue;
-            }
-            player_host_start (dtp_ctx);
-            set_player_status (dtp_ctx, PLAYER_STATUS_RUNNING);
-            player_update_state (dtp_ctx);
-            player_handle_cb (dtp_ctx);
-        }
-
         usleep (300 * 1000);    // 1/3s update
         if (get_player_status (dtp_ctx) != PLAYER_STATUS_RUNNING)
             continue;
