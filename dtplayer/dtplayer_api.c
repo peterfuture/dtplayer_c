@@ -159,7 +159,7 @@ int dtplayer_seekto (void *player_priv, int s_time)
     event->type = PLAYER_EVENT_SEEK;
     event->para.np = seek_time;
     dt_send_event_sync (event);
-
+    dt_info(TAG,"seek cmd send ok \n");
     return 0;
 }
 
