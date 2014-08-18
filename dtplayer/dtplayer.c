@@ -287,6 +287,11 @@ int player_seekto (dtplayer_context_t * dtp_ctx, int seek_time)
     
     if (get_player_status (dtp_ctx) < PLAYER_STATUS_INIT_EXIT)
         return -1;
+    
+    player_state_t *play_stat = &dtp_ctx->state;
+    play_stat->cur_time = seek_time;
+    play_stat->cur_time_ms = seek_time*1000;
+ 
     set_player_status (dtp_ctx, PLAYER_STATUS_SEEK_ENTER);
     if(io_thread_running(dtp_ctx))
         pause_io_thread (dtp_ctx);
