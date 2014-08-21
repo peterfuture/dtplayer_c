@@ -111,7 +111,7 @@ int video_output_stop (dtvideo_output_t * vo)
     vo_wrapper_t *wrapper = vo->wrapper;
     vo->status = VO_STATUS_EXIT;
     pthread_join (vo->output_thread_pid, NULL);
-    wrapper->vo_stop ();
+    wrapper->vo_stop(vo);
     dt_info (TAG, "[%s:%d] vout stop ok \n", __FUNCTION__, __LINE__);
     return 0;
 }
@@ -228,7 +228,7 @@ static void *video_output_thread (void *args)
             }
         }
         /*display picture & update vpts */
-        ret = wrapper->vo_render (pic);
+        ret = wrapper->vo_render(vo,pic);
         if (ret < 0)
         {
             printf ("frame toggle failed! \n");
@@ -257,7 +257,7 @@ int video_output_init (dtvideo_output_t * vo, int vo_id)
     if (ret < 0)
         return -1;
     vo_wrapper_t *wrapper = vo->wrapper;
-    wrapper->vo_init ();
+    wrapper->vo_init(vo);
     dt_info (TAG, "[%s:%d] video output init success\n", __FUNCTION__, __LINE__);
 
     /*start aout pthread */

@@ -63,7 +63,7 @@ int sdl2_stop()
 }
 
 
-static int vo_sdl2_init ()
+static int vo_sdl2_init (dtvideo_output_t *vout)
 {
 
     vo_wrapper_t *wrap = &vo_sdl2_ops;
@@ -72,7 +72,7 @@ static int vo_sdl2_init ()
     return 0;
 }
 
-static int vo_sdl2_render (AVPicture_t * pict)
+static int vo_sdl2_render (dtvideo_output_t *vout,AVPicture_t * pict)
 {
     vo_wrapper_t *wrap = &vo_sdl2_ops;
     
@@ -102,7 +102,7 @@ static int vo_sdl2_render (AVPicture_t * pict)
     return 0;
 }
 
-static int vo_sdl2_stop ()
+static int vo_sdl2_stop (dtvideo_output_t *vout)
 {
     vo_wrapper_t *wrap = &vo_sdl2_ops;
     sdl2_ctx_t *ctx = (sdl2_ctx_t *)wrap->handle;
