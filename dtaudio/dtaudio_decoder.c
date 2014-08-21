@@ -139,6 +139,8 @@ static void *audio_decode_loop (void *arg)
         {
             if (decoder->pts_first == -1)
             {
+                if(frame.pts == DT_NOPTS_VALUE)
+                    frame.pts = 0;
                 decoder->pts_first = pts_exchange (decoder, frame.pts);
                 dt_info (TAG, "first frame pts:%lld dts:%lld duration:%d size:%d\n", decoder->pts_first, frame.dts, frame.duration, frame.size);
             }

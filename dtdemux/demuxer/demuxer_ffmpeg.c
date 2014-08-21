@@ -135,6 +135,9 @@ static int64_t pts_exchange (AVPacket * avpkt, dt_media_info_t * media_info)
     int cur_aidx = (has_audio) ? media_info->astreams[media_info->cur_ast_index]->index : -1;
     //int cur_sidx = (has_sub)?media_info->sstreams[media_info->cur_sst_index]->index:-1;
 
+    if(avpkt->pts == AV_NOPTS_VALUE)
+        return DT_NOPTS_VALUE;
+
     if (has_video && cur_vidx == avpkt->stream_index)
     {
         num = media_info->vstreams[media_info->cur_vst_index]->time_base.num;
@@ -147,7 +150,7 @@ static int64_t pts_exchange (AVPacket * avpkt, dt_media_info_t * media_info)
         den = media_info->astreams[media_info->cur_ast_index]->time_base.den;
         exchange = 90000 * (double) num / den;
     }
-
+    
     return (int64_t) (avpkt->pts * exchange);
 }
 
@@ -206,7 +209,7 @@ static int demuxer_ffmpeg_read_frame (demuxer_wrapper_t * wrapper, dt_av_frame_t
     if(frame->type == (int)AVMEDIA_TYPE_AUDIO)
         dt_debug(TAG,"GET AUDIO FRAME, pts:%lld \n",frame->pts);
     else
-        dt_info(TAG,"GET VIDEO FRAME, pts:%llx dts:%llx size:%d key:%d\n",frame->pts, frame->dts,frame->size,frame->key_frame);
+        dt_debug(TAG,"GET VIDEO FRAME, pts:%llx dts:%llx size:%d key:%d\n",frame->pts, frame->dts,frame->size,frame->key_frame);
     
     dt_debug (TAG, "read ok,frame size:%d %02x %02x %02x %02x addr:%p\n", frame->size, frame->data[0], frame->data[1], frame->data[2], frame->data[3], frame->data);
     dt_debug (TAG, "SIDE_DATA_ELEMENT:%d \n", avpkt.side_data_elems);
