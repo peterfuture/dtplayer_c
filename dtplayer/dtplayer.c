@@ -462,7 +462,7 @@ static void *event_handle_loop (dtplayer_context_t * dtp_ctx)
     set_player_status (dtp_ctx, PLAYER_STATUS_EXIT);
     player_handle_cb (dtp_ctx);
 
-    //free(dtp_ctx);
+    free(dtp_ctx);
     pthread_exit (NULL);
     return NULL;
 }

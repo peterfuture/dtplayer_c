@@ -7,8 +7,6 @@
 
 #define TAG "PLAYER-API"
 
-static dtplayer_context_t ply_ctx;
-
 void dtplayer_register_ex_stream(stream_wrapper_t *wrapper)
 {
 
@@ -45,8 +43,7 @@ void *dtplayer_init (dtplayer_para_t * para)
     if (!para)
         return NULL;
     player_register_all();
-    //dtplayer_context_t *dtp_ctx = malloc(sizeof(dtplayer_context_t));
-    dtplayer_context_t *dtp_ctx = &ply_ctx;
+    dtplayer_context_t *dtp_ctx = malloc(sizeof(dtplayer_context_t)); // will free in dtplayer.c
     if (!dtp_ctx)
     {
         dt_error (TAG, "dtplayer context malloc failed \n");
