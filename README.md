@@ -35,11 +35,9 @@ Android
 
 2 export DT_FFMPEG_ANDROID_DIR=/PATH/TO/FFmpeg-Android/build/ffmpeg/armv7
 
-2 patch -p1 < ffmpeg-dtp-android.patch
-
 3 ./build-for-android.sh
 
-Target: dtplayer_g.exe libdtp.a
+Target: libdtp.so
 
 for more details, refer to http://blog.csdn.net/u011350110/article/details/22585323
 
