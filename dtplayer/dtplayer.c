@@ -81,7 +81,7 @@ int player_init (dtplayer_context_t * dtp_ctx)
     if (ret < 0)
     {
         ret = -1;
-        goto ERR1;
+        goto ERR0;
     }
     dtp_ctx->media_info = dtdemuxer_get_media_info (dtp_ctx->demuxer_priv);
 
@@ -160,13 +160,11 @@ int player_init (dtplayer_context_t * dtp_ctx)
     ctrl_info->width = para->width;
     ctrl_info->height = para->height;
 
-
     //invalid check
-
     if (!ctrl_info->has_audio && !ctrl_info->has_video)
     {
         dt_info (TAG, "HAVE NO A-V STREAM \n");
-        goto ERR1;
+        goto ERR0;
     }
 
     //updte mediainfo --
@@ -182,8 +180,6 @@ int player_init (dtplayer_context_t * dtp_ctx)
     set_player_status (dtp_ctx, PLAYER_STATUS_INIT_EXIT);
     player_handle_cb (dtp_ctx);
     return 0;
-ERR1:
-    player_server_release (dtp_ctx);
 ERR0:
     set_player_status (dtp_ctx, PLAYER_STATUS_ERROR);
     player_handle_cb (dtp_ctx);

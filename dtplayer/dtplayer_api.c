@@ -75,7 +75,10 @@ int dtplayer_set_video_size (void *player_priv, int width, int height)
 
 int dtplayer_start (void *player_priv)
 {
-    /*init service */
+    //Comments:
+    //register evetn server and player service in player_start
+    //Since some app just want to get mediaInfo in dtplayer_init
+    //No need to create loop there
     dt_event_server_init ();
     
     dtplayer_context_t *dtp_ctx = (dtplayer_context_t *)player_priv;
