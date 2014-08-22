@@ -50,8 +50,8 @@ static int parse_cmd(int argc,char **argv,dtplayer_para_t *para)
     para->update_cb = (void *) update_cb;
     //para->no_audio=1;
     //para->no_video=1;
-    para->width = ply_ctx.disp_width;
-    para->height = ply_ctx.disp_height;
+    para->width = -1;
+    para->height = -1;
     return 0;
 }
 
@@ -83,9 +83,6 @@ int main (int argc, char **argv)
     player_register_all();
     register_ex_all();
 
-    ui_init();    
-    render_init();
-
     dtplayer_para_t para;
     parse_cmd(argc,argv,&para);
     
@@ -103,6 +100,20 @@ int main (int argc, char **argv)
 	}
 	dt_info(TAG,"Get Media Info Ok,filesize:%lld fulltime:%lld S \n",info.file_size,info.duration);
 
+    //set display win size
+    vstream_info_t *vstream = info.vstreams[0];
+    int width = vstream->width;
+    int height = vstream->height;
+
+    if(width <= 0 || width > 1280)
+        width = 720;
+    if(height <= 0 || height >720)
+        height = 480;
+
+    dtplayer_set_video_size(player_priv, width, height);
+
+    ui_init(width,height); 
+    render_init();
 
 	dtplayer_start (player_priv);
 

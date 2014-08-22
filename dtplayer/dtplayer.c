@@ -190,6 +190,20 @@ ERR0:
     return -1;
 }
 
+int player_set_video_size (dtplayer_context_t * dtp_ctx, int width, int height)
+{
+    player_ctrl_t *pctrl = &dtp_ctx->ctrl_info;
+    dt_info(TAG,"[%s:%d] width:%d height:%d\n",__FUNCTION__,__LINE__,width,height);
+    if(pctrl->width == -1)
+    {
+        pctrl->width = width;
+        pctrl->height = height;
+    }
+    else
+        dt_error(TAG,"dst width:%d height:%d have been set \n",pctrl->width,pctrl->height);
+    return 0;
+}
+
 int player_start (dtplayer_context_t * dtp_ctx)
 {
     int ret = 0;

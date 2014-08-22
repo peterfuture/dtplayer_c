@@ -66,6 +66,13 @@ void *dtplayer_init (dtplayer_para_t * para)
     return dtp_ctx;
 }
 
+int dtplayer_set_video_size (void *player_priv, int width, int height)
+{
+    dtplayer_context_t *dtp_ctx = (dtplayer_context_t *)player_priv;
+    int ret = player_set_video_size(dtp_ctx,width,height); 
+    return ret;
+}
+
 int dtplayer_start (void *player_priv)
 {
     /*init service */

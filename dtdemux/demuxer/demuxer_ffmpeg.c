@@ -84,6 +84,12 @@ static int demuxer_ffmpeg_open (demuxer_wrapper_t * wrapper)
     //==================================================
     ffmpeg_ctx->stream_ext = ctx->stream_priv;
     ffmpeg_ctx->buf = (uint8_t *)malloc(FFMPEG_BUF_SIZE);
+    if(!ffmpeg_ctx->buf)
+    {
+        dt_error(TAG,"[%s:%d] buf malloc failed\n",__FUNCTION__,__LINE__);
+        ffmpeg_ctx->buf = NULL;
+        return -1;
+    }
     AVIOContext *io_ctx = avio_alloc_context(ffmpeg_ctx->buf,FFMPEG_BUF_SIZE,0,ffmpeg_ctx->stream_ext,read_packet,NULL,seek_packet);
     io_ctx->write_flag = 0;
     ret = av_probe_input_buffer(io_ctx, &iformat, "", NULL, 0, 0);
@@ -452,10 +458,10 @@ static int demuxer_ffmpeg_close (demuxer_wrapper_t * wrapper)
 {
     ffmpeg_ctx_t *ctx = (ffmpeg_ctx_t *)wrapper->demuxer_priv;
     AVFormatContext *ic = ctx->ic;
+
     if(ic)
         avformat_close_input (&ic);
-    if(ctx->buf)
-        free(ctx->buf);
+    ctx->buf = NULL; // no need to free ctx->buf, will free in avformat_close_input
     free(ctx);
     wrapper->demuxer_priv = NULL;
     return 0;

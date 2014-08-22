@@ -18,7 +18,7 @@ typedef struct{
 
 static sdl2_ctx_t sdl2_ctx;
 
-int sdl2_init()
+int sdl2_init(int w, int h)
 {
     int flags = 0;
     
@@ -32,8 +32,8 @@ int sdl2_init()
     ctx->dx = ctx->dy = 0;
     //ctx->dw = vo->para.d_width;
     //ctx->dh = vo->para.d_height;
-    ctx->dw = 720;
-    ctx->dh = 480;
+    ctx->dw = w;
+    ctx->dh = h;
     
     //sdl create win here, For audio only file need a sdl window to contrl too
     ctx->win = SDL_CreateWindow("dtplayer",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,ctx->dw,ctx->dh,flags);

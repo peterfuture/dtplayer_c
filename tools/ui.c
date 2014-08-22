@@ -8,10 +8,10 @@ int sdl2_stop();
 
 #endif
 
-int ui_init()
+int ui_init(int w, int h)
 {
 #ifdef ENABLE_VO_SDL2 
-    sdl2_init();    
+    sdl2_init(w,h);
 #endif
     return 0;
 }
