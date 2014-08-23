@@ -25,7 +25,7 @@ static void sdl2_cb(void *userdata,uint8_t *buf,int size)
     return;
 }
 
-static int ao_sdl2_init (dtaudio_para_t *para)
+static int ao_sdl2_init (dtaudio_output_t *aout, dtaudio_para_t *para)
 {
     int ret = 0;
     memcpy(&wrapper->para,para,sizeof(dtaudio_para_t));
@@ -73,31 +73,31 @@ FAIL:
     return ret;
 }
 
-static int ao_sdl2_play (uint8_t * buf, int size)
+static int ao_sdl2_play (dtaudio_output_t *aout, uint8_t * buf, int size)
 {
     sdl_ao_ctx_t *ctx = (sdl_ao_ctx_t *)wrapper->ao_priv;
     return buf_put(&ctx->dbt,buf,size);
 }
 
-static int ao_sdl2_pause ()
+static int ao_sdl2_pause (dtaudio_output_t *aout)
 {
     SDL_PauseAudio(1);
     return 0;
 }
 
-static int ao_sdl2_resume ()
+static int ao_sdl2_resume (dtaudio_output_t *aout)
 {
     SDL_PauseAudio(0);
     return 0;
 }
 
-static int ao_sdl2_level()
+static int ao_sdl2_level(dtaudio_output_t *aout)
 {
     sdl_ao_ctx_t *ctx = (sdl_ao_ctx_t *)wrapper->ao_priv;
     return ctx->dbt.level;
 }
 
-static int64_t ao_sdl2_get_latency ()
+static int64_t ao_sdl2_get_latency (dtaudio_output_t *aout)
 {
     sdl_ao_ctx_t *ctx = (sdl_ao_ctx_t *)wrapper->ao_priv;
     
@@ -111,7 +111,7 @@ static int64_t ao_sdl2_get_latency ()
     return latency;
 }
 
-static int ao_sdl2_stop ()
+static int ao_sdl2_stop (dtaudio_output_t *aout)
 {
     if(wrapper->ao_priv)
     {

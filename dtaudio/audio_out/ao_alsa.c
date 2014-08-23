@@ -38,7 +38,7 @@ static snd_pcm_format_t format_to_alsa (int fmt)
     }
 }
 
-static int ao_alsa_init (dtaudio_para_t *para)
+static int ao_alsa_init (dtaudio_output_t *aout, dtaudio_para_t *para)
 {
     memcpy(&wrapper->para,para,sizeof(dtaudio_para_t));
     snd_pcm_t *alsa_handle;
@@ -190,14 +190,14 @@ static int ao_alsa_init (dtaudio_para_t *para)
     return 0;
 }
 
-static int ao_alsa_level ()
+static int ao_alsa_level (dtaudio_output_t *aout)
 {
     alsa_ctx_t *ctx = (alsa_ctx_t *)wrapper->ao_priv;
     return ctx->buf_level;
 }
 
 #define ALSA_RESERVE_THRESHOLD 10*1024
-static int ao_alsa_play (uint8_t * buf, int size)
+static int ao_alsa_play (dtaudio_output_t *aout, uint8_t * buf, int size)
 {
     alsa_ctx_t *ctx = (alsa_ctx_t *)wrapper->ao_priv;
     snd_pcm_t *alsa_handle = (snd_pcm_t *) ctx->handle;
@@ -213,9 +213,9 @@ static int ao_alsa_play (uint8_t * buf, int size)
     if (num_frames == 0)
         return 0;
 
-    if (ao_alsa_level (wrapper) >= ctx->buf_threshold)
+    if (ao_alsa_level (aout) >= ctx->buf_threshold)
     {
-        dt_debug (TAG, "ALSA EXCEED THRESHOLD,size:%d  thres:%d \n", ao_alsa_level (wrapper), ctx->buf_threshold);
+        dt_debug (TAG, "ALSA EXCEED THRESHOLD,size:%d  thres:%d \n", ao_alsa_level (aout), ctx->buf_threshold);
         return 0;
     }
 
@@ -272,7 +272,7 @@ static int ao_alsa_space (alsa_ctx_t *ctx)
     return ret;
 }
 
-static int ao_alsa_pause ()
+static int ao_alsa_pause (dtaudio_output_t *aout)
 {
     alsa_ctx_t *ctx = (alsa_ctx_t *)wrapper->ao_priv;
     snd_pcm_t *handle = (snd_pcm_t *) ctx->handle;
@@ -289,7 +289,7 @@ static int ao_alsa_pause ()
     return 0;
 }
 
-static int ao_alsa_resume ()
+static int ao_alsa_resume (dtaudio_output_t *aout)
 {
     alsa_ctx_t *ctx = (alsa_ctx_t *)wrapper->ao_priv;
     snd_pcm_t *handle = (snd_pcm_t *) ctx->handle;
@@ -306,7 +306,7 @@ static int ao_alsa_resume ()
     return 0;
 }
 
-static int64_t ao_alsa_get_latency ()
+static int64_t ao_alsa_get_latency (dtaudio_output_t *aout)
 {
     alsa_ctx_t *ctx = (alsa_ctx_t *)wrapper->ao_priv;
 
@@ -323,7 +323,7 @@ static int64_t ao_alsa_get_latency ()
     dt_debug (TAG, "[%s:%d]==alsa_level:%d thres:%d sample_num:%d buffersize:%d latency:%llu latency_s:%llu \n", __FUNCTION__, __LINE__, ctx->buf_level, ctx->buf_threshold, sample_num, ctx->buf_size, latency, latency_s);
     return latency;
 }
-static int ao_alsa_stop ()
+static int ao_alsa_stop (dtaudio_output_t *aout)
 {
     alsa_ctx_t *ctx = (alsa_ctx_t *)wrapper->ao_priv;
     if(!ctx)

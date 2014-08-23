@@ -97,7 +97,7 @@ int audio_output_pause (dtaudio_output_t * ao)
 {
     ao->status = AO_STATUS_PAUSE;
     ao_wrapper_t *wrapper = ao->aout_ops;
-    wrapper->ao_pause ();
+    wrapper->ao_pause (ao);
     return 0;
 }
 
@@ -105,7 +105,7 @@ int audio_output_resume (dtaudio_output_t * ao)
 {
     ao->status = AO_STATUS_RUNNING;
     ao_wrapper_t *wrapper = ao->aout_ops;
-    wrapper->ao_resume ();
+    wrapper->ao_resume (ao);
     return 0;
 }
 
@@ -114,7 +114,7 @@ int audio_output_stop (dtaudio_output_t * ao)
     ao->status = AO_STATUS_EXIT;
     pthread_join (ao->output_thread_pid, NULL);
     ao_wrapper_t *wrapper = ao->aout_ops;
-    wrapper->ao_stop ();
+    wrapper->ao_stop (ao);
     return 0;
 }
 
@@ -125,7 +125,7 @@ int audio_output_latency (dtaudio_output_t * ao)
     if (ao->status == AO_STATUS_PAUSE)
         return ao->last_valid_latency;
     ao_wrapper_t *wrapper = ao->aout_ops;
-    ao->last_valid_latency = wrapper->ao_latency ();
+    ao->last_valid_latency = wrapper->ao_latency (ao);
     return ao->last_valid_latency;
 }
 
@@ -133,7 +133,7 @@ int audio_output_get_level (dtaudio_output_t * ao)
 {
 
     ao_wrapper_t *wrapper = ao->aout_ops;
-    return wrapper->ao_level();
+    return wrapper->ao_level(ao);
 }
 
 static void *audio_output_thread (void *args)
@@ -183,7 +183,7 @@ static void *audio_output_thread (void *args)
 #endif
         }
         /*write to ao device */
-        wlen = wrapper->ao_write (buffer, rlen);
+        wlen = wrapper->ao_write (ao, buffer, rlen);
         if (wlen <= 0)
         {
             usleep (1000);
@@ -213,7 +213,7 @@ int audio_output_init (dtaudio_output_t * ao, int ao_id)
         return -1;
     
     ao_wrapper_t *wrapper = ao->aout_ops;
-    wrapper->ao_init (&ao->para);
+    wrapper->ao_init (ao, &ao->para);
     dt_info (TAG, "[%s:%d] audio output init success\n", __FUNCTION__, __LINE__);
     
     /*start aout pthread */
@@ -236,6 +236,6 @@ int64_t audio_output_get_latency (dtaudio_output_t * ao)
         return ao->last_valid_latency;
     
     ao_wrapper_t *wrapper = ao->aout_ops;
-    ao->last_valid_latency = wrapper->ao_latency ();
+    ao->last_valid_latency = wrapper->ao_latency (ao);
     return ao->last_valid_latency;
 }

@@ -101,10 +101,14 @@ int main (int argc, char **argv)
 	dt_info(TAG,"Get Media Info Ok,filesize:%lld fulltime:%lld S \n",info.file_size,info.duration);
 
     //set display win size
-    vstream_info_t *vstream = info.vstreams[0];
-    int width = vstream->width;
-    int height = vstream->height;
-
+    int width = 720;
+    int height = 480;
+    if(info.has_video)
+    {
+        vstream_info_t *vstream = info.vstreams[0];
+        width = vstream->width;
+        height = vstream->height;
+    }
     if(width <= 0 || width > 1280)
         width = 720;
     if(height <= 0 || height >720)
