@@ -23,7 +23,7 @@ static int ex_vdec_release (vd_wrapper_t *wrapper)
 
 vd_wrapper_t vd_ex_ops = {
     .name = "ex video decoder",
-    .vfmt = VIDEO_FORMAT_INVALID,
+    .vfmt = DT_VIDEO_FORMAT_INVALID,
     .type = DT_TYPE_VIDEO,
     .init = ex_vdec_init,
     .decode_frame = ex_vdec_decode,

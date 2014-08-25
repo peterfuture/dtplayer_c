@@ -17,32 +17,32 @@ typedef struct
 } type_map_t;
 
 static const type_map_t media_map[] = {
-    {"mpegts", MEDIA_FORMAT_MPEGTS},
-    {"mpeg", MEDIA_FORMAT_MPEGPS},
-    {"rm", MEDIA_FORMAT_RM},
-    {"avi", MEDIA_FORMAT_AVI},
-    {"mkv", MEDIA_FORMAT_MKV},
-    {"matroska", MEDIA_FORMAT_MKV},
-    {"mov", MEDIA_FORMAT_MOV},
-    {"mp4", MEDIA_FORMAT_MP4},
-    {"flv", MEDIA_FORMAT_FLV},
-    {"aac", MEDIA_FORMAT_AAC},
-    {"ac3", MEDIA_FORMAT_AC3},
-    {"mp3", MEDIA_FORMAT_MP3},
-    {"mp2", MEDIA_FORMAT_MP3},
-    {"wav", MEDIA_FORMAT_WAV},
-    {"dts", MEDIA_FORMAT_DTS},
-    {"flac", MEDIA_FORMAT_FLAC},
-    {"h264", MEDIA_FORMAT_H264},
-    {"cavs", MEDIA_FORMAT_AVS},
-    {"mpegvideo", MEDIA_FORMAT_M2V},
-    {"p2p", MEDIA_FORMAT_P2P},
-    {"asf", MEDIA_FORMAT_ASF},
-    {"m4a", MEDIA_FORMAT_MP4},
-    {"m4v", MEDIA_FORMAT_MP4},
-    {"rtsp", MEDIA_FORMAT_RTSP},
-    {"ape", MEDIA_FORMAT_APE},
-    {"amr", MEDIA_FORMAT_AMR},
+    {"mpegts", DT_MEDIA_FORMAT_MPEGTS},
+    {"mpeg", DT_MEDIA_FORMAT_MPEGPS},
+    {"rm", DT_MEDIA_FORMAT_RM},
+    {"avi", DT_MEDIA_FORMAT_AVI},
+    {"mkv", DT_MEDIA_FORMAT_MKV},
+    {"matroska", DT_MEDIA_FORMAT_MKV},
+    {"mov", DT_MEDIA_FORMAT_MOV},
+    {"mp4", DT_MEDIA_FORMAT_MP4},
+    {"flv", DT_MEDIA_FORMAT_FLV},
+    {"aac", DT_MEDIA_FORMAT_AAC},
+    {"ac3", DT_MEDIA_FORMAT_AC3},
+    {"mp3", DT_MEDIA_FORMAT_MP3},
+    {"mp2", DT_MEDIA_FORMAT_MP3},
+    {"wav", DT_MEDIA_FORMAT_WAV},
+    {"dts", DT_MEDIA_FORMAT_DTS},
+    {"flac", DT_MEDIA_FORMAT_FLAC},
+    {"h264", DT_MEDIA_FORMAT_H264},
+    {"cavs", DT_MEDIA_FORMAT_AVS},
+    {"mpegvideo", DT_MEDIA_FORMAT_M2V},
+    {"p2p", DT_MEDIA_FORMAT_P2P},
+    {"asf", DT_MEDIA_FORMAT_ASF},
+    {"m4a", DT_MEDIA_FORMAT_MP4},
+    {"m4v", DT_MEDIA_FORMAT_MP4},
+    {"rtsp", DT_MEDIA_FORMAT_RTSP},
+    {"ape", DT_MEDIA_FORMAT_APE},
+    {"amr", DT_MEDIA_FORMAT_AMR},
 };
 
 typedef struct{
@@ -226,7 +226,7 @@ static int demuxer_ffmpeg_read_frame (demuxer_wrapper_t * wrapper, dt_av_frame_t
 static int media_format_convert (const char *name)
 {
     int i, j;
-    int type = MEDIA_FORMAT_INVALID;
+    int type = DT_MEDIA_FORMAT_INVALID;
     j = sizeof (media_map) / sizeof (type_map_t);
     for (i = 0; i < j; i++)
     {
@@ -246,7 +246,7 @@ static int media_format_convert (const char *name)
             if (i == j)
             {
                 dt_error ("Unsupport media type %s\n", name);
-                return MEDIA_FORMAT_INVALID;
+                return DT_MEDIA_FORMAT_INVALID;
             }
         }
     }
@@ -256,13 +256,13 @@ static int media_format_convert (const char *name)
 
 }
 
-audio_format_t audio_format_convert (enum AVCodecID id)
+dtaudio_format_t audio_format_convert (enum AVCodecID id)
 {
-    audio_format_t format = AUDIO_FORMAT_INVALID;
+    dtaudio_format_t format = DT_AUDIO_FORMAT_INVALID;
     switch (id)
     {
     default:
-        format = AUDIO_FORMAT_UNKOWN;
+        format = DT_AUDIO_FORMAT_UNKOWN;
         break;
     }
     dt_info (TAG, "[audio_format_convert]audio codec_id=0x%x format=%d\n", id, format);
@@ -271,14 +271,14 @@ audio_format_t audio_format_convert (enum AVCodecID id)
 
 static int video_format_convert (enum AVCodecID id)
 {
-    video_format_t format;
+    dtvideo_format_t format;
     switch (id)
     {
     case AV_CODEC_ID_H264:
-        format = VIDEO_FORMAT_H264;
+        format = DT_VIDEO_FORMAT_H264;
         break;
     default:
-            format = VIDEO_FORMAT_UNKOWN;
+            format = DT_VIDEO_FORMAT_UNKOWN;
             break;
     }
     dt_info (TAG, "[video_format_convert]video codec_id=0x%x format=%d\n", id, format);
@@ -287,7 +287,7 @@ static int video_format_convert (enum AVCodecID id)
 
 static int subtitle_format_convert (int id)
 {
-    return SUBTITLE_FORMAT_UNKOWN;
+    return DT_SUBTITLE_FORMAT_UNKOWN;
 
 }
 
@@ -331,7 +331,7 @@ static int demuxer_ffmpeg_setup_info (demuxer_wrapper_t * wrapper, dt_media_info
     info->cur_sst_index = -1;
 
     /*get media info */
-    info->format = MEDIA_FORMAT_INVALID;
+    info->format = DT_MEDIA_FORMAT_INVALID;
     info->bit_rate = ic->bit_rate;
     double duration = ((double) ic->duration / AV_TIME_BASE);
     info->duration = (int) (ic->duration / AV_TIME_BASE);
@@ -340,7 +340,7 @@ static int demuxer_ffmpeg_setup_info (demuxer_wrapper_t * wrapper, dt_media_info
     info->file_size = avio_size (ic->pb);
 
     info->format = media_format_convert (ic->iformat->name);
-    if (info->format == MEDIA_FORMAT_INVALID)
+    if (info->format == DT_MEDIA_FORMAT_INVALID)
         dt_warning (TAG, "get wrong media format\n");
 
     //get stream info
@@ -352,7 +352,7 @@ static int demuxer_ffmpeg_setup_info (demuxer_wrapper_t * wrapper, dt_media_info
         {
 
             //for some mp3 have video, just skip
-            if(info->format == MEDIA_FORMAT_MP3)
+            if(info->format == DT_MEDIA_FORMAT_MP3)
                 continue;
 
             vst_info = (vstream_info_t *) malloc (sizeof (vstream_info_t));

@@ -64,7 +64,7 @@ static int select_video_decoder (dtvideo_decoder_t * decoder)
     p = &g_vd;
     while(*p != NULL)
     {
-        if((*p)->vfmt == VIDEO_FORMAT_UNKOWN)
+        if((*p)->vfmt == DT_VIDEO_FORMAT_UNKOWN)
             break;
         if((*p)->vfmt == para->vfmt)
             break;

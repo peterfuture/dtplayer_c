@@ -15,9 +15,9 @@ static enum AVCodecID convert_to_id(int format)
 {
     switch(format)
     {
-        case AUDIO_FORMAT_AAC:
+        case DT_AUDIO_FORMAT_AAC:
             return AV_CODEC_ID_AAC;
-        case AUDIO_FORMAT_AC3:
+        case DT_AUDIO_FORMAT_AC3:
             return AV_CODEC_ID_AC3;
 
         default:
@@ -207,7 +207,7 @@ int ffmpeg_adec_release (ad_wrapper_t *wrapper)
 
 ad_wrapper_t ad_ffmpeg_ops = {
     .name = "ffmpeg audio decoder",
-    .afmt = AUDIO_FORMAT_UNKOWN, //support all afmt
+    .afmt = DT_AUDIO_FORMAT_UNKOWN, //support all afmt
     .type = DT_TYPE_AUDIO,
     .init = ffmpeg_adec_init,
     .decode_frame = ffmpeg_adec_decode,

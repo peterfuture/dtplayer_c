@@ -41,7 +41,7 @@ static int select_audio_decoder (dtaudio_decoder_t * decoder)
     p = &g_ad;
     while (*p != NULL)
     {
-        if((*p)->afmt == AUDIO_FORMAT_UNKOWN)
+        if((*p)->afmt == DT_AUDIO_FORMAT_UNKOWN)
             break;
         if ((*p)->afmt != para->afmt)
             p = &(*p)->next;

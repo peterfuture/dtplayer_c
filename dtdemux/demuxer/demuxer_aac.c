@@ -262,7 +262,7 @@ static int demuxer_aac_setup_info (demuxer_wrapper_t * wrapper, dt_media_info_t 
     info->cur_sst_index = -1;
 
     /*get media info */
-    info->format = MEDIA_FORMAT_AAC;
+    info->format = DT_MEDIA_FORMAT_AAC;
     strcpy (info->file_name, ctx->file_name);
     info->bit_rate = aac_ctx->bitrate;
     info->duration = aac_ctx->duration;
@@ -279,7 +279,7 @@ static int demuxer_aac_setup_info (demuxer_wrapper_t * wrapper, dt_media_info_t 
     ast_info->time_base.num = -1;
     ast_info->time_base.den = -1;
     ast_info->bit_rate = aac_ctx->bitrate;
-    ast_info->format = AUDIO_FORMAT_AAC;
+    ast_info->format = DT_AUDIO_FORMAT_AAC;
     ast_info->codec_priv = NULL;
     info->astreams[info->ast_num] = ast_info;
     info->ast_num++;
