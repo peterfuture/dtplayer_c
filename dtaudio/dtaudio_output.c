@@ -141,10 +141,15 @@ static void *audio_output_thread (void *args)
     dtaudio_output_t *ao = (dtaudio_output_t *) args;
     ao_wrapper_t *wrapper = ao->aout_ops;
     
-    uint8_t buffer[PCM_WRITE_SIZE];
     int rlen, ret, wlen;
     rlen = ret = wlen = 0;
-   
+
+    dtaudio_para_t *para = &ao->para;
+    int bytes_per_sample = para->data_width * para->dst_channels / 2;
+    const int unit_size = PCM_WRITE_SIZE * para->dst_samplerate * bytes_per_sample / 1000;
+    uint8_t *buffer = malloc(unit_size);
+    if(!buffer) // err
+       return; 
     for (;;)
     {
         if (ao->status == AO_STATUS_EXIT)
@@ -161,7 +166,7 @@ static void *audio_output_thread (void *args)
         /*read data from filter or decode buffer */
         if (rlen <= 0)
         {
-            rlen = audio_output_read (ao->parent, buffer, PCM_WRITE_SIZE);
+            rlen = audio_output_read (ao->parent, buffer, unit_size);
             if (rlen <= 0)
             {
                 dt_debug (LOG_TAG, "pcm read failed! \n");
@@ -197,6 +202,7 @@ static void *audio_output_thread (void *args)
     }
   EXIT:
     dt_info (LOG_TAG, "[file:%s][%s:%d]ao playback thread exit\n", __FILE__, __FUNCTION__, __LINE__);
+    free(buffer);
     pthread_exit (NULL);
     return NULL;
 

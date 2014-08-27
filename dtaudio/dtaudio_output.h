@@ -4,7 +4,7 @@
 #include "ao_wrapper.h"
 
 #define LOG_TAG "DTAUDIO-OUTPUT"
-#define PCM_WRITE_SIZE 1024
+#define PCM_WRITE_SIZE 10 // ms
 
 void aout_register_all();
 void aout_register_ext(ao_wrapper_t *ao);
