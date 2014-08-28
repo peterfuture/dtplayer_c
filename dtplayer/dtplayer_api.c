@@ -7,32 +7,32 @@
 
 #define TAG "PLAYER-API"
 
-void dtplayer_register_ex_stream(stream_wrapper_t *wrapper)
+void dtplayer_register_ext_stream(stream_wrapper_t *wrapper)
 {
 
 }
 
-void dtplayer_register_ex_demuxer(demuxer_wrapper_t *wrapper)
+void dtplayer_register_ext_demuxer(demuxer_wrapper_t *wrapper)
 {
 
 }
 
-void dtplayer_register_ex_ao(ao_wrapper_t *wrapper)
+void dtplayer_register_ext_ao(ao_wrapper_t *wrapper)
+{
+    register_ext_ao(wrapper);
+}
+
+void dtplayer_register_ext_ad(ad_wrapper_t *wrapper)
 {
 
 }
 
-void dtplayer_register_ex_ad(ad_wrapper_t *wrapper)
+void dtplayer_register_ext_vo(vo_wrapper_t *wrapper)
 {
-
+    register_ext_vo(wrapper);
 }
 
-void dtplayer_register_ex_vo(vo_wrapper_t *wrapper)
-{
-
-}
-
-void dtplayer_register_ex_vd(vd_wrapper_t *wrapper)
+void dtplayer_register_ext_vd(vd_wrapper_t *wrapper)
 {
     register_ext_vd(wrapper);
 }

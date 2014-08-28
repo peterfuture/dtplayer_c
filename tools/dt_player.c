@@ -63,7 +63,7 @@ static void register_ex_all()
     //player_register_ex_ao();
     //player_register_ex_ad();
     //player_register_ex_vo();
-    dtplayer_register_ex_vd(&vd_ex_ops);
+    //dtplayer_register_ext_vd(&vd_ex_ops);
 }
 
 int main (int argc, char **argv)

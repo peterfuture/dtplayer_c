@@ -20,12 +20,12 @@
  *
  * */
 
-void dtplayer_register_ex_stream(stream_wrapper_t *wrapper);
-void dtplayer_register_ex_demuxer(demuxer_wrapper_t *wrapper);
-void dtplayer_register_ex_ao(ao_wrapper_t *wrapper);
-void dtplayer_register_ex_ad(ad_wrapper_t *wrapper);
-void dtplayer_register_ex_vo(vo_wrapper_t *wrapper);
-void dtplayer_register_ex_vd(vd_wrapper_t *wrapper);
+void dtplayer_register_ext_stream(stream_wrapper_t *wrapper);
+void dtplayer_register_ext_demuxer(demuxer_wrapper_t *wrapper);
+void dtplayer_register_ext_ao(ao_wrapper_t *wrapper);
+void dtplayer_register_ext_ad(ad_wrapper_t *wrapper);
+void dtplayer_register_ext_vo(vo_wrapper_t *wrapper);
+void dtplayer_register_ext_vd(vd_wrapper_t *wrapper);
 
 /* 
  * do global initialization of dtplayer.

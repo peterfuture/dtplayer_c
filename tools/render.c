@@ -134,8 +134,8 @@ ao_wrapper_t ao_ex_ops = {
 
 int render_init()
 {
-    register_ext_ao(&ao_ex_ops);
-    register_ext_vo(&vo_ex_ops); 
+    dtplayer_register_ext_ao(&ao_ex_ops);
+    dtplayer_register_ext_vo(&vo_ex_ops); 
 
     return  0;
 }
