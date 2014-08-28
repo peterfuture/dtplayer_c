@@ -52,7 +52,7 @@ typedef struct _AVPicture_t_
 /*video part*/
 
 //From ffmpeg
-enum DT_AVPixelFormat
+typedef enum DT_AVPixelFormat
 {
     DTAV_PIX_FMT_NONE = -1,
     DTAV_PIX_FMT_YUV420P,       ///< planar YUV 4:2:0, 12bpp, (1 Cr & Cb sample per 2x2 Y samples)
@@ -235,6 +235,7 @@ typedef enum _AO_ID_
     AO_ID_OSS,
     AO_ID_DSOUND,
     AO_ID_ANDROID = 0x100,
+    AO_ID_OPENSL = 0x101,
     AO_ID_IOS = 0x200,
 } dtao_format_t;
 
