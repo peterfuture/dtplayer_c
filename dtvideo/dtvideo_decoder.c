@@ -129,9 +129,14 @@ static void *video_decode_loop (void *arg)
         ret = dtvideo_read_frame (decoder->parent, &frame);
         if (ret < 0)
         {
-            usleep (100);
-            dt_debug (TAG, "[%s:%d] dtaudio decoder loop read frame failed \n", __FUNCTION__, __LINE__);
-            continue;
+            if(decoder->pts_first == -1 || decoder->pts_first == DT_NOPTS_VALUE)
+            {
+                usleep(1000);
+                continue;
+            }
+            //no data left, maybe eof, need to flush left data
+            memset(&frame,0,sizeof(dt_av_frame_t));
+            dt_info (TAG, "[%s:%d] no video frame left, flush left frames \n", __FUNCTION__, __LINE__);
         }
         /*read one frame,enter decode frame module */
         //will exec once for one time
@@ -141,6 +146,7 @@ static void *video_decode_loop (void *arg)
             decoder->decode_err_cnt++;
             dt_debug (TAG, "[%s:%d]decode failed \n", __FUNCTION__, __LINE__);
             picture = NULL;
+            usleep(10000);
             goto DECODE_END;
         }
         if (!picture)
@@ -175,7 +181,8 @@ static void *video_decode_loop (void *arg)
         //we successfully decodec one frame
         if (frame.data)
         {
-            free (frame.data);
+            if(frame.data)
+                free (frame.data);
             frame.data = NULL;
             frame.size = 0;
             frame.pts = -1;
