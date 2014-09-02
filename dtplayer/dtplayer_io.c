@@ -82,8 +82,8 @@ static void *player_io_thread (dtplayer_context_t * dtp_ctx)
     if(GetEnv("PLAYER","dump.mode",value) > 0)
     {
         dump_mode = atoi(value);
-        dt_info(TAG,"dump mode:%d 0 nodump 1dumpaudio 2dumpvideo \n",dump_mode);
     }
+    dt_info(TAG,"dump mode:%d 0 nodump 1dumpaudio 2dumpvideo \n",dump_mode);
     
     do
     {
