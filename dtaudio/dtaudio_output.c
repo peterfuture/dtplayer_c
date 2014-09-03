@@ -149,7 +149,8 @@ static void *audio_output_thread (void *args)
     const int unit_size = PCM_WRITE_SIZE * para->dst_samplerate * bytes_per_sample / 1000;
     uint8_t *buffer = malloc(unit_size);
     if(!buffer) // err
-       return; 
+       goto EXIT;
+
     for (;;)
     {
         if (ao->status == AO_STATUS_EXIT)
@@ -202,7 +203,9 @@ static void *audio_output_thread (void *args)
     }
   EXIT:
     dt_info (LOG_TAG, "[file:%s][%s:%d]ao playback thread exit\n", __FILE__, __FUNCTION__, __LINE__);
-    free(buffer);
+    if(buffer)
+        free(buffer);
+    buffer = NULL;
     pthread_exit (NULL);
     return NULL;
 
