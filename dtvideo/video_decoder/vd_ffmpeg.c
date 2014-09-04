@@ -13,16 +13,24 @@
 #include "libswscale/swscale.h"
 
 #define TAG "VDEC-FFMPEG"
-static AVFrame *frame;
-static struct SwsContext *pSwsCtx = NULL;;
 
-int ffmpeg_vdec_init (vd_wrapper_t *wrapper, void *parent)
+typedef struct vd_ffmpeg_ctx{
+    AVCodecContext *avctxp;
+    AVFrame *frame;
+    struct SwsContext *pSwsCtx;
+}vd_ffmpeg_ctx_t;
+
+int ffmpeg_vdec_init (dtvideo_decoder_t *decoder)
 {
-    dtvideo_decoder_t *decoder = (dtvideo_decoder_t *)parent;
-    wrapper->parent = parent; 
+    vd_wrapper_t *wrapper = decoder->wrapper;
+    vd_ffmpeg_ctx_t *vd_ctx = malloc(sizeof(vd_ffmpeg_ctx_t));
+    if(!vd_ctx)
+        return -1;
+    memset(vd_ctx, 0, sizeof(vd_ffmpeg_ctx_t));
     //select video decoder and call init
     AVCodec *codec = NULL;
-    AVCodecContext *avctxp = (AVCodecContext *) decoder->decoder_priv;
+    AVCodecContext *avctxp = (AVCodecContext *) decoder->vd_priv;
+    vd_ctx->avctxp = (AVCodecContext *) decoder->vd_priv;
     avctxp->thread_count = 1;   //do not use multi thread,may crash
     enum AVCodecID id = avctxp->codec_id;
     codec = avcodec_find_decoder (id);
@@ -38,11 +46,14 @@ int ffmpeg_vdec_init (vd_wrapper_t *wrapper, void *parent)
     }
     dt_info (TAG, " [%s:%d] ffmpeg dec init ok \n", __FUNCTION__, __LINE__);
     //alloc one frame for decode
-    frame = av_frame_alloc ();
+    vd_ctx->frame = av_frame_alloc ();
+    memcpy(&wrapper->para, &decoder->para ,sizeof(dtvideo_para_t));
+    decoder->vd_priv = (void *)vd_ctx;
     return 0;
 }
 
 //convert to dst fmt
+#if 0
 static int convert_frame (dtvideo_decoder_t * decoder, AVFrame * src, int64_t pts, dt_av_pic_t ** p_pict)
 {
     uint8_t *buffer;
@@ -73,6 +84,7 @@ static int convert_frame (dtvideo_decoder_t * decoder, AVFrame * src, int64_t pt
     *p_pict = pict;
     return 0;
 }
+#endif
 
 static int copy_frame (dtvideo_decoder_t * decoder, AVFrame * src, int64_t pts, dt_av_pic_t ** p_pict)
 {
@@ -118,11 +130,11 @@ static int copy_frame (dtvideo_decoder_t * decoder, AVFrame * src, int64_t pts, 
  *
  * */
 
-int ffmpeg_vdec_decode (vd_wrapper_t *wrapper, dt_av_frame_t * dt_frame, dt_av_pic_t ** pic)
+int ffmpeg_vdec_decode (dtvideo_decoder_t *decoder, dt_av_frame_t * dt_frame, dt_av_pic_t ** pic)
 {
     int ret = 0;
-    dtvideo_decoder_t *decoder = (dtvideo_decoder_t *)wrapper->parent; 
-    AVCodecContext *avctxp = (AVCodecContext *) decoder->decoder_priv;
+    vd_ffmpeg_ctx_t *vd_ctx = (vd_ffmpeg_ctx_t *)decoder->vd_priv;
+    AVCodecContext *avctxp = (AVCodecContext *) vd_ctx->avctxp;
     dt_debug (TAG, "[%s:%d] param-- w:%d h:%d  extr_si:%d \n", __FUNCTION__, __LINE__, avctxp->width, avctxp->height, avctxp->extradata_size);
     int got_picture = 0;
     AVPacket pkt;
@@ -133,6 +145,7 @@ int ffmpeg_vdec_decode (vd_wrapper_t *wrapper, dt_av_frame_t * dt_frame, dt_av_p
     pkt.dts = dt_frame->dts;
     pkt.side_data_elems = 0;
     pkt.buf = NULL;
+    AVFrame *frame = vd_ctx->frame;
     avcodec_decode_video2 (avctxp, frame, &got_picture, &pkt);
     if (got_picture)
     {
@@ -150,15 +163,23 @@ int ffmpeg_vdec_decode (vd_wrapper_t *wrapper, dt_av_frame_t * dt_frame, dt_av_p
     return ret;
 }
 
-int ffmpeg_vdec_release (vd_wrapper_t *wrapper)
+int ffmpeg_vdec_info_changed (dtvideo_decoder_t *decoder)
 {
-    dtvideo_decoder_t *decoder = (dtvideo_decoder_t *)wrapper->parent; 
-    AVCodecContext *avctxp = (AVCodecContext *) decoder->decoder_priv;
+    //vd_wrapper_t *wrapper = decoder->wrapper;
+    return 0;
+}
+
+int ffmpeg_vdec_release (dtvideo_decoder_t *decoder)
+{
+    vd_ffmpeg_ctx_t *vd_ctx = (vd_ffmpeg_ctx_t *)decoder->vd_priv;
+    AVCodecContext *avctxp = (AVCodecContext *) vd_ctx->avctxp;
     avcodec_close (avctxp);
-    av_frame_free (&frame);
-    if (pSwsCtx)
-        sws_freeContext (pSwsCtx);
-    pSwsCtx = NULL;
+    if(vd_ctx->frame)
+        av_frame_free (&vd_ctx->frame);
+    if (vd_ctx->pSwsCtx)
+        sws_freeContext (vd_ctx->pSwsCtx);
+    vd_ctx->pSwsCtx = NULL;
+    free(vd_ctx);
     return 0;
 }
 
@@ -168,5 +189,6 @@ vd_wrapper_t vd_ffmpeg_ops = {
     .type = DT_TYPE_VIDEO,
     .init = ffmpeg_vdec_init,
     .decode_frame = ffmpeg_vdec_decode,
+    .info_changed = ffmpeg_vdec_info_changed,
     .release = ffmpeg_vdec_release,
 };

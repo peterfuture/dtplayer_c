@@ -3,19 +3,19 @@
 
 #define TAG "VD-EX"
 
-static int ex_vdec_init (vd_wrapper_t *wrapper, void *parent)
+static int ex_vdec_init (dtvideo_decoder_t *decoder)
 {
     dt_info(TAG,"VD EX INIT OK \n");
     return 0;
 }
 
-static int ex_vdec_decode (vd_wrapper_t *wrapper, dt_av_frame_t * dt_frame, AVPicture_t ** pic)
+static int ex_vdec_decode (dtvideo_decoder_t *decoder, dt_av_frame_t * dt_frame, dt_av_pic_t ** pic)
 {
     dt_info(TAG,"VD EX DECODE OK \n");
     return 0;
 }
 
-static int ex_vdec_release (vd_wrapper_t *wrapper)
+static int ex_vdec_release (dtvideo_decoder_t *decoder)
 {
     dt_info(TAG,"VD EX RELEASE OK \n");
     return 0;

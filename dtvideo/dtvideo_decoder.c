@@ -94,7 +94,7 @@ static void *video_decode_loop (void *arg)
     dtvideo_filter_t *filter = (dtvideo_filter_t *) &(vctx->video_filt);
     queue_t *picture_queue = vctx->vo_queue;
     /*used for decode */
-    AVPicture_t *picture = NULL;
+    dt_av_pic_t *picture = NULL;
     int ret;
     dt_info (TAG, "[%s:%d] start decode loop \n", __FUNCTION__, __LINE__);
 
@@ -141,7 +141,7 @@ static void *video_decode_loop (void *arg)
         }
         /*read one frame,enter decode frame module */
         //will exec once for one time
-        ret = wrapper->decode_frame (wrapper, &frame, &picture);
+        ret = wrapper->decode_frame (decoder, &frame, &picture);
         if (ret <= 0)
         {
             decoder->decode_err_cnt++;
@@ -154,8 +154,10 @@ static void *video_decode_loop (void *arg)
             goto DECODE_END;
 
         //got one frame, filter process
-        if(decoder->info_changed)
+        if(wrapper->info_changed(decoder))
         {
+            memcpy(&decoder->para, &wrapper->para, sizeof(dtvideo_para_t));
+            memcpy(&filter->para, &wrapper->para, sizeof(dtvideo_para_t));
             video_filter_reset(filter, &decoder->para);
         }
 
@@ -220,8 +222,8 @@ int video_decoder_init (dtvideo_decoder_t * decoder)
     vd_wrapper_t *wrapper = decoder->wrapper; 
     /*init decoder */
     decoder->pts_current = decoder->pts_first = -1;
-    decoder->decoder_priv = decoder->para.avctx_priv;
-    ret = wrapper->init (wrapper,decoder);
+    decoder->vd_priv = decoder->para.avctx_priv;
+    ret = wrapper->init (decoder);
     if (ret < 0)
         return -1;
     
@@ -278,7 +280,7 @@ int video_decoder_stop (dtvideo_decoder_t * decoder)
     /*Decode thread exit */
     decoder->status = VDEC_STATUS_EXIT;
     pthread_join (decoder->video_decoder_pid, NULL);
-    wrapper->release (wrapper);
+    wrapper->release (decoder);
    
     /*release queue */
     dtvideo_context_t *vctx = (dtvideo_context_t *) decoder->parent;
