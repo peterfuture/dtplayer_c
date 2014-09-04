@@ -278,6 +278,7 @@ DIRS =  . \
         dtaudio/audio_out \
         dtvideo \
         dtvideo/video_decoder \
+        dtvideo/video_filter \
         dtvideo/video_out \
         dthost \
         dtplayer \
