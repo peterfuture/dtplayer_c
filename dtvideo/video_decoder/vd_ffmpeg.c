@@ -13,39 +13,6 @@
 static AVFrame *frame;
 static struct SwsContext *pSwsCtx = NULL;;
 
-static int img_convert (AVPicture * dst, int dst_pix_fmt, AVFrame * src, int src_pix_fmt, int src_width, int src_height, int dest_width, int dest_height)
-{
-    //pSwsCtx = sws_getContext(src_width, src_height, src_pix_fmt,dest_width, dest_height, dst_pix_fmt,SWS_BICUBIC, NULL, NULL, NULL);
-    pSwsCtx = sws_getCachedContext (pSwsCtx, src_width, src_height, src->format, dest_width, dest_height, dst_pix_fmt, SWS_BICUBIC, NULL, NULL, NULL);
-    sws_scale (pSwsCtx, src->data, src->linesize, 0, src_height, dst->data, dst->linesize);
-    return 0;
-}
-
-#if 0
-static void SaveFrame (AVFrame * pFrame, int width, int height, int iFrame)
-{
-    FILE *pFile;
-    char szFilename[32];
-    int y;
-
-    // Open file
-    sprintf (szFilename, "frame%d.ppm", iFrame);
-    pFile = fopen (szFilename, "wb");
-    if (pFile == NULL)
-        return;
-
-    // Write header
-    fprintf (pFile, "P6\n%d %d\n255\n", width, height);
-
-    // Write pixel data
-    for (y = 0; y < height; y++)
-        fwrite (pFrame->data[0] + y * pFrame->linesize[0], 1, width * 3, pFile);
-
-    // Close file
-    fclose (pFile);
-}
-#endif
-
 int ffmpeg_vdec_init (vd_wrapper_t *wrapper, void *parent)
 {
     dtvideo_decoder_t *decoder = (dtvideo_decoder_t *)parent;
@@ -72,20 +39,33 @@ int ffmpeg_vdec_init (vd_wrapper_t *wrapper, void *parent)
     return 0;
 }
 
-static int output_picture (dtvideo_decoder_t * decoder, AVFrame * src_frame, int64_t pts, AVPicture_t ** p_pict)
+//convert to dst fmt
+static int convert_to_picture (dtvideo_decoder_t * decoder, AVFrame * src, int64_t pts, AVPicture_t ** p_pict)
 {
     uint8_t *buffer;
-    int numBytes;
+    int buffer_size;
+
+    dtvideo_para_t *para = &decoder->para;
+    int sw = para->s_width; 
+    int dw = para->d_width; 
+    int sh = para->s_height; 
+    int dh = para->d_height; 
+    int sf = para->s_pixfmt; 
+    int df = para->d_pixfmt; 
+
+    //step1: malloc avpicture_t
     AVPicture_t *pict = malloc (sizeof (AVPicture_t));
     memset (pict, 0, sizeof (AVPicture_t));
-    AVPicture *dest_pic = (AVPicture *) (pict);
-    // Allocate an AVFrame structure
-    numBytes = avpicture_get_size (decoder->para.d_pixfmt, decoder->para.d_width, decoder->para.d_height);
-    buffer = (uint8_t *) malloc (numBytes * sizeof (uint8_t));
-    avpicture_fill ((AVPicture *) dest_pic, buffer, decoder->para.d_pixfmt, decoder->para.d_width, decoder->para.d_height);
+    //step2: convert to avpicture, ffmpeg struct
+    AVPicture *dst = (AVPicture *) (pict);
+    //step3: allocate an AVFrame structure
+    buffer_size = avpicture_get_size (decoder->para.d_pixfmt, decoder->para.d_width, decoder->para.d_height);
+    buffer = (uint8_t *) malloc (buffer_size * sizeof (uint8_t));
+    avpicture_fill ((AVPicture *) dst, buffer, df, dw, dh);
 
-    // Convert the image from its native format to YV12
-    img_convert ((AVPicture *) dest_pic, decoder->para.d_pixfmt, src_frame, decoder->para.s_pixfmt, decoder->para.s_width, decoder->para.s_height, decoder->para.d_width, decoder->para.d_height);
+    pSwsCtx = sws_getCachedContext (pSwsCtx, sw, sh, sf, dw, dh, df, SWS_BICUBIC, NULL, NULL, NULL);
+    sws_scale (pSwsCtx, src->data, src->linesize, 0, sh, dst->data, dst->linesize);
+    
     pict->pts = pts;
     *p_pict = pict;
     return 0;
@@ -100,6 +80,13 @@ static int output_picture (dtvideo_decoder_t * decoder, AVFrame * src_frame, int
  * -1 err occured while decoding 
  *
  * */
+
+static int setup_picture(AVFrame *frame, AVPicture **pic)
+{
+
+
+    return 0;
+}
 
 int ffmpeg_vdec_decode (vd_wrapper_t *wrapper, dt_av_frame_t * dt_frame, AVPicture_t ** pic)
 {
@@ -119,7 +106,7 @@ int ffmpeg_vdec_decode (vd_wrapper_t *wrapper, dt_av_frame_t * dt_frame, AVPictu
     avcodec_decode_video2 (avctxp, frame, &got_picture, &pkt);
     if (got_picture)
     {
-        ret = output_picture (decoder, frame, av_frame_get_best_effort_timestamp (frame), pic);
+        ret = convert_to_picture (decoder, frame, av_frame_get_best_effort_timestamp (frame), pic);
         if (ret == -1)
             ret = 0;
         else
