@@ -6,6 +6,7 @@
 #include "dt_buffer.h"
 #include "dt_queue.h"
 #include "dtvideo_decoder.h"
+#include "dtvideo_filter.h"
 #include "dtvideo_output.h"
 #if 0
 #include "dtvideo_filter.h"
@@ -37,8 +38,9 @@ typedef struct
     dt_buffer_t video_filtered_buf;
     /*module */
     dtvideo_decoder_t video_dec;
-    //dtvideo_filter_t video_filt;
+    dtvideo_filter_t video_filt;
     dtvideo_output_t video_out;
+    
     queue_t *vo_queue;
 
     /*pts relative */
@@ -55,6 +57,8 @@ typedef struct
 } dtvideo_context_t;
 
 void video_register_all();
+void register_ext_vd(vd_wrapper_t *vo);
+void register_ext_vf(vf_wrapper_t *vo);
 void register_ext_vo(vo_wrapper_t *vo);
 
 int dtvideo_read_frame (void *priv, dt_av_frame_t * frame);

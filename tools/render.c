@@ -1,5 +1,6 @@
 #include "render.h"
 
+#include "dtplayer_api.h"
 #include "dtaudio.h"
 #include "dtaudio_output.h"
 #include "dtvideo.h"

@@ -1,6 +1,8 @@
 #include "dthost_api.h"
 #include "dtplayer_api.h"
 #include "dtplayer.h"
+#include "dtaudio.h"
+#include "dtvideo.h"
 #include "dt_event.h"
 
 #include "pthread.h"
@@ -35,6 +37,11 @@ void dtplayer_register_ext_vo(vo_wrapper_t *wrapper)
 void dtplayer_register_ext_vd(vd_wrapper_t *wrapper)
 {
     register_ext_vd(wrapper);
+}
+
+void dtplayer_register_ext_vf(vf_wrapper_t *wrapper)
+{
+    register_ext_vf(wrapper);
 }
 
 void *dtplayer_init (dtplayer_para_t * para)

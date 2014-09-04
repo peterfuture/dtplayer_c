@@ -13,11 +13,6 @@ int dtvideo_read_frame (void *priv, dt_av_frame_t * frame)
     return ret;
 }
 
-int dtvideo_filter_read ()
-{
-    return 0;
-}
-
 /*get picture from vo_queue,remove*/
 AVPicture_t *dtvideo_output_read (void *priv)
 {
@@ -157,6 +152,7 @@ void video_register_all()
 {
     vdec_register_all();
     vout_register_all();
+    vf_register_all();
 }
 
 void register_ext_vd(vd_wrapper_t *vd)
@@ -167,6 +163,11 @@ void register_ext_vd(vd_wrapper_t *vd)
 void register_ext_vo(vo_wrapper_t *vo)
 {
    vout_register_ext(vo); 
+}
+
+void register_ext_vf(vf_wrapper_t *vf)
+{
+   vf_register_ext(vf); 
 }
 
 int video_start (dtvideo_context_t * vctx)
@@ -229,8 +230,17 @@ int video_init (dtvideo_context_t * vctx)
     vctx->current_pts = vctx->last_valid_pts = -1;
 
     dtvideo_decoder_t *video_dec = &vctx->video_dec;
+    dtvideo_filter_t *video_filt = &vctx->video_filt;
     dtvideo_output_t *video_out = &vctx->video_out;
-    /*video decoder init */
+    
+    //vf ctx init
+    //vf will init in vd but used in vo
+    memset (video_filt, 0, sizeof (dtvideo_filter_t));
+    memset (&video_filt->para, 0, sizeof (dtvideo_para_t));
+    memcpy (&video_filt->para, &vctx->video_para, sizeof (dtvideo_para_t));
+    video_filt->parent = vctx;
+
+    //vd ctx init 
     memset (video_dec, 0, sizeof (dtvideo_decoder_t));
     memset (&video_dec->para, 0, sizeof (dtvideo_para_t));
     memcpy (&video_dec->para, &vctx->video_para, sizeof (dtvideo_para_t));
@@ -238,7 +248,8 @@ int video_init (dtvideo_context_t * vctx)
     ret = video_decoder_init (video_dec);
     if (ret < 0)
         goto err1;
-    /*audio output decoder */
+
+    //vo ctx init
     memset (video_out, 0, sizeof (dtvideo_output_t));
     memset (&video_out->para, 0, sizeof (dtvideo_para_t));
     memcpy (&(video_out->para), &(vctx->video_para), sizeof (dtvideo_para_t));

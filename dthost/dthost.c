@@ -101,7 +101,7 @@ int host_update_vpts (dthost_context_t * hctx, int64_t vpts)
 
     if (host_sync_enable (hctx) && avdiff / 90 > AVSYNC_THRESHOLD_MAX) //close sync
     {
-        dt_info (TAG, "avdiff:%d ecceed :%d ms, cloase sync \n", avdiff / 90, AVSYNC_THRESHOLD_MAX);
+        dt_info (TAG, "avdiff:%llx ecceed :%d ms, cloase sync \n", avdiff / 90, AVSYNC_THRESHOLD_MAX);
         hctx->sync_mode = DT_SYNC_VIDEO_MASTER;
         return 0;
     }
@@ -178,7 +178,7 @@ int host_start (dthost_context_t * hctx)
     int av_diff_ms = abs (hctx->pts_video - hctx->pts_audio) / 90;
     if (av_diff_ms > AVSYNC_DROP_THRESHOLD)
     {
-        dt_info (TAG, "FIRST AV DIFF EXCEED % MS,DO NOT DROP\n",AVSYNC_DROP_THRESHOLD);
+        dt_info (TAG, "FIRST AV DIFF EXCEED %d MS,DO NOT DROP\n",AVSYNC_DROP_THRESHOLD);
         hctx->sync_mode = DT_SYNC_VIDEO_MASTER;
     }
     else

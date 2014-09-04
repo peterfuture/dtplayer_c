@@ -91,6 +91,7 @@ static void *video_decode_loop (void *arg)
     dtvideo_decoder_t *decoder = (dtvideo_decoder_t *) arg;
     vd_wrapper_t *wrapper = decoder->wrapper;
     dtvideo_context_t *vctx = (dtvideo_context_t *) decoder->parent;
+    dtvideo_filter_t *filter = (dtvideo_filter_t *) &(vctx->video_filt);
     queue_t *picture_queue = vctx->vo_queue;
     /*used for decode */
     AVPicture_t *picture = NULL;
@@ -151,6 +152,15 @@ static void *video_decode_loop (void *arg)
         }
         if (!picture)
             goto DECODE_END;
+
+        //got one frame, filter process
+        if(decoder->info_changed)
+        {
+            video_filter_reset(filter, &decoder->para);
+        }
+
+        video_filter_process(filter);
+
         decoder->frame_count++;
         //Got one frame
         //picture->pts = frame.pts;

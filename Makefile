@@ -61,6 +61,7 @@ endif
 DT_CFLAGS += -DENABLE_VDEC_NULL=0
 ifeq ($(DT_FFMPEG),yes)
 	DT_CFLAGS += -DENABLE_VDEC_FFMPEG=1
+	DT_CFLAGS += -DENABLE_VF_FFMPEG=1
 endif
 
 #DT_CFLAGS += -DENABLE_VO_NULL=0
@@ -236,8 +237,10 @@ SRCS_COMMON-$(DT_SDL) += dtaudio/audio_out/ao_sdl.c                  # out
 SRCS_COMMON-$(DT_VIDEO) += dtvideo/dtvideo_api.c
 SRCS_COMMON-$(DT_VIDEO) += dtvideo/dtvideo.c
 SRCS_COMMON-$(DT_VIDEO) += dtvideo/dtvideo_decoder.c
+SRCS_COMMON-$(DT_VIDEO) += dtvideo/dtvideo_filter.c
 SRCS_COMMON-$(DT_VIDEO) += dtvideo/dtvideo_output.c
 SRCS_COMMON-$(DT_FFMPEG) += dtvideo/video_decoder/vd_ffmpeg.c         #dec
+SRCS_COMMON-$(DT_FFMPEG) += dtvideo/video_filter/vf_ffmpeg.c          #filter
 SRCS_COMMON-$(DT_SDL) += dtvideo/video_out/vo_sdl.c                   #out
 
 #dtport

@@ -35,6 +35,7 @@ typedef struct dtvideo_decoder
     pthread_t video_decoder_pid;
     vdec_status_t status;
     int decode_err_cnt;
+    int info_changed;
 
     int64_t pts_current;
     int64_t pts_first;
