@@ -20,7 +20,7 @@ typedef struct vd_wrapper
     int type;
 
     int (*init) (struct vd_wrapper *wrapper, void *parent);
-    int (*decode_frame) (struct vd_wrapper *wrapper, dt_av_frame_t * frame, AVPicture_t ** pic);
+    int (*decode_frame) (struct vd_wrapper *wrapper, dt_av_frame_t * frame, dt_av_pic_t ** pic);
     int (*release) (struct vd_wrapper *wrapper);
     
     void *vd_priv;

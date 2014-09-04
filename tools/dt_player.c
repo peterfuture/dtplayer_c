@@ -48,7 +48,7 @@ static int parse_cmd(int argc,char **argv,dtplayer_para_t *para)
     //init para with argv
     para->file_name = argv[1];
     para->update_cb = (void *) update_cb;
-    //para->no_audio=1;
+    para->no_audio=1;
     //para->no_video=1;
     para->width = -1;
     para->height = -1;

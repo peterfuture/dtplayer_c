@@ -73,7 +73,7 @@ int video_filter_reset(dtvideo_filter_t *filter, dtvideo_para_t *para)
     return 0;
 }
 
-int video_filter_process(dtvideo_filter_t *filter)
+int video_filter_process(dtvideo_filter_t *filter, dt_av_pic_t *pic)
 {
     int ret = 0;
     //init first
@@ -90,7 +90,7 @@ int video_filter_process(dtvideo_filter_t *filter)
     }
 
     vf_wrapper_t *wrapper = filter->wrapper;
-    ret = wrapper->process(filter);
+    ret = wrapper->process(filter, pic);
 END:
     return ret;
 }

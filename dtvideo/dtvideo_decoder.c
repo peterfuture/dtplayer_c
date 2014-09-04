@@ -159,7 +159,7 @@ static void *video_decode_loop (void *arg)
             video_filter_reset(filter, &decoder->para);
         }
 
-        video_filter_process(filter);
+        video_filter_process(filter, picture);
 
         decoder->frame_count++;
         //Got one frame
@@ -200,6 +200,10 @@ static void *video_decode_loop (void *arg)
     }
     while (1);
     dt_info (TAG, "[file:%s][%s:%d]decoder loop thread exit ok\n", __FILE__, __FUNCTION__, __LINE__);
+
+    //filter release
+    video_filter_stop(filter);
+
     pthread_exit (NULL);
     return NULL;
 }
@@ -275,7 +279,7 @@ int video_decoder_stop (dtvideo_decoder_t * decoder)
     decoder->status = VDEC_STATUS_EXIT;
     pthread_join (decoder->video_decoder_pid, NULL);
     wrapper->release (wrapper);
-    
+   
     /*release queue */
     dtvideo_context_t *vctx = (dtvideo_context_t *) decoder->parent;
     queue_t *picture_queue = vctx->vo_queue;

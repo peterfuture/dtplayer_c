@@ -2,6 +2,9 @@
  *video decoder interface using ffmpeg
  * */
 
+#include "dt_av.h"
+#include "dtvideo_pic.h"
+
 #include "libavcodec/avcodec.h"
 #include "../dtvideo_decoder.h"
 
@@ -40,7 +43,7 @@ int ffmpeg_vdec_init (vd_wrapper_t *wrapper, void *parent)
 }
 
 //convert to dst fmt
-static int convert_to_picture (dtvideo_decoder_t * decoder, AVFrame * src, int64_t pts, AVPicture_t ** p_pict)
+static int convert_frame (dtvideo_decoder_t * decoder, AVFrame * src, int64_t pts, dt_av_pic_t ** p_pict)
 {
     uint8_t *buffer;
     int buffer_size;
@@ -54,12 +57,12 @@ static int convert_to_picture (dtvideo_decoder_t * decoder, AVFrame * src, int64
     int df = para->d_pixfmt; 
 
     //step1: malloc avpicture_t
-    AVPicture_t *pict = malloc (sizeof (AVPicture_t));
-    memset (pict, 0, sizeof (AVPicture_t));
+    dt_av_pic_t *pict = malloc (sizeof (dt_av_pic_t));
+    memset (pict, 0, sizeof (dt_av_pic_t));
     //step2: convert to avpicture, ffmpeg struct
     AVPicture *dst = (AVPicture *) (pict);
     //step3: allocate an AVFrame structure
-    buffer_size = avpicture_get_size (decoder->para.d_pixfmt, decoder->para.d_width, decoder->para.d_height);
+    buffer_size = avpicture_get_size (df, dw, dh);
     buffer = (uint8_t *) malloc (buffer_size * sizeof (uint8_t));
     avpicture_fill ((AVPicture *) dst, buffer, df, dw, dh);
 
@@ -68,6 +71,40 @@ static int convert_to_picture (dtvideo_decoder_t * decoder, AVFrame * src, int64
     
     pict->pts = pts;
     *p_pict = pict;
+    return 0;
+}
+
+static int copy_frame (dtvideo_decoder_t * decoder, AVFrame * src, int64_t pts, dt_av_pic_t ** p_pict)
+{
+    dtvideo_para_t *para = &decoder->para;
+    uint8_t *buffer;
+    int buffer_size;
+    int sw = para->s_width; 
+    int dw = sw; 
+    int sh = para->s_height; 
+    int dh = sh; 
+    int sf = para->s_pixfmt; 
+    int df = sf; 
+    //step1: malloc dt_av_pic_t
+    dt_av_pic_t *pict = dtav_new_pic();
+    memset (pict, 0, sizeof (dt_av_pic_t));
+    //step2: convert to avpicture, ffmpeg struct
+    AVPicture *dst = (AVPicture *) (pict);
+    //step3: allocate an AVFrame structure
+    buffer_size = avpicture_get_size (df, dw, dh);
+    buffer = (uint8_t *) malloc (buffer_size * sizeof (uint8_t));
+    avpicture_fill ((AVPicture *) dst, buffer, df, dw, dh);
+
+
+#if 1
+    av_picture_copy(dst,(AVPicture *)src,sf,sw,sh);
+#else
+    pSwsCtx = sws_getCachedContext (pSwsCtx, sw, sh, sf, dw, dh, df, SWS_BICUBIC, NULL, NULL, NULL);
+    sws_scale (pSwsCtx, src->data, src->linesize, 0, sh, dst->data, dst->linesize);
+#endif
+    pict->pts = pts;
+    *p_pict = pict;
+    
     return 0;
 }
 
@@ -81,14 +118,7 @@ static int convert_to_picture (dtvideo_decoder_t * decoder, AVFrame * src, int64
  *
  * */
 
-static int setup_picture(AVFrame *frame, AVPicture **pic)
-{
-
-
-    return 0;
-}
-
-int ffmpeg_vdec_decode (vd_wrapper_t *wrapper, dt_av_frame_t * dt_frame, AVPicture_t ** pic)
+int ffmpeg_vdec_decode (vd_wrapper_t *wrapper, dt_av_frame_t * dt_frame, dt_av_pic_t ** pic)
 {
     int ret = 0;
     dtvideo_decoder_t *decoder = (dtvideo_decoder_t *)wrapper->parent; 
@@ -106,7 +136,8 @@ int ffmpeg_vdec_decode (vd_wrapper_t *wrapper, dt_av_frame_t * dt_frame, AVPictu
     avcodec_decode_video2 (avctxp, frame, &got_picture, &pkt);
     if (got_picture)
     {
-        ret = convert_to_picture (decoder, frame, av_frame_get_best_effort_timestamp (frame), pic);
+        ret = copy_frame (decoder, frame, av_frame_get_best_effort_timestamp (frame), pic);
+        //ret = convert_frame (decoder, frame, av_frame_get_best_effort_timestamp (frame), pic);
         if (ret == -1)
             ret = 0;
         else
