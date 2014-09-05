@@ -65,7 +65,8 @@ void *dtplayer_init (dtplayer_para_t * para)
     if (ret < 0)
     {
         dt_error (TAG, "PLAYER INIT FAILED \n");
-        return NULL;
+        free(dtp_ctx);
+        dtp_ctx = NULL;    
     }
     return dtp_ctx;
 }
