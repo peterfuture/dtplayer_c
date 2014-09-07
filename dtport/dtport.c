@@ -50,7 +50,7 @@ int port_init (dtport_context_t * pctx, dtport_para_t * para)
 }
 
 //==Part2:Data IO Relative
-int port_write_frame (dtport_context_t * pctx, dt_av_frame_t * frame, int type)
+int port_write_frame (dtport_context_t * pctx, dt_av_pkt_t * frame, int type)
 {
     int audio_write_enable = 1;
     int video_write_enable = 1;
@@ -92,7 +92,7 @@ int port_write_frame (dtport_context_t * pctx, dt_av_frame_t * frame, int type)
     return packet_queue_put (queue, frame);
 }
 
-int port_read_frame (dtport_context_t * pctx, dt_av_frame_t * frame, int type)
+int port_read_frame (dtport_context_t * pctx, dt_av_pkt_t * frame, int type)
 {
     dt_packet_queue_t *queue;
     switch (type)

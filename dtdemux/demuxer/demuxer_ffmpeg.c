@@ -160,7 +160,7 @@ static int64_t pts_exchange (AVPacket * avpkt, dt_media_info_t * media_info)
     return (int64_t) (avpkt->pts * exchange);
 }
 
-static int demuxer_ffmpeg_read_frame (demuxer_wrapper_t * wrapper, dt_av_frame_t * frame)
+static int demuxer_ffmpeg_read_frame (demuxer_wrapper_t * wrapper, dt_av_pkt_t * frame)
 {
     dtdemuxer_context_t *dem_ctx = (dtdemuxer_context_t *) wrapper->parent;
     dt_media_info_t *media_info = &dem_ctx->media_info;

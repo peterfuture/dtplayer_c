@@ -16,7 +16,7 @@ int packet_queue_init (dt_packet_queue_t * queue)
     return 0;
 }
 
-int packet_queue_put_frame (dt_packet_queue_t * queue, dt_av_frame_t * frame)
+int packet_queue_put_frame (dt_packet_queue_t * queue, dt_av_pkt_t * frame)
 {
     if (!queue)
     {
@@ -28,7 +28,7 @@ int packet_queue_put_frame (dt_packet_queue_t * queue, dt_av_frame_t * frame)
     if (!list)
         return -1;
     //list->frame=*frame;
-    memcpy (&list->frame, frame, sizeof (dt_av_frame_t));
+    memcpy (&list->frame, frame, sizeof (dt_av_pkt_t));
     list->next = NULL;
     if (!(queue->last))
         queue->first = list;
@@ -42,7 +42,7 @@ int packet_queue_put_frame (dt_packet_queue_t * queue, dt_av_frame_t * frame)
     return 0;
 }
 
-int packet_queue_put (dt_packet_queue_t * queue, dt_av_frame_t * frame)
+int packet_queue_put (dt_packet_queue_t * queue, dt_av_pkt_t * frame)
 {
     int ret;
     if (queue->nmutex)
@@ -67,7 +67,7 @@ int packet_queue_put (dt_packet_queue_t * queue, dt_av_frame_t * frame)
     return ret;
 }
 
-int packet_queue_get_frame (dt_packet_queue_t * queue, dt_av_frame_t * frame)
+int packet_queue_get_frame (dt_packet_queue_t * queue, dt_av_pkt_t * frame)
 {
     if (queue->nb_packets == 0)
     {
@@ -93,7 +93,7 @@ int packet_queue_get_frame (dt_packet_queue_t * queue, dt_av_frame_t * frame)
     return -1;
 }
 
-int packet_queue_get (dt_packet_queue_t * queue, dt_av_frame_t * frame)
+int packet_queue_get (dt_packet_queue_t * queue, dt_av_pkt_t * frame)
 {
     int ret;
     if (queue->nmutex)

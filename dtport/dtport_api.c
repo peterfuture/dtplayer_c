@@ -42,13 +42,13 @@ int dtport_init (void **port, dtport_para_t * para, void *parent)
 }
 
 //==Part2:DATA IO Relative
-int dtport_write_frame (void *port, dt_av_frame_t * frame, int type)
+int dtport_write_frame (void *port, dt_av_pkt_t * frame, int type)
 {
     dtport_context_t *pctx = (dtport_context_t *) port;
     return port_write_frame (pctx, frame, type);
 }
 
-int dtport_read_frame (void *port, dt_av_frame_t * frame, int type)
+int dtport_read_frame (void *port, dt_av_pkt_t * frame, int type)
 {
     dtport_context_t *pctx = (dtport_context_t *) port;
     return port_read_frame (pctx, frame, type);

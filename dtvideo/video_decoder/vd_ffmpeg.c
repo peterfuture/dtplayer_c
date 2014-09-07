@@ -130,7 +130,7 @@ static int copy_frame (dtvideo_decoder_t * decoder, AVFrame * src, int64_t pts, 
  *
  * */
 
-int ffmpeg_vdec_decode (dtvideo_decoder_t *decoder, dt_av_frame_t * dt_frame, dt_av_pic_t ** pic)
+int ffmpeg_vdec_decode (dtvideo_decoder_t *decoder, dt_av_pkt_t * dt_frame, dt_av_pic_t ** pic)
 {
     int ret = 0;
     vd_ffmpeg_ctx_t *vd_ctx = (vd_ffmpeg_ctx_t *)decoder->vd_priv;

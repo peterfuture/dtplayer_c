@@ -35,8 +35,8 @@ typedef struct
 
 int port_stop (dtport_context_t * pctx);
 int port_init (dtport_context_t * pctx, dtport_para_t * para);
-int port_write_frame (dtport_context_t * pctx, dt_av_frame_t * frame, int type);
-int port_read_frame (dtport_context_t * pctx, dt_av_frame_t * frame, int type);
+int port_write_frame (dtport_context_t * pctx, dt_av_pkt_t * frame, int type);
+int port_read_frame (dtport_context_t * pctx, dt_av_pkt_t * frame, int type);
 int port_get_state (dtport_context_t * pctx, buf_state_t * buf_state, int type);
 
 #endif

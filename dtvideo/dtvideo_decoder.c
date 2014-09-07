@@ -91,7 +91,7 @@ static int64_t pts_exchange (dtvideo_decoder_t * decoder, int64_t pts)
 
 static void *video_decode_loop (void *arg)
 {
-    dt_av_frame_t frame;
+    dt_av_pkt_t frame;
     dtvideo_decoder_t *decoder = (dtvideo_decoder_t *) arg;
     vd_wrapper_t *wrapper = decoder->wrapper;
     dtvideo_context_t *vctx = (dtvideo_context_t *) decoder->parent;
@@ -140,7 +140,7 @@ static void *video_decode_loop (void *arg)
                 continue;
             }
             //no data left, maybe eof, need to flush left data
-            memset(&frame,0,sizeof(dt_av_frame_t));
+            memset(&frame,0,sizeof(dt_av_pkt_t));
             dt_info (TAG, "[%s:%d] no video frame left, flush left frames \n", __FUNCTION__, __LINE__);
         }
         /*read one frame,enter decode frame module */

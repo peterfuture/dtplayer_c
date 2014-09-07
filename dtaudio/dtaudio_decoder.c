@@ -78,7 +78,7 @@ static void *audio_decode_loop (void *arg)
     int ret;
     dtaudio_decoder_t *decoder = (dtaudio_decoder_t *) arg;
     dtaudio_para_t *para = &decoder->aparam;
-    dt_av_frame_t frame;
+    dt_av_pkt_t frame;
     ad_wrapper_t *wrapper = decoder->wrapper;
     dtaudio_context_t *actx = (dtaudio_context_t *) decoder->parent;
     dt_buffer_t *out = &actx->audio_decoded_buf;

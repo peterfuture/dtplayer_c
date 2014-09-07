@@ -289,7 +289,7 @@ static int demuxer_aac_setup_info (demuxer_wrapper_t * wrapper, dt_media_info_t 
     return 0;
 }
 
-static int demuxer_aac_read_frame(demuxer_wrapper_t *wrapper, dt_av_frame_t *frame)
+static int demuxer_aac_read_frame(demuxer_wrapper_t *wrapper, dt_av_pkt_t *frame)
 {
     dtdemuxer_context_t *dem_ctx = (dtdemuxer_context_t *) wrapper->parent;
     aac_ctx_t *aac_ctx = (aac_ctx_t *)wrapper->demuxer_priv;

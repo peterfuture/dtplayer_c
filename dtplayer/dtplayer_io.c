@@ -12,12 +12,12 @@
 
 static void *player_io_thread (dtplayer_context_t * dtp_ctx);
 
-static int player_read_frame (dtplayer_context_t * dtp_ctx, dt_av_frame_t * frame)
+static int player_read_frame (dtplayer_context_t * dtp_ctx, dt_av_pkt_t * frame)
 {
     return dtdemuxer_read_frame (dtp_ctx->demuxer_priv, frame);
 }
 
-static int player_write_frame (dtplayer_context_t * dtp_ctx, dt_av_frame_t * frame)
+static int player_write_frame (dtplayer_context_t * dtp_ctx, dt_av_pkt_t * frame)
 {
     return dthost_write_frame (dtp_ctx->host_priv, frame, frame->type);
 }
@@ -73,7 +73,7 @@ int io_thread_running(dtplayer_context_t *dtp_ctx)
 static void *player_io_thread (dtplayer_context_t * dtp_ctx)
 {
     io_loop_t *io_ctl = &dtp_ctx->io_loop;
-    dt_av_frame_t frame;
+    dt_av_pkt_t frame;
     int frame_valid = 0;
     int ret = 0;
     
@@ -104,7 +104,7 @@ static void *player_io_thread (dtplayer_context_t * dtp_ctx)
         /*io ops */
         if (frame_valid == 1)
             goto WRITE_FRAME;
-        memset(&frame,0,sizeof(dt_av_frame_t));
+        memset(&frame,0,sizeof(dt_av_pkt_t));
         ret = player_read_frame (dtp_ctx, &frame);
         if (ret == DTERROR_NONE)
             frame_valid = 1;

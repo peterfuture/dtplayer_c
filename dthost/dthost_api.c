@@ -82,7 +82,7 @@ int dthost_init (void **host_priv, dthost_para_t * para)
 
 //==Part2:Data IO Relative
 
-int dthost_read_frame (void *host_priv, dt_av_frame_t * frame, int type)
+int dthost_read_frame (void *host_priv, dt_av_pkt_t * frame, int type)
 {
     int ret = 0;
     if (!host_priv)
@@ -95,7 +95,7 @@ int dthost_read_frame (void *host_priv, dt_av_frame_t * frame, int type)
     return ret;
 }
 
-int dthost_write_frame (void *host_priv, dt_av_frame_t * frame, int type)
+int dthost_write_frame (void *host_priv, dt_av_pkt_t * frame, int type)
 {
     int ret = 0;
     if (!host_priv)

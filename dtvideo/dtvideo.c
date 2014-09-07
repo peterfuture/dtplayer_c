@@ -4,7 +4,7 @@
 #define TAG "VIDEO-MGT"
 
 /*read frame from dtport*/
-int dtvideo_read_frame (void *priv, dt_av_frame_t * frame)
+int dtvideo_read_frame (void *priv, dt_av_pkt_t * frame)
 {
     int type = DT_TYPE_VIDEO;
     int ret = 0;
