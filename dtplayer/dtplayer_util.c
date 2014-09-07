@@ -31,7 +31,7 @@ int player_host_init (dtplayer_context_t * dtp_ctx)
         host_para->audio_format = astream->format;
         host_para->audio_channel = astream->channels;
         host_para->audio_samplerate = astream->sample_rate;
-        int downmix = 0;
+        int downmix = 1;
         if(GetEnv("AUDIO","audio.downmix",value) > 0)
         {
             downmix = atoi(value);
