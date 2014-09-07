@@ -68,7 +68,7 @@ static int select_video_decoder (dtvideo_decoder_t * decoder)
             break;
         if((*p)->vfmt == para->vfmt)
         {
-            if((*p)->is_hw == 1 && para->flag | DTV_FLAG_DISABLE_OMX == 1)
+            if((*p)->is_hw == 1 && (para->flag | DTV_FLAG_DISABLE_OMX) == 1)
                 continue;    
             break;
         }
@@ -271,7 +271,7 @@ int video_decoder_start (dtvideo_decoder_t * decoder)
 void dtpicture_free (void *pic)
 {
 
-    AVPicture_t *picture = (AVPicture_t *) (pic);
+    dt_av_pic_t *picture = (dt_av_pic_t *) (pic);
     if (picture->data)
         free (picture->data[0]);
     return;

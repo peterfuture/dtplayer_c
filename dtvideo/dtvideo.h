@@ -62,8 +62,8 @@ void register_ext_vf(vf_wrapper_t *vo);
 void register_ext_vo(vo_wrapper_t *vo);
 
 int dtvideo_read_frame (void *priv, dt_av_frame_t * frame);
-AVPicture_t *dtvideo_output_read (void *priv);
-AVPicture_t *dtvideo_output_pre_read (void *priv);
+dt_av_pic_t *dtvideo_output_read (void *priv);
+dt_av_pic_t *dtvideo_output_pre_read (void *priv);
 int dtvideo_get_avdiff (void *priv);
 int64_t dtvideo_get_current_pts (dtvideo_context_t * vctx);
 int64_t video_get_first_pts (dtvideo_context_t * vctx);

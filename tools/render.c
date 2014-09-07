@@ -22,7 +22,7 @@ static int vo_ex_init (dtvideo_output_t *vout)
     return ret; 
 }
 
-static int vo_ex_render (dtvideo_output_t *vout,AVPicture_t * pict)
+static int vo_ex_render (dtvideo_output_t *vout,dt_av_pic_t * pict)
 {
     int ret = 0;
 #ifdef ENABLE_VO_SDL2

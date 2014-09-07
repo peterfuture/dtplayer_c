@@ -72,7 +72,7 @@ static int vo_sdl2_init (dtvideo_output_t *vout)
     return 0;
 }
 
-static int vo_sdl2_render (dtvideo_output_t *vout,AVPicture_t * pict)
+static int vo_sdl2_render (dtvideo_output_t *vout,dt_av_pic_t * pict)
 {
     vo_wrapper_t *wrap = &vo_sdl2_ops;
     
