@@ -1,5 +1,4 @@
 #include "vf_wrapper.h"
-#include "dtvideo_pic.h"
 
 #include "libavcodec/avcodec.h"
 #include "libavcodec/avcodec.h"
@@ -47,7 +46,7 @@ static int ffmpeg_vf_init(dtvideo_filter_t *filter)
     return 0;
 }
 
-static int convert_picture (dtvideo_filter_t * filter, dt_av_pic_t * src)
+static int convert_picture (dtvideo_filter_t * filter, dt_av_frame_t * src)
 {
     uint8_t *buffer;
     int buffer_size;
@@ -64,10 +63,10 @@ static int convert_picture (dtvideo_filter_t * filter, dt_av_pic_t * src)
     dt_debug (TAG, "[%s:%d] sw:%d dw:%d sh:%d dh:%d sf:%d df:%d \n", __FUNCTION__, __LINE__,sw,dw,sh,dh,sf,df);
     const AVPixFmtDescriptor *pix_desc = av_pix_fmt_desc_get(sf);
     //step1: malloc avpicture_t
-    dt_av_pic_t *pict = dtav_new_pic();
+    dt_av_frame_t *pict = dtav_new_frame();
     if(!pict)
         return -1;
-    memset (pict, 0, sizeof (dt_av_pic_t));
+    memset (pict, 0, sizeof (dt_av_frame_t));
     AVPicture *dst = (AVPicture *)pict;
     //step3: allocate an AVFrame structure
     buffer_size = avpicture_get_size (df, dw, dh);
@@ -88,13 +87,13 @@ static int convert_picture (dtvideo_filter_t * filter, dt_av_pic_t * src)
     sws_scale (vf_ctx->pSwsCtx, src->data, src->linesize, 0, sh, dst->data, dst->linesize);
     
     pict->pts = src->pts;
-    dtav_unref_pic(src);
-    memcpy(src,pict,sizeof(dt_av_pic_t));
+    dtav_unref_frame(src);
+    memcpy(src,pict,sizeof(dt_av_frame_t));
 
     return 0;
 }
 
-static int ffmpeg_vf_process(dtvideo_filter_t *filter, dt_av_pic_t *pic)
+static int ffmpeg_vf_process(dtvideo_filter_t *filter, dt_av_frame_t *pic)
 {
     vf_ffmpeg_ctx_t *vf_ctx = (vf_ffmpeg_ctx_t *)(filter->vf_priv);
     if(!vf_ctx->need_process_flag) 

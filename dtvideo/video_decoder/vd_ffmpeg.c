@@ -3,7 +3,6 @@
  * */
 
 #include "dt_av.h"
-#include "dtvideo_pic.h"
 
 #include "libavcodec/avcodec.h"
 #include "../dtvideo_decoder.h"
@@ -54,7 +53,7 @@ int ffmpeg_vdec_init (dtvideo_decoder_t *decoder)
 
 //convert to dst fmt
 #if 0
-static int convert_frame (dtvideo_decoder_t * decoder, AVFrame * src, int64_t pts, dt_av_pic_t ** p_pict)
+static int convert_frame (dtvideo_decoder_t * decoder, AVFrame * src, int64_t pts, dt_av_frame_t ** p_pict)
 {
     uint8_t *buffer;
     int buffer_size;
@@ -68,8 +67,8 @@ static int convert_frame (dtvideo_decoder_t * decoder, AVFrame * src, int64_t pt
     int df = para->d_pixfmt; 
 
     //step1: malloc avpicture_t
-    dt_av_pic_t *pict = malloc (sizeof (dt_av_pic_t));
-    memset (pict, 0, sizeof (dt_av_pic_t));
+    dt_av_frame_t *pict = malloc (sizeof (dt_av_frame_t));
+    memset (pict, 0, sizeof (dt_av_frame_t));
     //step2: convert to avpicture, ffmpeg struct
     AVPicture *dst = (AVPicture *) (pict);
     //step3: allocate an AVFrame structure
@@ -86,7 +85,7 @@ static int convert_frame (dtvideo_decoder_t * decoder, AVFrame * src, int64_t pt
 }
 #endif
 
-static int copy_frame (dtvideo_decoder_t * decoder, AVFrame * src, int64_t pts, dt_av_pic_t ** p_pict)
+static int copy_frame (dtvideo_decoder_t * decoder, AVFrame * src, int64_t pts, dt_av_frame_t ** p_pict)
 {
     dtvideo_para_t *para = &decoder->para;
     uint8_t *buffer;
@@ -97,9 +96,9 @@ static int copy_frame (dtvideo_decoder_t * decoder, AVFrame * src, int64_t pts, 
     int dh = sh; 
     int sf = para->s_pixfmt; 
     int df = sf; 
-    //step1: malloc dt_av_pic_t
-    dt_av_pic_t *pict = dtav_new_pic();
-    memset (pict, 0, sizeof (dt_av_pic_t));
+    //step1: malloc dt_av_frame_t
+    dt_av_frame_t *pict = dtav_new_frame();
+    memset (pict, 0, sizeof (dt_av_frame_t));
     //step2: convert to avpicture, ffmpeg struct
     AVPicture *dst = (AVPicture *) (pict);
     //step3: allocate an AVFrame structure
@@ -130,7 +129,7 @@ static int copy_frame (dtvideo_decoder_t * decoder, AVFrame * src, int64_t pts, 
  *
  * */
 
-int ffmpeg_vdec_decode (dtvideo_decoder_t *decoder, dt_av_pkt_t * dt_frame, dt_av_pic_t ** pic)
+int ffmpeg_vdec_decode (dtvideo_decoder_t *decoder, dt_av_pkt_t * dt_frame, dt_av_frame_t ** pic)
 {
     int ret = 0;
     vd_ffmpeg_ctx_t *vd_ctx = (vd_ffmpeg_ctx_t *)decoder->vd_priv;

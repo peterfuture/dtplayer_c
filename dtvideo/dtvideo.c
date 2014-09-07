@@ -14,7 +14,7 @@ int dtvideo_read_frame (void *priv, dt_av_pkt_t * frame)
 }
 
 /*get picture from vo_queue,remove*/
-dt_av_pic_t *dtvideo_output_read (void *priv)
+dt_av_frame_t *dtvideo_output_read (void *priv)
 {
     dtvideo_context_t *vctx = (dtvideo_context_t *) priv;
     queue_t *picture_queue = vctx->vo_queue;
@@ -26,7 +26,7 @@ dt_av_pic_t *dtvideo_output_read (void *priv)
 }
 
 /*pre get picture from vo_queue, not remove*/
-dt_av_pic_t *dtvideo_output_pre_read (void *priv)
+dt_av_frame_t *dtvideo_output_pre_read (void *priv)
 {
     dtvideo_context_t *vctx = (dtvideo_context_t *) priv;
     queue_t *picture_queue = vctx->vo_queue;
@@ -70,7 +70,7 @@ int video_drop (dtvideo_context_t * vctx, int64_t target_pts)
         return 0;
     }
     dt_info (TAG, "[%s:%d]target pts:%lld \n", __FUNCTION__, __LINE__, target_pts);
-    dt_av_pic_t *pic = NULL;
+    dt_av_frame_t *pic = NULL;
     int64_t cur_pts = video_get_first_pts (vctx);
     int drop_count = 300;
     do

@@ -145,9 +145,9 @@ static void *video_output_thread (void *args)
     vo_wrapper_t *wrapper = vo->wrapper;
     int ret, wlen;
     ret = wlen = 0;
-    dt_av_pic_t *picture_pre;
-    dt_av_pic_t *picture;
-    dt_av_pic_t *pic;
+    dt_av_frame_t *picture_pre;
+    dt_av_frame_t *picture;
+    dt_av_frame_t *pic;
     int64_t sys_clock;          //contrl video display
     int64_t cur_time, time_diff;
     dtvideo_context_t *vctx = vo->parent;
@@ -161,7 +161,7 @@ static void *video_output_thread (void *args)
             continue;
         }
         /*pre read picture and update sys time */
-        picture_pre = (dt_av_pic_t *) dtvideo_output_pre_read (vo->parent);
+        picture_pre = (dt_av_frame_t *) dtvideo_output_pre_read (vo->parent);
         if (!picture_pre)
         {
             dt_debug (TAG, "[%s:%d]frame read failed ! \n", __FUNCTION__, __LINE__);
@@ -192,14 +192,14 @@ static void *video_output_thread (void *args)
             continue;
         }
         /*read data from filter or decode buffer */
-        picture = (dt_av_pic_t *) dtvideo_output_read (vo->parent);
+        picture = (dt_av_frame_t *) dtvideo_output_read (vo->parent);
         if (!picture)
         {
             dt_error (TAG, "[%s:%d]frame read failed ! \n", __FUNCTION__, __LINE__);
             usleep (1000);
             continue;
         }
-        pic = (dt_av_pic_t *) picture;
+        pic = (dt_av_frame_t *) picture;
 
         //update pts
         if (vctx->last_valid_pts == -1)
@@ -211,7 +211,7 @@ static void *video_output_thread (void *args)
             //printf("[%s:%d]!update pts:%llu \n",__FUNCTION__,__LINE__,vctx->current_pts);
         }
         /*read next frame ,check drop frame */
-        picture_pre = (dt_av_pic_t *) dtvideo_output_pre_read (vo->parent);
+        picture_pre = (dt_av_frame_t *) dtvideo_output_pre_read (vo->parent);
         if (picture_pre)
         {
             if (picture_pre->pts == -1) //invalid pts, calc using last pts

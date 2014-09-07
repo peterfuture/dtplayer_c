@@ -75,7 +75,7 @@ int video_filter_reset(dtvideo_filter_t *filter, dtvideo_para_t *para)
     return 0;
 }
 
-int video_filter_process(dtvideo_filter_t *filter, dt_av_pic_t *pic)
+int video_filter_process(dtvideo_filter_t *filter, dt_av_frame_t *pic)
 {
     int ret = 0;
     //init first

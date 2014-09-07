@@ -98,7 +98,7 @@ static void *video_decode_loop (void *arg)
     dtvideo_filter_t *filter = (dtvideo_filter_t *) &(vctx->video_filt);
     queue_t *picture_queue = vctx->vo_queue;
     /*used for decode */
-    dt_av_pic_t *picture = NULL;
+    dt_av_frame_t *picture = NULL;
     int ret;
     dt_info (TAG, "[%s:%d] start decode loop \n", __FUNCTION__, __LINE__);
 
@@ -271,7 +271,7 @@ int video_decoder_start (dtvideo_decoder_t * decoder)
 void dtpicture_free (void *pic)
 {
 
-    dt_av_pic_t *picture = (dt_av_pic_t *) (pic);
+    dt_av_frame_t *picture = (dt_av_frame_t *) (pic);
     if (picture->data)
         free (picture->data[0]);
     return;

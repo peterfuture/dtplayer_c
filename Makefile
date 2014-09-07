@@ -190,6 +190,7 @@ CFLAGS      += $(DT_CFLAGS)
 #                   SOURCECODE
 #======================================================
 #dtutils
+SRCS_COMMON-$(DT_UTIL) += dtutils/dt_av.c
 SRCS_COMMON-$(DT_UTIL) += dtutils/dt_log.c
 SRCS_COMMON-$(DT_UTIL) += dtutils/dt_lock.c
 SRCS_COMMON-$(DT_UTIL) += dtutils/dt_ini.c
@@ -236,7 +237,6 @@ SRCS_COMMON-$(DT_SDL) += dtaudio/audio_out/ao_sdl.c                  # out
 #dtvideo
 SRCS_COMMON-$(DT_VIDEO) += dtvideo/dtvideo_api.c
 SRCS_COMMON-$(DT_VIDEO) += dtvideo/dtvideo.c
-SRCS_COMMON-$(DT_VIDEO) += dtvideo/dtvideo_pic.c
 SRCS_COMMON-$(DT_VIDEO) += dtvideo/dtvideo_decoder.c
 SRCS_COMMON-$(DT_VIDEO) += dtvideo/dtvideo_filter.c
 SRCS_COMMON-$(DT_VIDEO) += dtvideo/dtvideo_output.c

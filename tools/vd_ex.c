@@ -9,7 +9,7 @@ static int ex_vdec_init (dtvideo_decoder_t *decoder)
     return 0;
 }
 
-static int ex_vdec_decode (dtvideo_decoder_t *decoder, dt_av_pkt_t * dt_frame, dt_av_pic_t ** pic)
+static int ex_vdec_decode (dtvideo_decoder_t *decoder, dt_av_pkt_t * dt_frame, dt_av_frame_t ** pic)
 {
     dt_info(TAG,"VD EX DECODE OK \n");
     return 0;
