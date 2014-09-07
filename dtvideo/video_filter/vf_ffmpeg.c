@@ -61,7 +61,7 @@ static int convert_picture (dtvideo_filter_t * filter, dt_av_pic_t * src)
     int sf = para->s_pixfmt; 
     int df = para->d_pixfmt; 
 
-    dt_info (TAG, "[%s:%d] sw:%d dw:%d sh:%d dh:%d sf:%d df:%d \n", __FUNCTION__, __LINE__,sw,dw,sh,dh,sf,df);
+    dt_debug (TAG, "[%s:%d] sw:%d dw:%d sh:%d dh:%d sf:%d df:%d \n", __FUNCTION__, __LINE__,sw,dw,sh,dh,sf,df);
     const AVPixFmtDescriptor *pix_desc = av_pix_fmt_desc_get(sf);
     //step1: malloc avpicture_t
     dt_av_pic_t *pict = dtav_new_pic();
@@ -73,7 +73,6 @@ static int convert_picture (dtvideo_filter_t * filter, dt_av_pic_t * src)
     buffer_size = avpicture_get_size (df, dw, dh);
     buffer = (uint8_t *) malloc (buffer_size * sizeof (uint8_t));
     avpicture_fill ((AVPicture *) dst, buffer, df, dw, dh);
-    dt_info(TAG, "start filter \n");
 
     //re setup linesize
     src->linesize[0] = av_image_get_linesize(sf, sw, 0);
@@ -85,9 +84,7 @@ static int convert_picture (dtvideo_filter_t * filter, dt_av_pic_t * src)
     src->data[2] = src->data[1] + src->linesize[1] * -(-sh>>pix_desc->log2_chroma_h);
 
     vf_ctx->pSwsCtx = sws_getCachedContext (vf_ctx->pSwsCtx, sw, sh, sf, dw, dh, df, SWS_BICUBIC, NULL, NULL, NULL);
-    dt_info(TAG, "get cached context \n");
     sws_scale (vf_ctx->pSwsCtx, src->data, src->linesize, 0, sh, dst->data, dst->linesize);
-    dt_info(TAG, "filter end \n");
     
     pict->pts = src->pts;
     dtav_unref_pic(src);
