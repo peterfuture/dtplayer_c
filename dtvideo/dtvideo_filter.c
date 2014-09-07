@@ -70,6 +70,8 @@ static int video_filter_init(dtvideo_filter_t *filter)
 
 int video_filter_reset(dtvideo_filter_t *filter, dtvideo_para_t *para)
 {
+    if(filter->status == VF_STATUS_IDLE) // no need reset
+        return 0;
     return 0;
 }
 
