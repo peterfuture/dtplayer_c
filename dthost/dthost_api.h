@@ -32,7 +32,6 @@ typedef struct
     int audio_filter;           //audio filter options
     int audio_output;           //audio output device select
     void *actx_priv;            //point to 
-
     /*video */
     int video_format;
     int video_dest_width;
@@ -53,7 +52,7 @@ typedef struct
     int video_filter;
     int video_output;
     void *vctx_priv;
-
+    int vflag;
     /*sub */
     int sub_format;
     int sub_id;

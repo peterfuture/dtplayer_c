@@ -385,6 +385,7 @@ int host_init (dthost_context_t * hctx)
             dt_error (TAG, "[%s:%d] dtvideo init failed video_priv ==NULL \n", __FUNCTION__, __LINE__);
             goto ERR3;
         }
+        video_para.flag = host_para->vflag;
     }
 
     /*init audio */

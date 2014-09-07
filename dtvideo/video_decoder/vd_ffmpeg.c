@@ -187,6 +187,7 @@ vd_wrapper_t vd_ffmpeg_ops = {
     .name = "ffmpeg video decoder",
     .vfmt = DT_VIDEO_FORMAT_UNKOWN, //support all vfmt
     .type = DT_TYPE_VIDEO,
+    .is_hw = 0,
     .init = ffmpeg_vdec_init,
     .decode_frame = ffmpeg_vdec_decode,
     .info_changed = ffmpeg_vdec_info_changed,

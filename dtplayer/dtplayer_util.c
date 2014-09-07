@@ -73,6 +73,13 @@ int player_host_init (dtplayer_context_t * dtp_ctx)
 
         vstream_info_t *vstream = media_info->vstreams[pctrl->cur_vst_index];
 
+        //disable omx setting
+        if(vstream->format == DT_VIDEO_FORMAT_H264 && media_info->format != DT_MEDIA_FORMAT_MPEGTS)
+        {
+            host_para->vflag |= DTV_FLAG_DISABLE_OMX; 
+            dt_info (TAG, "[%s:%d] disable omx\n", __FUNCTION__, __LINE__);
+        }
+
         host_para->video_format = vstream->format;
         host_para->video_src_width = vstream->width;
         host_para->video_src_height = vstream->height;

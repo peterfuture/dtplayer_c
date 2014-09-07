@@ -75,6 +75,7 @@ static int convert_picture (dtvideo_filter_t * filter, dt_av_pic_t * src)
     avpicture_fill ((AVPicture *) dst, buffer, df, dw, dh);
 
     //re setup linesize
+#ifdef ENABLE_ANDROID
     src->linesize[0] = av_image_get_linesize(sf, sw, 0);
     src->linesize[1] = av_image_get_linesize(sf, sw, 1);
     src->linesize[2] = av_image_get_linesize(sf, sw, 2);
@@ -82,7 +83,7 @@ static int convert_picture (dtvideo_filter_t * filter, dt_av_pic_t * src)
     src->data[0] = src->data[0];
     src->data[1] = src->data[0] + src->linesize[0] * sh;
     src->data[2] = src->data[1] + src->linesize[1] * -(-sh>>pix_desc->log2_chroma_h);
-
+#endif
     vf_ctx->pSwsCtx = sws_getCachedContext (vf_ctx->pSwsCtx, sw, sh, sf, dw, dh, df, SWS_BICUBIC, NULL, NULL, NULL);
     sws_scale (vf_ctx->pSwsCtx, src->data, src->linesize, 0, sh, dst->data, dst->linesize);
     
