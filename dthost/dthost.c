@@ -92,13 +92,15 @@ int host_update_vpts (dthost_context_t * hctx, int64_t vpts)
 
     if (sys_time == -1)
         return 0;
-    if (!hctx->sync_enable && avdiff / 90 > AVSYNC_THRESHOLD)
+
+    //when sync == 0, update systime with vpts
+    if (host_sync_enable(hctx) == 0 && avdiff / 90 > AVSYNC_THRESHOLD)
     {
         dt_info (TAG, "[%s:%d] sync disable or avdiff too much, update systime with vpts, sys:%lld vpts:%lld\n", __FUNCTION__, __LINE__, sys_time, vpts);
         hctx->sys_time = vpts;
         return 0;
     }
-
+    
     if (host_sync_enable (hctx) && avdiff / 90 > AVSYNC_THRESHOLD_MAX) //close sync
     {
         dt_info (TAG, "avdiff:%llx ecceed :%d ms, cloase sync \n", avdiff / 90, AVSYNC_THRESHOLD_MAX);
@@ -376,6 +378,7 @@ int host_init (dthost_context_t * hctx)
         video_para.video_filter = host_para->video_filter;
         video_para.video_output = host_para->video_output;
         video_para.avctx_priv = host_para->vctx_priv;
+        video_para.flag = host_para->vflag;
         ret = dtvideo_init (&hctx->video_priv, &video_para, hctx);
         if (ret < 0)
             goto ERR3;
@@ -385,7 +388,6 @@ int host_init (dthost_context_t * hctx)
             dt_error (TAG, "[%s:%d] dtvideo init failed video_priv ==NULL \n", __FUNCTION__, __LINE__);
             goto ERR3;
         }
-        video_para.flag = host_para->vflag;
     }
 
     /*init audio */

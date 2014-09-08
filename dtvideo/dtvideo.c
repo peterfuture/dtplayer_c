@@ -236,22 +236,20 @@ int video_init (dtvideo_context_t * vctx)
     //vf ctx init
     //vf will init in vd but used in vo
     memset (video_filt, 0, sizeof (dtvideo_filter_t));
-    memset (&video_filt->para, 0, sizeof (dtvideo_para_t));
     memcpy (&video_filt->para, &vctx->video_para, sizeof (dtvideo_para_t));
     video_filt->parent = vctx;
 
     //vd ctx init 
     memset (video_dec, 0, sizeof (dtvideo_decoder_t));
-    memset (&video_dec->para, 0, sizeof (dtvideo_para_t));
     memcpy (&video_dec->para, &vctx->video_para, sizeof (dtvideo_para_t));
     video_dec->parent = vctx;
     ret = video_decoder_init (video_dec);
     if (ret < 0)
         goto err1;
+    dt_info (TAG, "[%s:%d] vdecoder init ok\n", __FUNCTION__, __LINE__);
 
     //vo ctx init
     memset (video_out, 0, sizeof (dtvideo_output_t));
-    memset (&video_out->para, 0, sizeof (dtvideo_para_t));
     memcpy (&(video_out->para), &(vctx->video_para), sizeof (dtvideo_para_t));
     video_out->parent = vctx;
     ret = video_output_init (video_out, vctx->video_para.video_output);

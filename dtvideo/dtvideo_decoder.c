@@ -69,7 +69,10 @@ static int select_video_decoder (dtvideo_decoder_t * decoder)
         if((*p)->vfmt == para->vfmt)
         {
             if((*p)->is_hw == 1 && (para->flag | DTV_FLAG_DISABLE_OMX) == 1)
-                continue;    
+            {
+                p = &(*p)->next;
+                continue;
+            }
             break;
         }
         p = &(*p)->next;

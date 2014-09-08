@@ -93,17 +93,19 @@ int player_init (dtplayer_context_t * dtp_ctx)
      *
      * */
 
-    //first parse ini file
-    char value[512];
-    
-    ctrl_info->sync_enable = (int)(ctrl_info->has_audio && ctrl_info->has_video); // default
-    if (GetEnv ("PLAYER", "player.syncenable", value) > 0)
-        ctrl_info->sync_enable = atoi (value);
-    
     ctrl_info->has_audio = dtp_ctx->media_info->has_audio;
     ctrl_info->has_video = dtp_ctx->media_info->has_video;
     ctrl_info->has_sub = dtp_ctx->media_info->has_sub;
-    dt_info (TAG, "initial setting, has audio:%d has video:%d has sub:%d \n", ctrl_info->has_audio, ctrl_info->has_video, ctrl_info->has_sub);
+
+    //parse ini file
+    char value[512];
+    ctrl_info->sync_enable = (int)(ctrl_info->has_audio && ctrl_info->has_video); // default
+    if (GetEnv ("PLAYER", "player.syncenable", value) > 0)
+    {
+        dt_info(TAG,"sync enable set by ini, value:%d\n ",ctrl_info->sync_enable);
+        ctrl_info->sync_enable = atoi (value);
+    }
+    dt_info (TAG, "initial setting, has audio:%d has video:%d has sub:%d sync_enable:%d\n", ctrl_info->has_audio, ctrl_info->has_video, ctrl_info->has_sub, ctrl_info->sync_enable);
 
 
     if (GetEnv ("PLAYER", "player.noaudio", value) > 0)
