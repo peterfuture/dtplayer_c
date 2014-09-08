@@ -188,6 +188,7 @@ static void *video_output_thread (void *args)
         //maybe need to block
         if (sys_clock < picture_pre->pts)
         {
+            dt_error (TAG, "[%s:%d] nto show ! \n", __FUNCTION__, __LINE__);
             dt_usleep (REFRESH_DURATION);
             continue;
         }
@@ -221,7 +222,7 @@ static void *video_output_thread (void *args)
             }
             if (sys_clock >= picture_pre->pts)
             {
-                dt_debug (TAG, "drop frame,sys clock:%lld thispts:%lld next->pts:%lld \n", sys_clock, picture->pts, picture_pre->pts);
+                dt_info (TAG, "drop frame,sys clock:%lld thispts:%lld next->pts:%lld \n", sys_clock, picture->pts, picture_pre->pts);
                 dtpicture_free (pic);
                 free(picture);
                 continue;
@@ -231,7 +232,7 @@ static void *video_output_thread (void *args)
         ret = wrapper->vo_render(vo,pic);
         if (ret < 0)
         {
-            printf ("frame toggle failed! \n");
+            dt_error (TAG, "frame toggle failed! \n");
             usleep (1000);
         }
 
