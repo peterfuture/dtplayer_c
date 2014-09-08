@@ -183,8 +183,8 @@ int player_init (dtplayer_context_t * dtp_ctx)
     player_handle_cb (dtp_ctx);
     return 0;
 ERR0:
-    set_player_status (dtp_ctx, PLAYER_STATUS_ERROR);
-    player_handle_cb (dtp_ctx);
+    //set_player_status (dtp_ctx, PLAYER_STATUS_ERROR);
+    //player_handle_cb (dtp_ctx);
     return -1;
 }
 

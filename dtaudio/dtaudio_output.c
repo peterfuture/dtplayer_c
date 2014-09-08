@@ -145,12 +145,12 @@ static void *audio_output_thread (void *args)
     rlen = ret = wlen = 0;
 
     dtaudio_para_t *para = &ao->para;
-    int bytes_per_sample = para->data_width * para->dst_channels / 2;
+    int bytes_per_sample = para->data_width * para->dst_channels / 8;
     const int unit_size = PCM_WRITE_SIZE * para->dst_samplerate * bytes_per_sample / 1000;
     uint8_t *buffer = malloc(unit_size);
     if(!buffer) // err
        goto EXIT;
-
+    dt_info(TAG, "write :%d ms :%d bytes one time \n",PCM_WRITE_SIZE, unit_size);
     for (;;)
     {
         if (ao->status == AO_STATUS_EXIT)
