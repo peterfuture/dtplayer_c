@@ -188,7 +188,7 @@ static void *video_output_thread (void *args)
         //maybe need to block
         if (sys_clock < picture_pre->pts)
         {
-            dt_error (TAG, "[%s:%d] nto show ! \n", __FUNCTION__, __LINE__);
+            dt_debug (TAG, "[%s:%d] nto show ! \n", __FUNCTION__, __LINE__);
             dt_usleep (REFRESH_DURATION);
             continue;
         }

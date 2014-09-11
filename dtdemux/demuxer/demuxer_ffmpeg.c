@@ -373,6 +373,12 @@ static int demuxer_ffmpeg_setup_info (demuxer_wrapper_t * wrapper, dt_media_info
             vst_info->codec_priv = (void *) pCodec;
             info->vstreams[info->vst_num] = vst_info;
             info->vst_num++;
+            if(pCodec->extradata_size)
+            {
+                vst_info->extradata_size = pCodec->extradata_size;
+                memcpy(vst_info->extradata, pCodec->extradata, pCodec->extradata_size);
+            }
+            dt_info(TAG, "VIDEO EXTRA DATA SIZE:%d - %d \n", pCodec->extradata_size, vst_info->extradata_size);
         }
         else if (pCodec->codec_type == AVMEDIA_TYPE_AUDIO)
         {

@@ -226,8 +226,6 @@ int demuxer_close (dtdemuxer_context_t * dem_ctx)
         {
             if (info->vstreams[i] == NULL)
                 continue;
-            if (info->vstreams[i]->extradata_size)
-                free (info->vstreams[i]->extradata);
             free (info->vstreams[i]);
             info->vstreams[i] = NULL;
         }

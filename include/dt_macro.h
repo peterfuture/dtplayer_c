@@ -26,4 +26,6 @@
 /*PORT*/ 
 /*AUDIO*/ 
 /*VIDEO*/
+#define VIDEO_EXTRADATA_SIZE 4096
+
 #endif

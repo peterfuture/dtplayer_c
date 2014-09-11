@@ -163,7 +163,7 @@ int host_start (dthost_context_t * hctx)
             video_start_flag = !((first_vpts = dtvideo_get_first_pts (hctx->video_priv)) == -1);
         if (audio_start_flag && video_start_flag)
             break;
-        usleep (100);
+        usleep (1000);
         if(print_cnt-- == 0)
         {
             dt_info (TAG, "audio:%d video:%d \n", audio_start_flag, video_start_flag);
