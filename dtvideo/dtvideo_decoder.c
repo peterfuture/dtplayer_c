@@ -153,7 +153,7 @@ static void *video_decode_loop (void *arg)
         if (ret <= 0)
         {
             decoder->decode_err_cnt++;
-            dt_info (TAG, "[%s:%d]decode failed \n", __FUNCTION__, __LINE__);
+            dt_debug (TAG, "[%s:%d]decode failed \n", __FUNCTION__, __LINE__);
             picture = NULL;
             usleep(10000);
             goto DECODE_END;
