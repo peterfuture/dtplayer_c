@@ -12,7 +12,9 @@ typedef struct vf_ffmpeg_ctx
 {
     struct SwsContext *pSwsCtx;;
     int need_process_flag;
-
+    dt_av_frame_t *swap_frame;
+    int swap_buf_size;
+    uint8_t *swapbuf;
 }vf_ffmpeg_ctx_t;
 
 static int ffmpeg_vf_capable(dtvideo_filter_t *filter)
@@ -42,6 +44,10 @@ static int ffmpeg_vf_init(dtvideo_filter_t *filter)
     dtvideo_para_t *para = &filter->para;
     vf_ctx->need_process_flag = need_process(para);
     filter->vf_priv = vf_ctx;
+    if(vf_ctx->need_process_flag)
+    {
+        vf_ctx->swap_frame = dtav_new_frame();
+    }
     dt_info (TAG, "[%s:%d] vf init ok ,need process:%d \n", __FUNCTION__, __LINE__,vf_ctx->need_process_flag);
     return 0;
 }
@@ -63,14 +69,25 @@ static int convert_picture (dtvideo_filter_t * filter, dt_av_frame_t * src)
     dt_debug (TAG, "[%s:%d] sw:%d dw:%d sh:%d dh:%d sf:%d df:%d \n", __FUNCTION__, __LINE__,sw,dw,sh,dh,sf,df);
     const AVPixFmtDescriptor *pix_desc = av_pix_fmt_desc_get(sf);
     //step1: malloc avpicture_t
-    dt_av_frame_t *pict = dtav_new_frame();
+    if(!vf_ctx->swap_frame)
+        vf_ctx->swap_frame = dtav_new_frame();
+    dt_av_frame_t *pict = vf_ctx->swap_frame;
     if(!pict)
+    {
         return -1;
-    memset (pict, 0, sizeof (dt_av_frame_t));
+    }
+    memset(pict, 0, sizeof(dt_av_frame_t));
     AVPicture *dst = (AVPicture *)pict;
     //step3: allocate an AVFrame structure
     buffer_size = avpicture_get_size (df, dw, dh);
-    buffer = (uint8_t *) malloc (buffer_size * sizeof (uint8_t));
+    if(buffer_size > vf_ctx->swap_buf_size)
+    {
+        if(vf_ctx->swapbuf)
+            free(vf_ctx->swapbuf);
+        vf_ctx->swap_buf_size = buffer_size;
+        vf_ctx->swapbuf = (uint8_t *) malloc (buffer_size * sizeof (uint8_t));
+    }
+    buffer = vf_ctx->swapbuf;
     avpicture_fill ((AVPicture *) dst, buffer, df, dw, dh);
 
     //re setup linesize
@@ -89,6 +106,10 @@ static int convert_picture (dtvideo_filter_t * filter, dt_av_frame_t * src)
     pict->pts = src->pts;
     dtav_unref_frame(src);
     memcpy(src,pict,sizeof(dt_av_frame_t));
+
+
+    vf_ctx->swapbuf = NULL;
+    vf_ctx->swap_buf_size = 0;
 
     return 0;
 }

@@ -89,6 +89,7 @@ int video_filter_process(dtvideo_filter_t *filter, dt_av_frame_t *pic)
             goto END;
         }
         filter->status = VF_STATUS_RUNNING;
+        dt_info (TAG, "[%s:%d]vf init ok \n",__FUNCTION__,__LINE__);
     }
 
     vf_wrapper_t *wrapper = filter->wrapper;
