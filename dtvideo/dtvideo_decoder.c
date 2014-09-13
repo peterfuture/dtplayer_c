@@ -32,6 +32,20 @@ static void register_vdec (vd_wrapper_t * vd)
 void register_vdec_ext(vd_wrapper_t *vd)
 {
     vd_wrapper_t **p;
+    
+    p = &g_vd;
+    while(1)
+    {
+        if(*p == NULL)
+            break;
+        if(strstr((*p)->name, vd->name) != NULL)
+        {
+            dt_info (TAG, "[%s:%d] vdec already registerd, name:%s fmt:%d \n", __FUNCTION__, __LINE__, (*p)->name, (*p)->vfmt);
+            return;
+        }
+        p = &(*p)->next;
+    }
+    
     p = &g_vd;
     if(*p == NULL)
     {
