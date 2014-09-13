@@ -337,16 +337,6 @@ int host_init (dthost_context_t * hctx)
         goto ERR1;
     dt_info (TAG, "[%s:%d] dtport init success \n", __FUNCTION__, __LINE__);
 
-    char value[512];
-    int vout_type = 0;
-    if(GetEnv("VIDEO","vout.type",value) > 0)
-    {
-        vout_type = atoi(value);
-        dt_info(TAG,"vout type:%d - 0 rgb565 1 yuv420 2 rgb24 \n",vout_type);
-    }
-    else
-        dt_info(TAG,"vout type not set, use default: rgb565 \n");
-
     /*init video */
     if (host_para->has_video)
     {
@@ -357,12 +347,12 @@ int host_init (dthost_context_t * hctx)
         video_para.s_width = host_para->video_src_width;
         video_para.s_height = host_para->video_src_height;
         video_para.s_pixfmt = host_para->video_src_pixfmt;
-        if(vout_type == 0)
-            video_para.d_pixfmt = DTAV_PIX_FMT_RGB565LE;
-        if(vout_type == 1)
-            video_para.d_pixfmt = DTAV_PIX_FMT_YUV420P;
-        if(vout_type == 2)
-            video_para.d_pixfmt = DTAV_PIX_FMT_RGB24;
+        video_para.d_pixfmt = host_para->video_dest_pixfmt;
+       
+#ifdef ENABLE_ANDROID
+        video_para.d_pixfmt = video_para.s_pixfmt;
+        dt_info(TAG,"for android platform, transform pixfmt using opengl. pixfmt:%d  \n", video_para.s_pixfmt);
+#endif
         video_para.rate = host_para->video_rate;
         video_para.ratio = host_para->video_ratio;
         video_para.fps = host_para->video_fps;

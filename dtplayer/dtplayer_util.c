@@ -80,6 +80,16 @@ int player_host_init (dtplayer_context_t * dtp_ctx)
             dt_info (TAG, "[%s:%d] disable omx\n", __FUNCTION__, __LINE__);
         }
 
+        char value[512];
+        int vout_type = 0;
+        if(GetEnv("VIDEO","vout.type",value) > 0)
+        {
+            vout_type = atoi(value);
+            dt_info(TAG,"vout type:%d - 0 rgb565 1 yuv420 2 rgb24 \n",vout_type);
+        }
+        else
+            dt_info(TAG,"vout type not set, use default: rgb565 \n");
+
         host_para->video_format = vstream->format;
         host_para->video_src_width = vstream->width;
         host_para->video_src_height = vstream->height;
@@ -97,6 +107,12 @@ int player_host_init (dtplayer_context_t * dtp_ctx)
 
         host_para->video_extra_size = vstream->extradata_size;
         host_para->video_src_pixfmt = vstream->pix_fmt;
+        if(vout_type == 0)
+            host_para->video_dest_pixfmt = DTAV_PIX_FMT_RGB565LE;
+        if(vout_type == 1)
+            host_para->video_dest_pixfmt = DTAV_PIX_FMT_YUV420P;
+        if(vout_type == 2)
+            host_para->video_dest_pixfmt = DTAV_PIX_FMT_RGB24;
 
         host_para->vctx_priv = vstream->codec_priv;
 
