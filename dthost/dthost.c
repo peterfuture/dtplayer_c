@@ -430,6 +430,53 @@ int host_init (dthost_context_t * hctx)
     return -3;
 }
 
+int host_video_resize (dthost_context_t * hctx, int w, int h)
+{
+    int has_video = hctx->para.has_video;
+
+    if(! has_video)
+    {
+        dt_warning(TAG, "RESIZE FAILED ,HAVE NO VIDEO \n");
+        return -1;
+    }
+
+    //invalid check
+    if(hctx->para.video_dest_width == w && hctx->para.video_dest_height == h)
+    {
+        dt_warning(TAG, "RESIZE FAILED ,EQUAL TO CURRENT \n");
+        return -1;
+    }
+
+    host_pause(hctx);
+    if(dtvideo_resize (hctx->video_priv, w, h) < 0)
+    {
+        dtaudio_resume(hctx->audio_priv);
+        return -1;
+    }
+
+    /*check start condition */
+    int video_start_flag = 0;
+    int64_t first_vpts = -1;
+    int print_cnt = 100;
+    do
+    {
+        video_start_flag = !((first_vpts = dtvideo_get_first_pts (hctx->video_priv)) == -1);
+        if (video_start_flag)
+            break;
+        usleep (1000);
+        if(print_cnt-- == 0)
+        {
+            dt_info (TAG, "video:%d \n", video_start_flag);
+            print_cnt = 100;
+        }
+    }
+    while (1);
+
+    dtaudio_resume(hctx->audio_priv);
+    dtvideo_start(hctx->video_priv);
+    return 0;
+}
+
 //==Part3:Data IO Relative
 
 int host_write_frame (dthost_context_t * hctx, dt_av_pkt_t * frame, int type)

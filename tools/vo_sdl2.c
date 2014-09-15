@@ -13,6 +13,8 @@ typedef struct{
     SDL_Texture *tex;
     dt_lock_t vo_mutex;
     int dx,dy,dw,dh;
+    int w_full;
+    int h_full;
     int sdl_inited;
 }sdl2_ctx_t;
 
@@ -42,8 +44,34 @@ int sdl2_init(int w, int h)
         dt_error(TAG,"SDL_CreateWindow Error:%s \n",SDL_GetError());
         return 1;
     }
-    dt_info(TAG,"CREATE WIN OK\n");
+
+    SDL_DisplayMode dm;
+    if (SDL_GetDesktopDisplayMode(0, &dm) != 0) {
+        SDL_Log("SDL_GetDesktopDisplayMode failed: %s", SDL_GetError());
+        return 1;
+    }
+    
+    ctx->w_full = dm.w;
+    ctx->h_full = dm.h;
+
+    dt_info(TAG,"CREATE WIN OK, max w:%d , h:%d \n", ctx->w_full, ctx->h_full);
     dt_lock_init (&sdl2_ctx.vo_mutex, NULL);
+    return 0;
+}
+
+int sdl2_get_cur_size(int *w, int *h)
+{
+    sdl2_ctx_t *ctx = &sdl2_ctx;
+    *w = ctx->dw;
+    *h = ctx->dh;
+    return 0;
+}
+
+int sdl2_get_max_size(int *w, int *h)
+{
+    sdl2_ctx_t *ctx = &sdl2_ctx;
+    *w = ctx->w_full;
+    *h = ctx->h_full;
     return 0;
 }
 

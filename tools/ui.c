@@ -1,3 +1,4 @@
+#include "dt_player.h"
 #include "ui.h"
 
 #ifdef ENABLE_VO_SDL2 
@@ -5,6 +6,8 @@
 
 int sdl2_init();
 int sdl2_stop();
+int sdl2_get_cur_size(int *w, int *h);
+int sdl2_get_max_size(int *w, int *h);
 
 #endif
 
@@ -24,8 +27,25 @@ int ui_stop()
     return 0;
 }
 
-player_event_t get_event (int *arg,ply_ctx_t *ctx)
+int ui_get_cur_size(int *w, int *h)
 {
+#ifdef ENABLE_VO_SDL2
+    sdl2_get_cur_size(w, h);
+#endif
+    return 0;
+}
+
+int ui_get_max_size(int *w, int *h)
+{
+#ifdef ENABLE_VO_SDL2
+    sdl2_get_max_size(w, h);
+#endif
+    return 0;
+}
+
+player_event_t get_event (args_t *arg,ply_ctx_t *ctx)
+{
+    static int full_screen = 0;
 #ifdef ENABLE_VO_SDL2 
     SDL_Event event;
     SDL_WaitEvent(&event);
@@ -39,9 +59,17 @@ player_event_t get_event (int *arg,ply_ctx_t *ctx)
                 case SDLK_q:
                     return EVENT_STOP;
                 case SDLK_f:
-                    //toggle_full_screen(cur_stream);
-                    //cur_stream->force_refresh = 1;
-                    break;
+                    if(!full_screen)
+                    {
+                        ui_get_max_size(&arg->arg1, &arg->arg2);
+                        full_screen = 1;
+                    }
+                    else
+                    {
+                        ui_get_cur_size(&arg->arg1, &arg->arg2);
+                        full_screen = 0;
+                    }
+                    return EVENT_RESIZE;
                 case SDLK_p:
                 case SDLK_SPACE:
                     //toggle_pause(cur_stream);
@@ -57,22 +85,22 @@ player_event_t get_event (int *arg,ply_ctx_t *ctx)
                 case SDLK_w:
                     break;
                 case SDLK_PAGEUP:
-                    *arg = ctx->cur_time + 600;
+                    arg->arg1 = ctx->cur_time + 600;
                     return EVENT_SEEK;
                 case SDLK_PAGEDOWN:
-                    *arg = ctx->cur_time - 600;
+                    arg->arg1 = ctx->cur_time - 600;
                     return EVENT_SEEK;
                 case SDLK_LEFT:
-                    *arg = ctx->cur_time - 10;
+                    arg->arg1 = ctx->cur_time - 10;
                     return EVENT_SEEK;
                 case SDLK_RIGHT:
-                    *arg = ctx->cur_time + 10;
+                    arg->arg1 = ctx->cur_time + 10;
                     return EVENT_SEEK;
                 case SDLK_UP:
-                    *arg = ctx->cur_time + 60;
+                    arg->arg1 = ctx->cur_time + 60;
                     return EVENT_SEEK;
                 case SDLK_DOWN:
-                    *arg = ctx->cur_time - 60;
+                    arg->arg1 = ctx->cur_time - 60;
                     return EVENT_SEEK;
                 default:
                     break;
@@ -106,7 +134,7 @@ player_event_t get_event (int *arg,ply_ctx_t *ctx)
                 fprintf(stderr, "Seek to %2.0f%% (%2d:%02d:%02d) of total duration (%2d:%02d:%02d)       \n", frac*100,
                     hh, mm, ss, thh, tmm, tss);
                 ts = frac * ctx->duration;
-                *arg = ts;
+                arg->arg1 = (int)ts;
                 return EVENT_SEEK;
             }
 

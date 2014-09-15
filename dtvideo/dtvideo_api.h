@@ -10,6 +10,8 @@ int dtvideo_start (void *video_priv);
 int dtvideo_pause (void *video_priv);
 int dtvideo_resume (void *video_priv);
 int dtvideo_stop (void *video_priv);
+int dtvideo_resize (void *video_priv, int w, int h);
+
 int64_t dtvideo_external_get_pts (void *video_priv);
 int64_t dtvideo_get_first_pts (void *video_priv);
 int dtvideo_drop (void *video_priv, int64_t target_pts);

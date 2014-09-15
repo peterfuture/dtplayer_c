@@ -80,6 +80,12 @@ int dthost_init (void **host_priv, dthost_para_t * para)
     return ret;
 }
 
+int dthost_video_resize (void **host_priv, int w, int h)
+{
+    dthost_context_t *hctx = (dthost_context_t *) host_priv;
+    return host_video_resize (hctx, w, h);
+}
+
 //==Part2:Data IO Relative
 
 int dthost_read_frame (void *host_priv, dt_av_pkt_t * frame, int type)

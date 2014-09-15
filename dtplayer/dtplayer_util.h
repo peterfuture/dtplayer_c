@@ -8,5 +8,6 @@ int player_host_start (dtplayer_context_t * dtp_ctx);
 int player_host_pause (dtplayer_context_t * dtp_ctx);
 int player_host_resume (dtplayer_context_t * dtp_ctx);
 int player_host_stop (dtplayer_context_t * dtp_ctx);
+int player_host_resize (dtplayer_context_t * dtp_ctx, int w, int h);
 
 #endif

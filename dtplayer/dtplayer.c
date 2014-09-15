@@ -198,7 +198,9 @@ int player_set_video_size (dtplayer_context_t * dtp_ctx, int width, int height)
         pctrl->height = height;
     }
     else
-        dt_error(TAG,"dst width:%d height:%d have been set \n",pctrl->width,pctrl->height);
+        player_host_resize(dtp_ctx, width, height);
+    
+    dt_info(TAG,"set dst width:%d height:%d \n",pctrl->width,pctrl->height);
     return 0;
 }
 
