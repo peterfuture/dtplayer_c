@@ -24,7 +24,7 @@ Linux
 
 2 install ffmpeg & libav
 
-3 ./build-for-linux.sh
+3 ./build.sh linux
 
 Target: dtplayer.exe dtplayer_g.exe libdtp.so libdtp.a
 
@@ -35,7 +35,7 @@ Android
 
 2 export DT_FFMPEG_ANDROID_DIR=/PATH/TO/FFmpeg-Android/build/ffmpeg/armv7
 
-3 ./build-for-android.sh
+3 ./build.sh android
 
 Target: libdtp.so
 
