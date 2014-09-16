@@ -350,8 +350,11 @@ int host_init (dthost_context_t * hctx)
         video_para.d_pixfmt = host_para->video_dest_pixfmt;
        
 #ifdef ENABLE_ANDROID
-        video_para.d_pixfmt = video_para.s_pixfmt;
-        dt_info(TAG,"for android platform, transform pixfmt using opengl. pixfmt:%d  \n", video_para.s_pixfmt);
+        if(video_para.s_pixfmt == DTAV_PIX_FMT_YUV420P || video_para.s_pixfmt == DTAV_PIX_FMT_NV21 || video_para.s_pixfmt == DTAV_PIX_FMT_NV12)
+            video_para.d_pixfmt = video_para.s_pixfmt;
+        else
+            video_para.d_pixfmt = DTAV_PIX_FMT_YUV420P;
+        dt_info(TAG,"for android platform, transform pixfmt using opengl. pixfmt:%d  dst:%d \n", video_para.s_pixfmt, video_para.d_pixfmt);
 #endif
         video_para.rate = host_para->video_rate;
         video_para.ratio = host_para->video_ratio;
