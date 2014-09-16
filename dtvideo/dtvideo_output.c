@@ -142,6 +142,8 @@ int video_output_get_level (dtvideo_output_t * ao)
 static void *video_output_thread (void *args)
 {
     dtvideo_output_t *vo = (dtvideo_output_t *) args;
+    dtvideo_context_t *vctx = (dtvideo_context_t *) vo->parent;
+    dtvideo_filter_t *filter = (dtvideo_filter_t *) &(vctx->video_filt);
     vo_wrapper_t *wrapper = vo->wrapper;
     int ret, wlen;
     ret = wlen = 0;
@@ -150,7 +152,6 @@ static void *video_output_thread (void *args)
     dt_av_frame_t *pic;
     int64_t sys_clock;          //contrl video display
     int64_t cur_time, time_diff;
-    dtvideo_context_t *vctx = vo->parent;
     for (;;)
     {
         if (vo->status == VO_STATUS_EXIT)
@@ -229,6 +230,8 @@ static void *video_output_thread (void *args)
             }
         }
         /*display picture & update vpts */
+        //before render, call vf
+        video_filter_process(filter, picture);
         ret = wrapper->vo_render(vo,pic);
         if (ret < 0)
         {
@@ -244,6 +247,7 @@ static void *video_output_thread (void *args)
     }
   EXIT:
     dt_info (TAG, "[file:%s][%s:%d]ao playback thread exit\n", __FILE__, __FUNCTION__, __LINE__);
+    video_filter_stop(filter);
     pthread_exit (NULL);
     return NULL;
 }

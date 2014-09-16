@@ -268,8 +268,15 @@ int video_init (dtvideo_context_t * vctx)
 
 int video_reset(dtvideo_context_t *vctx)
 {
-    video_stop(vctx);
-    video_init(vctx);
+
+    dtvideo_output_t *video_out = &vctx->video_out;
+    video_out->para.d_width = vctx->video_para.d_width;
+    video_out->para.d_height = vctx->video_para.d_height;
+
+    video_output_stop (video_out);
+    video_output_init (video_out, vctx->video_para.video_output);
+    video_output_start (video_out);
+
     return 0;
 }
 

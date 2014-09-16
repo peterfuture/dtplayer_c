@@ -175,15 +175,13 @@ static void *video_decode_loop (void *arg)
         if (!picture)
             goto DECODE_END;
 
-        //got one frame, filter process
+        //got one frame, filter reset check
         if(wrapper->info_changed(decoder))
         {
             memcpy(&decoder->para, &wrapper->para, sizeof(dtvideo_para_t));
             memcpy(&filter->para, &wrapper->para, sizeof(dtvideo_para_t));
             video_filter_reset(filter, &decoder->para);
         }
-
-        video_filter_process(filter, picture);
 
         decoder->frame_count++;
         //Got one frame
@@ -224,9 +222,6 @@ static void *video_decode_loop (void *arg)
     }
     while (1);
     dt_info (TAG, "[file:%s][%s:%d]decoder loop thread exit ok\n", __FILE__, __FUNCTION__, __LINE__);
-
-    //filter release
-    video_filter_stop(filter);
 
     pthread_exit (NULL);
     return NULL;
