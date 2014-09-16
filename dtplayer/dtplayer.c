@@ -192,13 +192,24 @@ int player_set_video_size (dtplayer_context_t * dtp_ctx, int width, int height)
 {
     player_ctrl_t *pctrl = &dtp_ctx->ctrl_info;
     dt_info(TAG,"[%s:%d] width:%d height:%d\n",__FUNCTION__,__LINE__,width,height);
+   
     if(pctrl->width == -1)
     {
         pctrl->width = width;
         pctrl->height = height;
     }
-    else
-        player_host_resize(dtp_ctx, width, height);
+     
+    if(pctrl->width == width && pctrl->height == height)
+    {
+        return -1;
+    }
+    
+    int ret = player_host_resize(dtp_ctx, width, height);
+    if(ret == 0)
+    {
+        pctrl->width = width;
+        pctrl->height = height;
+    }
     
     dt_info(TAG,"set dst width:%d height:%d \n",pctrl->width,pctrl->height);
     return 0;

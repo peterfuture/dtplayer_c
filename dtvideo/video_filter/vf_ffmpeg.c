@@ -30,9 +30,8 @@ static int need_process(dtvideo_para_t *para)
     int dh = para->d_height;
     int sf = para->s_pixfmt;
     int df = para->d_pixfmt;
-
+    dt_info (TAG, "[%s:%d] sw:%d dw:%d sh:%d dh:%d sf:%d df:%d \n", __FUNCTION__, __LINE__,sw,dw,sh,dh,sf,df);
     return !(sw == dw && sh == dh && sf == df);
-
 }
 
 static int ffmpeg_vf_init(dtvideo_filter_t *filter)
@@ -48,6 +47,7 @@ static int ffmpeg_vf_init(dtvideo_filter_t *filter)
     {
         vf_ctx->swap_frame = dtav_new_frame();
     }
+    
     dt_info (TAG, "[%s:%d] vf init ok ,need process:%d \n", __FUNCTION__, __LINE__,vf_ctx->need_process_flag);
     return 0;
 }
@@ -66,7 +66,6 @@ static int convert_picture (dtvideo_filter_t * filter, dt_av_frame_t * src)
     int sf = para->s_pixfmt; 
     int df = para->d_pixfmt; 
 
-    dt_debug (TAG, "[%s:%d] sw:%d dw:%d sh:%d dh:%d sf:%d df:%d \n", __FUNCTION__, __LINE__,sw,dw,sh,dh,sf,df);
     const AVPixFmtDescriptor *pix_desc = av_pix_fmt_desc_get(sf);
     //step1: malloc avpicture_t
     if(!vf_ctx->swap_frame)
@@ -137,6 +136,7 @@ static int ffmpeg_vf_release(dtvideo_filter_t *filter)
     if (vf_ctx->pSwsCtx)
         sws_freeContext (vf_ctx->pSwsCtx);
     free(vf_ctx);
+    vf_ctx = NULL;
     dt_info (TAG, "[%s:%d] vf release ok \n", __FUNCTION__, __LINE__);
     return 0;
 }

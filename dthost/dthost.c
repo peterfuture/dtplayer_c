@@ -442,22 +442,17 @@ int host_video_resize (dthost_context_t * hctx, int w, int h)
         dt_warning(TAG, "RESIZE FAILED ,HAVE NO VIDEO \n");
         return -1;
     }
-
-    //invalid check
-    if(hctx->para.video_dest_width == w && hctx->para.video_dest_height == h)
-    {
-        dt_warning(TAG, "RESIZE FAILED ,EQUAL TO CURRENT \n");
-        return -1;
-    }
-
+    
     host_pause(hctx);
-    if(dtvideo_resize (hctx->video_priv, w, h) < 0)
+    int ret = dtvideo_resize (hctx->video_priv, w, h);
+    if(ret == 0)
     {
-        dtaudio_resume(hctx->audio_priv);
-        return -1;
+        hctx->para.video_dest_width = w;
+        hctx->para.video_dest_height = h;
     }
     dtaudio_resume(hctx->audio_priv);
-    return 0;
+
+    return ret;
 }
 
 //==Part3:Data IO Relative

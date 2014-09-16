@@ -6,8 +6,9 @@
 
 int sdl2_init();
 int sdl2_stop();
-int sdl2_get_cur_size(int *w, int *h);
+int sdl2_get_orig_size(int *w, int *h);
 int sdl2_get_max_size(int *w, int *h);
+int sdl2_window_resize(int w, int h);
 
 #endif
 
@@ -27,10 +28,10 @@ int ui_stop()
     return 0;
 }
 
-int ui_get_cur_size(int *w, int *h)
+int ui_get_orig_size(int *w, int *h)
 {
 #ifdef ENABLE_VO_SDL2
-    sdl2_get_cur_size(w, h);
+    sdl2_get_orig_size(w, h);
 #endif
     return 0;
 }
@@ -39,6 +40,14 @@ int ui_get_max_size(int *w, int *h)
 {
 #ifdef ENABLE_VO_SDL2
     sdl2_get_max_size(w, h);
+#endif
+    return 0;
+}
+
+int ui_window_resize(int w, int h)
+{
+#ifdef ENABLE_VO_SDL2 
+    sdl2_window_resize(w, h); 
 #endif
     return 0;
 }
@@ -66,7 +75,7 @@ player_event_t get_event (args_t *arg,ply_ctx_t *ctx)
                     }
                     else
                     {
-                        ui_get_cur_size(&arg->arg1, &arg->arg2);
+                        ui_get_orig_size(&arg->arg1, &arg->arg2);
                         full_screen = 0;
                     }
                     return EVENT_RESIZE;

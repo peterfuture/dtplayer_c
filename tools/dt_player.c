@@ -151,7 +151,10 @@ int main (int argc, char **argv)
                 goto QUIT_CHECK;
                 break;
             case EVENT_RESIZE:
+                dt_info(TAG,"resize, w:%d h:%d \n",arg.arg1, arg.arg2);
+                ui_window_resize(arg.arg1, arg.arg2);       
                 dtplayer_set_video_size(player_priv, arg.arg1, arg.arg2);
+                break;
             default:
                 dt_info(TAG,"UNKOWN CMD, IGNORE \n");
                 break;

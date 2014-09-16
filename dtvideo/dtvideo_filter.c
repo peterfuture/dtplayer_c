@@ -65,6 +65,7 @@ static int video_filter_init(dtvideo_filter_t *filter)
         return ret;
     vf_wrapper_t *wrapper = filter->wrapper;
     ret = wrapper->init(filter);
+    dt_lock_init(&filter->mutex, NULL);
     return ret;
 }
 
@@ -79,6 +80,7 @@ int video_filter_process(dtvideo_filter_t *filter, dt_av_frame_t *pic)
 {
     int ret = 0;
     //init first
+    dt_lock(&filter->mutex);
     if(filter->status == VF_STATUS_IDLE)
     {
         ret = video_filter_init(filter);
@@ -91,17 +93,20 @@ int video_filter_process(dtvideo_filter_t *filter, dt_av_frame_t *pic)
         filter->status = VF_STATUS_RUNNING;
         dt_info (TAG, "[%s:%d]vf init ok \n",__FUNCTION__,__LINE__);
     }
-
     vf_wrapper_t *wrapper = filter->wrapper;
     ret = wrapper->process(filter, pic);
+    dt_unlock(&filter->mutex);
 END:
     return ret;
 }
 
 int video_filter_stop(dtvideo_filter_t *filter)
 {
+    dt_lock(&filter->mutex);
     vf_wrapper_t *wrapper = filter->wrapper;
-    wrapper->release(filter);
+    if(filter->status == VF_STATUS_RUNNING)
+        wrapper->release(filter);
     filter->status = VF_STATUS_IDLE;
+    dt_unlock(&filter->mutex);
     return 0;
 }

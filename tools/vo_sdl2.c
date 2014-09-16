@@ -13,6 +13,7 @@ typedef struct{
     SDL_Texture *tex;
     dt_lock_t vo_mutex;
     int dx,dy,dw,dh;
+    int sw,sh;
     int w_full;
     int h_full;
     int sdl_inited;
@@ -59,11 +60,11 @@ int sdl2_init(int w, int h)
     return 0;
 }
 
-int sdl2_get_cur_size(int *w, int *h)
+int sdl2_get_orig_size(int *w, int *h)
 {
     sdl2_ctx_t *ctx = &sdl2_ctx;
-    *w = ctx->dw;
-    *h = ctx->dh;
+    *w = ctx->sw;
+    *h = ctx->sh;
     return 0;
 }
 
@@ -90,12 +91,23 @@ int sdl2_stop()
     return 0;
 }
 
+int sdl2_window_resize(int w, int h)
+{
+    sdl2_ctx_t *ctx = &sdl2_ctx;
+    SDL_SetWindowSize(ctx->win, w, h);
+    ctx->dw = w;
+    ctx->dh = h;
+    return 0;
+}
 
 static int vo_sdl2_init (dtvideo_output_t *vout)
 {
 
     vo_wrapper_t *wrap = &vo_sdl2_ops;
     wrap->handle = (void *)&sdl2_ctx;
+    sdl2_ctx_t *ctx = (sdl2_ctx_t *)wrap->handle;
+    ctx->sw = vout->para->s_width;
+    ctx->sh = vout->para->s_height;
     dt_info (TAG, "sdl2 init OK\n");
     return 0;
 }
