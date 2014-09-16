@@ -74,7 +74,7 @@ void vdec_register_all ()
 static int select_video_decoder (dtvideo_decoder_t * decoder)
 {
     vd_wrapper_t **p;
-    dtvideo_para_t *para = &(decoder->para);
+    dtvideo_para_t *para = decoder->para;
     p = &g_vd;
     while(*p != NULL)
     {
@@ -180,7 +180,7 @@ static void *video_decode_loop (void *arg)
         {
             memcpy(&decoder->para, &wrapper->para, sizeof(dtvideo_para_t));
             memcpy(&filter->para, &wrapper->para, sizeof(dtvideo_para_t));
-            video_filter_reset(filter, &decoder->para);
+            video_filter_reset(filter, decoder->para);
         }
 
         decoder->frame_count++;
@@ -199,7 +199,7 @@ static void *video_decode_loop (void *arg)
         {
             if(pts_mode)
             {
-                int fps = decoder->para.fps;
+                int fps = decoder->para->fps;
                 float dur_inc = 90000/fps;
                 picture->pts = decoder->pts_current + dur_inc;
                 decoder->pts_current = picture->pts; 
@@ -239,7 +239,7 @@ int video_decoder_init (dtvideo_decoder_t * decoder)
     vd_wrapper_t *wrapper = decoder->wrapper; 
     /*init decoder */
     decoder->pts_current = decoder->pts_first = -1;
-    decoder->vd_priv = decoder->para.avctx_priv;
+    decoder->vd_priv = decoder->para->avctx_priv;
     ret = wrapper->init (decoder);
     if (ret < 0)
         return -1;
@@ -249,7 +249,7 @@ int video_decoder_init (dtvideo_decoder_t * decoder)
     if(GetEnv("VIDEO","pts.mode",value) > 0)
     {
         pts_mode = atoi(value);
-        dt_info(TAG,"pts mode:%d fps:%f \n",pts_mode,decoder->para.fps);
+        dt_info(TAG,"pts mode:%d fps:%f \n",pts_mode,decoder->para->fps);
     }
     
     dt_info (TAG, "[%s:%d] video decoder init ok\n", __FUNCTION__, __LINE__);

@@ -41,7 +41,7 @@ static int ffmpeg_vf_init(dtvideo_filter_t *filter)
     if(!vf_ctx)
         return -1;
     memset(vf_ctx,0,sizeof(*vf_ctx));
-    dtvideo_para_t *para = &filter->para;
+    dtvideo_para_t *para = filter->para;
     vf_ctx->need_process_flag = need_process(para);
     filter->vf_priv = vf_ctx;
     if(vf_ctx->need_process_flag)
@@ -58,7 +58,7 @@ static int convert_picture (dtvideo_filter_t * filter, dt_av_frame_t * src)
     int buffer_size;
     
     vf_ffmpeg_ctx_t *vf_ctx = (vf_ffmpeg_ctx_t *)(filter->vf_priv);
-    dtvideo_para_t *para = &filter->para;
+    dtvideo_para_t *para = filter->para;
     int sw = para->s_width; 
     int dw = para->d_width; 
     int sh = para->s_height; 

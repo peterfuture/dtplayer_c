@@ -456,27 +456,7 @@ int host_video_resize (dthost_context_t * hctx, int w, int h)
         dtaudio_resume(hctx->audio_priv);
         return -1;
     }
-
-    /*check start condition */
-    int video_start_flag = 0;
-    int64_t first_vpts = -1;
-    int print_cnt = 100;
-    do
-    {
-        video_start_flag = !((first_vpts = dtvideo_get_first_pts (hctx->video_priv)) == -1);
-        if (video_start_flag)
-            break;
-        usleep (1000);
-        if(print_cnt-- == 0)
-        {
-            dt_info (TAG, "video:%d \n", video_start_flag);
-            print_cnt = 100;
-        }
-    }
-    while (1);
-
     dtaudio_resume(hctx->audio_priv);
-    dtvideo_start(hctx->video_priv);
     return 0;
 }
 

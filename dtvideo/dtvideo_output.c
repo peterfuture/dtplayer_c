@@ -183,7 +183,7 @@ static void *video_output_thread (void *args)
         dt_debug (TAG, "time_diff:%lld pts_inc:%lld sys_clock:%lld nextpts:%lld cur_time:%llu last_time:%llu\n", time_diff, time_diff * 9 / 100, sys_clock, picture_pre->pts, cur_time, last_time);
         last_time = cur_time;
         if (picture_pre->pts == -1) //invalid pts, calc using last pts
-            picture_pre->pts = vctx->current_pts + 90000 / vo->para.fps;
+            picture_pre->pts = vctx->current_pts + 90000 / vo->para->fps;
         //update sys time
         dtvideo_update_systime (vo->parent, sys_clock);
         //maybe need to block
@@ -218,8 +218,8 @@ static void *video_output_thread (void *args)
         {
             if (picture_pre->pts == -1) //invalid pts, calc using last pts
             {
-                dt_debug (TAG, "can not get vpts from frame,estimate using fps:%d  \n", vo->para.fps);
-                picture_pre->pts = vctx->current_pts + 90000 / vo->para.fps;
+                dt_debug (TAG, "can not get vpts from frame,estimate using fps:%d  \n", vo->para->fps);
+                picture_pre->pts = vctx->current_pts + 90000 / vo->para->fps;
             }
             if (sys_clock >= picture_pre->pts)
             {

@@ -134,9 +134,9 @@ int video_get_dec_state (dtvideo_context_t * vctx, dec_state_t * dec_state)
     return -1;
     dtvideo_decoder_t *vdec = &vctx->video_dec;
     dec_state->vdec_error_count = vdec->decode_err_cnt;
-    dec_state->vdec_fps = vdec->para.rate;
-    dec_state->vdec_width = vdec->para.d_width;
-    dec_state->vdec_height = vdec->para.d_height;
+    dec_state->vdec_fps = vdec->para->rate;
+    dec_state->vdec_width = vdec->para->d_width;
+    dec_state->vdec_height = vdec->para->d_height;
     dec_state->vdec_status = vdec->status;
     return 0;
 }
@@ -234,12 +234,12 @@ int video_init (dtvideo_context_t * vctx)
     //vf ctx init
     //vf will init in vd but used in vo
     memset (video_filt, 0, sizeof (dtvideo_filter_t));
-    memcpy (&video_filt->para, &vctx->video_para, sizeof (dtvideo_para_t));
+    video_filt->para = &vctx->video_para;
     video_filt->parent = vctx;
 
     //vd ctx init 
     memset (video_dec, 0, sizeof (dtvideo_decoder_t));
-    memcpy (&video_dec->para, &vctx->video_para, sizeof (dtvideo_para_t));
+    video_dec->para = &vctx->video_para;
     video_dec->parent = vctx;
     ret = video_decoder_init (video_dec);
     if (ret < 0)
@@ -248,7 +248,7 @@ int video_init (dtvideo_context_t * vctx)
 
     //vo ctx init
     memset (video_out, 0, sizeof (dtvideo_output_t));
-    memcpy (&(video_out->para), &(vctx->video_para), sizeof (dtvideo_para_t));
+    video_out->para = &vctx->video_para;
     video_out->parent = vctx;
     ret = video_output_init (video_out, vctx->video_para.video_output);
     if (ret < 0)
@@ -270,8 +270,6 @@ int video_reset(dtvideo_context_t *vctx)
 {
 
     dtvideo_output_t *video_out = &vctx->video_out;
-    video_out->para.d_width = vctx->video_para.d_width;
-    video_out->para.d_height = vctx->video_para.d_height;
 
     video_output_stop (video_out);
     video_output_init (video_out, vctx->video_para.video_output);

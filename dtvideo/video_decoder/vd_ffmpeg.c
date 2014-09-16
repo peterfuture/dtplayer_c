@@ -87,7 +87,7 @@ static int convert_frame (dtvideo_decoder_t * decoder, AVFrame * src, int64_t pt
 
 static int copy_frame (dtvideo_decoder_t * decoder, AVFrame * src, int64_t pts, dt_av_frame_t ** p_pict)
 {
-    dtvideo_para_t *para = &decoder->para;
+    dtvideo_para_t *para = decoder->para;
     uint8_t *buffer;
     int buffer_size;
     int sw = para->s_width; 
