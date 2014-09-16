@@ -212,8 +212,6 @@ int video_stop (dtvideo_context_t * vctx)
     {
         dtvideo_output_t *video_out = &vctx->video_out;
         video_output_stop (video_out);
-        //dtvideo_filter_t *video_filter=&vctx->video_filt;
-        //video_filter_stop(video_filter);
         dtvideo_decoder_t *video_decoder = &vctx->video_dec;
         video_decoder_stop (video_decoder);
         vctx->video_status = VIDEO_STATUS_STOPPED;
@@ -266,4 +264,27 @@ int video_init (dtvideo_context_t * vctx)
     video_decoder_stop (video_dec);
     dt_info (TAG, "[%s:%d]video output init failed \n", __FUNCTION__, __LINE__);
     return -3;
+}
+
+int video_reset(dtvideo_context_t *vctx)
+{
+    video_stop(vctx);
+    video_init(vctx);
+    return 0;
+}
+
+int video_resize (dtvideo_context_t * vctx, int w, int h)
+{
+    dtvideo_para_t *para = &vctx->video_para;
+
+    if(para->d_width == w && para->d_height == h)
+    {
+        dt_error(TAG, "size equal to current \n");
+        return -1;
+    }
+
+    para->d_width = w;
+    para->d_height = h;
+    video_reset(vctx);
+    return 0;
 }

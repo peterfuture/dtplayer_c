@@ -123,7 +123,7 @@ int main (int argc, char **argv)
 
     //event handle
     player_event_t event = EVENT_NONE;
-    int arg = -1;
+    args_t arg;
     while(1)
     {
         if(ply_ctx.exit_flag == 1)
@@ -144,12 +144,14 @@ int main (int argc, char **argv)
                 dtplayer_resume (player_priv);
                 break;
             case EVENT_SEEK:
-                dtplayer_seekto (player_priv, arg);
+                dtplayer_seekto (player_priv, arg.arg1);
                 break;
             case EVENT_STOP:
                 dtplayer_stop (player_priv);
                 goto QUIT_CHECK;
                 break;
+            case EVENT_RESIZE:
+                dtplayer_set_video_size(player_priv, arg.arg1, arg.arg2);
             default:
                 dt_info(TAG,"UNKOWN CMD, IGNORE \n");
                 break;

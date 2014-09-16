@@ -28,6 +28,8 @@ int host_pause (dthost_context_t * hctx);
 int host_resume (dthost_context_t * hctx);
 int host_stop (dthost_context_t * hctx);
 int host_init (dthost_context_t * hctx);
+int host_video_resize (dthost_context_t * hctx, int w, int h);
+
 int host_write_frame (dthost_context_t * hctx, dt_av_pkt_t * frame, int type);
 int host_read_frame (dthost_context_t * hctx, dt_av_pkt_t * frame, int type);
 

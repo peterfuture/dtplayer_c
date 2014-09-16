@@ -78,6 +78,12 @@ int dtvideo_stop (void *video_priv)
 
 }
 
+int dtvideo_resize (void *video_priv, int w, int h)
+{
+    dtvideo_context_t *vctx = (dtvideo_context_t *) video_priv;
+    return video_resize(vctx, w, h);
+}
+
 //==Part2:PTS&STATUS Relative
 int64_t dtvideo_external_get_pts (void *video_priv)
 {

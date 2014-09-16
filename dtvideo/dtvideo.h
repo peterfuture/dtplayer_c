@@ -78,5 +78,6 @@ int video_pause (dtvideo_context_t * vctx);
 int video_resume (dtvideo_context_t * vctx);
 int video_stop (dtvideo_context_t * vctx);
 int video_init (dtvideo_context_t * vctx);
+int video_resize (dtvideo_context_t * vctx, int w, int h);
 
 #endif

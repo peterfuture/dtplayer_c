@@ -3,6 +3,12 @@
 
 #include "stdint.h"
 
+typedef struct
+{
+    int arg1;
+    int arg2;
+}args_t;
+
 typedef struct ply_ctx
 {
     void * handle; // player handle

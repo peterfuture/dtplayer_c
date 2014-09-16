@@ -100,5 +100,8 @@ END:
 
 int video_filter_stop(dtvideo_filter_t *filter)
 {
+    vf_wrapper_t *wrapper = filter->wrapper;
+    wrapper->release(filter);
+    filter->status = VF_STATUS_IDLE;
     return 0;
 }
