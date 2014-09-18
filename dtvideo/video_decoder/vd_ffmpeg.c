@@ -46,7 +46,7 @@ int ffmpeg_vdec_init (dtvideo_decoder_t *decoder)
     dt_info (TAG, " [%s:%d] ffmpeg dec init ok \n", __FUNCTION__, __LINE__);
     //alloc one frame for decode
     vd_ctx->frame = av_frame_alloc ();
-    memcpy(&wrapper->para, &decoder->para ,sizeof(dtvideo_para_t));
+    wrapper->para = decoder->para;
     decoder->vd_priv = (void *)vd_ctx;
     return 0;
 }
