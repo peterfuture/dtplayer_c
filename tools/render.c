@@ -60,16 +60,23 @@ vo_wrapper_t vo_ex_ops = {
 extern ao_wrapper_t ao_sdl2_ops;
 #endif
 
+#ifdef ENABLE_DTAP
+    dtap_context_t ap_ctx;
+#endif
+
+
+
 ao_wrapper_t ao_ex_ops;
 ao_wrapper_t *ao_wrapper = &ao_ex_ops;
 static int ao_ex_init (dtaudio_output_t *aout, dtaudio_para_t *para)
 {
     int ret = 0;
 #ifdef ENABLE_DTAP
-    dtap_context_t ap_ctx;
     memset(&ap_ctx, 0 , sizeof(dtap_context_t));
+    ap_ctx.para.samplerate = para->samplerate;
+    ap_ctx.para.channels = para->channels;
+    ap_ctx.para.data_width = para->data_width;
     dtap_init(&ap_ctx);    
-    //dtap_process(&ap_ctx, NULL);    
 #endif
 
 #ifdef ENABLE_VO_SDL2 
@@ -81,8 +88,25 @@ static int ao_ex_init (dtaudio_output_t *aout, dtaudio_para_t *para)
 static int ao_ex_play (dtaudio_output_t *aout, uint8_t * buf, int size)
 {
     int ret = 0;
+    
+#ifdef ENABLE_DTAP
+    uint8_t *out_buf = (uint8_t *)malloc(sizeof(size));
+    dtap_frame_t frame;
+    frame.in_buf = buf;
+    frame.out_buf = out_buf;
+    dtap_process(&ap_ctx, &frame);
+#endif
+
 #ifdef ENABLE_VO_SDL2 
+#ifdef ENABLE_DTAP
+    ret = ao_sdl2_ops.ao_write(aout,out_buf,size);
+#else
     ret = ao_sdl2_ops.ao_write(aout,buf,size);
+#endif
+#endif
+
+#ifdef ENABLE_DTAP
+    free(out_buf);
 #endif
     return ret;
 }
@@ -126,6 +150,12 @@ static int64_t ao_ex_get_latency (dtaudio_output_t *aout)
 static int ao_ex_stop (dtaudio_output_t *aout)
 {
     int ret = 0;
+
+#ifdef ENABLE_DTAP
+    memset(&ap_ctx, 0 , sizeof(dtap_context_t));
+    dtap_release(&ap_ctx);    
+#endif
+
 #ifdef ENABLE_VO_SDL2 
     ret = ao_sdl2_ops.ao_stop(aout);
 #endif
