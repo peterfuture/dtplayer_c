@@ -99,7 +99,6 @@ static int ao_sdl2_play (dtaudio_output_t *aout, uint8_t * buf, int size)
         return 0;
 
 #ifdef ENABLE_DTAP
-    printf("play size:%d \n", size);
     dtap_frame_t frame;
     frame.in = buf;
     frame.in_size = size;
