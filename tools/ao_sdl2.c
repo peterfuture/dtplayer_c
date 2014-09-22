@@ -1,6 +1,10 @@
 #include "dtaudio_output.h"
 #include "dt_buffer.h"
 
+#ifdef ENABLE_DTAP
+#include "dtap_api.h"
+#endif
+
 #include <SDL2/SDL.h>
 
 #define TAG "AOUT-SDL2"
@@ -14,6 +18,10 @@ typedef struct{
 
 ao_wrapper_t ao_sdl2_ops;
 static ao_wrapper_t *wrapper = &ao_sdl2_ops;
+
+#ifdef ENABLE_DTAP
+    dtap_context_t ap_ctx;
+#endif
 
 static void sdl2_cb(void *userdata,uint8_t *buf,int size)
 {
@@ -64,7 +72,16 @@ static int ao_sdl2_init (dtaudio_output_t *aout, dtaudio_para_t *para)
         goto FAIL;
     }
     SDL_PauseAudio(0);
-    dt_info(TAG,"SDL2 AO Init OK\n"); 
+
+#ifdef ENABLE_DTAP
+    memset(&ap_ctx, 0 , sizeof(dtap_context_t));
+    ap_ctx.para.samplerate = para->samplerate;
+    ap_ctx.para.channels = para->channels;
+    ap_ctx.para.data_width = para->data_width;
+    dtap_init(&ap_ctx);
+#endif
+    
+    dt_info(TAG,"SDL2 AO Init OK\n");
     return 0;
 FAIL:
     buf_release(&ctx->dbt);
@@ -76,6 +93,19 @@ FAIL:
 static int ao_sdl2_play (dtaudio_output_t *aout, uint8_t * buf, int size)
 {
     sdl_ao_ctx_t *ctx = (sdl_ao_ctx_t *)wrapper->ao_priv;
+
+    //write ok or failed
+    if(buf_space(&ctx->dbt) < size)
+        return 0;
+
+#ifdef ENABLE_DTAP
+    printf("play size:%d \n", size);
+    dtap_frame_t frame;
+    frame.in = buf;
+    frame.in_size = size;
+    dtap_process(&ap_ctx, &frame);
+#endif
+
     return buf_put(&ctx->dbt,buf,size);
 }
 
@@ -123,6 +153,13 @@ static int ao_sdl2_stop (dtaudio_output_t *aout)
         SDL_QuitSubSystem(SDL_INIT_AUDIO);
         wrapper->ao_priv = NULL;
     }
+
+#ifdef ENABLE_DTAP
+    memset(&ap_ctx, 0 , sizeof(dtap_context_t));
+    dtap_release(&ap_ctx);    
+#endif
+
+
     return 0;
 }
     
