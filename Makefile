@@ -68,7 +68,7 @@ DT_SDL2 = yes
 DT_ALSA = yes
 DT_FAAD = no
 DT_TSDEMUX = no
-DTAP = no
+DTAP=yes
 
 #module
 DT_STREAM=yes
@@ -183,7 +183,7 @@ LDFLAGS-$(DT_SDL)  += -lSDL
 LDFLAGS-$(DT_SDL2) += -lSDL2 -Wl,-rpath=/usr/local/lib
 LDFLAGS-$(DT_ALSA) += -lasound
 LDFLAGS-$(DT_FAAD) += -lfaad
-LDFLAGS-$(DTAP)    += -ldtap -L$(DTAP_TREE)
+LDFLAGS-$(DTAP)    += $(DTAP_TREE)/libdtap.a $(DTAP_TREE)/lvm/libbundle.a $(DTAP_TREE)/lvm/libreverb.a 
 
 #======================================================
 #                   ENV-SETUP 

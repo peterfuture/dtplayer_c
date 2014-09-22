@@ -1,10 +1,6 @@
 #include "dtaudio_output.h"
 #include "dtaudio.h"
 
-#ifdef ENABLE_DTAP
-#include "dtap_api.h"
-#endif
-
 #define TAG "AUDIO-OUT"
 //#define DTAUDIO_DUMP_PCM 1
 #define REGISTER_AO(X, x)	 	\
@@ -155,13 +151,6 @@ static void *audio_output_thread (void *args)
     if(!buffer) // err
        goto EXIT;
     dt_info(TAG, "write :%d ms :%d bytes one time \n",PCM_WRITE_SIZE, unit_size);
-
-#ifdef ENABLE_DTAP
-    dtap_context_t ap_ctx;
-    memset(&ap_ctx, 0 , sizeof(dtap_context_t));
-    dtap_init(&ap_ctx);    
-    //dtap_process(&ap_ctx, NULL);    
-#endif
 
     for (;;)
     {

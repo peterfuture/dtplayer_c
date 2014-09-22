@@ -6,6 +6,11 @@
 #include "dtvideo.h"
 #include "dtvideo_output.h"
 
+#ifdef ENABLE_DTAP
+#include "dtap_api.h"
+#endif
+
+
 /*---------------------------------------------------------- */
 #ifdef ENABLE_VO_SDL2
 extern vo_wrapper_t vo_sdl2_ops;
@@ -60,6 +65,13 @@ ao_wrapper_t *ao_wrapper = &ao_ex_ops;
 static int ao_ex_init (dtaudio_output_t *aout, dtaudio_para_t *para)
 {
     int ret = 0;
+#ifdef ENABLE_DTAP
+    dtap_context_t ap_ctx;
+    memset(&ap_ctx, 0 , sizeof(dtap_context_t));
+    dtap_init(&ap_ctx);    
+    //dtap_process(&ap_ctx, NULL);    
+#endif
+
 #ifdef ENABLE_VO_SDL2 
     ret = ao_sdl2_ops.ao_init(aout,para);
 #endif
