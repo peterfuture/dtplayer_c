@@ -158,6 +158,7 @@ endif
 ifeq ($(DTAP),yes)
 	DT_CFLAGS += -DENABLE_DTAP=1
 	DT_CFLAGS += -I$(DTAP_INCLUDE)/
+	LDFLAGS-$(DTAP)    += $(DTAP_TREE)/libdtap.a $(DTAP_TREE)/lvm/libbundle.a $(DTAP_TREE)/lvm/libreverb.a 
 endif
 
 #======================================================
@@ -183,7 +184,6 @@ LDFLAGS-$(DT_SDL)  += -lSDL
 LDFLAGS-$(DT_SDL2) += -lSDL2 -Wl,-rpath=/usr/local/lib
 LDFLAGS-$(DT_ALSA) += -lasound
 LDFLAGS-$(DT_FAAD) += -lfaad
-LDFLAGS-$(DTAP)    += $(DTAP_TREE)/libdtap.a $(DTAP_TREE)/lvm/libbundle.a $(DTAP_TREE)/lvm/libreverb.a 
 
 #======================================================
 #                   ENV-SETUP 
