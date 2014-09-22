@@ -7,6 +7,57 @@
 DT_VERSION = v1.0
 
 #======================================================
+#                   Rules
+#======================================================
+
+#release
+%.o: %.S
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+%.o: %.c
+	@echo CC $@ 
+	@$(CC) $(CFLAGS) -shared -fPIC -c -o $@ $< 
+
+%.o: %.cpp
+	$(CC) $(CXXFLAGS) -c -o $@ $<
+
+%.o: %.m
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+%-rc.o: %.rc
+	$(WINDRES) -I. $< -o $@
+
+#debug
+%.debug.o: %.S
+	$(CC) $(CFLAGS) -g -c -o $@ $<
+
+%.debug.o: %.c
+	@echo CC $@ 
+	@$(CC) $(CFLAGS) -g -c -o $@ $< 
+
+%.debug.o: %.cpp
+	$(CXX) $(CXXFLAGS) -g -c -o $@ $<
+
+%.debug.o: %.m
+	$(CC) $(CFLAGS) -g -c -o $@ $<
+#==============================================
+
+#======================================================
+#                   ENV 
+#======================================================
+export MAKEROOT := $(shell pwd)
+AR       = ar
+CC       = gcc
+CXX      = g++
+STRIP    = strip 
+
+CFLAGS  += -Wall 
+DT_DEBUG = -g
+
+CFLAGS  += -I/usr/include -I/usr/local/include
+LDFLAGS += -L/usr/local/lib -L/usr/lib -L./
+
+#======================================================
 #                   SETTING                      
 #======================================================
 
@@ -17,6 +68,7 @@ DT_SDL2 = yes
 DT_ALSA = yes
 DT_FAAD = no
 DT_TSDEMUX = no
+DTAP = no
 
 #module
 DT_STREAM=yes
@@ -103,6 +155,11 @@ ifeq ($(DT_ALSA),yes)
 	DT_CFLAGS += -DENABLE_AO_ALSA=1
 endif
 
+ifeq ($(DTAP),yes)
+	DT_CFLAGS += -DENABLE_DTAP=1
+	DT_CFLAGS += -I$(DTAP_INCLUDE)/
+endif
+
 #======================================================
 #                   FFMPEG                      
 #======================================================
@@ -126,59 +183,11 @@ LDFLAGS-$(DT_SDL)  += -lSDL
 LDFLAGS-$(DT_SDL2) += -lSDL2 -Wl,-rpath=/usr/local/lib
 LDFLAGS-$(DT_ALSA) += -lasound
 LDFLAGS-$(DT_FAAD) += -lfaad
+LDFLAGS-$(DTAP)    += -ldtap -L$(DTAP_TREE)
 
 #======================================================
-#                   Rules
+#                   ENV-SETUP 
 #======================================================
-
-#release
-%.o: %.S
-	$(CC) $(CFLAGS) -c -o $@ $<
-
-%.o: %.c
-	@echo CC $@ 
-	@$(CC) $(CFLAGS) -shared -fPIC -c -o $@ $< 
-
-%.o: %.cpp
-	$(CC) $(CXXFLAGS) -c -o $@ $<
-
-%.o: %.m
-	$(CC) $(CFLAGS) -c -o $@ $<
-
-%-rc.o: %.rc
-	$(WINDRES) -I. $< -o $@
-
-#debug
-%.debug.o: %.S
-	$(CC) $(CFLAGS) -g -c -o $@ $<
-
-%.debug.o: %.c
-	@echo CC $@ 
-	@$(CC) $(CFLAGS) -g -c -o $@ $< 
-
-%.debug.o: %.cpp
-	$(CXX) $(CXXFLAGS) -g -c -o $@ $<
-
-%.debug.o: %.m
-	$(CC) $(CFLAGS) -g -c -o $@ $<
-#==============================================
-
-
-#======================================================
-#                   ENV 
-#======================================================
-export MAKEROOT := $(shell pwd)
-AR       = ar
-CC       = gcc
-CXX      = g++
-STRIP    = strip 
-
-CFLAGS  += -Wall 
-DT_DEBUG = -g
-
-CFLAGS  += -I/usr/include -I/usr/local/include
-LDFLAGS += -L/usr/local/lib -L/usr/lib -L./
-
 LDFLAGS += -lpthread -lm 
 LDFLAGS += $(LDFLAGS-yes)
 
