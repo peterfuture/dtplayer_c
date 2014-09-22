@@ -68,7 +68,7 @@ DT_SDL2 = yes
 DT_ALSA = yes
 DT_FAAD = no
 DT_TSDEMUX = no
-DTAP=yes
+DTAP=no
 
 #module
 DT_STREAM=yes
