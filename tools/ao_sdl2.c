@@ -78,6 +78,8 @@ static int ao_sdl2_init (dtaudio_output_t *aout, dtaudio_para_t *para)
     ap_ctx.para.samplerate = para->samplerate;
     ap_ctx.para.channels = para->channels;
     ap_ctx.para.data_width = para->data_width;
+    ap_ctx.para.type = DTAP_EFFECT_EQ;
+    ap_ctx.para.item = EQ_EFFECT_HEAVYMETAL;
     dtap_init(&ap_ctx);
 #endif
     
