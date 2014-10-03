@@ -23,7 +23,7 @@ mkdir -p build
 
 case $OPT in
      linux|Linux) echo "build for Linux platform.."
-         make -f  makefile-linux
+         make -f  makefile
          mkdir -p build/linux
          cp *.so  build/linux
          cp *.a   build/linux
@@ -37,7 +37,7 @@ case $OPT in
          cp *.exe build/android
          ;;
      all|All) echo "build for Linux & Android platform.."
-        make -f  makefile-linux
+        make -f  makefile
          mkdir -p build/linux
          cp *.so  build/linux
          cp *.a   build/linux
