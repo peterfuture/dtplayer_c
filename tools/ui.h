@@ -11,6 +11,11 @@ typedef enum{
     EVENT_STOP,
     EVENT_SEEK,
     EVENT_RESIZE,
+
+    //AE
+    EVENT_AE,
+
+    EVENT_MAX      = 0x800
 }player_event_t;
 
 player_event_t get_event (args_t *arg,ply_ctx_t *ctx);

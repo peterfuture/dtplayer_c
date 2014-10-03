@@ -19,6 +19,10 @@
 
 static ply_ctx_t ply_ctx;
 
+#ifdef ENABLE_DTAP
+int dtap_change_effect();
+#endif
+
 static int update_cb (player_state_t * state)
 {
     if (state->cur_status == PLAYER_STATUS_EXIT)
@@ -155,6 +159,11 @@ int main (int argc, char **argv)
                 ui_window_resize(arg.arg1, arg.arg2);       
                 dtplayer_set_video_size(player_priv, arg.arg1, arg.arg2);
                 break;
+#ifdef ENABLE_DTAP
+            case EVENT_AE:
+                dtap_change_effect();
+                break;
+#endif
             default:
                 dt_info(TAG,"UNKOWN CMD, IGNORE \n");
                 break;

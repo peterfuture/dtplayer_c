@@ -21,6 +21,14 @@ static ao_wrapper_t *wrapper = &ao_sdl2_ops;
 
 #ifdef ENABLE_DTAP
     dtap_context_t ap_ctx;
+    int cur_ae_id = EQ_EFFECT_FLAT;
+int dtap_change_effect()
+{
+    cur_ae_id = (cur_ae_id + 1) % 9;
+    ap_ctx.para.item = cur_ae_id;
+    dtap_update(&ap_ctx);
+    return 0;
+}
 #endif
 
 static void sdl2_cb(void *userdata,uint8_t *buf,int size)
@@ -79,7 +87,7 @@ static int ao_sdl2_init (dtaudio_output_t *aout, dtaudio_para_t *para)
     ap_ctx.para.channels = para->channels;
     ap_ctx.para.data_width = para->data_width;
     ap_ctx.para.type = DTAP_EFFECT_EQ;
-    ap_ctx.para.item = EQ_EFFECT_HEAVYMETAL;
+    ap_ctx.para.item = cur_ae_id;
     dtap_init(&ap_ctx);
 #endif
     
@@ -104,7 +112,8 @@ static int ao_sdl2_play (dtaudio_output_t *aout, uint8_t * buf, int size)
     dtap_frame_t frame;
     frame.in = buf;
     frame.in_size = size;
-    dtap_process(&ap_ctx, &frame);
+    if(ap_ctx.para.item != EQ_EFFECT_FLAT)
+        dtap_process(&ap_ctx, &frame);
 #endif
 
     return buf_put(&ctx->dbt,buf,size);

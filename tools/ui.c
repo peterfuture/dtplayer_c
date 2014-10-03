@@ -93,6 +93,10 @@ player_event_t get_event (args_t *arg,ply_ctx_t *ctx)
                     break;
                 case SDLK_w:
                     break;
+#ifdef ENABLE_DTAP
+                case SDLK_e:
+                    return EVENT_AE;
+#endif
                 case SDLK_PAGEUP:
                     arg->arg1 = ctx->cur_time + 600;
                     return EVENT_SEEK;
