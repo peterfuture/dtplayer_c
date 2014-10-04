@@ -104,6 +104,19 @@ int sdl2_window_resize(int w, int h)
     vf.para.d_width = w;
     vf.para.d_height = h;
     video_filter_update(&vf);
+    
+    if(ctx->ren)
+    {
+        SDL_DestroyRenderer(ctx->ren);
+        ctx->ren = NULL;
+    }
+    if(ctx->tex)
+    {
+        SDL_DestroyTexture(ctx->tex);
+        ctx->tex = NULL;
+    }
+
+    
     dt_unlock (&ctx->vo_mutex);
     return 0;
 }
@@ -131,12 +144,12 @@ static int vo_sdl2_init (dtvideo_output_t *vout)
 static int vo_sdl2_render (dtvideo_output_t *vout,dt_av_frame_t * pict)
 {
     vo_wrapper_t *wrap = &vo_sdl2_ops;
-   
-    video_filter_process(&vf, pict);
 
     sdl2_ctx_t *ctx = (sdl2_ctx_t *)wrap->handle;
     dt_lock (&ctx->vo_mutex);
-
+    
+    video_filter_process(&vf, pict);
+    
     SDL_Rect dst;
     dst.x = ctx->dx;
     dst.y = ctx->dy;
