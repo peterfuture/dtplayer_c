@@ -133,7 +133,7 @@ static int vo_sdl2_init (dtvideo_output_t *vout)
     //Init vf
     memset(&vf, 0, sizeof(dtvideo_filter_t));
     memcpy(&vf.para, vout->para, sizeof(dtvideo_para_t));
-    vf.para.d_pixfmt = vf.para.s_pixfmt;
+    vf.para.s_pixfmt = vf.para.d_pixfmt;
     vf.para.d_width = ctx->dw;
     vf.para.d_height = ctx->dh;
     video_filter_init(&vf); 
