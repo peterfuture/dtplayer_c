@@ -108,9 +108,9 @@ int player_host_init (dtplayer_context_t * dtp_ctx)
         host_para->video_extra_size = vstream->extradata_size;
         host_para->video_src_pixfmt = vstream->pix_fmt;
         if(vout_type == 0)
-            host_para->video_dest_pixfmt = DTAV_PIX_FMT_RGB565LE;
-        if(vout_type == 1)
             host_para->video_dest_pixfmt = DTAV_PIX_FMT_YUV420P;
+        if(vout_type == 1)
+            host_para->video_dest_pixfmt = DTAV_PIX_FMT_RGB565LE;
         if(vout_type == 2)
             host_para->video_dest_pixfmt = DTAV_PIX_FMT_RGB24;
 

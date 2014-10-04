@@ -145,7 +145,6 @@ static int convert_picture (dtvideo_filter_t * filter, dt_av_frame_t * src)
 
     vf_ctx->swapbuf = NULL;
     vf_ctx->swap_buf_size = 0;
-
     return 0;
 }
 

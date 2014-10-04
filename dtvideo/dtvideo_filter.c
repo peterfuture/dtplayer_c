@@ -133,7 +133,7 @@ int video_filter_init(dtvideo_filter_t *filter)
 
     vf_wrapper_t *wrapper = filter->wrapper;
     ret = wrapper->init(filter);
-    if(ret > 0)
+    if(ret >= 0)
         filter->status = VF_STATUS_RUNNING;
 EXIT:
     if(ret < 0)
@@ -166,16 +166,9 @@ int video_filter_update(dtvideo_filter_t *filter)
 int video_filter_process(dtvideo_filter_t *filter, dt_av_frame_t *frame)
 {
     int ret = 0;
-    if(filter->status == VF_STATUS_IDLE)
+    if(filter->status == VF_STATUS_IDLE) // No need to Process
     {
-        ret = video_filter_init(filter);
-        if(ret < 0)
-        {
-            dt_error (TAG, "[%s:%d]vf init failed \n",__FUNCTION__,__LINE__);
-            goto EXIT;
-        }
-        filter->status = VF_STATUS_RUNNING;
-        dt_debug (TAG, "[%s:%d]vf init ok \n",__FUNCTION__,__LINE__);
+        return 0;
     }
     dt_lock(&filter->mutex);
     vf_wrapper_t *wrapper = filter->wrapper;

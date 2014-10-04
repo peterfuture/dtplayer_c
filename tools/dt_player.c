@@ -81,8 +81,6 @@ int main (int argc, char **argv)
         return 0;
     }
     memset(&ply_ctx,0,sizeof(ply_ctx_t));
-    ply_ctx.disp_width = 720;
-    ply_ctx.disp_height = 480;
 
     player_register_all();
     register_ex_all();
@@ -117,8 +115,6 @@ int main (int argc, char **argv)
         width = 720;
     if(height <= 0 || height >720)
         height = 480;
-
-    dtplayer_set_video_size(player_priv, width, height);
 
     ui_init(width,height); 
     render_init();
@@ -157,7 +153,7 @@ int main (int argc, char **argv)
             case EVENT_RESIZE:
                 dt_info(TAG,"resize, w:%d h:%d \n",arg.arg1, arg.arg2);
                 ui_window_resize(arg.arg1, arg.arg2);       
-                dtplayer_set_video_size(player_priv, arg.arg1, arg.arg2);
+                //dtplayer_set_video_size(player_priv, arg.arg1, arg.arg2);
                 break;
 #ifdef ENABLE_DTAP
             case EVENT_AE:
