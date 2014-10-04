@@ -232,9 +232,8 @@ int video_init (dtvideo_context_t * vctx)
     dtvideo_output_t *video_out = &vctx->video_out;
     
     //vf ctx init
-    //vf will init in vd but used in vo
     memset (video_filt, 0, sizeof (dtvideo_filter_t));
-    video_filt->para = &vctx->video_para;
+    memcpy(&video_filt->para, &vctx->video_para, sizeof(dtvideo_para_t));
     video_filt->parent = vctx;
 
     //vd ctx init 

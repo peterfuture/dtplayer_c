@@ -17,9 +17,17 @@ typedef struct vf_ffmpeg_ctx
     uint8_t *swapbuf;
 }vf_ffmpeg_ctx_t;
 
-static int ffmpeg_vf_capable(dtvideo_filter_t *filter)
+static int ffmpeg_vf_capable(vf_cap_t cap)
 {
-    return VF_CAP_CONVERT | VF_CAP_CROP; 
+#ifdef ENABLE_LINUX
+    int ffmpeg_cap = VF_CAP_COLORSPACE_CONVERT | VF_CAP_CLIP;
+#endif
+#ifdef ENABLE_ANDROID
+    int ffmpeg_cap = VF_CAP_COLORSPACE_CONVERT;
+#endif
+
+    dt_debug(TAG, "request cap: %x , %s support:%x \n", cap, "ffmpeg vf", ffmpeg_cap);
+    return cap & ffmpeg_cap; 
 }
 
 static int need_process(dtvideo_para_t *para)
@@ -30,7 +38,7 @@ static int need_process(dtvideo_para_t *para)
     int dh = para->d_height;
     int sf = para->s_pixfmt;
     int df = para->d_pixfmt;
-    dt_info (TAG, "[%s:%d] sw:%d dw:%d sh:%d dh:%d sf:%d df:%d \n", __FUNCTION__, __LINE__,sw,dw,sh,dh,sf,df);
+    dt_debug (TAG, "[%s:%d] sw:%d dw:%d sh:%d dh:%d sf:%d df:%d \n", __FUNCTION__, __LINE__,sw,dw,sh,dh,sf,df);
     return !(sw == dw && sh == dh && sf == df);
 }
 
@@ -40,7 +48,7 @@ static int ffmpeg_vf_init(dtvideo_filter_t *filter)
     if(!vf_ctx)
         return -1;
     memset(vf_ctx,0,sizeof(*vf_ctx));
-    dtvideo_para_t *para = filter->para;
+    dtvideo_para_t *para = &filter->para;
     vf_ctx->need_process_flag = need_process(para);
     filter->vf_priv = vf_ctx;
     if(vf_ctx->need_process_flag)
@@ -58,7 +66,7 @@ static int convert_picture (dtvideo_filter_t * filter, dt_av_frame_t * src)
     int buffer_size;
     
     vf_ffmpeg_ctx_t *vf_ctx = (vf_ffmpeg_ctx_t *)(filter->vf_priv);
-    dtvideo_para_t *para = filter->para;
+    dtvideo_para_t *para = &filter->para;
     int sw = para->s_width; 
     int dw = para->d_width; 
     int sh = para->s_height; 

@@ -1,3 +1,13 @@
+/***********************************************************************
+**
+**  Module : dtvideo_filter.c
+**  Summary: convert colorspace to yuv420p
+**  Section: dtvideo
+**  Author : peter
+**  Notes  : 
+**
+***********************************************************************/
+
 #include "dtvideo.h"
 #include "dtvideo_filter.h"
 
@@ -11,17 +21,31 @@
 
 static vf_wrapper_t *g_vf = NULL;
 
-static void register_vf (vf_wrapper_t * vf)
+
+/***********************************************************************
+**
+** register internal filter
+**
+***********************************************************************/
+static void register_vf(vf_wrapper_t * vf)
 {
     vf_wrapper_t **p;
     p = &g_vf;
     while (*p != NULL)
+    {
         p = &(*p)->next;
+    }
     *p = vf;
-    dt_info (TAG, "[%s:%d] register vf, name:%s \n", __FUNCTION__, __LINE__, (*p)->name);
+    dt_info (TAG, "[%s:%d] register internal vf, name:%s \n", __FUNCTION__, __LINE__, (*p)->name);
     vf->next = NULL;
+    return;
 }
 
+/***********************************************************************
+**
+** register external filter
+**
+***********************************************************************/
 void vf_register_ext(vf_wrapper_t *vf)
 {
     vf_wrapper_t **p;
@@ -36,11 +60,15 @@ void vf_register_ext(vf_wrapper_t *vf)
         vf->next = *p;
         *p = vf;
     }
-    
-    dt_info (TAG, "[%s:%d]register ext vf. name:%s \n",__FUNCTION__,__LINE__, vf->name);
-
+    dt_info (TAG, "[%s:%d]register external vf. name:%s \n",__FUNCTION__,__LINE__, vf->name);
+    return;
 }
 
+/***********************************************************************
+**
+** register all internal filters
+**
+***********************************************************************/
 void vf_register_all ()
 {
 #ifdef ENABLE_VF_FFMPEG
@@ -49,57 +77,119 @@ void vf_register_all ()
     return;
 }
 
-static int select_vf(dtvideo_filter_t *filter)
+/***********************************************************************
+**
+** select first vf with capbilities cap
+** cap: vf capbilities set
+**
+***********************************************************************/
+static int select_vf(dtvideo_filter_t *filter, vf_cap_t cap)
 {
-    if(!g_vf)
-        return -1;
-    filter->wrapper = g_vf;
-    dt_info (TAG, "[%s:%d] select--%s video filter \n", __FUNCTION__, __LINE__, g_vf->name);
-    return 0;
-}
+    int ret = -1;
+    vf_wrapper_t *vf = g_vf;
 
-static int video_filter_init(dtvideo_filter_t *filter)
-{
-    int ret = select_vf(filter);
-    if(ret < 0)
+    if(!vf)
         return ret;
-    vf_wrapper_t *wrapper = filter->wrapper;
-    ret = wrapper->init(filter);
-    dt_lock_init(&filter->mutex, NULL);
+
+    while(vf != NULL)
+    {
+        if(vf->capable(cap) == cap) // maybe cap have several elements
+        {
+            ret = 0;
+            break;
+        }
+        vf = vf->next;
+    }
+
+    filter->wrapper = vf;
+    if(vf) 
+        dt_info (TAG, "[%s:%d] %s video filter selected \n", __FUNCTION__, __LINE__, g_vf->name);
+    else
+        dt_info (TAG, "[%s:%d] No video filter selected \n", __FUNCTION__, __LINE__, g_vf->name);
     return ret;
 }
 
-int video_filter_reset(dtvideo_filter_t *filter, dtvideo_para_t *para)
+/***********************************************************************
+**
+** Init video filter
+**
+***********************************************************************/
+int video_filter_init(dtvideo_filter_t *filter)
 {
-    if(filter->status == VF_STATUS_IDLE) // no need reset
-        return 0;
+    dt_lock_init(&filter->mutex, NULL);
+    dt_lock(&filter->mutex);
+
+    int cap = 0;
+    dtvideo_para_t *para = &filter->para;
+    if(para->s_pixfmt != para->d_pixfmt)
+        cap |= VF_CAP_COLORSPACE_CONVERT;
+
+    if(para->s_width != para->d_width || para->s_height != para->d_height)
+        cap |= VF_CAP_CLIP;
+
+    int ret = select_vf(filter, cap);
+    if(ret < 0)
+        goto EXIT;
+
+    vf_wrapper_t *wrapper = filter->wrapper;
+    ret = wrapper->init(filter);
+    if(ret > 0)
+        filter->status = VF_STATUS_RUNNING;
+EXIT:
+    if(ret < 0)
+    {
+        filter->wrapper = NULL;
+    }
+
+    dt_unlock(&filter->mutex);
+    return ret;
+}
+
+/***********************************************************************
+**
+** update video filter
+** reset para in filter first 
+**
+***********************************************************************/
+int video_filter_update(dtvideo_filter_t *filter)
+{
+    video_filter_stop(filter);
+    video_filter_init(filter);
     return 0;
 }
 
-int video_filter_process(dtvideo_filter_t *filter, dt_av_frame_t *pic)
+/***********************************************************************
+**
+** process one frame
+**
+***********************************************************************/
+int video_filter_process(dtvideo_filter_t *filter, dt_av_frame_t *frame)
 {
     int ret = 0;
-    //init first
-    dt_lock(&filter->mutex);
     if(filter->status == VF_STATUS_IDLE)
     {
         ret = video_filter_init(filter);
         if(ret < 0)
         {
-            dt_info (TAG, "[%s:%d]vf init failed \n",__FUNCTION__,__LINE__);
-            ret = -1;
-            goto END;
+            dt_error (TAG, "[%s:%d]vf init failed \n",__FUNCTION__,__LINE__);
+            goto EXIT;
         }
         filter->status = VF_STATUS_RUNNING;
-        dt_info (TAG, "[%s:%d]vf init ok \n",__FUNCTION__,__LINE__);
+        dt_debug (TAG, "[%s:%d]vf init ok \n",__FUNCTION__,__LINE__);
     }
+    dt_lock(&filter->mutex);
     vf_wrapper_t *wrapper = filter->wrapper;
-    ret = wrapper->process(filter, pic);
+    ret = wrapper->process(filter, frame);
     dt_unlock(&filter->mutex);
-END:
+EXIT:
     return ret;
 }
 
+/***********************************************************************
+**
+** stop filter
+**
+***********************************************************************/
 int video_filter_stop(dtvideo_filter_t *filter)
 {
     dt_lock(&filter->mutex);

@@ -180,7 +180,7 @@ static void *video_decode_loop (void *arg)
         {
             memcpy(&decoder->para, &wrapper->para, sizeof(dtvideo_para_t));
             memcpy(&filter->para, &wrapper->para, sizeof(dtvideo_para_t));
-            video_filter_reset(filter, decoder->para);
+            video_filter_update(filter);
         }
 
         decoder->frame_count++;
