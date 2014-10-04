@@ -1,7 +1,7 @@
 /***********************************************************************
 **
 **  Module : dtvideo_filter.c
-**  Summary: convert colorspace to yuv420p
+**  Summary: video pp wrapper
 **  Section: dtvideo
 **  Author : peter
 **  Notes  : 

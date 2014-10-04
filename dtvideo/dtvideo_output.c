@@ -152,6 +152,12 @@ static void *video_output_thread (void *args)
     dt_av_frame_t *pic;
     int64_t sys_clock;          //contrl video display
     int64_t cur_time, time_diff;
+
+    //Init filter first, Just do color space convert
+    filter->para.d_width = filter->para.s_width;
+    filter->para.d_height = filter->para.s_height;
+    video_filter_init(filter);
+
     for (;;)
     {
         if (vo->status == VO_STATUS_EXIT)
