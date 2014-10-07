@@ -174,7 +174,6 @@ int video_filter_process(dtvideo_filter_t *filter, dt_av_frame_t *frame)
     vf_wrapper_t *wrapper = filter->wrapper;
     ret = wrapper->process(filter, frame);
     dt_unlock(&filter->mutex);
-EXIT:
     return ret;
 }
 

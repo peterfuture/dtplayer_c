@@ -8,8 +8,8 @@
 #include <string.h>
 
 #define QUEUE_MAX_PACK_NUM 8
-#define QUEUE_MAX_ABUF_SIZE 20*1024*1024 //20M
-#define QUEUE_MAX_VBUF_SIZE 10*1024*1024 // 10M
+#define QUEUE_MAX_ABUF_SIZE 20*1024*1024 // 20M
+#define QUEUE_MAX_VBUF_SIZE 50*1024*1024 // 50M
 
 typedef struct pack
 {

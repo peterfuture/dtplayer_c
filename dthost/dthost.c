@@ -150,7 +150,8 @@ int host_start (dthost_context_t * hctx)
     int64_t first_apts = -1;
     int64_t first_vpts = -1;
     dt_info (TAG, "check start condition has_audio:%d has_video:%d has_sub:%d\n", has_audio, has_video, has_sub);
-    int print_cnt = 100;
+    // max delay 3s
+    int print_cnt = 300;
     do
     {
         if (!has_audio)
@@ -163,16 +164,22 @@ int host_start (dthost_context_t * hctx)
             video_start_flag = !((first_vpts = dtvideo_get_first_pts (hctx->video_priv)) == -1);
         if (audio_start_flag && video_start_flag)
             break;
-        usleep (1000);
+        usleep (10000);
         if(print_cnt-- == 0)
         {
-            dt_info (TAG, "audio:%d video:%d \n", audio_start_flag, video_start_flag);
-            print_cnt = 100;
+            dt_info (TAG, "time out: audio:%d video:%d \n", audio_start_flag, video_start_flag);
+            break;
         }
     }
     while (1);
 
-    dt_info (TAG, "first apts:%lld first vpts:%lld \n", first_apts, first_vpts);
+    if(audio_start_flag & video_start_flag == 0)
+    {
+        dt_error(TAG, "Error: av not ready,  audio:%d video:%d \n", audio_start_flag, video_start_flag);
+        return -1;
+    }
+
+    dt_info(TAG, "first apts:%lld first vpts:%lld \n", first_apts, first_vpts);
     hctx->pts_audio = first_apts;
     hctx->pts_video = first_vpts;
 

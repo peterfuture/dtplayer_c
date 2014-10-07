@@ -132,6 +132,7 @@ static int demuxer_ffmpeg_open (demuxer_wrapper_t * wrapper)
 static int64_t pts_exchange (AVPacket * avpkt, dt_media_info_t * media_info)
 {
     double exchange = 1;
+    int64_t result;
     int num, den;
     int has_video = media_info->has_video;
     int has_audio = media_info->has_audio;
@@ -141,23 +142,35 @@ static int64_t pts_exchange (AVPacket * avpkt, dt_media_info_t * media_info)
     int cur_aidx = (has_audio) ? media_info->astreams[media_info->cur_ast_index]->index : -1;
     //int cur_sidx = (has_sub)?media_info->sstreams[media_info->cur_sst_index]->index:-1;
 
-    if(avpkt->pts == AV_NOPTS_VALUE)
-        return DT_NOPTS_VALUE;
-
     if (has_video && cur_vidx == avpkt->stream_index)
     {
         num = media_info->vstreams[media_info->cur_vst_index]->time_base.num;
         den = media_info->vstreams[media_info->cur_vst_index]->time_base.den;
-        exchange = 90000 * num / (double)den;
+        exchange = DT_PTS_FREQ * num / (double)den;
     }
     else if (has_audio && cur_aidx == avpkt->stream_index)
     {
         num = media_info->astreams[media_info->cur_ast_index]->time_base.num;
         den = media_info->astreams[media_info->cur_ast_index]->time_base.den;
-        exchange = 90000 * (double) num / den;
+        exchange = DT_PTS_FREQ * (double) num / den;
+    }
+
+    //case 1: pts valid
+    if(avpkt->pts != AV_NOPTS_VALUE)
+        return (int64_t) (avpkt->pts * exchange);
+
+    //case 2: pts invalid
+    
+    //dts invalid case - following pts will increase with in decoder
+    if(avpkt->dts == AV_NOPTS_VALUE)
+    {
+        return 0;
     }
     
-    return (int64_t) (avpkt->pts * exchange);
+    //dts valid case
+    result = (int64_t)(exchange * avpkt->dts);
+    dt_debug(TAG, "pts:%llx setup from dts: %llx  exchange:%f \n", result, avpkt->dts, (float)exchange);
+    return result;
 }
 
 static int demuxer_ffmpeg_read_frame (demuxer_wrapper_t * wrapper, dt_av_pkt_t * frame)
