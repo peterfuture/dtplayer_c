@@ -27,6 +27,7 @@ int dtap_change_effect()
     cur_ae_id = (cur_ae_id + 1) % 9;
     ap_ctx.para.item = cur_ae_id;
     dtap_update(&ap_ctx);
+    dtap_init(&ap_ctx);
     return 0;
 }
 #endif
