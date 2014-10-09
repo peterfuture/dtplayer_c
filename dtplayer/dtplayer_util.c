@@ -85,10 +85,10 @@ int player_host_init (dtplayer_context_t * dtp_ctx)
         if(GetEnv("VIDEO","vout.type",value) > 0)
         {
             vout_type = atoi(value);
-            dt_info(TAG,"vout type:%d - 0 rgb565 1 yuv420 2 rgb24 \n",vout_type);
+            dt_info(TAG,"vout type:%d - 0 yuv420 1 rgb565 2 rgb24 \n",vout_type);
         }
         else
-            dt_info(TAG,"vout type not set, use default: rgb565 \n");
+            dt_info(TAG,"vout type not set, use default: yuv420 \n");
 
         host_para->video_format = vstream->format;
         host_para->video_src_width = vstream->width;
