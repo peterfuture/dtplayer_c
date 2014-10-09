@@ -111,6 +111,7 @@ static void *video_decode_loop (void *arg)
 {
     dt_av_pkt_t frame;
     dtvideo_decoder_t *decoder = (dtvideo_decoder_t *) arg;
+    dtvideo_para_t *para = decoder->para;
     vd_wrapper_t *wrapper = decoder->wrapper;
     dtvideo_context_t *vctx = (dtvideo_context_t *) decoder->parent;
     dtvideo_filter_t *filter = (dtvideo_filter_t *) &(vctx->video_filt);
@@ -205,6 +206,12 @@ static void *video_decode_loop (void *arg)
                 decoder->pts_current = picture->pts; 
             }
         }
+
+
+        // setup some common info
+        picture->width = para->d_width;
+        picture->height = para->d_height;
+        picture->pixfmt = para->d_pixfmt;
 
         /*queue in */
         queue_push_tail (picture_queue, picture);
