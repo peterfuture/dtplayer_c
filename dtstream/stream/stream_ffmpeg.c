@@ -46,7 +46,10 @@ static int stream_ffmpeg_read (stream_wrapper_t * wrapper,uint8_t *buf,int len)
     if(r>0)
         info->cur_pos += r;
     if(r<=0)
+    {
+        dt_info(TAG, "[ffmpeg] ffmpeg read failed, ret :%d \n", r);
         info->eof_flag = 1;
+    }
     return (r <= 0) ? -1 : r;
 }
 
