@@ -188,7 +188,6 @@ static void *video_decode_loop (void *arg)
         //Got one frame
         //picture->pts = frame.pts;
         
-        dt_info(TAG, "[%s:%d]frame decoded ok, picture->pts :%llx\n", __FUNCTION__, __LINE__, picture->pts);
         //update current pts, clear the buffer size
         if (frame.pts >= 0 && decoder->pts_first == -1)
         {

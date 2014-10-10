@@ -96,7 +96,7 @@ int demuxer_open(dtdemuxer_context_t * dem_ctx)
     }
    
     char value[512];
-    int probe_enable = 1;
+    int probe_enable = 0;
     int probe_size = dtstream_local(dem_ctx->stream_priv)?PROBE_LOCAL_SIZE:PROBE_STREAM_SIZE;
     if(GetEnv("DEMUXER","demuxer.probe",value) > 0)
     {
