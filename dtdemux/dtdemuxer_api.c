@@ -7,14 +7,14 @@ int dtdemuxer_open (void **priv, dtdemuxer_para_t * para, void *parent)
     dtdemuxer_context_t *dem_ctx = (dtdemuxer_context_t *) malloc (sizeof (dtdemuxer_context_t));
     if (!dem_ctx)
     {
-        dt_error (TAG, "demuxer context malloc failed \n");
+        dt_error(TAG, "demuxer context malloc failed \n");
         return -1;
     }
     memset (dem_ctx, 0, sizeof (dtdemuxer_context_t));
     dem_ctx->file_name = para->file_name;
     if (demuxer_open (dem_ctx) == -1)
     {
-        dt_error (TAG, "demuxer context open failed \n");
+        dt_error(TAG, "demuxer context open failed \n");
         free(dem_ctx);
         return -1;
     }
