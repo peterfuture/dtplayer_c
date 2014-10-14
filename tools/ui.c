@@ -132,7 +132,7 @@ player_event_t get_event (args_t *arg,ply_ctx_t *ctx)
                         break;
                     x = event.motion.x;
                 }
-                int64_t ts;
+#if 0
                 int ns, hh, mm, ss;
                 int tns, thh, tmm, tss;
                 tns  = ctx->duration / 1000000LL;
@@ -146,8 +146,12 @@ player_event_t get_event (args_t *arg,ply_ctx_t *ctx)
                 ss   = (ns % 60);
                 fprintf(stderr, "Seek to %2.0f%% (%2d:%02d:%02d) of total duration (%2d:%02d:%02d)       \n", frac*100,
                     hh, mm, ss, thh, tmm, tss);
+#endif
+                int64_t ts;
+                frac = x / ctx->disp_width;
                 ts = frac * ctx->duration;
                 arg->arg1 = (int)ts;
+                printf("Seek to %d s\n", (int)ts);
                 return EVENT_SEEK;
             }
 

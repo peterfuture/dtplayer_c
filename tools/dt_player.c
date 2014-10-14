@@ -117,6 +117,9 @@ int main (int argc, char **argv)
     if(height <= 0 || height >720)
         height = 480;
 
+    ply_ctx.disp_width = width;
+    ply_ctx.disp_height = height;
+
     ui_init(width,height); 
     render_init();
 
@@ -153,7 +156,9 @@ int main (int argc, char **argv)
                 break;
             case EVENT_RESIZE:
                 dt_info(TAG,"resize, w:%d h:%d \n",arg.arg1, arg.arg2);
-                ui_window_resize(arg.arg1, arg.arg2);       
+                ui_window_resize(arg.arg1, arg.arg2);
+                ply_ctx.disp_width = arg.arg1;
+                ply_ctx.disp_height = arg.arg2;
                 //dtplayer_set_video_size(player_priv, arg.arg1, arg.arg2);
                 break;
 #ifdef ENABLE_DTAP
