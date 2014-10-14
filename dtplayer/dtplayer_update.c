@@ -36,7 +36,7 @@ int player_handle_cb (dtplayer_context_t * dtp_ctx)
 {
     player_state_t *state = &dtp_ctx->state;
     if (dtp_ctx->update_cb)
-        dtp_ctx->update_cb (state);
+        dtp_ctx->update_cb(dtp_ctx->cookie, state);
     return 0;
 
 }

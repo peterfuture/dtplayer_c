@@ -58,7 +58,7 @@ void *dtplayer_init (dtplayer_para_t * para)
     }
     memset (dtp_ctx, 0, sizeof (*dtp_ctx));
     memcpy (&dtp_ctx->player_para, para, sizeof (dtplayer_para_t));
-
+    dtp_ctx->cookie = para->cookie;
     dt_info(TAG,"start playing :%s \n",para->file_name);
     /*init player */
     ret = player_init (dtp_ctx);

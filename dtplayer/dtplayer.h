@@ -55,12 +55,13 @@ typedef struct dtplayer_context
     void *host_priv;
 
     player_state_t state;
-    int (*update_cb) (player_state_t * state); // update player info to uplevel
+    int (*update_cb) (void *cookie, player_state_t * state); // update player info to uplevel
 
     io_loop_t io_loop;
     pthread_t event_loop_id;
 
     void *player_server;
+    void *cookie;
 } dtplayer_context_t;
 
 void player_register_all();

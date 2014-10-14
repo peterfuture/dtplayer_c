@@ -173,7 +173,7 @@ int host_start (dthost_context_t * hctx)
     }
     while (1);
 
-    if(audio_start_flag & video_start_flag == 0)
+    if((audio_start_flag & video_start_flag) == 0)
     {
         dt_error(TAG, "Error: av not ready,  audio:%d video:%d \n", audio_start_flag, video_start_flag);
         return -1;

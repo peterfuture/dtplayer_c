@@ -23,7 +23,7 @@ static ply_ctx_t ply_ctx;
 int dtap_change_effect();
 #endif
 
-static int update_cb (player_state_t * state)
+static int update_cb (void *cookie, player_state_t * state)
 {
     if (state->cur_status == PLAYER_STATUS_EXIT)
     {
@@ -56,6 +56,7 @@ static int parse_cmd(int argc,char **argv,dtplayer_para_t *para)
     //para->no_video=1;
     para->width = -1;
     para->height = -1;
+    para->cookie = NULL;
     return 0;
 }
 
