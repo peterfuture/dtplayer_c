@@ -168,6 +168,10 @@ int main (int argc, char **argv)
                 ply_ctx.disp_height = arg.arg2;
                 //dtplayer_set_video_size(player_priv, arg.arg1, arg.arg2);
                 break;
+            case EVENT_VOLUME_ADD:
+                dt_info(TAG, " volume add \n");
+                ply_ctx.volume = (++ply_ctx.volume) % 10;
+                ply_ctx.ao.ao_set_volume(&ply_ctx.ao, ply_ctx.volume);
 #ifdef ENABLE_DTAP
             case EVENT_AE:
                 dtap_change_effect(&ply_ctx.ao);

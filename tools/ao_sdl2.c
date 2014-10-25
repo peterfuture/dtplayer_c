@@ -176,6 +176,18 @@ static int ao_sdl2_stop (dtaudio_output_t *aout)
     return 0;
 }
 
+static int ao_sdl2_get_volume(dtaudio_output_t *aout)
+{
+    dt_info(TAG,"getvolume: \n");
+    return 0;
+}
+
+static int ao_sdl2_set_volume(dtaudio_output_t *aout, int value)
+{
+    dt_info(TAG,"setvolume: %d \n", value);
+    return 0;
+}
+
 void ao_sdl2_setup(ao_wrapper_t *wrapper)
 {
     if(wrapper == NULL) return;
@@ -188,6 +200,8 @@ void ao_sdl2_setup(ao_wrapper_t *wrapper)
     wrapper->ao_write = ao_sdl2_play;
     wrapper->ao_level = ao_sdl2_level;
     wrapper->ao_latency = ao_sdl2_get_latency;
+    wrapper->ao_get_volume = ao_sdl2_get_volume;
+    wrapper->ao_set_volume = ao_sdl2_set_volume;
 }
 
 
@@ -201,4 +215,6 @@ ao_wrapper_t ao_sdl2_ops = {
     .ao_write = ao_sdl2_play,
     .ao_level = ao_sdl2_level,
     .ao_latency = ao_sdl2_get_latency,
+    .ao_get_volume = ao_sdl2_get_volume,
+    .ao_set_volume = ao_sdl2_set_volume,
 };

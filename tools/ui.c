@@ -88,7 +88,7 @@ player_event_t get_event (args_t *arg,ply_ctx_t *ctx)
                 case SDLK_a:
                     break;
                 case SDLK_v:
-                    break;
+                    return EVENT_VOLUME_ADD;
                 case SDLK_t:
                     break;
                 case SDLK_w:

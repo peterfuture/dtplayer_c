@@ -21,6 +21,7 @@ typedef struct ply_ctx
     int disp_height;
 
     ao_wrapper_t ao;
+    int volume;
 
     int exit_flag;
 }ply_ctx_t;

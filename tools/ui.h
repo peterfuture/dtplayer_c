@@ -11,6 +11,8 @@ typedef enum{
     EVENT_STOP,
     EVENT_SEEK,
     EVENT_RESIZE,
+    
+    EVENT_VOLUME_ADD,
 
     //AE
     EVENT_AE,

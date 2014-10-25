@@ -25,6 +25,8 @@ typedef struct ao_wrapper
     int64_t (*ao_latency) (struct dtaudio_output *aout);
     int (*ao_level) (struct dtaudio_output *aout);
     int (*ao_write) (struct dtaudio_output *aout, uint8_t * buf, int size);
+    int (*ao_get_volume) (struct dtaudio_output *aout);
+    int (*ao_set_volume) (struct dtaudio_output *aout, int value);
     struct ao_wrapper *next;
     void *ao_priv;
 } ao_wrapper_t;
