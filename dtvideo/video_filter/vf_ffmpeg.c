@@ -101,7 +101,9 @@ static int convert_picture (dtvideo_filter_t * filter, dt_av_frame_t * src)
     int sf = para->s_pixfmt; 
     int df = para->d_pixfmt; 
 
+#ifdef ENABLE_ANDROID
     const AVPixFmtDescriptor *pix_desc = av_pix_fmt_desc_get(sf);
+#endif
     if(!vf_ctx->swap_frame)
         vf_ctx->swap_frame = dtav_new_frame();
     

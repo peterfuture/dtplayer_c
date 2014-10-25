@@ -176,13 +176,13 @@ static int ao_sdl2_stop (dtaudio_output_t *aout)
     return 0;
 }
 
-static int ao_sdl2_get_volume(dtaudio_output_t *aout)
+static int ao_sdl2_get_volume(ao_wrapper_t *ao)
 {
     dt_info(TAG,"getvolume: \n");
     return 0;
 }
 
-static int ao_sdl2_set_volume(dtaudio_output_t *aout, int value)
+static int ao_sdl2_set_volume(ao_wrapper_t *ao, int value)
 {
     dt_info(TAG,"setvolume: %d \n", value);
     return 0;

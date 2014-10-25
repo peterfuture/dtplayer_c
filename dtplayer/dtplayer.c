@@ -127,15 +127,18 @@ int player_init (dtplayer_context_t * dtp_ctx)
 
 
     //then use para update contrl info
-    if (para->sync_enable != -1)
-        ctrl_info->sync_enable = para->sync_enable;
+    if (para->disable_avsync != -1)
+        ctrl_info->sync_enable = !para->disable_avsync;
 
-    if(para->no_audio != -1)
-        ctrl_info->has_audio = (!para->no_audio);
-    if(para->no_video != -1)
-        ctrl_info->has_video = (!para->no_video);
-    if(para->no_sub != -1)
-        ctrl_info->has_sub = (!para->no_sub);
+    if(para->disable_audio != -1)
+        ctrl_info->has_audio = (!para->disable_audio);
+    if(para->disable_video != -1)
+        ctrl_info->has_video = (!para->disable_video);
+    if(para->disable_sub != -1)
+        ctrl_info->has_sub = (!para->disable_sub);
+    ctrl_info->disable_hw_acodec = para->disable_hw_acodec; 
+    ctrl_info->disable_hw_vcodec = para->disable_hw_vcodec; 
+    ctrl_info->disable_hw_scodec = para->disable_hw_scodec; 
 
     if(para->audio_index != -1)
         ctrl_info->cur_ast_index = dtp_ctx->media_info->cur_ast_index = para->audio_index;

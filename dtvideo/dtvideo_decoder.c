@@ -82,7 +82,7 @@ static int select_video_decoder (dtvideo_decoder_t * decoder)
             break;
         if((*p)->vfmt == para->vfmt)
         {
-            if((*p)->is_hw == 1 && (para->flag & DTV_FLAG_DISABLE_OMX) > 0)
+            if((*p)->is_hw == 1 && (para->flag & DTAV_FLAG_DISABLE_HW_CODEC) > 0)
             {
                 dt_info (TAG, "[%s:%d]disable-  hw name:%s flag:%d \n", __FUNCTION__, __LINE__,(*p)->name, para->flag);
                 p = &(*p)->next;

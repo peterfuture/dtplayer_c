@@ -23,8 +23,9 @@ static ply_ctx_t ply_ctx;
 int dtap_change_effect(ao_wrapper_t *wrapper);
 #endif
 
-
-void vo_sdl2_setup(ao_wrapper_t *wrapper);
+#ifdef ENABLE_AO_SDL2 
+void ao_sdl2_setup(ao_wrapper_t *wrapper);
+#endif
 
 static int update_cb (void *cookie, player_state_t * state)
 {
@@ -45,12 +46,12 @@ static int update_cb (void *cookie, player_state_t * state)
 static int parse_cmd(int argc,char **argv,dtplayer_para_t *para)
 {
     //first reset para
-    para->no_audio = para->no_video = para->no_sub = -1;
+    para->disable_audio = para->disable_video = para->disable_sub = -1;
     para->height = para->width = -1;
     para->loop_mode = 0;
     para->audio_index = para->video_index = para->sub_index = -1;
     para->update_cb = NULL;
-    para->sync_enable = -1;
+    para->disable_avsync = -1;
 
     //init para with argv
     para->file_name = argv[1];
@@ -170,8 +171,10 @@ int main (int argc, char **argv)
                 break;
             case EVENT_VOLUME_ADD:
                 dt_info(TAG, " volume add \n");
-                ply_ctx.volume = (++ply_ctx.volume) % 10;
+                ply_ctx.volume++;
+                ply_ctx.volume = ply_ctx.volume % 10;
                 ply_ctx.ao.ao_set_volume(&ply_ctx.ao, ply_ctx.volume);
+                break;
 #ifdef ENABLE_DTAP
             case EVENT_AE:
                 dtap_change_effect(&ply_ctx.ao);

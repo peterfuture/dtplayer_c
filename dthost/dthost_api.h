@@ -31,6 +31,7 @@ typedef struct
     unsigned char audio_extra_data[AUDIO_EXTR_DATA_SIZE];
     int audio_filter;           //audio filter options
     int audio_output;           //audio output device select
+    int aflag;                  //DISABLE_HW_ACODEC ETC.
     void *actx_priv;            //point to 
     /*video */
     int video_format;
@@ -51,13 +52,15 @@ typedef struct
     unsigned char video_extra_data[VIDEO_EXTR_DATA_SIZE];
     int video_filter;
     int video_output;
+    int vflag;                  //DISABLE_HW_VCODEC ETC.
     void *vctx_priv;
-    int vflag;
     /*sub */
     int sub_format;
     int sub_id;
     int sub_width;
     int sub_height;
+    int sflag;
+    void *sctx_priv;            //DISABLE_HW_SCODEC ETC.
 } dthost_para_t;
 
 typedef struct
