@@ -2,6 +2,7 @@
 #define DT_PLAYER_H
 
 #include "stdint.h"
+#include "ao_wrapper.h"
 
 typedef struct
 {
@@ -18,6 +19,8 @@ typedef struct ply_ctx
     int64_t duration;
     int disp_width;
     int disp_height;
+
+    ao_wrapper_t ao;
 
     int exit_flag;
 }ply_ctx_t;

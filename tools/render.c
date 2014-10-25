@@ -51,7 +51,7 @@ vo_wrapper_t vo_ex_ops = {
 
 
 /*---------------------------------------------------------- */
-#ifdef ENABLE_VO_SDL2 
+#ifdef ENABLE_AO_SDL2 
 extern ao_wrapper_t ao_sdl2_ops;
 #endif
 
@@ -60,7 +60,7 @@ ao_wrapper_t *ao_wrapper = &ao_ex_ops;
 static int ao_ex_init (dtaudio_output_t *aout, dtaudio_para_t *para)
 {
     int ret = 0;
-#ifdef ENABLE_VO_SDL2 
+#ifdef ENABLE_AO_SDL2 
     ret = ao_sdl2_ops.ao_init(aout,para);
 #endif
     return ret;
@@ -69,7 +69,7 @@ static int ao_ex_init (dtaudio_output_t *aout, dtaudio_para_t *para)
 static int ao_ex_play (dtaudio_output_t *aout, uint8_t * buf, int size)
 {
     int ret = 0;
-#ifdef ENABLE_VO_SDL2 
+#ifdef ENABLE_AO_SDL2 
     ret = ao_sdl2_ops.ao_write(aout,buf,size);
 #endif
     return ret;
@@ -78,7 +78,7 @@ static int ao_ex_play (dtaudio_output_t *aout, uint8_t * buf, int size)
 static int ao_ex_pause (dtaudio_output_t *aout)
 {
     int ret = 0;
-#ifdef ENABLE_VO_SDL2 
+#ifdef ENABLE_AO_SDL2 
     ret = ao_sdl2_ops.ao_pause(aout);
 #endif
     return ret;
@@ -87,7 +87,7 @@ static int ao_ex_pause (dtaudio_output_t *aout)
 static int ao_ex_resume (dtaudio_output_t *aout)
 {
     int ret = 0;
-#ifdef ENABLE_VO_SDL2 
+#ifdef ENABLE_AO_SDL2 
     ret = ao_sdl2_ops.ao_resume(aout);
 #endif
     return ret;
@@ -96,7 +96,7 @@ static int ao_ex_resume (dtaudio_output_t *aout)
 static int ao_ex_level(dtaudio_output_t *aout)
 {
     int ret = 0;
-#ifdef ENABLE_VO_SDL2 
+#ifdef ENABLE_AO_SDL2 
     ret = ao_sdl2_ops.ao_level(aout);
 #endif
     return ret;
@@ -105,7 +105,7 @@ static int ao_ex_level(dtaudio_output_t *aout)
 static int64_t ao_ex_get_latency (dtaudio_output_t *aout)
 {
     int ret = 0;
-#ifdef ENABLE_VO_SDL2 
+#ifdef ENABLE_AO_SDL2 
     ret = ao_sdl2_ops.ao_latency(aout);
 #endif
     return ret;
@@ -114,7 +114,7 @@ static int64_t ao_ex_get_latency (dtaudio_output_t *aout)
 static int ao_ex_stop (dtaudio_output_t *aout)
 {
     int ret = 0;
-#ifdef ENABLE_VO_SDL2 
+#ifdef ENABLE_AO_SDL2 
     ret = ao_sdl2_ops.ao_stop(aout);
 #endif
     return ret;
@@ -135,7 +135,7 @@ ao_wrapper_t ao_ex_ops = {
 
 int render_init()
 {
-    dtplayer_register_ext_ao(&ao_ex_ops);
+//    dtplayer_register_ext_ao(&ao_ex_ops);
     dtplayer_register_ext_vo(&vo_ex_ops); 
 
     return  0;

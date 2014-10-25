@@ -11,6 +11,8 @@
 
 #define SDL_AUDIO_BUFFER_SIZE 1024
 
+const char *ao_sdl2_name = "SDL AO";
+
 typedef struct{
     SDL_AudioSpec wanted;     // config audio
     dt_buffer_t dbt;
@@ -22,7 +24,7 @@ static ao_wrapper_t *wrapper = &ao_sdl2_ops;
 #ifdef ENABLE_DTAP
     dtap_context_t ap_ctx;
     int cur_ae_id = EQ_EFFECT_FLAT;
-int dtap_change_effect()
+int dtap_change_effect(ao_wrapper_t *wrapper)
 {
     cur_ae_id = (cur_ae_id + 1) % 9;
     ap_ctx.para.item = cur_ae_id;
@@ -173,7 +175,22 @@ static int ao_sdl2_stop (dtaudio_output_t *aout)
 
     return 0;
 }
-    
+
+void ao_sdl2_setup(ao_wrapper_t *wrapper)
+{
+    if(wrapper == NULL) return;
+    wrapper->id = AO_ID_SDL;
+    wrapper->name = ao_sdl2_name;
+    wrapper->ao_init = ao_sdl2_init;
+    wrapper->ao_pause = ao_sdl2_pause;
+    wrapper->ao_resume = ao_sdl2_resume;
+    wrapper->ao_stop = ao_sdl2_stop;
+    wrapper->ao_write = ao_sdl2_play;
+    wrapper->ao_level = ao_sdl2_level;
+    wrapper->ao_latency = ao_sdl2_get_latency;
+}
+
+
 ao_wrapper_t ao_sdl2_ops = {
     .id = AO_ID_SDL,
     .name = "sdl2",

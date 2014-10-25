@@ -20,8 +20,11 @@
 static ply_ctx_t ply_ctx;
 
 #ifdef ENABLE_DTAP
-int dtap_change_effect();
+int dtap_change_effect(ao_wrapper_t *wrapper);
 #endif
+
+
+void vo_sdl2_setup(ao_wrapper_t *wrapper);
 
 static int update_cb (void *cookie, player_state_t * state)
 {
@@ -83,6 +86,10 @@ int main (int argc, char **argv)
     }
     memset(&ply_ctx,0,sizeof(ply_ctx_t));
 
+#ifdef ENABLE_AO_SDL2 
+    ao_sdl2_setup(&ply_ctx.ao);
+    dtplayer_register_ext_ao(&ply_ctx.ao);
+#endif
     player_register_all();
     register_ex_all();
 
@@ -163,7 +170,7 @@ int main (int argc, char **argv)
                 break;
 #ifdef ENABLE_DTAP
             case EVENT_AE:
-                dtap_change_effect();
+                dtap_change_effect(&ply_ctx.ao);
                 break;
 #endif
             default:
