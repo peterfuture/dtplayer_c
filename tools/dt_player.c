@@ -1,6 +1,5 @@
 #include "dt_player.h"
 #include "version.h"
-#include "render.h"
 #include "stream_wrapper.h"
 #include "demuxer_wrapper.h"
 #include "ao_wrapper.h"

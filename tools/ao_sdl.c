@@ -27,7 +27,6 @@ static void sdl_cb(void *userdata,uint8_t *buf,int size)
 static int ao_sdl_init (dtaudio_output_t *aout, dtaudio_para_t *ppara)
 {
     int ret = 0;
-    ao_wrapper_t *wrapper = aout->wrapper;
     sdl_ao_ctx_t *ctx = malloc(sizeof(*ctx));
     if(!ctx)
     {
