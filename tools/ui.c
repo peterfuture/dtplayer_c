@@ -3,19 +3,28 @@
 
 #ifdef ENABLE_VO_SDL2 
 #include <SDL2/SDL.h>
-
 int sdl2_init();
 int sdl2_stop();
 int sdl2_get_orig_size(int *w, int *h);
 int sdl2_get_max_size(int *w, int *h);
 int sdl2_window_resize(int w, int h);
-
 #endif
+
+#ifdef ENABLE_VO_SDL
+#include <SDL/SDL.h>
+int sdl_init();
+int sdl_stop();
+#endif
+
+
 
 int ui_init(int w, int h)
 {
 #ifdef ENABLE_VO_SDL2 
     sdl2_init(w,h);
+#endif
+#ifdef ENABLE_VO_SDL
+    sdl_init(w,h);
 #endif
     return 0;
 }
@@ -24,6 +33,9 @@ int ui_stop()
 {
 #ifdef ENABLE_VO_SDL2 
     sdl2_stop(); 
+#endif
+#ifdef ENABLE_VO_SDL
+    sdl_stop(); 
 #endif
     return 0;
 }
@@ -132,21 +144,6 @@ player_event_t get_event (args_t *arg,ply_ctx_t *ctx)
                         break;
                     x = event.motion.x;
                 }
-#if 0
-                int ns, hh, mm, ss;
-                int tns, thh, tmm, tss;
-                tns  = ctx->duration / 1000000LL;
-                thh  = tns / 3600;
-                tmm  = (tns % 3600) / 60;
-                tss  = (tns % 60);
-                frac = x / ctx->disp_width;
-                ns   = frac * tns;
-                hh   = ns / 3600;
-                mm   = (ns % 3600) / 60;
-                ss   = (ns % 60);
-                fprintf(stderr, "Seek to %2.0f%% (%2d:%02d:%02d) of total duration (%2d:%02d:%02d)       \n", frac*100,
-                    hh, mm, ss, thh, tmm, tss);
-#endif
                 int64_t ts;
                 frac = x / ctx->disp_width;
                 ts = frac * ctx->duration;

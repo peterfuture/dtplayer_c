@@ -3,6 +3,7 @@
 
 #include "stdint.h"
 #include "ao_wrapper.h"
+#include "vo_wrapper.h"
 
 typedef struct
 {
@@ -22,6 +23,7 @@ typedef struct ply_ctx
 
     ao_wrapper_t ao;
     int volume;
+    vo_wrapper_t vo;
 
     int exit_flag;
 }ply_ctx_t;

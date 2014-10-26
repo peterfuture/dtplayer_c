@@ -26,6 +26,10 @@ int dtap_change_effect(ao_wrapper_t *wrapper);
 #ifdef ENABLE_AO_SDL2 
 void ao_sdl2_setup(ao_wrapper_t *wrapper);
 #endif
+#ifdef ENABLE_AO_SDL
+void ao_sdl_setup(ao_wrapper_t *wrapper);
+void vo_sdl_setup(vo_wrapper_t *wrapper);
+#endif
 
 static int update_cb (void *cookie, player_state_t * state)
 {
@@ -51,7 +55,7 @@ static int parse_cmd(int argc,char **argv,dtplayer_para_t *para)
     para->loop_mode = 0;
     para->audio_index = para->video_index = para->sub_index = -1;
     para->update_cb = NULL;
-    para->disable_avsync = -1;
+    para->disable_avsync = 0;
 
     //init para with argv
     para->file_name = argv[1];
@@ -91,6 +95,13 @@ int main (int argc, char **argv)
     ao_sdl2_setup(&ply_ctx.ao);
     dtplayer_register_ext_ao(&ply_ctx.ao);
 #endif
+#ifdef ENABLE_AO_SDL 
+    ao_sdl_setup(&ply_ctx.ao);
+    dtplayer_register_ext_ao(&ply_ctx.ao);
+    vo_sdl_setup(&ply_ctx.vo);
+    dtplayer_register_ext_vo(&ply_ctx.vo);
+#endif
+
     player_register_all();
     register_ex_all();
 
@@ -129,7 +140,6 @@ int main (int argc, char **argv)
     ply_ctx.disp_height = height;
 
     ui_init(width,height); 
-    render_init();
 
 	dtplayer_start (player_priv);
 

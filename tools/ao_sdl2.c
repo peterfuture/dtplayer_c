@@ -11,7 +11,7 @@
 
 #define SDL_AUDIO_BUFFER_SIZE 1024
 
-const char *ao_sdl2_name = "SDL AO";
+const char *ao_sdl2_name = "SDL2 AO";
 
 typedef struct{
     SDL_AudioSpec wanted;     // config audio

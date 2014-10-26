@@ -63,8 +63,8 @@ LDFLAGS += -L/usr/local/lib -L/usr/lib -L./
 
 #extlib
 DT_FFMPEG = yes
-DT_SDL = no
-DT_SDL2 = yes
+DT_SDL = yes
+DT_SDL2 = no
 DT_ALSA = yes
 DT_FAAD = no
 DT_TSDEMUX = no
@@ -238,10 +238,9 @@ SRCS_COMMON-$(DT_AUDIO) += dtaudio/dtaudio.c
 SRCS_COMMON-$(DT_AUDIO) += dtaudio/dtaudio_decoder.c
 SRCS_COMMON-$(DT_AUDIO) += dtaudio/dtaudio_filter.c
 SRCS_COMMON-$(DT_AUDIO) += dtaudio/dtaudio_output.c
-SRCS_COMMON-$(DT_FAAD) += dtaudio/audio_decoder/ad_faad.c            # dec
-SRCS_COMMON-$(DT_FFMPEG) += dtaudio/audio_decoder/ad_ffmpeg.c        # dec
-SRCS_COMMON-$(DT_ALSA) += dtaudio/audio_out/ao_alsa.c                # out
-SRCS_COMMON-$(DT_SDL) += dtaudio/audio_out/ao_sdl.c                  # out
+SRCS_COMMON-$(DT_FAAD)  += dtaudio/audio_decoder/ad_faad.c            # dec
+SRCS_COMMON-$(DT_FFMPEG)+= dtaudio/audio_decoder/ad_ffmpeg.c        # dec
+SRCS_COMMON-$(DT_ALSA)  += dtaudio/audio_out/ao_alsa.c                # out
 
 #dtvideo
 SRCS_COMMON-$(DT_VIDEO) += dtvideo/dtvideo_api.c
@@ -251,7 +250,6 @@ SRCS_COMMON-$(DT_VIDEO) += dtvideo/dtvideo_filter.c
 SRCS_COMMON-$(DT_VIDEO) += dtvideo/dtvideo_output.c
 SRCS_COMMON-$(DT_FFMPEG) += dtvideo/video_decoder/vd_ffmpeg.c         #dec
 SRCS_COMMON-$(DT_FFMPEG) += dtvideo/video_filter/vf_ffmpeg.c          #filter
-SRCS_COMMON-$(DT_SDL) += dtvideo/video_out/vo_sdl.c                   #out
 
 #dtport
 SRCS_COMMON-$(DT_PORT) += dtport/dt_packet_queue.c
@@ -325,8 +323,9 @@ ALL_PRG += $(DTLIB_DEBUG) $(DTLIB_RELEASE)
 
 #dtm player
 RENDER-$(DT_SDL2) += tools/ao_sdl2.c tools/vo_sdl2.c
-SRCS_DTPLAYER   += tools/dt_player.c tools/ui.c tools/render.c tools/version.c tools/vd_ex.c
-SRCS_DTPLAYER   += $(RENDER-yes)
+RENDER-$(DT_SDL)  += tools/ao_sdl.c tools/vo_sdl.c
+SRCS_DTPLAYER     += tools/dt_player.c tools/ui.c tools/render.c tools/version.c tools/vd_ex.c
+SRCS_DTPLAYER     += $(RENDER-yes)
 
 OBJS_DTPLAYER_RELEASE   += $(addsuffix .o, $(basename $(SRCS_DTPLAYER)))
 DTM_PLAYER_DEPS_RELEASE  = $(OBJS_DTPLAYER_RELEASE) $(DTLIB_RELEASE)
