@@ -324,7 +324,7 @@ ALL_PRG += $(DTLIB_DEBUG) $(DTLIB_RELEASE)
 #dtm player
 RENDER-$(DT_SDL2) += tools/ao_sdl2.c tools/vo_sdl2.c
 RENDER-$(DT_SDL)  += tools/ao_sdl.c tools/vo_sdl.c
-SRCS_DTPLAYER     += tools/dt_player.c tools/ui.c tools/render.c tools/version.c tools/vd_ex.c
+SRCS_DTPLAYER     += tools/dt_player.c tools/ui.c tools/version.c tools/vd_ex.c
 SRCS_DTPLAYER     += $(RENDER-yes)
 
 OBJS_DTPLAYER_RELEASE   += $(addsuffix .o, $(basename $(SRCS_DTPLAYER)))

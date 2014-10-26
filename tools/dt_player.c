@@ -202,7 +202,6 @@ QUIT_CHECK:
         usleep(100);
         break;
     }
-    render_stop();
     ui_stop(); 
     dt_info ("", "QUIT DTPLAYER-TEST\n");
     return 0;
