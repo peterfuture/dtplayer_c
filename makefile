@@ -76,6 +76,7 @@ DT_DEMUXER=yes
 DT_UTIL=yes
 DT_AUDIO=yes
 DT_VIDEO=yes
+DT_SUB=no
 DT_PORT=yes
 DT_HOST=yes
 DT_PLAYER=yes
@@ -243,13 +244,23 @@ SRCS_COMMON-$(DT_FFMPEG)+= dtaudio/audio_decoder/ad_ffmpeg.c        # dec
 SRCS_COMMON-$(DT_ALSA)  += dtaudio/audio_out/ao_alsa.c                # out
 
 #dtvideo
-SRCS_COMMON-$(DT_VIDEO) += dtvideo/dtvideo_api.c
-SRCS_COMMON-$(DT_VIDEO) += dtvideo/dtvideo.c
-SRCS_COMMON-$(DT_VIDEO) += dtvideo/dtvideo_decoder.c
-SRCS_COMMON-$(DT_VIDEO) += dtvideo/dtvideo_filter.c
-SRCS_COMMON-$(DT_VIDEO) += dtvideo/dtvideo_output.c
+SRCS_COMMON-$(DT_VIDEO)  += dtvideo/dtvideo_api.c
+SRCS_COMMON-$(DT_VIDEO)  += dtvideo/dtvideo.c
+SRCS_COMMON-$(DT_VIDEO)  += dtvideo/dtvideo_decoder.c
+SRCS_COMMON-$(DT_VIDEO)  += dtvideo/dtvideo_filter.c
+SRCS_COMMON-$(DT_VIDEO)  += dtvideo/dtvideo_output.c
 SRCS_COMMON-$(DT_FFMPEG) += dtvideo/video_decoder/vd_ffmpeg.c         #dec
 SRCS_COMMON-$(DT_FFMPEG) += dtvideo/video_filter/vf_ffmpeg.c          #filter
+
+#dtsub
+SRCS_COMMON-$(DT_SUB)    += dtsub/dtsub_api.c
+SRCS_COMMON-$(DT_SUB)    += dtsub/dtsub.c
+SRCS_COMMON-$(DT_SUB)    += dtsub/dtsub_parser.c
+SRCS_COMMON-$(DT_SUB)    += dtsub/dtsub_decoder.c
+SRCS_COMMON-$(DT_SUB)    += dtsub/dtsub_output.c
+SRCS_COMMON-$(DT_FFMPEG) += dtsub/sub_parser/sp_ffmpeg.c
+SRCS_COMMON-$(DT_FFMPEG) += dtsub/sub_decoder/sd_ffmpeg.c
+SRCS_COMMON-$(DT_SUB)    += dtsub/sub_output/so_null.c
 
 #dtport
 SRCS_COMMON-$(DT_PORT) += dtport/dt_packet_queue.c
@@ -257,8 +268,8 @@ SRCS_COMMON-$(DT_PORT) += dtport/dtport_api.c
 SRCS_COMMON-$(DT_PORT) += dtport/dtport.c
 
 #dthost
-SRCS_COMMON-$(DT_HOST) += dthost/dthost.c
 SRCS_COMMON-$(DT_HOST) += dthost/dthost_api.c
+SRCS_COMMON-$(DT_HOST) += dthost/dthost.c
 
 #dtplayer
 SRCS_COMMON-$(DT_PLAYER) +=dtplayer/dtplayer_api.c
@@ -287,6 +298,10 @@ DIRS =  . \
         dtvideo/video_decoder \
         dtvideo/video_filter \
         dtvideo/video_out \
+        dtsub \
+        dtsub/sub_decoder \
+        dtsub/sub_output \
+        dtsub/sub_parser \
         dthost \
         dtplayer \
 		tools   
