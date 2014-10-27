@@ -66,7 +66,7 @@
 /* local includes */
 #include "dt_ini.h"
 
-#define INI_FILE "./sys_set.ini"
+#define INI_FILE "./etc/sys_set.ini"
 
 static struct ENTRY *Entry = NULL;
 static struct ENTRY *CurEntry = NULL;

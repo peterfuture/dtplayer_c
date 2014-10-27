@@ -69,7 +69,6 @@ int player_init (dtplayer_context_t * dtp_ctx)
         goto ERR0;
     }
 
-
     set_player_status (dtp_ctx, PLAYER_STATUS_INIT_ENTER);
     dt_info (TAG, "[%s:%d] START PLAYER INIT\n", __FUNCTION__, __LINE__);
     dtp_ctx->file_name = dtp_ctx->player_para.file_name;
@@ -173,8 +172,6 @@ int player_init (dtplayer_context_t * dtp_ctx)
     }
 
     //updte mediainfo --
-    //
-    ctrl_info->has_sub = 0;     // do not support sub for now 
     dtp_ctx->media_info->disable_audio = !ctrl_info->has_audio;
     dtp_ctx->media_info->disable_video = !ctrl_info->has_video;
     dtp_ctx->media_info->disable_sub = !ctrl_info->has_sub;
