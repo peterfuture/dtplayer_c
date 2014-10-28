@@ -93,6 +93,8 @@ int64_t dthost_get_apts (void *host_priv);
 int64_t dthost_update_apts (void *host_priv, int64_t pts);
 int64_t dthost_get_vpts (void *host_priv);
 void dthost_update_vpts (void *host_priv, int64_t vpts);
+int64_t dthost_get_spts (void *host_priv);
+void dthost_update_spts (void *host_priv, int64_t spts);
 int dthost_get_avdiff (void *host_priv);
 int64_t dthost_get_current_time (void *host_priv);
 int64_t dthost_get_systime (void *host_priv);

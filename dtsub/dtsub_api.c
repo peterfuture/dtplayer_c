@@ -14,10 +14,66 @@
 #include "dtsub_para.h"
 #include "dtsub.h"
 #include "dt_av.h"
+#include "dthost_api.h"
 
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+
+/***********************************************************************
+**
+** dtsub_read_frame
+**
+** - read packet from dtport
+**
+***********************************************************************/
+int dtsub_read_pkt(void *priv, dt_av_pkt_t * pkt)
+{
+    int type = DT_TYPE_SUBTITLE;
+    int ret = 0;
+    dtsub_context_t *sctx = (dtsub_context_t *) priv;
+    ret = dthost_read_frame(sctx->parent, pkt, type);
+    return ret;
+}
+
+/***********************************************************************
+**
+** dtsub_output_read
+**
+** - read sub frame(decoded) from so_queue
+** - removed from queue
+**
+***********************************************************************/
+dt_av_frame_t *dtsub_output_read(void *priv)
+{
+    dtsub_context_t *sctx = (dtsub_context_t *)priv;
+    queue_t *sub_queue = sctx->so_queue;
+    if (sub_queue->length == 0)
+    {
+        return NULL;
+    }
+    return queue_pop_head(sub_queue);
+}
+
+/***********************************************************************
+**
+** dtsub_output_pre_read
+**
+** - pre read sub frame(decoded) from so_queue
+** - not removed from queue
+**
+***********************************************************************/
+dt_av_frame_t *dtsub_output_pre_read(void *priv)
+{
+    dtsub_context_t *sctx = (dtsub_context_t *)priv;
+    queue_t *sub_queue = sctx->so_queue;
+    if (sub_queue->length == 0)
+    {
+        return NULL;
+    }
+    return queue_pre_pop_head(sub_queue);
+}
+
 
 /***********************************************************************
 **
@@ -34,7 +90,7 @@ int dtsub_init(void **sub_priv, dtsub_para_t *para, void *parent)
         ret = -1;
         goto ERR0;
     }
-    memcpy(&sctx->para, para, sizeof(dtsub_para_t));
+    memcpy(&sctx->sub_para, para, sizeof(dtsub_para_t));
 
     //we need to set parent early
     sctx->parent = parent;
@@ -120,6 +176,33 @@ int dtsub_stop(void *sub_priv)
 
 /***********************************************************************
 **
+** dtsub_get_systime
+**
+***********************************************************************/
+int64_t dtsub_get_systime (void *priv)
+{
+    dtsub_context_t *sctx = (dtsub_context_t *)priv;
+    if (sctx->sub_status <= SUB_STATUS_INITED)
+        return -1;
+    return dthost_get_systime(sctx->parent);
+}
+
+/***********************************************************************
+**
+** dtsub_update_pts
+**
+***********************************************************************/
+void dtsub_update_pts(void *priv)
+{
+    dtsub_context_t *sctx = (dtsub_context_t *)priv;
+    if (sctx->sub_status < SUB_STATUS_INITED)
+        return;
+    dthost_update_spts(sctx->parent, sctx->current_pts);
+    return;
+}
+
+/***********************************************************************
+**
 ** dtsub_get_pts
 **
 ** - get cur sub pts
@@ -127,8 +210,8 @@ int dtsub_stop(void *sub_priv)
 ***********************************************************************/
 int64_t dtsub_get_pts(void *sub_priv)
 {
-    dtsub_context_t *vctx = (dtsub_context_t *)sub_priv;
-    return dtsub_get_current_pts(vctx);
+    dtsub_context_t *sctx = (dtsub_context_t *)sub_priv;
+    return sub_get_current_pts(sctx);
 }
 
 /***********************************************************************

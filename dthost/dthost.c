@@ -6,7 +6,7 @@
 
 #include "unistd.h"
 
-#define TAG "host-MGT"
+#define TAG "HOST-MGT"
 
 //==Part1:PTS Relative
 int host_sync_enable (dthost_context_t * hctx)
@@ -24,6 +24,12 @@ int64_t host_get_vpts (dthost_context_t * hctx)
 {
     //return dtvideo_externel_get_pts(hctx->video_priv);
     return hctx->pts_video;
+}
+
+int64_t host_get_spts (dthost_context_t * hctx)
+{
+    //return dtvideo_externel_get_pts(hctx->video_priv);
+    return hctx->pts_sub;
 }
 
 int64_t host_get_systime (dthost_context_t * hctx)
@@ -112,6 +118,13 @@ int host_update_vpts (dthost_context_t * hctx, int64_t vpts)
     if (hctx->sync_enable && hctx->sync_mode == DT_SYNC_VIDEO_MASTER && avdiff / 90 < AVSYNC_THRESHOLD_MAX)
         hctx->sync_mode = DT_SYNC_AUDIO_MASTER;
 
+    return 0;
+}
+
+int host_update_spts (dthost_context_t * hctx, int64_t spts)
+{
+    hctx->pts_sub = spts;
+    dt_debug (TAG, "update spts:%llx \n", spts);
     return 0;
 }
 

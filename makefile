@@ -114,6 +114,7 @@ endif
 DT_CFLAGS += -DENABLE_VDEC_NULL=0
 ifeq ($(DT_FFMPEG),yes)
 	DT_CFLAGS += -DENABLE_VDEC_FFMPEG=1
+	DT_CFLAGS += -DENABLE_SDEC_FFMPEG=1
 	DT_CFLAGS += -DENABLE_VF_FFMPEG=1
 endif
 
@@ -257,6 +258,7 @@ SRCS_COMMON-$(DT_SUB)    += dtsub/dtsub_api.c
 SRCS_COMMON-$(DT_SUB)    += dtsub/dtsub.c
 SRCS_COMMON-$(DT_SUB)    += dtsub/dtsub_parser.c
 SRCS_COMMON-$(DT_SUB)    += dtsub/dtsub_decoder.c
+SRCS_COMMON-$(DT_SUB)    += dtsub/dtsub_filter.c
 SRCS_COMMON-$(DT_SUB)    += dtsub/dtsub_output.c
 SRCS_COMMON-$(DT_FFMPEG) += dtsub/sub_parser/sp_ffmpeg.c
 SRCS_COMMON-$(DT_FFMPEG) += dtsub/sub_decoder/sd_ffmpeg.c

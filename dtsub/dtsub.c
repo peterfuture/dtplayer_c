@@ -15,56 +15,52 @@
 
 /***********************************************************************
 **
-** dtsub_read_frame
+** sub_register_all
 **
-** - read packet from dtport
+** - register internal sub elements
 **
 ***********************************************************************/
-int dtsub_read_frame(void *priv, dt_av_pkt_t * frame)
+void sub_register_all()
 {
-    int type = DT_TYPE_SUBTITLE;
-    int ret = 0;
-    dtsub_context_t *sctx = (dtsub_context_t *) priv;
-    ret = dthost_read_frame (sctx->parent, frame, type);
-    return ret;
+    sd_register_all();
+    so_register_all();
+    sf_register_all();
 }
 
 /***********************************************************************
 **
-** dtsub_output_read
+** register_ext_sd
 **
-** - read sub frame(decoded) from so_queue
-** - removed from queue
+** - register external sub decoder
 **
 ***********************************************************************/
-dt_av_frame_t *dtsub_output_read(void *priv)
+void register_ext_sd(sd_wrapper_t *sd)
 {
-    dtsub_context_t *sctx = (dtsub_context_t *)priv;
-    queue_t *sub_queue = sctx->so_queue;
-    if (sub_queue->length == 0)
-    {
-        return NULL;
-    }
-    return queue_pop_head(sub_queue);
+   register_sd_ext(sd); 
 }
 
 /***********************************************************************
 **
-** dtsub_output_pre_read
+** register_ext_so
 **
-** - pre read sub frame(decoded) from so_queue
-** - not removed from queue
+** - register external sub render
 **
 ***********************************************************************/
-dt_av_frame_t *dtsub_output_pre_read(void *priv)
+void register_ext_so(so_wrapper_t *so)
 {
-    dtsub_context_t *sctx = (dtsub_context_t *)priv;
-    queue_t *sub_queue = sctx->so_queue;
-    if (sub_queue->length == 0)
-    {
-        return NULL;
-    }
-    return queue_pre_pop_head(sub_queue);
+   so_register_ext(so); 
+}
+
+/***********************************************************************
+**
+** register_ext_sf
+**
+** - register external sub filter
+**
+***********************************************************************/
+void register_ext_sf(sf_wrapper_t *sf)
+{
+   sf_register_ext(sf); 
 }
 
 /***********************************************************************
@@ -74,7 +70,6 @@ dt_av_frame_t *dtsub_output_pre_read(void *priv)
 ***********************************************************************/
 int64_t sub_get_current_pts(dtsub_context_t * sctx)
 {
-    uint64_t pts;
     if (sctx->sub_status <= SUB_STATUS_INITED)
         return -1;
     return sctx->current_pts;
@@ -141,33 +136,6 @@ int sub_drop (dtsub_context_t * sctx, int64_t target_pts)
 
 /***********************************************************************
 **
-** dtsub_get_systime
-**
-***********************************************************************/
-int64_t dtsub_get_systime (void *priv)
-{
-    dtsub_context_t *sctx = (dtsub_context_t *)priv;
-    if (sctx->sub_status <= SUB_STATUS_INITED)
-        return -1;
-    return dthost_get_systime(sctx->parent);
-}
-
-/***********************************************************************
-**
-** dtsub_update_pts
-**
-***********************************************************************/
-void dtsub_update_pts(void *priv)
-{
-    dtsub_context_t *sctx = (dtsub_context_t *)priv;
-    if (sctx->sub_status < SUB_STATUS_INITED)
-        return;
-    dthost_update_spts(sctx->parent, sctx->current_pts);
-    return;
-}
-
-/***********************************************************************
-**
 ** sub_get_dec_state
 **
 ***********************************************************************/
@@ -178,42 +146,27 @@ int sub_get_dec_state(dtsub_context_t * sctx, dec_state_t * dec_state)
     return -1;
     dtsub_decoder_t *sdec = &sctx->sub_dec;
     dec_state->sdec_error_count = sdec->decode_err_cnt;
-    dec_state->sdec_fps = sdec->para->rate;
-    dec_state->sdec_width = sdec->para->d_width;
-    dec_state->sdec_height = sdec->para->d_height;
+    dec_state->sdec_width = sdec->para->width;
+    dec_state->sdec_height = sdec->para->height;
     dec_state->sdec_status = sdec->status;
     return 0;
 }
 
-//reserve 10 frame
-//if low level just return
+/***********************************************************************
+**
+** sub_get_out_closed
+**
+***********************************************************************/
 int sub_get_out_closed (dtsub_context_t * sctx)
 {
     return 1;
 }
 
-void sub_register_all()
-{
-    sd_register_all();
-    so_register_all();
-    sf_register_all();
-}
-
-void register_ext_sd(sd_wrapper_t *sd)
-{
-   register_sdec_ext(sd); 
-}
-
-void register_ext_so(so_wrapper_t *so)
-{
-   so_register_ext(vo); 
-}
-
-void register_ext_sf(sf_wrapper_t *sf)
-{
-   sf_register_ext(sf); 
-}
-
+/***********************************************************************
+**
+** sub_start
+**
+***********************************************************************/
 int sub_start (dtsub_context_t * sctx)
 {
     if (sctx->sub_status == SUB_STATUS_INITED)
@@ -227,6 +180,11 @@ int sub_start (dtsub_context_t * sctx)
     return 0;
 }
 
+/***********************************************************************
+**
+** sub_pause
+**
+***********************************************************************/
 int sub_pause (dtsub_context_t * sctx)
 {
     if (sctx->sub_status == SUB_STATUS_ACTIVE)
@@ -238,6 +196,11 @@ int sub_pause (dtsub_context_t * sctx)
     return 0;
 }
 
+/***********************************************************************
+**
+** sub_resume
+**
+***********************************************************************/
 int sub_resume (dtsub_context_t * sctx)
 {
     if (sctx->sub_status == SUB_STATUS_PAUSED)
@@ -250,6 +213,11 @@ int sub_resume (dtsub_context_t * sctx)
     return -1;
 }
 
+/***********************************************************************
+**
+** sub_stop
+**
+***********************************************************************/
 int sub_stop (dtsub_context_t * sctx)
 {
     if (sctx->sub_status >= SUB_STATUS_INITED)
@@ -263,6 +231,11 @@ int sub_stop (dtsub_context_t * sctx)
     return 0;
 }
 
+/***********************************************************************
+**
+** sub_init
+**
+***********************************************************************/
 int sub_init (dtsub_context_t * sctx)
 {
     int ret = 0;
@@ -293,7 +266,7 @@ int sub_init (dtsub_context_t * sctx)
     memset (sub_out, 0, sizeof (dtsub_output_t));
     sub_out->para = &sctx->sub_para;
     sub_out->parent = sctx;
-    ret = sub_output_init (sub_out, sctx->sub_para.sub_output);
+    ret = sub_output_init(sub_out, sctx->sub_para.sub_output);
     if (ret < 0)
         goto err2;
 

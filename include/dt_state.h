@@ -25,7 +25,6 @@ typedef struct dec_state
     int vdec_error_count;
     int vdec_status;
 
-
     int sdec_width;
     int sdec_height;
     int sdec_error_count;

@@ -23,6 +23,7 @@ void player_register_all()
         demuxer_register_all();
         audio_register_all();
         video_register_all();
+        sub_register_all();
         register_ok = 1;
     }
 }
