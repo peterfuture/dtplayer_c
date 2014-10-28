@@ -41,8 +41,8 @@ static int update_cb (void *cookie, player_state_t * state)
     ply_ctx.cur_time_ms = state->cur_time_ms;
     ply_ctx.duration = state->full_time;
 
-    dt_debug (TAG, "UPDATECB CURSTATUS:%x \n", state->cur_status);
-    dt_info(TAG,"CUR TIME %lld S  FULL TIME:%lld  \n",state->cur_time,state->full_time);
+    dt_debug(TAG, "UPDATECB CURSTATUS:%x \n", state->cur_status);
+    dt_info(TAG, "CUR TIME %lld S  FULL TIME:%lld  \n",state->cur_time,state->full_time);
     return 0;
 }
 
@@ -59,8 +59,9 @@ static int parse_cmd(int argc,char **argv,dtplayer_para_t *para)
     //init para with argv
     para->file_name = argv[1];
     para->update_cb = (void *) update_cb;
-    //para->no_audio=1;
-    //para->no_video=1;
+    //para->disable_audio=1;
+    //para->disable_video=1;
+    //para->disable_sub=1;
     para->width = -1;
     para->height = -1;
     para->cookie = NULL;

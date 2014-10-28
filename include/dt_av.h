@@ -18,12 +18,10 @@ typedef enum DT_AVMediaType
     DT_TYPE_UNKNOWN = -1,
     DT_TYPE_VIDEO,
     DT_TYPE_AUDIO,
-    DT_TYPE_SUBTITLE,
-
     DT_TYPE_DATA,
+    DT_TYPE_SUBTITLE,
     DT_TYPE_ATTACHMENT,
-    DT_TYPE_NB,
-    DT_TYPE_MAX
+    DT_TYPE_NB
 } dt_media_type_t;
 
 // original packet

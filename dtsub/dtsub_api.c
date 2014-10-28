@@ -36,12 +36,10 @@ int dtsub_init(void **sub_priv, dtsub_para_t *para, void *parent)
         goto ERR0;
     }
     memcpy (&sctx->para, para, sizeof(dtsub_para_t));
-    sctx->para.extradata_size = para->extradata_size;
-    memcpy(&(sctx->para.extradata[0]), &(para->extradata[0]), para->extradata_size);
 
     //we need to set parent early
     sctx->parent = parent;
-    ret = sub_init (sctx);
+    ret = sub_init(sctx);
     if (ret < 0)
     {
         dt_error (TAG, "[%s:%d] sub init failed \n", __FUNCTION__, __LINE__);

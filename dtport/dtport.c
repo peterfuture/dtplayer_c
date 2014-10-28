@@ -31,7 +31,7 @@ int port_init (dtport_context_t * pctx, dtport_para_t * para)
         ret = packet_queue_init (&(pctx->queue_audio));
         if (ret < 0)
         {
-            dt_error (TAG, "[%s:%d] port  init audio queeu failed has_audio:%d\n", __FUNCTION__, __LINE__, pctx->param.has_audio);
+            dt_info(TAG, "[%s:%d] port  init audio queeu failed has_audio:%d\n", __FUNCTION__, __LINE__, pctx->param.has_audio);
             goto ERR0;
         }
         dt_info (TAG, "[%s:%d] port start init audio queeu has_audio:%d\n", __FUNCTION__, __LINE__, pctx->param.has_audio);
@@ -43,7 +43,10 @@ int port_init (dtport_context_t * pctx, dtport_para_t * para)
         packet_queue_init (&(pctx->queue_video));
     }
     if (para->has_subtitle)
+    {
+        dt_info(TAG, "[%s:%d] port start init sub queeu has_sub:%d\n", __FUNCTION__, __LINE__, pctx->param.has_subtitle);
         packet_queue_init (&(pctx->queue_subtitle));
+    }
     return ret;
   ERR0:
     return ret;

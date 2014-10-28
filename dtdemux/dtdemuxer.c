@@ -59,27 +59,36 @@ static int demuxer_select(dtdemuxer_context_t * dem_ctx)
 
 static void dump_media_info(dt_media_info_t * info)
 {
-    dt_info(TAG, "|====================MEDIA INFO====================|");
+    const char *type = "ung";
+    dt_info(TAG, "|====================MEDIA INFO====================| \n");
     dt_info(TAG, "|file_name:%s\n", info->file_name);
     dt_info(TAG, "|file_size:%lld \n", info->file_size);
     dt_info(TAG, "|duration:%lld bitrate:%d\n", info->duration, info->bit_rate);
     dt_info(TAG, "|has video:%d has audio:%d has sub:%d\n", info->has_video, info->has_audio, info->has_sub);
+    dt_info(TAG, "|====================VIDEO INFO====================| \n");
     dt_info(TAG, "|video stream info,num:%d\n", info->vst_num);
     int i = 0;
     for(i = 0; i < info->vst_num; i++)
     {
-        dt_info(TAG, "|video stream:%d index:%d id:%d\n", i, info->vstreams[i]->index, info->vstreams[i]->id);
-        dt_info(TAG, "|bitrate:%d width:%d height:%d duration:%lld \n", info->vstreams[i]->bit_rate, info->vstreams[i]->width, info->vstreams[i]->height, info->vstreams[i]->duration);
+        dt_info(TAG, "|--video stream:%d index:%d id:%d fmt:%s \n", i, info->vstreams[i]->index, info->vstreams[i]->id, type);
+        dt_info(TAG, "|--bitrate:%d width:%d height:%d duration:%lld \n", info->vstreams[i]->bit_rate, info->vstreams[i]->width, info->vstreams[i]->height, info->vstreams[i]->duration);
     }
+    dt_info(TAG, "|====================AUDIO INFO====================| \n");
     dt_info(TAG, "|audio stream info,num:%d\n", info->ast_num);
     for(i = 0; i < info->ast_num; i++)
     {
-        dt_info(TAG, "|audio stream:%d index:%d id:%d\n", i, info->astreams[i]->index, info->astreams[i]->id);
-        dt_info(TAG, "|bitrate:%d sample_rate:%d channels:%d bps:%d duration:%lld \n", info->astreams[i]->bit_rate, info->astreams[i]->sample_rate, info->astreams[i]->channels, info->astreams[i]->bps, info->astreams[i]->duration);
+        dt_info(TAG, "|--audio stream:%d index:%d id:%d fmt:%s\n", i, info->astreams[i]->index, info->astreams[i]->id, type);
+        dt_info(TAG, "|--bitrate:%d sample_rate:%d channels:%d bps:%d duration:%lld \n", info->astreams[i]->bit_rate, info->astreams[i]->sample_rate, info->astreams[i]->channels, info->astreams[i]->bps, info->astreams[i]->duration);
     }
 
+    dt_info(TAG, "|====================SUB INFO======================| \n");
     dt_info(TAG, "|subtitle stream num:%d\n", info->sst_num);
-    dt_info(TAG, "|================================================|\n");
+    for(i = 0; i < info->sst_num; i++)
+    {
+        dt_info(TAG, "|--sub stream:%d index:%d id:%d fmt:%s\n", i, info->sstreams[i]->index, info->sstreams[i]->id, type);
+        dt_info(TAG, "|--width:%d height:%d \n", info->sstreams[i]->width, info->sstreams[i]->height);
+    }
+    dt_info(TAG, "|==================================================|\n");
 }
 
 int demuxer_open(dtdemuxer_context_t * dem_ctx)

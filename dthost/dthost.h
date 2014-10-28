@@ -21,6 +21,7 @@ typedef struct
     void *port_priv;
     void *audio_priv;
     void *video_priv;
+    void *sub_priv;
 } dthost_context_t;
 
 int host_start (dthost_context_t * hctx);

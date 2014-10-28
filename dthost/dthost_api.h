@@ -67,12 +67,15 @@ typedef struct
 {
     int abuf_level;
     int vbuf_level;
+    int sbuf_level;
 
     int adec_err_cnt;
     int vdec_err_cnt;
+    int sdec_err_cnt;
 
     int64_t cur_apts;
     int64_t cur_vpts;
+    int64_t cur_spts;
     int64_t cur_systime;
 
 } host_state_t;

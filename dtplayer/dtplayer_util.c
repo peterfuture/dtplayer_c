@@ -59,7 +59,6 @@ int player_host_init (dtplayer_context_t * dtp_ctx)
 
         host_para->audio_extra_size = astream->extradata_size;
         host_para->actx_priv = astream->codec_priv; //AVCodecContext
-        dt_info (TAG, "[%s:%d] audio extra_size:%d time_base.num:%d den:%d\n", __FUNCTION__, __LINE__, host_para->audio_extra_size, host_para->audio_num, host_para->audio_den);
         if (host_para->audio_extra_size > 0)
         {
             memset (host_para->audio_extra_data, 0, host_para->audio_extra_size);
@@ -67,6 +66,8 @@ int player_host_init (dtplayer_context_t * dtp_ctx)
         }
         host_para->audio_filter = -1; //default
         host_para->audio_output = -1; //defualt
+        dt_info(TAG, "host-audio setup ok, cur index:%d \n", pctrl->cur_ast_index);
+        dt_info (TAG, "[%s:%d] audio extra_size:%d time_base.num:%d den:%d\n", __FUNCTION__, __LINE__, host_para->audio_extra_size, host_para->audio_num, host_para->audio_den);
     }
     //----video ----
     if (pctrl->has_video)
@@ -122,10 +123,6 @@ int player_host_init (dtplayer_context_t * dtp_ctx)
 
         host_para->vctx_priv = vstream->codec_priv;
 
-        dt_info(TAG, "[%s:%d]format:%d width:%d height:%d fmt:%d rate:%d ratio:%d fps:%g extra_size:%d\n", __FUNCTION__, __LINE__, host_para->video_format, host_para->video_src_width, host_para->video_src_height, host_para->video_src_pixfmt, host_para->video_rate, host_para->video_ratio, host_para->video_fps,host_para->video_extra_size);
-
-        dt_info(TAG, "timebase->num:%d timebase->den:%d \n", host_para->video_num, host_para->video_den);
-
         if (host_para->video_extra_size > 0)
         {
             memset (host_para->video_extra_data, 0, host_para->video_extra_size);
@@ -133,8 +130,27 @@ int player_host_init (dtplayer_context_t * dtp_ctx)
         }
         host_para->video_filter = -1; //defualt
         host_para->video_output = -1; //defualt
+        dt_info(TAG, "host-video Setup ok, cur index:%d \n", pctrl->cur_vst_index);
+        dt_info(TAG, "[%s:%d]format:%d width:%d height:%d fmt:%d rate:%d ratio:%d fps:%g extra_size:%d\n", __FUNCTION__, __LINE__, host_para->video_format, host_para->video_src_width, host_para->video_src_height, host_para->video_src_pixfmt, host_para->video_rate, host_para->video_ratio, host_para->video_fps,host_para->video_extra_size);
+        dt_info(TAG, "timebase->num:%d timebase->den:%d \n", host_para->video_num, host_para->video_den);
     }
     //----sub part------
+    if (pctrl->has_sub)
+    {
+        if (pctrl->cur_sst_index >= media_info->sst_num)
+        {
+            dt_warning (TAG, "sub index set exceed max video num ,reset to 0 \n");
+            pctrl->cur_sst_index = 0;
+        }
+
+        sstream_info_t *sstream = media_info->sstreams[pctrl->cur_sst_index];
+
+        host_para->sub_format = sstream->format;
+        host_para->sub_width = sstream->width;
+        host_para->sub_height = sstream->height;
+        dt_info(TAG, "host-sub setup ok, cur index:%d \n", pctrl->cur_sst_index);
+    }
+
     /* init dthost */
     dtp_ctx->host_priv = NULL;
     ret = dthost_init (&dtp_ctx->host_priv, host_para);
