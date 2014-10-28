@@ -5,6 +5,7 @@
 
 typedef struct{
     dtsub_para_t para;
+    queue_t *so_queue;
     void *parent;
 }dtsub_context_t;
 

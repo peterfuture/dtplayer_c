@@ -24,25 +24,24 @@
 ** dtsub_init
 **
 ***********************************************************************/
-
 int dtsub_init(void **sub_priv, dtsub_para_t *para, void *parent)
 {
     int ret = 0;
     dtsub_context_t *sctx = (dtsub_context_t *)malloc(sizeof(dtsub_context_t));
-    if (!sctx)
+    if(!sctx)
     {
         dt_error(TAG, "[%s:%d]dtsub module init failed \n", __FUNCTION__, __LINE__);
         ret = -1;
         goto ERR0;
     }
-    memcpy (&sctx->para, para, sizeof(dtsub_para_t));
+    memcpy(&sctx->para, para, sizeof(dtsub_para_t));
 
     //we need to set parent early
     sctx->parent = parent;
     ret = sub_init(sctx);
-    if (ret < 0)
+    if(ret < 0)
     {
-        dt_error (TAG, "[%s:%d] sub init failed \n", __FUNCTION__, __LINE__);
+        dt_error(TAG, "[%s:%d] sub init failed \n", __FUNCTION__, __LINE__);
         ret = -1;
         goto ERR1;
     }
@@ -51,5 +50,139 @@ int dtsub_init(void **sub_priv, dtsub_para_t *para, void *parent)
 ERR1:
     free(sctx);
 ERR0:
+    return ret;
+}
+
+/***********************************************************************
+**
+** dtsub_start
+**
+***********************************************************************/
+int dtsub_start(void *sub_priv)
+{
+    dtsub_context_t *sctx = (dtsub_context_t *)sub_priv;
+    return sub_start(sctx);
+}
+
+/***********************************************************************
+**
+** dtsub_pause
+**
+***********************************************************************/
+int dtsub_pause(void *sub_priv)
+{
+    dtsub_context_t *vctx = (dtsub_context_t *)sub_priv;
+    return sub_pause(vctx);
+}
+
+/***********************************************************************
+**
+** dtsub_resume
+**
+***********************************************************************/
+int dtsub_resume(void *sub_priv)
+{
+    dtsub_context_t *vctx = (dtsub_context_t *)sub_priv;
+    return sub_resume(vctx);
+}
+
+/***********************************************************************
+**
+** dtsub_stop
+**
+** - stop sub module
+**
+***********************************************************************/
+int dtsub_stop(void *sub_priv)
+{
+    int ret;
+    dtsub_context_t *vctx = (dtsub_context_t *)sub_priv;
+    if(!vctx)
+    {
+        dt_error(TAG, "[%s:%d] dt sub context == NULL\n", __FUNCTION__, __LINE__);
+        ret = -1;
+        goto ERR0;
+    }
+    ret = sub_stop(vctx);
+    if(ret < 0)
+    {
+        dt_error(TAG, "[%s:%d] DTVIDEO STOP FAILED\n", __FUNCTION__, __LINE__);
+        ret = -1;
+        goto ERR0;
+    }
+    free(sub_priv);
+    sub_priv = NULL;
+    return ret;
+  ERR0:
+    return ret;
+
+}
+
+/***********************************************************************
+**
+** dtsub_get_pts
+**
+** - get cur sub pts
+**
+***********************************************************************/
+int64_t dtsub_get_pts(void *sub_priv)
+{
+    dtsub_context_t *vctx = (dtsub_context_t *)sub_priv;
+    return dtsub_get_current_pts(vctx);
+}
+
+/***********************************************************************
+**
+** dtsub_get_first_pts
+**
+** - get first sub pts , no use
+**
+***********************************************************************/
+int64_t dtsub_get_first_pts(void *sub_priv)
+{
+    dtsub_context_t *vctx = (dtsub_context_t *)sub_priv;
+    return sub_get_first_pts(vctx);
+}
+
+/***********************************************************************
+**
+** dtsub_drop
+**
+** - drop sub data for sync
+**
+***********************************************************************/
+int dtsub_drop(void *sub_priv, int64_t target_pts)
+{
+    dtsub_context_t *vctx = (dtsub_context_t *)sub_priv;
+    return sub_drop(vctx, target_pts);
+}
+
+/***********************************************************************
+**
+** dtsub_get_state
+**
+** - get sub decoder state
+**
+***********************************************************************/
+int dtsub_get_state(void *sub_priv, dec_state_t * dec_state)
+{
+    int ret;
+    dtsub_context_t *vctx = (dtsub_context_t *)sub_priv;
+    ret = sub_get_dec_state(vctx, dec_state);
+    return ret;
+}
+
+/***********************************************************************
+**
+** dtsub_get_out_closed
+**
+** - check sub data consumed completely
+**
+***********************************************************************/
+int dtsub_get_out_closed(void *sub_priv)
+{
+    int ret;
+    dtsub_context_t *vctx = (dtsub_context_t *)sub_priv;
+    ret = sub_get_out_closed(vctx);
     return ret;
 }
