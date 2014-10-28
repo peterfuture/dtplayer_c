@@ -130,9 +130,9 @@ int main (int argc, char **argv)
         width = vstream->width;
         height = vstream->height;
     }
-    if(width <= 0 || width > 1280)
+    if(width <= 0 || width > 1920)
         width = 720;
-    if(height <= 0 || height >720)
+    if(height <= 0 || height >1088)
         height = 480;
 
     ply_ctx.disp_width = width;
