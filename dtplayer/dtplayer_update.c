@@ -47,11 +47,11 @@ void player_update_state (dtplayer_context_t * dtp_ctx)
     host_state_t host_state;
 
     /*update host state */
-    dthost_get_state (dtp_ctx->host_priv, &host_state);
+    dthost_get_state(dtp_ctx->host_priv, &host_state);
 
     /*calc cur time */
-    calc_cur_time (dtp_ctx, &host_state);
+    calc_cur_time(dtp_ctx, &host_state);
 
     /*show info */
-    dt_info(TAG, "Abuflevel:%d vbuflevel:%d cur_time:%lld(s) %lld(ms) duration:%lld(s) \n ", host_state.abuf_level, host_state.vbuf_level, play_stat->cur_time, play_stat->cur_time_ms, dtp_ctx->media_info->duration);
+    dt_info(TAG, "[%s:%d]alevel:%d vlevel:%d slevel:%d cur_time:%lld(s) %lld(ms) duration:%lld(s) \n", __FUNCTION__, __LINE__, host_state.abuf_level, host_state.vbuf_level, host_state.sbuf_level, play_stat->cur_time, play_stat->cur_time_ms, dtp_ctx->media_info->duration);
 }

@@ -226,9 +226,17 @@ static int demuxer_ffmpeg_read_frame(demuxer_wrapper_t * wrapper, dt_av_pkt_t * 
     frame->duration = avpkt.duration;
     frame->key_frame = avpkt.flags & AV_PKT_FLAG_KEY;
     if(frame->type ==(int)AVMEDIA_TYPE_AUDIO)
-        dt_debug(TAG,"GET AUDIO FRAME, pts:%lld \n",frame->pts);
-    else
+    {
+        dt_debug(TAG,"GET AUDIO FRAME, pts:%lld dts:%lld size:%d \n", frame->pts, frame->dts, frame->size);
+    }
+    if(frame->type ==(int)AVMEDIA_TYPE_VIDEO)
+    {
         dt_debug(TAG,"GET VIDEO FRAME, pts:%llx dts:%llx size:%d key:%d\n",frame->pts, frame->dts,frame->size,frame->key_frame);
+    }
+    if(frame->type == (int)AVMEDIA_TYPE_SUBTITLE)
+    {
+        dt_debug(TAG,"GET SUB FRAME, pts:%llx dts:%llx size:%d \n",frame->pts, frame->dts,frame->size);
+    }
     //dt_info(TAG, "read ok,frame size:%d %02x %02x %02x %02x addr:%p type:%d\n", frame->size, frame->data[0], frame->data[1], frame->data[2], frame->data[3], frame->data,frame->type);
     dt_debug(TAG, "SIDE_DATA_ELEMENT:%d \n", avpkt.side_data_elems);
 

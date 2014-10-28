@@ -1,7 +1,7 @@
 #include "dthost_api.h"
 #include "dthost.h"
 
-#define TAG "HOST-EXT"
+#define TAG "HOST-API"
 //=====part1: control methods
 
 int dthost_start (void *host_priv)
@@ -148,6 +148,24 @@ void dthost_update_vpts (void *host_priv, int64_t vpts)
     host_update_vpts (hctx, vpts);
     return;
 }
+
+int64_t dthost_get_spts (void *host_priv)
+{
+    if (!host_priv)
+        return -1;
+    dthost_context_t *hctx = (dthost_context_t *) (host_priv);
+    return host_get_spts(hctx);
+}
+
+void dthost_update_spts(void *host_priv, int64_t spts)
+{
+    if (!host_priv)
+        return;
+    dthost_context_t *hctx = (dthost_context_t *)(host_priv);
+    host_update_spts(hctx, spts);
+    return;
+}
+
 
 int dthost_get_avdiff (void *host_priv)
 {

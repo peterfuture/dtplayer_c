@@ -8,8 +8,7 @@ typedef struct
     int sfmt;
     int width;
     int height;
-    int extradata_size;
-    unsigned char extradata[SUB_EXTRADATA_SIZE];
+    int sub_output;
     void *avctx_priv;
 }dtsub_para_t;
 

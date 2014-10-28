@@ -2,10 +2,11 @@
 #include "dtport_api.h"
 #include "dtaudio_api.h"
 #include "dtvideo_api.h"
+#include "dtsub_api.h"
 
 #include "unistd.h"
 
-#define TAG "host-MGT"
+#define TAG "HOST-MGT"
 
 //==Part1:PTS Relative
 int host_sync_enable (dthost_context_t * hctx)
@@ -23,6 +24,12 @@ int64_t host_get_vpts (dthost_context_t * hctx)
 {
     //return dtvideo_externel_get_pts(hctx->video_priv);
     return hctx->pts_video;
+}
+
+int64_t host_get_spts (dthost_context_t * hctx)
+{
+    //return dtvideo_externel_get_pts(hctx->video_priv);
+    return hctx->pts_sub;
 }
 
 int64_t host_get_systime (dthost_context_t * hctx)
@@ -111,6 +118,13 @@ int host_update_vpts (dthost_context_t * hctx, int64_t vpts)
     if (hctx->sync_enable && hctx->sync_mode == DT_SYNC_VIDEO_MASTER && avdiff / 90 < AVSYNC_THRESHOLD_MAX)
         hctx->sync_mode = DT_SYNC_AUDIO_MASTER;
 
+    return 0;
+}
+
+int host_update_spts (dthost_context_t * hctx, int64_t spts)
+{
+    hctx->pts_sub = spts;
+    dt_debug (TAG, "update spts:%llx \n", spts);
     return 0;
 }
 
@@ -425,6 +439,19 @@ int host_init (dthost_context_t * hctx)
         }
     }
     /*init sub */
+    if(host_para->has_sub)
+    {
+        dtsub_para_t sub_para;
+        sub_para.sfmt = host_para->sub_format;
+        sub_para.width = host_para->sub_width;
+        sub_para.height = host_para->sub_height;
+        sub_para.avctx_priv = host_para->sctx_priv;
+        ret = dtsub_init(&hctx->sub_priv, &sub_para, hctx);
+        if(ret < 0)
+        {
+            dt_error(TAG, "ERR: dtsub init failed \n");
+        }
+    }
     return 0;
   ERR1:
     return -1;
@@ -489,6 +516,7 @@ int host_get_state (dthost_context_t * hctx, host_state_t * state)
 {
     int has_audio = hctx->para.has_audio;
     int has_video = hctx->para.has_video;
+    int has_sub = hctx->para.has_sub;
     buf_state_t buf_state;
     dec_state_t dec_state;
     if (has_audio)
@@ -519,6 +547,20 @@ int host_get_state (dthost_context_t * hctx, host_state_t * state)
         state->vbuf_level = -1;
         state->cur_vpts = -1;
         state->vdec_err_cnt = -1;
+    }
+
+    if(has_sub)
+    {
+        dtport_get_state(hctx->port_priv, &buf_state, DT_TYPE_SUBTITLE);
+        state->sbuf_level = buf_state.data_len;
+        state->sdec_err_cnt = 0;
+        state->cur_spts = -1;
+    }
+    else
+    {
+        state->sbuf_level = -1;
+        state->sdec_err_cnt = -1;
+        state->cur_spts = -1;
     }
 
     hctx->sys_time = (has_video)?hctx->pts_video:hctx->pts_audio;
