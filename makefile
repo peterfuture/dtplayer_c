@@ -171,6 +171,7 @@ ifeq ($(DT_FFMPEG_DIR),)
 	DT_FFMPEG_DIR = /usr/local/#default ffmpeg install dir 
 endif
 
+#use separate module
 FFMPEGPARTS_ALL = libavfilter libavformat libavcodec libswscale libswresample libavutil 
 FFMPEGPARTS = $(foreach part, $(FFMPEGPARTS_ALL), $(if $(wildcard $(DT_FFMPEG_DIR)/lib), $(part)))
 FFMPEGLIBS  = $(foreach part, $(FFMPEGPARTS), $(DT_FFMPEG_DIR)/lib/$(part).so)
@@ -191,8 +192,8 @@ LDFLAGS-$(DT_FAAD) += -lfaad
 #                   ENV-SETUP 
 #======================================================
 LDFLAGS += -lpthread -lm 
-LDFLAGS += $(LDFLAGS-yes)
 
+LDFLAGS     += $(LDFLAGS-yes)
 COMMON_LIBS += $(COMMON_LIBS-yes)
 DT_CFLAGS   += $(DT_CFLAGS-yes)
 CFLAGS      += $(DT_CFLAGS)
@@ -245,14 +246,13 @@ SRCS_COMMON-$(DT_FFMPEG)+= dtaudio/audio_decoder/ad_ffmpeg.c        # dec
 SRCS_COMMON-$(DT_ALSA)  += dtaudio/audio_out/ao_alsa.c                # out
 
 #dtvideo
-SRCS_COMMON-$(DT_VIDEO)  += dtvideo/dtvideo_api.c
-SRCS_COMMON-$(DT_VIDEO)  += dtvideo/dtvideo.c
-SRCS_COMMON-$(DT_VIDEO)  += dtvideo/dtvideo_decoder.c
-SRCS_COMMON-$(DT_VIDEO)  += dtvideo/dtvideo_filter.c
-SRCS_COMMON-$(DT_VIDEO)  += dtvideo/dtvideo_output.c
+SRCS_COMMON-$(DT_VIDEO) += dtvideo/dtvideo_api.c
+SRCS_COMMON-$(DT_VIDEO) += dtvideo/dtvideo.c
+SRCS_COMMON-$(DT_VIDEO) += dtvideo/dtvideo_decoder.c
+SRCS_COMMON-$(DT_VIDEO) += dtvideo/dtvideo_filter.c
+SRCS_COMMON-$(DT_VIDEO) += dtvideo/dtvideo_output.c
 SRCS_COMMON-$(DT_FFMPEG) += dtvideo/video_decoder/vd_ffmpeg.c         #dec
 SRCS_COMMON-$(DT_FFMPEG) += dtvideo/video_filter/vf_ffmpeg.c          #filter
-
 #dtsub
 SRCS_COMMON-$(DT_SUB)    += dtsub/dtsub_api.c
 SRCS_COMMON-$(DT_SUB)    += dtsub/dtsub.c
@@ -263,7 +263,6 @@ SRCS_COMMON-$(DT_SUB)    += dtsub/dtsub_output.c
 SRCS_COMMON-$(DT_FFMPEG) += dtsub/sub_parser/sp_ffmpeg.c
 SRCS_COMMON-$(DT_FFMPEG) += dtsub/sub_decoder/sd_ffmpeg.c
 SRCS_COMMON-$(DT_SUB)    += dtsub/sub_output/so_null.c
-
 #dtport
 SRCS_COMMON-$(DT_PORT) += dtport/dt_packet_queue.c
 SRCS_COMMON-$(DT_PORT) += dtport/dtport_api.c
@@ -308,7 +307,7 @@ DIRS =  . \
         dtplayer \
 		tools   
 #header
-INCLUDE_DIR += -I$(MAKEROOT)/include 
+INCLUDE_DIR += -I$(MAKEROOT)/include
 INCLUDE_DIR += -I$(MAKEROOT)/dtutils 
 INCLUDE_DIR += -I$(MAKEROOT)/dtstream 
 INCLUDE_DIR += -I$(MAKEROOT)/dtdemux 
@@ -358,6 +357,7 @@ all: $(ALL_PRG)
 
 libdtp.so: $(OBJS_DTLIB_DEP_RELEASE) $(COMMON_LIBS) 
 	@$(CC) -shared -fPIC -o $@ $^ $(LDFLAGS)
+	@$(STRIP) $@
 	@echo =====================================================
 	@echo build $@ done
 	@echo =====================================================
