@@ -24,8 +24,9 @@ static int so_null_stop (dtsub_output_t * so)
     return 0;
 }
 
-static int so_null_render (dtsub_output_t * so, dt_av_frame_t * frame)
+static int so_null_render (dtsub_output_t * so, dtav_sub_frame_t * frame)
 {
+    dt_info(TAG, "sub rennder ok\n");
     return 0;
 }
 

@@ -161,18 +161,28 @@ int sub_output_stop(dtsub_output_t * so)
 
 /***********************************************************************
 **
-** dtframe_free
+** dtsub_frame_free
 **
 ***********************************************************************/
-static void dtframe_free(void *pic)
+static void dtsub_frame_free(void *frame)
 {
-    dt_av_frame_t *frame =(dt_av_frame_t *)(pic);
-    if(frame->data)
-        free(frame->data[0]);
+    int i;
+
+    dtav_sub_frame_t *sub =(dtav_sub_frame_t *)(frame);
+    for (i = 0; i < sub->num_rects; i++) {
+        free(&sub->rects[i]->pict.data[0]);
+        free(&sub->rects[i]->pict.data[1]);
+        free(&sub->rects[i]->pict.data[2]);
+        free(&sub->rects[i]->pict.data[3]);
+        free(&sub->rects[i]->text);
+        free(&sub->rects[i]->ass);
+        free(&sub->rects[i]);
+    }
+
+    free(&sub->rects);
+    memset(sub, 0, sizeof(dtav_sub_frame_t));
     return;
 }
-
-
 
 /***********************************************************************
 **
@@ -189,8 +199,8 @@ static void *sub_output_thread(void *args)
     so_wrapper_t *wrapper = so->wrapper;
     int ret, wlen;
     ret = wlen = 0;
-    dt_av_frame_t *frame_pre;
-    dt_av_frame_t *frame;
+    dtav_sub_frame_t *frame_pre;
+    dtav_sub_frame_t *frame;
     int64_t sys_time;          //contrl sub display
 
     for(;;)
@@ -203,7 +213,7 @@ static void *sub_output_thread(void *args)
             continue;
         }
         /*pre read frame and update sys time */
-        frame_pre =(dt_av_frame_t *)dtsub_output_pre_read(so->parent);
+        frame_pre =(dtav_sub_frame_t *)dtsub_output_pre_read(so->parent);
         if(!frame_pre)
         {
             dt_debug(TAG, "[%s:%d]frame read failed ! \n", __FUNCTION__, __LINE__);
@@ -219,7 +229,7 @@ static void *sub_output_thread(void *args)
         {
             dt_error(TAG, "Err: sub frame pts invalid \n");
         }
-        
+        dt_info(TAG, "read one sub frame, pts:%lld systime:%lld \n", frame_pre->pts, sys_time); 
         //maybe need to block
         if(sys_time < frame_pre->pts)
         {
@@ -228,7 +238,7 @@ static void *sub_output_thread(void *args)
             continue;
         }
         /*read data from decoder buffer */
-        frame =(dt_av_frame_t *) dtsub_output_read(so->parent);
+        frame =(dtav_sub_frame_t *) dtsub_output_read(so->parent);
         if(!frame)
         {
             dt_error(TAG, "[%s:%d]frame read failed ! \n", __FUNCTION__, __LINE__);
@@ -246,13 +256,13 @@ static void *sub_output_thread(void *args)
             //printf("[%s:%d]!update pts:%llu \n",__FUNCTION__,__LINE__,sctx->current_pts);
         }
         /*read next frame ,check drop frame */
-        frame_pre =(dt_av_frame_t *) dtsub_output_pre_read(so->parent);
+        frame_pre =(dtav_sub_frame_t *) dtsub_output_pre_read(so->parent);
         if(frame_pre)
         {
             if(sys_time >= frame_pre->pts)
             {
                 dt_info(TAG, "drop frame,sys time:%lld thispts:%lld next->pts:%lld \n", sys_time, frame->pts, frame_pre->pts);
-                dtframe_free(frame);
+                dtsub_frame_free(frame);
                 free(frame);
                 continue;
             }
@@ -266,7 +276,7 @@ static void *sub_output_thread(void *args)
 
         /*update vpts */
         dtsub_update_pts(so->parent);
-        dtframe_free(frame);
+        dtsub_frame_free(frame);
         free(frame);
         dt_usleep(REFRESH_DURATION);
     }

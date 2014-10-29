@@ -18,7 +18,7 @@ typedef struct so_wrapper
 
     int (*so_init) (struct dtsub_output *sout);
     int (*so_stop) (struct dtsub_output *sout);
-    int (*so_render) (struct dtsub_output *sout,dt_av_frame_t * frame);
+    int (*so_render) (struct dtsub_output *sout,dtav_sub_frame_t * frame);
     void *handle;
     struct so_wrapper *next;
     void *so_priv;

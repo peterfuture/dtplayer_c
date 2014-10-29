@@ -144,12 +144,11 @@ static void *sub_decode_loop(void *arg)
 {
     dt_av_pkt_t pkt;
     dtsub_decoder_t *decoder =(dtsub_decoder_t *) arg;
-    dtsub_para_t *para = decoder->para;
     sd_wrapper_t *wrapper = decoder->wrapper;
     dtsub_context_t *sctx =(dtsub_context_t *) decoder->parent;
     queue_t *frame_queue = sctx->so_queue;
     /*used for decode */
-    dt_av_frame_t *frame = NULL;
+    dtav_sub_frame_t *frame = NULL;
     int ret;
     dt_info(TAG, "[%s:%d] start decode loop \n", __FUNCTION__, __LINE__);
 
@@ -169,7 +168,7 @@ static void *sub_decode_loop(void *arg)
             continue;
         }
 
-        /*read frame */
+        /*read pkt */
         if(!decoder->parent)
         {
             usleep(100);
@@ -220,10 +219,6 @@ static void *sub_decode_loop(void *arg)
             decoder->pts_first = pts_exchange(decoder, frame->pts);
             decoder->pts_current = decoder->pts_first;
         }
-
-        // setup some common info
-        frame->width = para->width;
-        frame->height = para->height;
 
         /*queue in */
         queue_push_tail(frame_queue, frame);
@@ -303,14 +298,26 @@ int sub_decoder_start(dtsub_decoder_t * decoder)
 
 /***********************************************************************
 **
-** dtframe_free
+** dtsub_frame_free
 **
 ***********************************************************************/
-static void dtframe_free(void *pic)
+static void dtsub_frame_free(void *frame)
 {
-    dt_av_frame_t *frame =(dt_av_frame_t *)(pic);
-    if(frame->data)
-        free(frame->data[0]);
+    int i;
+
+    dtav_sub_frame_t *sub =(dtav_sub_frame_t *)(frame);
+    for (i = 0; i < sub->num_rects; i++) {
+        free(&sub->rects[i]->pict.data[0]);
+        free(&sub->rects[i]->pict.data[1]);
+        free(&sub->rects[i]->pict.data[2]);
+        free(&sub->rects[i]->pict.data[3]);
+        free(&sub->rects[i]->text);
+        free(&sub->rects[i]->ass);
+        free(&sub->rects[i]);
+    }
+
+    free(&sub->rects);
+    memset(sub, 0, sizeof(dtav_sub_frame_t));
     return;
 }
 
@@ -333,7 +340,7 @@ int sub_decoder_stop(dtsub_decoder_t * decoder)
     queue_t *frame_queue = sctx->so_queue;
     if(frame_queue)
     {
-        queue_free(frame_queue,(free_func) dtframe_free);
+        queue_free(frame_queue,(free_func) dtsub_frame_free);
         frame_queue = NULL;
     }
     return 0;

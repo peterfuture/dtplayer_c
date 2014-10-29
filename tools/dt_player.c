@@ -61,7 +61,7 @@ static int parse_cmd(int argc,char **argv,dtplayer_para_t *para)
     para->update_cb = (void *) update_cb;
     //para->disable_audio=1;
     //para->disable_video=1;
-    //para->disable_sub=1;
+    para->disable_sub=1;
     para->width = -1;
     para->height = -1;
     para->cookie = NULL;

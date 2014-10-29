@@ -8,6 +8,7 @@
 #include "dtdemuxer.h"
 #include "dtaudio.h"
 #include "dtvideo.h"
+#include "dtsub.h"
 #include "pthread.h"
 
 #define TAG "PLAYER"

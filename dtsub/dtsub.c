@@ -248,12 +248,12 @@ int sub_init (dtsub_context_t * sctx)
     dtsub_filter_t *sub_filt = &sctx->sub_filt;
     dtsub_output_t *sub_out = &sctx->sub_out;
     
-    //vf ctx init
+    //sf ctx init
     memset (sub_filt, 0, sizeof (dtsub_filter_t));
     memcpy(&sub_filt->para, &sctx->sub_para, sizeof(dtsub_para_t));
     sub_filt->parent = sctx;
 
-    //vd ctx init 
+    //sd ctx init 
     memset (sub_dec, 0, sizeof (dtsub_decoder_t));
     sub_dec->para = &sctx->sub_para;
     sub_dec->parent = sctx;

@@ -251,6 +251,16 @@ int host_start (dthost_context_t * hctx)
         }
         dt_info (TAG, "[%s:%d]video start ok\n", __FUNCTION__, __LINE__);
     }
+    if(has_sub)
+    {
+        ret = dtsub_start(hctx->sub_priv);
+        if(ret < 0)
+        {
+            dt_error (TAG, "[%s:%d] dtvideo start failed \n", __FUNCTION__, __LINE__);
+            return -1;
+        }
+        dt_info (TAG, "[%s:%d]sub start ok\n", __FUNCTION__, __LINE__);
+    }
 
     return 0;
 }
