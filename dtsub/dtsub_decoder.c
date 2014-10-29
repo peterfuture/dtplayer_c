@@ -192,7 +192,7 @@ static void *sub_decode_loop(void *arg)
             }
             //no data left, maybe eof, need to flush left data
             memset(&pkt, 0, sizeof(dt_av_pkt_t));
-            dt_info(TAG, "[%s:%d] no sub pkt left, flush left frames \n", __FUNCTION__, __LINE__);
+            dt_debug(TAG, "[%s:%d] no sub pkt left, flush left frames \n", __FUNCTION__, __LINE__);
         }
         /*read one pkt, enter decode pkt module */
         //will exec once for one time
