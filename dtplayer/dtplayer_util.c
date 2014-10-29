@@ -148,6 +148,7 @@ int player_host_init (dtplayer_context_t * dtp_ctx)
         host_para->sub_format = sstream->format;
         host_para->sub_width = sstream->width;
         host_para->sub_height = sstream->height;
+        host_para->sctx_priv = sstream->codec_priv;
         dt_info(TAG, "host-sub setup ok, cur index:%d \n", pctrl->cur_sst_index);
     }
 

@@ -53,6 +53,61 @@ typedef struct
     int duration;
 } dt_av_frame_t;
 
+typedef enum dtav_sub_type {
+    DT_SUBTITLE_NONE,
+
+    DT_SUBTITLE_BITMAP,                ///< A bitmap, pict will be set
+
+    /**
+     * Plain text, the text field must be set by the decoder and is
+     * authoritative. ass and pict fields may contain approximations.
+     */
+    DT_SUBTITLE_TEXT,
+
+    /**
+     * Formatted text, the ass field must be set by the decoder and is
+     * authoritative. pict and text fields may contain approximations.
+     */
+    DT_SUBTITLE_ASS,
+}dtav_sub_type_t;
+
+
+typedef struct dt_sub_Rect {
+    int x;         ///< top left corner  of pict, undefined when pict is not set
+    int y;         ///< top left corner  of pict, undefined when pict is not set
+    int w;         ///< width            of pict, undefined when pict is not set
+    int h;         ///< height           of pict, undefined when pict is not set
+    int nb_colors; ///< number of colors in pict, undefined when pict is not set
+
+    /**
+     * data+linesize for the bitmap of this subtitle.
+     * can be set for text/ass as well once they where rendered
+     */
+    //AVPicture pict;
+    dt_av_frame_t pict;
+    dtav_sub_type_t type;
+
+    char *text;                     ///< 0 terminated plain UTF-8 text
+
+    /**
+     * 0 terminated ASS/SSA compatible event line.
+     * The presentation of this is unaffected by the other values in this
+     * struct.
+     */
+    char *ass;
+
+    int flags;
+}dtav_sub_rect_t;
+
+typedef struct dtav_subtitle {
+    uint16_t format; /* 0 = graphics */
+    uint32_t start_display_time; /* relative to packet pts, in ms */
+    uint32_t end_display_time; /* relative to packet pts, in ms */
+    unsigned num_rects;
+    dtav_sub_rect_t **rects;
+    int64_t pts;    ///< Same as packet pts, in AV_TIME_BASE
+}dtav_sub_frame_t;
+
 typedef enum{
     DTAV_FLAG_NONE = 0x0,
     DTAV_FLAG_DISABLE_HW_CODEC = 0x1,

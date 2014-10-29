@@ -59,8 +59,8 @@ typedef struct
     int sub_id;
     int sub_width;
     int sub_height;
-    int sflag;
-    void *sctx_priv;            //DISABLE_HW_SCODEC ETC.
+    int sflag;                  //DISABLE_HW_SCODEC ETC.
+    void *sctx_priv;
 } dthost_para_t;
 
 typedef struct
