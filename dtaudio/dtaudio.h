@@ -60,6 +60,7 @@ typedef struct
 } dtaudio_context_t;
 
 void audio_register_all();
+void audio_remove_all();
 void register_ext_ao(ao_wrapper_t *ao);
 
 int audio_read_frame (void *priv, dt_av_pkt_t * frame);

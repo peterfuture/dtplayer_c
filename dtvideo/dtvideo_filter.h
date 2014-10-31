@@ -4,6 +4,7 @@
 #include "vf_wrapper.h"
 
 void vf_register_all();
+void vf_remove_all();
 void vf_register_ext(vf_wrapper_t *vf);
 
 int video_filter_init(dtvideo_filter_t * filter);

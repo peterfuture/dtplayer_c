@@ -58,6 +58,11 @@ void vout_register_all ()
     return;
 }
 
+void vout_remove_all ()
+{
+    g_vo = NULL;
+}
+
 /*default alsa*/
 int select_vo_device (dtvideo_output_t * vo, int id)
 {

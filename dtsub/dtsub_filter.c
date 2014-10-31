@@ -76,6 +76,17 @@ void sf_register_all ()
 
 /***********************************************************************
 **
+** remove all internal filters
+**
+***********************************************************************/
+void sf_remove_all ()
+{
+    g_sf = NULL;
+    return;
+}
+
+/***********************************************************************
+**
 ** select first sf with capbilities cap
 ** cap: sf capbilities set
 **

@@ -9,7 +9,9 @@ int dtvideo_read_frame (void *priv, dt_av_pkt_t * frame)
     int type = DT_TYPE_VIDEO;
     int ret = 0;
     dtvideo_context_t *vctx = (dtvideo_context_t *) priv;
+    dt_debug(TAG, "[%s:%d]READ FRAME BEGIN \n", __FUNCTION__, __LINE__);
     ret = dthost_read_frame (vctx->parent, frame, type);
+    dt_debug(TAG, "[%s:%d]READ FRAME END \n", __FUNCTION__, __LINE__);
     return ret;
 }
 
@@ -153,6 +155,13 @@ void video_register_all()
     vdec_register_all();
     vout_register_all();
     vf_register_all();
+}
+
+void video_remove_all()
+{
+    vdec_remove_all();
+    vout_remove_all();
+    vf_remove_all();
 }
 
 void register_ext_vd(vd_wrapper_t *vd)

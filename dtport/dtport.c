@@ -113,8 +113,10 @@ int port_read_frame (dtport_context_t * pctx, dt_av_pkt_t * frame, int type)
         dt_warning (TAG, "[%s] unkown frame type audio or video \n", __FUNCTION__);
         return -1;
     }
-    //dt_info(TAG,"[%s:%d] start read frame type:%d nb:%d\n",__FUNCTION__,__LINE__,type,queue->nb_packets);
-    return packet_queue_get (queue, frame);
+    dt_debug(TAG, "[%s:%d]READ FRAME START, start read frame type:%d nb:%d\n",__FUNCTION__,__LINE__,type,queue->nb_packets);
+    int ret = packet_queue_get (queue, frame);
+    dt_debug(TAG, "[%s:%d]READ FRAME END \n", __FUNCTION__, __LINE__);
+    return ret;
 }
 
 //==Part3:Status Relative

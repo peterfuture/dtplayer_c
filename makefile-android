@@ -156,7 +156,7 @@ LDFLAGS-$(DT_FAAD) += -lfaad
 
 %.o: %.c
 	@echo CC $@ 
-	@$(CC) $(CFLAGS) -shared -fPIC -c -o $@ $< 
+	@$(CC) $(CFLAGS) -g -c -o $@ $< 
 
 %.o: %.cpp
 	$(CC) $(CXXFLAGS) -c -o $@ $<
@@ -349,8 +349,8 @@ all: $(ALL_PRG)
 	@echo =====================================================
 
 libdtp.so: $(OBJS_DTLIB_DEP_RELEASE) $(COMMON_LIBS) 
-	@$(CC) -shared -fPIC -o $@ $^ $(LDFLAGS)
-	@$(STRIP) $@
+	@$(CC) -shared -g -o $@ $^ $(LDFLAGS)
+	#@$(STRIP) $@
 	@echo =====================================================
 	@echo build $@ done
 	@echo =====================================================

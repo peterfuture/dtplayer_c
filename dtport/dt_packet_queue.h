@@ -23,7 +23,7 @@ typedef struct
     int nb_packets;
     int size;
     dt_packet_list_t *first, *last; //get packet from first packet and insert packet after last packet
-    int nmutex;
+    dt_lock_t mutex;
 } dt_packet_queue_t;
 
 int packet_queue_init (dt_packet_queue_t * queue);

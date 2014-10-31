@@ -7,6 +7,7 @@
 #define PCM_WRITE_SIZE 10 // ms
 
 void aout_register_all();
+void aout_remove_all();
 void aout_register_ext(ao_wrapper_t *ao);
 
 int audio_output_init (dtaudio_output_t * ao, int ao_id);

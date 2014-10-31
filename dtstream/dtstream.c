@@ -32,6 +32,11 @@ void stream_register_all ()
 #endif
 }
 
+void stream_remove_all ()
+{
+    g_stream = NULL;
+}
+
 static int get_stream_id(char *name)
 {
     int ret = access(name,0);

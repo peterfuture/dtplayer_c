@@ -34,6 +34,11 @@ void adec_register_all ()
     return;
 }
 
+void adec_remove_all ()
+{
+    g_ad = NULL;
+}
+
 static int select_audio_decoder (dtaudio_decoder_t * decoder)
 {
     ad_wrapper_t **p;

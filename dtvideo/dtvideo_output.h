@@ -4,6 +4,7 @@
 #include "vo_wrapper.h"
 
 void vout_register_all();
+void vout_remove_all();
 void vout_register_ext(vo_wrapper_t *vo);
 
 int video_output_init (dtvideo_output_t * vo, int vo_id);

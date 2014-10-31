@@ -15,9 +15,9 @@
 
 static void *event_handle_loop (dtplayer_context_t * dtp_ctx);
 
+static int register_ok = 0;
 void player_register_all()
 {
-    static int register_ok = 0;
     if(!register_ok)
     {
         stream_register_all();
@@ -26,6 +26,19 @@ void player_register_all()
         video_register_all();
         sub_register_all();
         register_ok = 1;
+    }
+}
+
+void player_remove_all()
+{
+    if(register_ok)
+    {
+        stream_remove_all();
+        demuxer_remove_all();
+        audio_remove_all();
+        video_remove_all();
+        sub_remove_all();
+        register_ok = 0;
     }
 }
 
@@ -480,6 +493,7 @@ static void *event_handle_loop (dtplayer_context_t * dtp_ctx)
     player_handle_cb (dtp_ctx);
 
     free(dtp_ctx);
+    player_register_all();
     pthread_exit (NULL);
     return NULL;
 }

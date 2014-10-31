@@ -4,6 +4,7 @@
 #include "so_wrapper.h"
 
 void so_register_all();
+void so_remove_all();
 void so_register_ext(so_wrapper_t *so);
 
 int sub_output_init (dtsub_output_t * so, int so_id);

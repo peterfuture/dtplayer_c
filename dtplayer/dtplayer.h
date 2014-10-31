@@ -69,6 +69,7 @@ typedef struct dtplayer_context
 } dtplayer_context_t;
 
 void player_register_all();
+void player_remove_all();
 int player_init (dtplayer_context_t * dtp_ctx);
 int player_set_video_size (dtplayer_context_t * dtp_ctx, int width, int height);
 int player_start (dtplayer_context_t * dtp_ctx);

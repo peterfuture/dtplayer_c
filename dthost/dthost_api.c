@@ -97,7 +97,9 @@ int dthost_read_frame (void *host_priv, dt_av_pkt_t * frame, int type)
         return -1;
     }
     dthost_context_t *hctx = (dthost_context_t *) host_priv;
+    dt_debug(TAG, "[%s:%d]READ FRAME BEGIN \n", __FUNCTION__, __LINE__);
     ret = host_read_frame (hctx, frame, type);
+    dt_debug(TAG, "[%s:%d]READ FRAME BEGIN \n", __FUNCTION__, __LINE__);
     return ret;
 }
 

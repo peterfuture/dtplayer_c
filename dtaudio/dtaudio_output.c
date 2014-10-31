@@ -52,6 +52,11 @@ void aout_register_all ()
     return;
 }
 
+void aout_remove_all ()
+{
+    g_ao = NULL;
+}
+
 /*default alsa*/
 static int select_ao_device (dtaudio_output_t * ao, int id)
 {

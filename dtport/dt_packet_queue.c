@@ -12,7 +12,7 @@ int packet_queue_init (dt_packet_queue_t * queue)
     queue->first = NULL;
     queue->last = NULL;
     queue->size = 0;
-    queue->nmutex = 0;
+    dt_lock_init(&queue->mutex, NULL);
     return 0;
 }
 
@@ -45,24 +45,24 @@ int packet_queue_put_frame (dt_packet_queue_t * queue, dt_av_pkt_t * frame)
 int packet_queue_put (dt_packet_queue_t * queue, dt_av_pkt_t * frame)
 {
     int ret;
-    if (queue->nmutex)
-        return -1;
-    queue->nmutex = 1;
+    dt_lock(&queue->mutex);
+    
     if (frame->type == 0 && queue->size >= QUEUE_MAX_VBUF_SIZE)
     {
         dt_debug (TAG, "[%s:%d]type:%d(0 video 1 audio) packet queue exceed size\n", __FUNCTION__, __LINE__, frame->type);
-        queue->nmutex = 0;
-        return -2;
+        ret = -1;
+        goto END;
     }
 
     if (frame->type == 1 && queue->size >= QUEUE_MAX_ABUF_SIZE)
     {
         dt_debug (TAG, "[%s:%d]type:%d(0 video 1 audio) packet queue exceed size\n", __FUNCTION__, __LINE__, frame->type);
-        queue->nmutex = 0;
-        return -2;
+        ret = -2;
+        goto END;
     }
     ret = packet_queue_put_frame (queue, frame);
-    queue->nmutex = 0;
+END:
+    dt_unlock(&queue->mutex);
     //printf("[%s:%d] packet queue in ok\n",__FUNCTION__,__LINE__);
     return ret;
 }
@@ -71,7 +71,7 @@ int packet_queue_get_frame (dt_packet_queue_t * queue, dt_av_pkt_t * frame)
 {
     if (queue->nb_packets == 0)
     {
-//        printf("[%s:%d] No packet left\n",__FUNCTION__,__LINE__);
+        dt_debug(TAG, "[%s:%d] No packet left\n",__FUNCTION__,__LINE__);
         return -1;
     }
     dt_packet_list_t *list;
@@ -87,7 +87,7 @@ int packet_queue_get_frame (dt_packet_queue_t * queue, dt_av_pkt_t * frame)
         //queue->size-=frame->size+sizeof(*list);
         list->frame.data = NULL;
         free (list);
-        //printf("[%s:%d] queue get frame ok\n",__FUNCTION__,__LINE__);
+        dt_debug(TAG, "[%s:%d] queue get frame ok\n",__FUNCTION__,__LINE__);
         return 0;
     }
     return -1;
@@ -96,11 +96,11 @@ int packet_queue_get_frame (dt_packet_queue_t * queue, dt_av_pkt_t * frame)
 int packet_queue_get (dt_packet_queue_t * queue, dt_av_pkt_t * frame)
 {
     int ret;
-    if (queue->nmutex)
-        return -1;
-    queue->nmutex = 1;
+    dt_lock(&queue->mutex);
+    dt_debug(TAG, "[%s:%d]READ FRAME BEGIN \n", __FUNCTION__, __LINE__);
     ret = packet_queue_get_frame (queue, frame);
-    queue->nmutex = 0;
+    dt_debug(TAG, "[%s:%d]READ FRAME END \n", __FUNCTION__, __LINE__);
+    dt_unlock(&queue->mutex);
     return ret;
 }
 
@@ -117,9 +117,7 @@ int packet_queue_data_size (dt_packet_queue_t * queue)
 int packet_queue_flush (dt_packet_queue_t * queue)
 {
     dt_packet_list_t *list1, *list2;
-    while (queue->nmutex)
-        usleep (100);
-    queue->nmutex = 1;
+    dt_lock(&queue->mutex);
     for (list1 = queue->first; list1 != NULL; list1 = list2)
     {
         list2 = list1->next;
@@ -133,7 +131,7 @@ int packet_queue_flush (dt_packet_queue_t * queue)
     queue->first = NULL;
     queue->nb_packets = 0;
     queue->size = 0;
-    queue->nmutex = 0;
+    dt_unlock(&queue->mutex);
     return 0;
 }
 

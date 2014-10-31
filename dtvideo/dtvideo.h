@@ -57,6 +57,7 @@ typedef struct
 } dtvideo_context_t;
 
 void video_register_all();
+void video_remove_all();
 void register_ext_vd(vd_wrapper_t *vo);
 void register_ext_vf(vf_wrapper_t *vo);
 void register_ext_vo(vo_wrapper_t *vo);

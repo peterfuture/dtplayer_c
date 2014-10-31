@@ -38,6 +38,7 @@ typedef struct{
 }dtsub_context_t;
 
 void sub_register_all();
+void sub_remove_all();
 void register_ext_sd(sd_wrapper_t *sd);
 void register_ext_so(so_wrapper_t *so);
 void register_ext_sf(sf_wrapper_t *sf);

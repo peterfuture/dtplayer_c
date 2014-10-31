@@ -161,6 +161,12 @@ void audio_register_all()
     aout_register_all();
 }
 
+void audio_remove_all()
+{
+    adec_remove_all();
+    aout_remove_all();
+}
+
 void register_ext_ao(ao_wrapper_t *ao)
 {
     aout_register_ext(ao);

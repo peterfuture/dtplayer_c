@@ -4,6 +4,7 @@
 #include "sf_wrapper.h"
 
 void sf_register_all();
+void sf_remove_all();
 void sf_register_ext(sf_wrapper_t *sf);
 
 int sub_filter_init(dtsub_filter_t * filter);

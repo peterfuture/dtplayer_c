@@ -77,6 +77,11 @@ void vf_register_all ()
     return;
 }
 
+void vf_remove_all ()
+{
+    g_vf = NULL;
+}
+
 /***********************************************************************
 **
 ** select first vf with capbilities cap

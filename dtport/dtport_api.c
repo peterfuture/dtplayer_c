@@ -1,6 +1,8 @@
 #include "dtport_api.h"
 #include "dtport.h"
 
+#define TAG "PORT-API"
+
 //==Part1:Control
 //
 int dtport_stop (void *port)
@@ -51,7 +53,10 @@ int dtport_write_frame (void *port, dt_av_pkt_t * frame, int type)
 int dtport_read_frame (void *port, dt_av_pkt_t * frame, int type)
 {
     dtport_context_t *pctx = (dtport_context_t *) port;
-    return port_read_frame (pctx, frame, type);
+    dt_debug(TAG, "[%s:%d]READ FRAME BEGIN \n", __FUNCTION__, __LINE__);
+    int ret = port_read_frame (pctx, frame, type);
+    dt_debug(TAG, "[%s:%d]READ FRAME END \n", __FUNCTION__, __LINE__);
+    return ret;
 }
 
 //==Part3:State

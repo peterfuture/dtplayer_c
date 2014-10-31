@@ -37,6 +37,11 @@ void demuxer_register_all()
 #endif
 }
 
+void demuxer_remove_all()
+{
+    g_demuxer = NULL;
+}
+
 static int demuxer_select(dtdemuxer_context_t * dem_ctx)
 {
     if(!g_demuxer)

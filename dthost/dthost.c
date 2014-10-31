@@ -518,7 +518,10 @@ int host_read_frame (dthost_context_t * hctx, dt_av_pkt_t * frame, int type)
         dt_error (TAG, "dtport is NULL\n");
         return -1;
     }
-    return dtport_read_frame (hctx->port_priv, frame, type);
+    dt_debug(TAG, "[%s:%d]READ FRAME BEGIN \n", __FUNCTION__, __LINE__);
+    int ret = dtport_read_frame (hctx->port_priv, frame, type);
+    dt_debug(TAG, "[%s:%d]READ FRAME BEGIN \n", __FUNCTION__, __LINE__);
+    return ret;
 }
 
 //==Part4:Status

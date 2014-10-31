@@ -71,6 +71,11 @@ void vdec_register_all ()
     return;
 }
 
+void vdec_remove_all ()
+{
+    g_vd = NULL;
+}
+
 static int select_video_decoder (dtvideo_decoder_t * decoder)
 {
     vd_wrapper_t **p;

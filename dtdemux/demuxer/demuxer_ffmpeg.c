@@ -215,7 +215,6 @@ static int update_video_frame(demuxer_wrapper_t *wrapper, AVPacket *avpkt)
     int ret = av_bitstream_filter_filter(ctx->bsfc, pCodec, NULL, &pkt.data, &pkt.size, avpkt->data, avpkt->size, avpkt->flags & AV_PKT_FLAG_KEY);
     if(ret <= 0)
         return 0;
-    dt_info(TAG, "after filter, %02x %02x %02x %02x \n", pkt.data[0], pkt.data[1], pkt.data[2], pkt.data[3]);
     free(avpkt->data); // replace with pkt data, Here need to free
     *avpkt = pkt;
     return 0;
@@ -255,9 +254,9 @@ static int demuxer_ffmpeg_read_frame(demuxer_wrapper_t * wrapper, dt_av_pkt_t * 
     //read frame ok
     if(has_video && cur_vidx == avpkt.stream_index)
     {
-        dt_info(TAG, "befor filter, %02x %02x %02x %02x \n", avpkt.data[0], avpkt.data[1], avpkt.data[2], avpkt.data[3]);
+        dt_debug(TAG, "befor filter, %02x %02x %02x %02x \n", avpkt.data[0], avpkt.data[1], avpkt.data[2], avpkt.data[3]);
         update_video_frame(wrapper, &avpkt); // update video frame, header etc...
-        dt_info(TAG, "after filter, %02x %02x %02x %02x \n", avpkt.data[0], avpkt.data[1], avpkt.data[2], avpkt.data[3]);
+        dt_debug(TAG, "after filter, %02x %02x %02x %02x \n", avpkt.data[0], avpkt.data[1], avpkt.data[2], avpkt.data[3]);
         frame->type = AVMEDIA_TYPE_VIDEO;
     }
     else if(has_audio && cur_aidx == avpkt.stream_index)
