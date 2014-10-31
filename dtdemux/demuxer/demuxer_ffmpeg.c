@@ -49,6 +49,7 @@ typedef struct{
     struct AVFormatContext *ic;
     void *stream_ext;
     uint8_t *buf;
+    AVBitStreamFilterContext *bsfc;
 }ffmpeg_ctx_t;
 
 
@@ -173,6 +174,53 @@ static int64_t pts_exchange(AVPacket * avpkt, dt_media_info_t * media_info)
     return result;
 }
 
+static int update_video_frame(demuxer_wrapper_t *wrapper, AVPacket *avpkt)
+{
+    dtdemuxer_context_t *dem_ctx =(dtdemuxer_context_t *) wrapper->parent;
+    dt_media_info_t *media_info = &dem_ctx->media_info;
+
+    int has_video =(media_info->disable_video) ? 0 : media_info->has_video;
+
+    int cur_vidx =(has_video) ? media_info->vstreams[media_info->cur_vst_index]->index : -1;
+
+    if(cur_vidx == -1)
+    {
+        dt_info(TAG, "cur vidx invalid\n");
+        return 0;
+    }
+
+    ffmpeg_ctx_t *ctx =(ffmpeg_ctx_t *)wrapper->demuxer_priv;
+    AVFormatContext *ic = ctx->ic;
+
+    AVStream *pStream = ic->streams[cur_vidx];
+    AVCodecContext *pCodec = pStream->codec;
+
+    if(pCodec->codec_id != AV_CODEC_ID_H264)
+    {
+        dt_info(TAG, "not H264, no need to filter\n");
+        return 0;
+    }
+    AVPacket pkt = *avpkt;
+    //init
+    if(!ctx->bsfc)
+    {
+        ctx->bsfc = av_bitstream_filter_init("h264_mp4toannexb");
+        if(!ctx->bsfc)
+        {
+            dt_info(TAG, "filter init failed \n");
+            return 0;
+        }
+    }
+
+    int ret = av_bitstream_filter_filter(ctx->bsfc, pCodec, NULL, &pkt.data, &pkt.size, avpkt->data, avpkt->size, avpkt->flags & AV_PKT_FLAG_KEY);
+    if(ret <= 0)
+        return 0;
+    dt_info(TAG, "after filter, %02x %02x %02x %02x \n", pkt.data[0], pkt.data[1], pkt.data[2], pkt.data[3]);
+    free(avpkt->data); // replace with pkt data, Here need to free
+    *avpkt = pkt;
+    return 0;
+}
+
 static int demuxer_ffmpeg_read_frame(demuxer_wrapper_t * wrapper, dt_av_pkt_t * frame)
 {
     dtdemuxer_context_t *dem_ctx =(dtdemuxer_context_t *) wrapper->parent;
@@ -206,7 +254,12 @@ static int demuxer_ffmpeg_read_frame(demuxer_wrapper_t * wrapper, dt_av_pkt_t * 
     }
     //read frame ok
     if(has_video && cur_vidx == avpkt.stream_index)
+    {
+        dt_info(TAG, "befor filter, %02x %02x %02x %02x \n", avpkt.data[0], avpkt.data[1], avpkt.data[2], avpkt.data[3]);
+        update_video_frame(wrapper, &avpkt); // update video frame, header etc...
+        dt_info(TAG, "after filter, %02x %02x %02x %02x \n", avpkt.data[0], avpkt.data[1], avpkt.data[2], avpkt.data[3]);
         frame->type = AVMEDIA_TYPE_VIDEO;
+    }
     else if(has_audio && cur_aidx == avpkt.stream_index)
         frame->type = AVMEDIA_TYPE_AUDIO;
     else if(has_sub && cur_sidx == avpkt.stream_index)
@@ -484,9 +537,8 @@ static int demuxer_ffmpeg_close(demuxer_wrapper_t * wrapper)
 {
     ffmpeg_ctx_t *ctx =(ffmpeg_ctx_t *)wrapper->demuxer_priv;
     AVFormatContext *ic = ctx->ic;
-
-    if(ic)
-        avformat_close_input(&ic);
+    if(ic) avformat_close_input(&ic);
+    av_bitstream_filter_close(ctx->bsfc);
     ctx->buf = NULL; // no need to free ctx->buf, will free in avformat_close_input
     free(ctx);
     wrapper->demuxer_priv = NULL;

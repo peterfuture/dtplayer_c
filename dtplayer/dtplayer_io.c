@@ -119,7 +119,7 @@ static void *player_io_thread (dtplayer_context_t * dtp_ctx)
             continue;
         }
         dt_debug(TAG, "read ok size:%d pts:%lld \n",frame.size,frame.pts);
-      WRITE_FRAME:
+WRITE_FRAME:
         ret = player_write_frame (dtp_ctx, &frame);
         if (ret == DTERROR_NONE)
         {
@@ -147,7 +147,7 @@ static void *player_io_thread (dtplayer_context_t * dtp_ctx)
         }
     }
     while (1);
-  QUIT:
+QUIT:
     dt_info (TAG, "io thread quit ok\n");
     pthread_exit (NULL);
     return 0;
