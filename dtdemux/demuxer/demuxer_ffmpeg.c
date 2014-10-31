@@ -77,7 +77,7 @@ static int demuxer_ffmpeg_open(demuxer_wrapper_t * wrapper)
     char *file_name = ctx->file_name;
 
     ffmpeg_ctx_t *ffmpeg_ctx =(ffmpeg_ctx_t *)malloc(sizeof(*ffmpeg_ctx));
-
+    memset(ffmpeg_ctx, 0, sizeof(ffmpeg_ctx_t));
     av_register_all();
     AVFormatContext *ic = avformat_alloc_context();
     AVInputFormat *iformat = NULL;
@@ -537,7 +537,9 @@ static int demuxer_ffmpeg_close(demuxer_wrapper_t * wrapper)
     ffmpeg_ctx_t *ctx =(ffmpeg_ctx_t *)wrapper->demuxer_priv;
     AVFormatContext *ic = ctx->ic;
     if(ic) avformat_close_input(&ic);
-    av_bitstream_filter_close(ctx->bsfc);
+    if(ctx->bsfc)
+        av_bitstream_filter_close(ctx->bsfc);
+    ctx->bsfc = NULL;
     ctx->buf = NULL; // no need to free ctx->buf, will free in avformat_close_input
     free(ctx);
     wrapper->demuxer_priv = NULL;

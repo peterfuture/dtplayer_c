@@ -493,7 +493,7 @@ static void *event_handle_loop (dtplayer_context_t * dtp_ctx)
     player_handle_cb (dtp_ctx);
 
     free(dtp_ctx);
-    player_register_all();
+    player_remove_all();
     pthread_exit (NULL);
     return NULL;
 }

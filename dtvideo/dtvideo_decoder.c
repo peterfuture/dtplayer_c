@@ -38,6 +38,8 @@ void register_vdec_ext(vd_wrapper_t *vd)
     {
         if(*p == NULL)
             break;
+
+        dt_info (TAG, "[%s:%d] register vdec: %s comp:%s \n", __FUNCTION__, __LINE__, (*p)->name, vd->name);
         if(strstr((*p)->name, vd->name) != NULL)
         {
             dt_info (TAG, "[%s:%d] vdec already registerd, name:%s fmt:%d \n", __FUNCTION__, __LINE__, (*p)->name, (*p)->vfmt);
@@ -74,6 +76,7 @@ void vdec_register_all ()
 void vdec_remove_all ()
 {
     g_vd = NULL;
+    dt_info (TAG, "[%s:%d]remove all vd \n",__FUNCTION__,__LINE__);
 }
 
 static int select_video_decoder (dtvideo_decoder_t * decoder)
