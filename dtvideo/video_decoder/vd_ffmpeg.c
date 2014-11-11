@@ -19,6 +19,35 @@ typedef struct vd_ffmpeg_ctx{
     struct SwsContext *pSwsCtx;
 }vd_ffmpeg_ctx_t;
 
+static enum AVCodecID convert_to_id(int format)
+{
+    switch(format)
+    {
+        case DT_VIDEO_FORMAT_H264:
+            return AV_CODEC_ID_H264;
+        default:
+            return -1;
+    }
+}
+static AVCodecContext * alloc_ffmpeg_ctx(dtvideo_decoder_t *decoder)
+{
+    AVCodecContext *ctx = avcodec_alloc_context3(NULL);
+    if(!ctx)
+        return NULL;
+    
+    ctx->codec_type = AVMEDIA_TYPE_VIDEO;
+    ctx->codec_id = convert_to_id(decoder->para->vfmt);
+    dt_info(TAG, "vfmt->id  %d->%d \n", decoder->para->vfmt, ctx->codec_id);
+    if(ctx->codec_id == -1)
+    {
+        av_free(ctx); 
+        return NULL;
+    }
+    //maybe ffmpeg not register
+    av_register_all ();
+    return ctx;
+}
+
 int ffmpeg_vdec_init (dtvideo_decoder_t *decoder)
 {
     vd_wrapper_t *wrapper = decoder->wrapper;
@@ -26,10 +55,18 @@ int ffmpeg_vdec_init (dtvideo_decoder_t *decoder)
     if(!vd_ctx)
         return -1;
     memset(vd_ctx, 0, sizeof(vd_ffmpeg_ctx_t));
+
+    AVCodecContext *avctxp = NULL;
+    if(decoder->vd_priv)
+        avctxp = (AVCodecContext *) decoder->vd_priv;
+    else
+        avctxp = alloc_ffmpeg_ctx(decoder); 
+    if(!avctxp)
+        return -1;
+    avctxp->thread_count = 1;   //do not use multi thread,may crash
+    vd_ctx->avctxp = avctxp; 
     //select video decoder and call init
     AVCodec *codec = NULL;
-    AVCodecContext *avctxp = (AVCodecContext *) decoder->vd_priv;
-    vd_ctx->avctxp = (AVCodecContext *) decoder->vd_priv;
     avctxp->thread_count = 1;   //do not use multi thread,may crash
     enum AVCodecID id = avctxp->codec_id;
     codec = avcodec_find_decoder (id);

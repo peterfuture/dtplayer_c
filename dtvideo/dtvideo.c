@@ -9,9 +9,7 @@ int dtvideo_read_frame (void *priv, dt_av_pkt_t * frame)
     int type = DT_TYPE_VIDEO;
     int ret = 0;
     dtvideo_context_t *vctx = (dtvideo_context_t *) priv;
-    dt_debug(TAG, "[%s:%d]READ FRAME BEGIN \n", __FUNCTION__, __LINE__);
     ret = dthost_read_frame (vctx->parent, frame, type);
-    dt_debug(TAG, "[%s:%d]READ FRAME END \n", __FUNCTION__, __LINE__);
     return ret;
 }
 
