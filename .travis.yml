@@ -1,6 +1,18 @@
 language: c
 compiler:
 - gcc
+before_install:
+    - sudo apt-get install libsdl1.2-dev
+    - sudo apt-get install ffmpeg
 # Change this to your needs
-# script: 
-make clean && make
+before_script:
+    make clean
+script: 
+    - make -j2
+notifications:
+  recipients:
+    - peter_future@outlook.com
+  email:
+    on_success: change
+    on_failure: always
+
