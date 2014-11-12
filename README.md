@@ -1,5 +1,6 @@
 [dtplayer]
 ========
+[![Build Status](https://travis-ci.org/peterfuture/dtplayer_c.svg?branch=master)](https://travis-ci.org/peterfuture/dtplayer_c)
 
 dtplayer is an open-sourced project, published under GPLv3 for individual/personal users .
 
