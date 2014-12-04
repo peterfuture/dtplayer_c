@@ -16,6 +16,16 @@
 
 #define LOG_INI_FILE "./sys_set.ini"
 
+#define KNRM  "\x1B[0m"
+#define KRED  "\x1B[31m"
+#define KGRN  "\x1B[32m"
+#define KYEL  "\x1B[33m"
+#define KBLU  "\x1B[34m"
+#define KMAG  "\x1B[35m"
+#define KCYN  "\x1B[36m"
+#define KWHT  "\x1B[37m"
+
+
 static int dt_log_level = DT_LOG_INFO;
 //static FILE * dt_fp = NULL;
 
@@ -34,8 +44,8 @@ static int display_time()
     struct tm* tm_info;
     time(&timer);
     tm_info = localtime(&timer);
-    strftime(buffer, 25, "%Y:%m:%d:%H:%M:%S", tm_info);
-    printf("[%s]", buffer);
+    strftime(buffer, 25, "%Y:%m %d:%H:%M:%S", tm_info);
+    printf("%s[%s]", KRED, buffer);
     return 0;
 }
 
@@ -44,7 +54,7 @@ void dt_log (void *tag, int level, const char *fmt, ...)
     if (!check_level (level))
         return;
     dt_get_log_level (DT_LOG_ERROR);
-    printf ("[%s] ", (char *) tag);
+    printf ("[%s]%s ", (char *) tag);
     va_list vl;
     va_start (vl, fmt);
     vprintf (fmt, vl);
@@ -139,6 +149,7 @@ void dt_get_log_level (int level)
         printf ("[Invalid]");
         break;
     }
+    printf("%s: ", KNRM);
 }
 
 #if 0
