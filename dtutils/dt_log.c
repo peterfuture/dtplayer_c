@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <time.h>
 
 #if ENABLE_ANDROID
 
@@ -26,12 +27,24 @@ static int check_level (int level)
     return level >= dt_log_level;
 }
 
+static int display_time()
+{
+    time_t timer;
+    char buffer[25];
+    struct tm* tm_info;
+    time(&timer);
+    tm_info = localtime(&timer);
+    strftime(buffer, 25, "%Y:%m:%d:%H:%M:%S", tm_info);
+    printf("[%s]", buffer);
+    return 0;
+}
+
 void dt_log (void *tag, int level, const char *fmt, ...)
 {
     if (!check_level (level))
         return;
+    dt_get_log_level (DT_LOG_ERROR);
     printf ("[%s] ", (char *) tag);
-    dt_get_log_level (level);
     va_list vl;
     va_start (vl, fmt);
     vprintf (fmt, vl);
@@ -42,8 +55,9 @@ void dt_error (void *tag, const char *fmt, ...)
 {
     if (!check_level (DT_LOG_ERROR))
         return;
+    display_time();
+    dt_get_log_level (DT_LOG_DEBUG);
     printf ("[%s] ", (char *) tag);
-    dt_get_log_level (DT_LOG_ERROR);
     va_list vl;
     va_start (vl, fmt);
     vprintf (fmt, vl);
@@ -55,8 +69,9 @@ void dt_debug (void *tag, const char *fmt, ...)
 {
     if (!check_level (DT_LOG_DEBUG))
         return;
+    display_time();
+    dt_get_log_level (DT_LOG_WARNING);
     printf ("[%s] ", (char *) tag);
-    dt_get_log_level (DT_LOG_DEBUG);
     va_list vl;
     va_start (vl, fmt);
     vprintf (fmt, vl);
@@ -67,8 +82,9 @@ void dt_warning (void *tag, const char *fmt, ...)
 {
     if (!check_level (DT_LOG_WARNING))
         return;
+    display_time();
+    dt_get_log_level (DT_LOG_INFO);
     printf ("[%s] ", (char *) tag);
-    dt_get_log_level (DT_LOG_WARNING);
     va_list vl;
     va_start (vl, fmt);
     vprintf (fmt, vl);
@@ -79,8 +95,9 @@ void dt_info (void *tag, const char *fmt, ...)
 {
     if (!check_level (DT_LOG_INFO))
         return;
-    printf ("[%s] ", (char *) tag);
+    display_time();
     dt_get_log_level (DT_LOG_INFO);
+    printf ("[%s] ", (char *) tag);
     va_list vl;
     va_start (vl, fmt);
     vprintf (fmt, vl);
