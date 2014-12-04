@@ -45,7 +45,7 @@ static int display_time()
     time(&timer);
     tm_info = localtime(&timer);
     strftime(buffer, 25, "%Y:%m %d:%H:%M:%S", tm_info);
-    printf("%s[%s]", KRED, buffer);
+    printf("%s[%s]", KYEL, buffer);
     return 0;
 }
 
@@ -131,22 +131,22 @@ void dt_get_log_level (int level)
         printf ("[Invalid]");
         break;
     case DT_LOG_ERROR:
-        printf ("[ERROR]");
+        printf ("%s[ERROR]", KRED);
         break;
     case DT_LOG_DEBUG:
-        printf ("[DEBUG]");
+        printf ("%s[DEBUG]", KBLU);
         break;
     case DT_LOG_WARNING:
-        printf ("[WARNING]");
+        printf ("%s[WARNING]", KGRN);
         break;
     case DT_LOG_INFO:
         printf ("[INFO]");
         break;
     case DT_LOG_MAX:
-        printf ("[Invalid]");
+        printf ("%s[Invalid]", KRED);
         break;
     default:
-        printf ("[Invalid]");
+        printf ("%s[Invalid]", KRED);
         break;
     }
     printf("%s: ", KNRM);
