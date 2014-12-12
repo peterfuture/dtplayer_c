@@ -254,9 +254,11 @@ static int demuxer_ffmpeg_read_frame(demuxer_wrapper_t * wrapper, dt_av_pkt_t * 
     //read frame ok
     if(has_video && cur_vidx == avpkt.stream_index)
     {
+#ifdef ENABLE_ANDROID
         dt_debug(TAG, "befor filter, %02x %02x %02x %02x \n", avpkt.data[0], avpkt.data[1], avpkt.data[2], avpkt.data[3]);
         update_video_frame(wrapper, &avpkt); // update video frame, header etc...
         dt_debug(TAG, "after filter, %02x %02x %02x %02x \n", avpkt.data[0], avpkt.data[1], avpkt.data[2], avpkt.data[3]);
+#endif
         frame->type = AVMEDIA_TYPE_VIDEO;
     }
     else if(has_audio && cur_aidx == avpkt.stream_index)
