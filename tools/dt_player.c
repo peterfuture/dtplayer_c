@@ -46,24 +46,24 @@ static int update_cb (void *cookie, player_state_t * state)
     return 0;
 }
 
-static int parse_cmd(int argc,char **argv,dtplayer_para_t *para)
+static int para_setup(int argc,char **argv,dtplayer_para_t *para)
 {
-    //first reset para
-    para->disable_audio = para->disable_video = para->disable_sub = -1;
-    para->height = para->width = -1;
+    para->height = 
+    para->width = -1;
+    
     para->loop_mode = 0;
-    para->audio_index = para->video_index = para->sub_index = -1;
-    para->update_cb = NULL;
-    para->disable_avsync = 0;
+    para->audio_index =
+    para->video_index = 
+    para->sub_index = -1;
 
-    //init para with argv
     para->file_name = argv[1];
     para->update_cb = (void *) update_cb;
-    //para->disable_audio=1;
-    //para->disable_video=1;
+    
+    para->disable_audio=0;
+    para->disable_video=0;
     para->disable_sub=1;
-    para->width = -1;
-    para->height = -1;
+    para->disable_avsync = 0;
+
     para->cookie = NULL;
     return 0;
 }
@@ -95,6 +95,7 @@ int main (int argc, char **argv)
     ao_sdl2_setup(&ply_ctx.ao);
     dtplayer_register_ext_ao(&ply_ctx.ao);
 #endif
+
 #ifdef ENABLE_AO_SDL 
     ao_sdl_setup(&ply_ctx.ao);
     dtplayer_register_ext_ao(&ply_ctx.ao);
@@ -106,23 +107,23 @@ int main (int argc, char **argv)
     register_ex_all();
 
     dtplayer_para_t para;
-    parse_cmd(argc,argv,&para);
-    
-    void *player_priv = dtplayer_init (&para);
+    para_setup(argc,argv,&para);
+   
+    void *player_priv = NULL;
+    dt_media_info_t info;
+    player_priv = dtplayer_init (&para);
     if (!player_priv)
         return -1;
-
-    //get media info
-	dt_media_info_t info;
 	ret = dtplayer_get_mediainfo(player_priv, &info);
 	if(ret < 0)
 	{
-		dt_info(TAG,"Get mediainfo failed, quit \n");
+		dt_info(TAG,"get mediainfo failed, quit \n");
 		return -1;
 	}
-	dt_info(TAG,"Get Media Info Ok,filesize:%lld fulltime:%lld S \n",info.file_size,info.duration);
+	dt_info(TAG,"get mediainfo ok, filesize:%lld fulltime:%lld S \n",info.file_size,info.duration);
 
-    //set display win size
+    //set video display window size
+    //if no video, disp audio
     int width = 720;
     int height = 480;
     if(info.has_video)
@@ -131,17 +132,15 @@ int main (int argc, char **argv)
         width = vstream->width;
         height = vstream->height;
     }
-    if(width <= 0 || width > 1920)
+    if(width <= 0 || width > 4096)
         width = 720;
-    if(height <= 0 || height >1088)
+    if(height <= 0 || height >2160)
         height = 480;
-
     ply_ctx.disp_width = width;
     ply_ctx.disp_height = height;
-
     ui_init(width,height); 
 
-	dtplayer_start (player_priv);
+	dtplayer_start(player_priv);
 
     //event handle
     player_event_t event = EVENT_NONE;
