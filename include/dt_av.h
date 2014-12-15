@@ -314,6 +314,9 @@ typedef enum _AO_ID_
 /*subtitle part*/
 
 
+void *dt_malloc(size_t size);
+void dt_free(void *ptr);
+
 dt_av_frame_t *dtav_new_frame();
 int dtav_unref_frame(dt_av_frame_t *frame);
 int dtav_free_frame(dt_av_frame_t *frame);

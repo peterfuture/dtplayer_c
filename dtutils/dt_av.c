@@ -1,4 +1,18 @@
 #include "dt_av.h"
+
+void *dt_malloc(size_t size)
+{
+    void *ptr = malloc(size);
+    if(!ptr) return ptr;
+    memset(ptr, 0, size);
+    return ptr;
+}
+
+void dt_free(void *ptr)
+{
+    free(ptr);
+}
+
 dt_av_frame_t *dtav_new_frame()
 {
     dt_av_frame_t *frame = (dt_av_frame_t *)malloc(sizeof(dt_av_frame_t));
