@@ -20,6 +20,23 @@ typedef enum{
     EVENT_MAX      = 0x800
 }player_event_t;
 
+typedef struct ui_ctx{
+    int full_screen_flag;
+
+    int max_width;
+    int max_height;
+
+    int orig_width;
+    int orig_height;
+
+    int cur_x_pos;
+    int cur_y_pos;
+    int cur_width;
+    int cur_height;
+
+    void *context;
+}ui_ctx_t;
+
 player_event_t get_event (args_t *arg,ply_ctx_t *ctx);
 int ui_init();
 int ui_get_orig_size(int *w, int *h);

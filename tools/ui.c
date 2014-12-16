@@ -16,13 +16,15 @@ int sdl_init();
 int sdl_stop();
 #endif
 
-int ui_init(int w, int h)
+int ui_init(ply_ctx_t *ply_ctx, ui_ctx_t *ui_ctx)
 {
+    ui_ctx->orig_width = ply_ctx->disp_width;
+    ui_ctx->orig_height = ply_ctx->disp_height;
 #ifdef ENABLE_VO_SDL2 
-    sdl2_init(w,h);
+    sdl2_init(ply_ctx, ui_ctx);
 #endif
 #ifdef ENABLE_VO_SDL
-    sdl_init(w,h);
+    sdl_init(ply_ctx, ui_ctx);
 #endif
     return 0;
 }

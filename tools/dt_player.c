@@ -30,7 +30,7 @@ void ao_sdl_setup(ao_wrapper_t *wrapper);
 void vo_sdl_setup(vo_wrapper_t *wrapper);
 #endif
 
-static int update_cb (void *cookie, player_state_t * state)
+static int update_cb(void *cookie, player_state_t * state)
 {
     if (state->cur_status == PLAYER_STATUS_EXIT)
     {
@@ -79,7 +79,7 @@ static void register_ex_all()
     //dtplayer_register_ext_vd(&vd_ex_ops);
 }
 
-int main (int argc, char **argv)
+int main(int argc, char **argv)
 {
     int ret = 0;
     version_info ();
@@ -136,11 +136,13 @@ int main (int argc, char **argv)
         width = 720;
     if(height <= 0 || height >2160)
         height = 480;
-    dt_info(TAG, "get video size, width: %d->%d height: %d->%d \n", vstream->width, vstream->height, width, height);
+    dt_info(TAG, "get video size, width: %d->%d height: %d->%d \n", vstream->width, width, vstream->height, height);
 
     ply_ctx.disp_width = width;
     ply_ctx.disp_height = height;
-    ui_init(width,height); 
+
+    ui_ctx_t ui_ctx;
+    ui_init(&ply_ctx, &ui_ctx); 
 
     dtplayer_start(player_priv);
 
