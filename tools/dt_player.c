@@ -114,13 +114,13 @@ int main (int argc, char **argv)
     player_priv = dtplayer_init (&para);
     if (!player_priv)
         return -1;
-	ret = dtplayer_get_mediainfo(player_priv, &info);
-	if(ret < 0)
-	{
-		dt_info(TAG,"get mediainfo failed, quit \n");
-		return -1;
-	}
-	dt_info(TAG,"get mediainfo ok, filesize:%lld fulltime:%lld S \n",info.file_size,info.duration);
+    ret = dtplayer_get_mediainfo(player_priv, &info);
+    if(ret < 0)
+    {
+        dt_info(TAG,"get mediainfo failed, quit \n");
+        return -1;
+    }
+    dt_info(TAG,"get mediainfo ok, filesize:%lld fulltime:%lld S \n",info.file_size,info.duration);
 
     //set video display window size
     //if no video, disp audio
@@ -142,7 +142,7 @@ int main (int argc, char **argv)
     ply_ctx.disp_height = height;
     ui_init(width,height); 
 
-	dtplayer_start(player_priv);
+    dtplayer_start(player_priv);
 
     //event handle
     player_event_t event = EVENT_NONE;

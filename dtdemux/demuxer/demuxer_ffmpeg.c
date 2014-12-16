@@ -469,7 +469,7 @@ static int demuxer_ffmpeg_setup_info(demuxer_wrapper_t * wrapper, dt_media_info_
             ast_info->time_base.den = pStream->time_base.den;
             ast_info->bit_rate = pCodec->bit_rate;
             ast_info->format = audio_format_convert(pCodec->codec_id);
-            ast_info->codec_priv =(void *) pCodec;
+            ast_info->codec_priv = (void *)pCodec;
             info->astreams[info->ast_num] = ast_info;
             info->ast_num++;
         }

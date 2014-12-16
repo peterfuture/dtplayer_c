@@ -50,10 +50,10 @@ int dtaudio_init (void **audio_priv, dtaudio_para_t * para, void *parent)
     }
     //we need to set parent early, Since enter audio decoder loop first,will crash for parent invalid
     actx->parent = parent;
-    ret = audio_init (actx);
+    ret = audio_init(actx);
     if (ret < 0)
     {
-        dt_error ("[%s:%d] audio_init failed \n", __FUNCTION__, __LINE__);
+        dt_error(TAG, "[%s:%d] audio_init failed \n", __FUNCTION__, __LINE__);
         return ret;
     }
 

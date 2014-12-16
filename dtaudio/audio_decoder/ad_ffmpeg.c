@@ -27,6 +27,9 @@ static enum AVCodecID convert_to_id(int format)
 
 static AVCodecContext * alloc_ffmpeg_ctx(dtaudio_decoder_t *decoder)
 {
+    //maybe ffmpeg not register
+    av_register_all ();
+
     AVCodecContext *ctx = avcodec_alloc_context3(NULL);
     if(!ctx)
         return NULL;
@@ -42,8 +45,8 @@ static AVCodecContext * alloc_ffmpeg_ctx(dtaudio_decoder_t *decoder)
     ctx->sample_rate = decoder->aparam.samplerate;
     ctx->sample_fmt = AV_SAMPLE_FMT_S16;
     ctx->internal = NULL; 
-    //maybe ffmpeg not register
-    av_register_all ();
+
+    dt_info(TAG, "avcodec null, alloc in decoder \n");
     return ctx;
 }
 
