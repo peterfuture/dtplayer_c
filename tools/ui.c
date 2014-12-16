@@ -16,8 +16,6 @@ int sdl_init();
 int sdl_stop();
 #endif
 
-
-
 int ui_init(int w, int h)
 {
 #ifdef ENABLE_VO_SDL2 
