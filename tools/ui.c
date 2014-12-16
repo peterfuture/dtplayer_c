@@ -12,7 +12,7 @@ int sdl2_window_resize(int w, int h);
 
 #ifdef ENABLE_VO_SDL
 #include <SDL/SDL.h>
-int sdl_init();
+int sdl_init(ply_ctx_t *ply_ctx, ui_ctx_t *ui_ctx);
 int sdl_stop();
 #endif
 

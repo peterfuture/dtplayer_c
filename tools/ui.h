@@ -38,7 +38,7 @@ typedef struct ui_ctx{
 }ui_ctx_t;
 
 player_event_t get_event (args_t *arg,ply_ctx_t *ctx);
-int ui_init();
+int ui_init(ply_ctx_t *ply_ctx, ui_ctx_t *ui_ctx);
 int ui_get_orig_size(int *w, int *h);
 int ui_get_max_size(int *w, int *h);
 int ui_stop();

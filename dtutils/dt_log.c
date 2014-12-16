@@ -54,7 +54,7 @@ void dt_log (void *tag, int level, const char *fmt, ...)
     if (!check_level (level))
         return;
     dt_get_log_level (DT_LOG_ERROR);
-    printf ("[%s]%s ", (char *) tag);
+    printf("[%s] ", (char *) tag);
     va_list vl;
     va_start (vl, fmt);
     vprintf (fmt, vl);

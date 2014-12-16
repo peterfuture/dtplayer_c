@@ -32,7 +32,7 @@ void vo_sdl_setup(vo_wrapper_t *wrapper);
 
 static int update_cb(void *cookie, player_state_t * state)
 {
-    if (state->cur_status == PLAYER_STATUS_EXIT)
+    if(state->cur_status == PLAYER_STATUS_EXIT)
     {
         dt_info (TAG, "RECEIVE EXIT CMD\n");
         ply_ctx.exit_flag = 1;
@@ -57,7 +57,7 @@ static int para_setup(int argc,char **argv,dtplayer_para_t *para)
     para->sub_index = -1;
 
     para->file_name = argv[1];
-    para->update_cb = (void *) update_cb;
+    para->update_cb = (void *)update_cb;
     
     para->disable_audio=0;
     para->disable_video=0;
@@ -82,11 +82,11 @@ static void register_ex_all()
 int main(int argc, char **argv)
 {
     int ret = 0;
-    version_info ();
-    if (argc < 2)
+    version_info();
+    if(argc < 2)
     {
-        dt_info ("", " no enough args\n");
-        show_usage ();
+        dt_info("", " no enough args\n");
+        show_usage();
         return 0;
     }
     memset(&ply_ctx,0,sizeof(ply_ctx_t));
@@ -111,7 +111,7 @@ int main(int argc, char **argv)
    
     void *player_priv = NULL;
     dt_media_info_t info;
-    player_priv = dtplayer_init (&para);
+    player_priv = dtplayer_init(&para);
     if (!player_priv)
         return -1;
     ret = dtplayer_get_mediainfo(player_priv, &info);
@@ -142,6 +142,7 @@ int main(int argc, char **argv)
     ply_ctx.disp_height = height;
 
     ui_ctx_t ui_ctx;
+    memset(&ui_ctx, 0, sizeof(ui_ctx_t));
     ui_init(&ply_ctx, &ui_ctx); 
 
     dtplayer_start(player_priv);
