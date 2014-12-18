@@ -70,14 +70,15 @@ typedef struct dtplayer_context
 
 void player_register_all();
 void player_remove_all();
-int player_init (dtplayer_context_t * dtp_ctx);
-int player_set_video_size (dtplayer_context_t * dtp_ctx, int width, int height);
-int player_start (dtplayer_context_t * dtp_ctx);
-int player_pause (dtplayer_context_t * dtp_ctx);
-int player_resume (dtplayer_context_t * dtp_ctx);
-int player_seekto (dtplayer_context_t * dtp_ctx, int seek_time); //s
-int player_get_mediainfo (dtplayer_context_t * dtp_ctx, dt_media_info_t *info); //s
-int player_stop (dtplayer_context_t * dtp_ctx);
-int player_video_resize (dtplayer_context_t * dtp_ctx, int w, int h);
+int player_init(dtplayer_context_t * dtp_ctx);
+int player_set_video_size(dtplayer_context_t * dtp_ctx, int width, int height);
+int player_prepare(dtplayer_context_t * dtp_ctx);
+int player_start(dtplayer_context_t * dtp_ctx);
+int player_pause(dtplayer_context_t * dtp_ctx);
+int player_resume(dtplayer_context_t * dtp_ctx);
+int player_seekto(dtplayer_context_t * dtp_ctx, int seek_time); //s
+int player_get_mediainfo(dtplayer_context_t * dtp_ctx, dt_media_info_t *info); //s
+int player_stop(dtplayer_context_t * dtp_ctx);
+int player_video_resize(dtplayer_context_t * dtp_ctx, int w, int h);
 
 #endif

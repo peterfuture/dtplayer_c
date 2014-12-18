@@ -230,11 +230,10 @@ int player_set_video_size(dtplayer_context_t * dtp_ctx, int width, int height)
     return 0;
 }
 
-int player_start(dtplayer_context_t * dtp_ctx)
+int player_prepare(dtplayer_context_t *dtp_ctx)
 {
     int ret = 0;
     pthread_t tid;
-
 
     if(get_player_status(dtp_ctx)>= PLAYER_STATUS_START)
     {
@@ -268,7 +267,31 @@ int player_start(dtplayer_context_t * dtp_ctx)
         dt_error(TAG "file:%s [%s:%d] player io thread start failed \n", __FILE__, __FUNCTION__, __LINE__);
         goto ERR2;
     }
+    set_player_status(dtp_ctx, PLAYER_STATUS_PREPARED);
 
+    return 0;
+ERR2:
+    player_host_stop(dtp_ctx);
+ERR3:
+    set_player_status(dtp_ctx, PLAYER_STATUS_ERROR);
+    player_handle_cb(dtp_ctx);
+    return ret;
+
+}
+
+
+int player_start(dtplayer_context_t * dtp_ctx)
+{
+    int ret;
+    
+    if(get_player_status(dtp_ctx) < PLAYER_STATUS_PREPARE_START)
+    {
+        ret = player_prepare(dtp_ctx);
+        if(ret < 0)
+            return ret;
+    }
+
+    set_player_status(dtp_ctx, PLAYER_STATUS_START);
     ret = player_host_start(dtp_ctx);
     if(ret != 0)
     {
@@ -280,12 +303,12 @@ int player_start(dtplayer_context_t * dtp_ctx)
     dt_info(TAG, "PLAYER START OK\n");
     set_player_status(dtp_ctx, PLAYER_STATUS_RUNNING);
     player_handle_cb(dtp_ctx);
+
     return 0;
-  ERR1:
+
+ERR1:
     stop_io_thread(dtp_ctx);
-  ERR2:
     player_host_stop(dtp_ctx);
-  ERR3:
     set_player_status(dtp_ctx, PLAYER_STATUS_ERROR);
     player_handle_cb(dtp_ctx);
     return ret;
