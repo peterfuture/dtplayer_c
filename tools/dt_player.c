@@ -108,7 +108,8 @@ int main(int argc, char **argv)
 
     dtplayer_para_t para;
     para_setup(argc,argv,&para);
-   
+    ply_ctx.file_name = para.file_name; 
+
     void *player_priv = NULL;
     dt_media_info_t info;
     player_priv = dtplayer_init(&para);

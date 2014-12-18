@@ -15,6 +15,7 @@ struct ui_ctx;
 
 typedef struct ply_ctx
 {
+    char *file_name;
     void * handle; // player handle
     
     int64_t cur_time;

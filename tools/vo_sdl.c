@@ -57,7 +57,7 @@ int sdl_init(ply_ctx_t *ply_ctx, ui_ctx_t *ui_ctx)
 
     //SDL_WM_SetIcon(SDL_LoadBMP("icon.bmp"), NULL);
     sdl_ctx.screen = SDL_SetVideoMode(ui_ctx->cur_width, ui_ctx->cur_height, 0, flags);
-    SDL_WM_SetCaption("dtplayer", "dtplayer");
+    SDL_WM_SetCaption(sdl_ctx.ply_ctx->file_name, sdl_ctx.ply_ctx->file_name);
     
     dt_lock_init(&sdl_ctx.vo_mutex, NULL);
     return 0;
@@ -84,7 +84,7 @@ int sdl_window_resize(int w, int h)
         flags |= SDL_RESIZABLE;
     
     sdl_ctx.screen = SDL_SetVideoMode(w, h, 0, flags);
-    SDL_WM_SetCaption("dtplayer", "dtplayer");
+    SDL_WM_SetCaption(sdl_ctx.ply_ctx->file_name, sdl_ctx.ply_ctx->file_name);
     sdl_ctx.overlay = SDL_CreateYUVOverlay(w, h, SDL_YV12_OVERLAY, sdl_ctx.screen);
     
     dt_unlock (&ctx->vo_mutex);
