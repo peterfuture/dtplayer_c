@@ -1,4 +1,5 @@
 #include "dtvideo_output.h"
+#include "dtvideo_filter.h"
 #include "dt_player.h"
 #include "ui.h"
 
@@ -12,6 +13,8 @@ typedef struct
     SDL_Surface *screen;
     SDL_Overlay *overlay;
     dt_lock_t vo_mutex;
+
+    dtvideo_filter_t vf;
 
     ui_ctx_t *ui_ctx;
     ply_ctx_t *ply_ctx;
@@ -51,11 +54,40 @@ int sdl_init(ply_ctx_t *ply_ctx, ui_ctx_t *ui_ctx)
     ui_ctx->cur_height = ui_ctx->orig_height;
 
     flags = SDL_HWSURFACE | SDL_ASYNCBLIT | SDL_HWACCEL | SDL_RESIZABLE;
+
     //SDL_WM_SetIcon(SDL_LoadBMP("icon.bmp"), NULL);
     sdl_ctx.screen = SDL_SetVideoMode(ui_ctx->cur_width, ui_ctx->cur_height, 0, flags);
-    SDL_WM_SetCaption("dtplayer", NULL);
+    SDL_WM_SetCaption("dtplayer", "dtplayer");
     
     dt_lock_init(&sdl_ctx.vo_mutex, NULL);
+    return 0;
+}
+
+int sdl_window_resize(int w, int h)
+{
+    sdl_ctx_t *ctx = &sdl_ctx;
+    dt_lock (&ctx->vo_mutex);
+
+    ctx->ui_ctx->cur_width = w;
+    ctx->ui_ctx->cur_height = h;
+
+    sdl_ctx.vf.para.d_width = w;
+    sdl_ctx.vf.para.d_height = h;
+    video_filter_update(&sdl_ctx.vf);
+    
+    SDL_FreeYUVOverlay(sdl_ctx.overlay);
+    dt_info(TAG, "W:%d H:%d \n", w, h);
+    int flags = SDL_HWSURFACE | SDL_ASYNCBLIT | SDL_HWACCEL;
+    if(sdl_ctx.ui_ctx->max_width == w)
+        flags |= SDL_FULLSCREEN;
+    else
+        flags |= SDL_RESIZABLE;
+    
+    sdl_ctx.screen = SDL_SetVideoMode(w, h, 0, flags);
+    SDL_WM_SetCaption("dtplayer", "dtplayer");
+    sdl_ctx.overlay = SDL_CreateYUVOverlay(w, h, SDL_YV12_OVERLAY, sdl_ctx.screen);
+    
+    dt_unlock (&ctx->vo_mutex);
     return 0;
 }
 
@@ -71,6 +103,14 @@ static int vo_sdl_init(dtvideo_output_t * vo)
     
     sdl_ctx.overlay = SDL_CreateYUVOverlay(cur_width, cur_height, SDL_YV12_OVERLAY, sdl_ctx.screen);
 
+    //Init vf
+    memset(&sdl_ctx.vf, 0, sizeof(dtvideo_filter_t));
+    memcpy(&sdl_ctx.vf.para, vo->para, sizeof(dtvideo_para_t));
+    sdl_ctx.vf.para.s_pixfmt = sdl_ctx.vf.para.d_pixfmt;
+    sdl_ctx.vf.para.d_width = sdl_ctx.ui_ctx->cur_width;
+    sdl_ctx.vf.para.d_height = sdl_ctx.ui_ctx->cur_height;
+    video_filter_init(&sdl_ctx.vf); 
+ 
     dt_lock_init(&sdl_ctx.vo_mutex, NULL);
 
     dt_info(TAG, "w:%d h:%d planes:%d \n", sdl_ctx.overlay->w, sdl_ctx.overlay->h, sdl_ctx.overlay->planes);
@@ -86,7 +126,7 @@ static int vo_sdl_stop(dtvideo_output_t * vo)
 
     SDL_FreeYUVOverlay(sdl_ctx.overlay);
     sdl_ctx.overlay = NULL;
-
+    video_filter_stop(&sdl_ctx.vf);
     dt_unlock(&sdl_ctx.vo_mutex);
 
     dt_info(TAG, "uninit vo sdl\n");
@@ -97,6 +137,8 @@ static int vo_sdl_render(dtvideo_output_t * vo, dt_av_frame_t * frame)
 {
     dt_lock(&sdl_ctx.vo_mutex);
 
+    video_filter_process(&sdl_ctx.vf, frame);
+    
     SDL_Rect rect;
     SDL_LockYUVOverlay(sdl_ctx.overlay);
 

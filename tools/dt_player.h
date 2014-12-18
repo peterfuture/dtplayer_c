@@ -11,6 +11,8 @@ typedef struct
     int arg2;
 }args_t;
 
+struct ui_ctx;
+
 typedef struct ply_ctx
 {
     void * handle; // player handle
@@ -26,6 +28,8 @@ typedef struct ply_ctx
     vo_wrapper_t vo;
 
     int exit_flag;
+
+    struct ui_ctx *ui_ctx;
 }ply_ctx_t;
 
 #endif

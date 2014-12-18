@@ -61,12 +61,17 @@ int ui_window_resize(int w, int h)
 #ifdef ENABLE_VO_SDL2 
     sdl2_window_resize(w, h); 
 #endif
+
+#ifdef ENABLE_VO_SDL
+    sdl_window_resize(w, h); 
+#endif
     return 0;
 }
 
 #ifdef ENABLE_VO_SDL
 player_event_t get_event (args_t *arg,ply_ctx_t *ctx)
 {
+    static int full_screen = 0;
     SDL_Event event;
     SDL_PollEvent(&event);
     switch (event.type) 
@@ -78,7 +83,20 @@ player_event_t get_event (args_t *arg,ply_ctx_t *ctx)
                 case SDLK_q:
                     return EVENT_STOP;
                 case SDLK_f:
-                     return EVENT_NONE;
+                    if(!full_screen)
+                    {
+                        arg->arg1 = ctx->ui_ctx->max_width;
+                        arg->arg2 = ctx->ui_ctx->max_height;
+                        full_screen = 1;
+                    }
+                    else
+                    {
+                        arg->arg1 = ctx->ui_ctx->orig_width;
+                        arg->arg2 = ctx->ui_ctx->orig_height;
+                        full_screen = 0;
+                    }
+ 
+                    return EVENT_RESIZE;
                 case SDLK_p:
                 case SDLK_SPACE:
                     //toggle_pause(cur_stream);

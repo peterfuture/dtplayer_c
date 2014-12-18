@@ -141,9 +141,8 @@ int main(int argc, char **argv)
     ply_ctx.disp_width = width;
     ply_ctx.disp_height = height;
 
-    ui_ctx_t ui_ctx;
-    memset(&ui_ctx, 0, sizeof(ui_ctx_t));
-    ui_init(&ply_ctx, &ui_ctx); 
+    ply_ctx.ui_ctx = (ui_ctx_t *)dt_malloc(sizeof(ui_ctx_t));
+    ui_init(&ply_ctx, ply_ctx.ui_ctx); 
 
     dtplayer_start(player_priv);
 
