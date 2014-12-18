@@ -60,13 +60,13 @@ static int player_server_init(dtplayer_context_t * dtp_ctx)
     server->id = EVENT_SERVER_PLAYER;
     strcpy(server->name, "SERVER-PLAYER");
     dt_register_server(server);
-    dtp_ctx->player_server = (void *) server;
+    dtp_ctx->player_server = (void *)server;
     return 0;
 }
 
 static int player_server_release(dtplayer_context_t * dtp_ctx)
 {
-    event_server_t *server = (event_server_t *) dtp_ctx->player_server;
+    event_server_t *server = (event_server_t *)dtp_ctx->player_server;
     dt_remove_server(server);
     dtp_ctx->player_server = NULL;
     return 0;
@@ -78,7 +78,7 @@ int player_init(dtplayer_context_t * dtp_ctx)
     dtplayer_para_t *para = &dtp_ctx->player_para;
     player_ctrl_t *ctrl_info = &dtp_ctx->ctrl_info;
     
-    if(get_player_status(dtp_ctx) >= PLAYER_STATUS_INIT_ENTER)
+    if(get_player_status(dtp_ctx)>= PLAYER_STATUS_INIT_ENTER)
     {
         dt_error(TAG,"player already inited \n");
         goto ERR0;
@@ -114,7 +114,7 @@ int player_init(dtplayer_context_t * dtp_ctx)
     //parse ini file
     char value[512];
     ctrl_info->sync_enable = (int)(ctrl_info->has_audio && ctrl_info->has_video); // default
-    if(GetEnv("PLAYER", "player.syncenable", value) > 0)
+    if(GetEnv("PLAYER", "player.syncenable", value)> 0)
     {
         dt_info(TAG,"sync enable set by ini, value:%d\n ",ctrl_info->sync_enable);
         ctrl_info->sync_enable = atoi(value);
@@ -122,17 +122,17 @@ int player_init(dtplayer_context_t * dtp_ctx)
     dt_info(TAG, "initial setting, has audio:%d has video:%d has sub:%d sync_enable:%d\n", ctrl_info->has_audio, ctrl_info->has_video, ctrl_info->has_sub, ctrl_info->sync_enable);
 
 
-    if(GetEnv("PLAYER", "player.noaudio", value) > 0)
+    if(GetEnv("PLAYER", "player.noaudio", value)> 0)
     {
         if(atoi(value) == 1)
             ctrl_info->has_audio = 0;
     }
-    if(GetEnv("PLAYER", "player.novideo", value) > 0)
+    if(GetEnv("PLAYER", "player.novideo", value)> 0)
     {
         if(atoi(value) == 1)
             ctrl_info->has_video = 0;
     }
-    if(GetEnv("PLAYER", "player.nosub", value) > 0)
+    if(GetEnv("PLAYER", "player.nosub", value)> 0)
     {
         if(atoi(value) == 1)
             ctrl_info->has_sub = 0;
@@ -236,7 +236,7 @@ int player_start(dtplayer_context_t * dtp_ctx)
     pthread_t tid;
 
 
-    if(get_player_status(dtp_ctx) >= PLAYER_STATUS_START)
+    if(get_player_status(dtp_ctx)>= PLAYER_STATUS_START)
     {
         dt_error(TAG,"player already started \n");
         return 0;
@@ -246,7 +246,7 @@ int player_start(dtplayer_context_t * dtp_ctx)
 
     /* init & start player server first */
     player_server_init(dtp_ctx);
-    ret = pthread_create(&tid, NULL,(void *) &event_handle_loop,(void *) dtp_ctx);
+    ret = pthread_create(&tid, NULL,(void *)&event_handle_loop,(void *)dtp_ctx);
     if(ret == -1)
     {
         dt_error(TAG "file:%s [%s:%d] player io thread start failed \n", __FILE__, __FUNCTION__, __LINE__);
@@ -308,7 +308,7 @@ int player_pause(dtplayer_context_t * dtp_ctx)
 
 int player_resume(dtplayer_context_t * dtp_ctx)
 {
-    if(get_player_status(dtp_ctx) != PLAYER_STATUS_PAUSED)
+    if(get_player_status(dtp_ctx)!= PLAYER_STATUS_PAUSED)
         return -1;
     if(player_host_resume(dtp_ctx) == -1)
     {
@@ -325,7 +325,7 @@ int player_seekto(dtplayer_context_t * dtp_ctx, int seek_time)
 {
     player_ctrl_t *ctrl_info = &dtp_ctx->ctrl_info;
     
-    if(get_player_status(dtp_ctx) < PLAYER_STATUS_INIT_EXIT)
+    if(get_player_status(dtp_ctx)< PLAYER_STATUS_INIT_EXIT)
         return -1;
     
     player_state_t *play_stat = &dtp_ctx->state;
@@ -345,7 +345,7 @@ int player_seekto(dtplayer_context_t * dtp_ctx, int seek_time)
         goto FAIL;
     player_host_stop(dtp_ctx);
     player_host_init(dtp_ctx);
-    if(io_thread_running(dtp_ctx)) // maybe io thread already quit
+    if(io_thread_running(dtp_ctx))// maybe io thread already quit
         resume_io_thread(dtp_ctx);
     else
         start_io_thread(dtp_ctx);
@@ -355,7 +355,7 @@ int player_seekto(dtplayer_context_t * dtp_ctx, int seek_time)
     player_handle_cb(dtp_ctx);
 
     //check if another seek event comming soom
-    event_server_t *server = (event_server_t *) dtp_ctx->player_server;
+    event_server_t *server = (event_server_t *)dtp_ctx->player_server;
     event_t *event = dt_peek_event(server);
     if(event != NULL && event->type == PLAYER_EVENT_SEEK)
     {
@@ -418,7 +418,7 @@ static char * get_event_name(int cmd)
 
 static int player_handle_event(dtplayer_context_t * dtp_ctx)
 {
-    event_server_t *server = (event_server_t *) dtp_ctx->player_server;
+    event_server_t *server = (event_server_t *)dtp_ctx->player_server;
     event_t *event = dt_get_event(server);
 START:
     if(!event)
@@ -471,7 +471,7 @@ static void *event_handle_loop(dtplayer_context_t * dtp_ctx)
         if(get_player_status(dtp_ctx) == PLAYER_STATUS_STOP)
             goto QUIT;
         usleep(300 * 1000);    // 1/3s update
-        if(get_player_status(dtp_ctx) != PLAYER_STATUS_RUNNING)
+        if(get_player_status(dtp_ctx)!= PLAYER_STATUS_RUNNING)
             continue;
         if(get_player_status(dtp_ctx) == PLAYER_STATUS_RUNNING)
             player_update_state(dtp_ctx);
