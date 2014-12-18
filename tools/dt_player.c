@@ -123,8 +123,7 @@ int main(int argc, char **argv)
     }
     dt_info(TAG,"get mediainfo ok, filesize:%lld fulltime:%lld S \n",info.file_size,info.duration);
 
-    //set video display window size
-    //if no video, disp audio
+    //set default window size
     int width = 720;
     int height = 480;
     vstream_info_t *vstream = info.vstreams[0];
