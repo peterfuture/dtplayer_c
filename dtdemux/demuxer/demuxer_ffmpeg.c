@@ -8,7 +8,7 @@
 
 #define TAG "DEMUX-FFMPEG"
 
-#define FFMPEG_BUF_SIZE 1024*1024 // 60k
+#define FFMPEG_BUF_SIZE 32768 // equal to ffmpeg default value - IO_BUFFER_SIZE
 
 typedef struct
 {
@@ -92,17 +92,8 @@ static int demuxer_ffmpeg_open(demuxer_wrapper_t * wrapper)
         return -1;
     }
     AVIOContext *io_ctx = avio_alloc_context(ffmpeg_ctx->buf,FFMPEG_BUF_SIZE,0,ffmpeg_ctx->stream_ext,read_packet,NULL,seek_packet);
-    io_ctx->write_flag = 0;
-    ret = av_probe_input_buffer2(io_ctx, &iformat, "", NULL, 0, 0);
-    if(ret < 0)
-    {
-        dt_error(TAG,"av_probe_input_buffer call failed!\n");
-        return -1;
-    }
-    dt_debug(TAG,"av_probe_input_buffer OK, %s \n",iformat->name);
-    ic->pb = io_ctx;
-    //===================================================
-
+    ic->pb = io_ctx; // Here to replace AVIOContext
+    
     err = avformat_open_input(&ic, file_name, ic->iformat, NULL);
     if(err < 0)
     {
