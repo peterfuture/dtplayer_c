@@ -320,5 +320,6 @@ void dt_free(void *ptr);
 dt_av_frame_t *dtav_new_frame();
 int dtav_unref_frame(dt_av_frame_t *frame);
 int dtav_free_frame(dt_av_frame_t *frame);
+void dtav_clear_frame(void *frame);
 
 #endif

@@ -235,7 +235,7 @@ static void *video_output_thread (void *args)
             if (sys_clock >= picture_pre->pts)
             {
                 dt_info (TAG, "drop frame,sys clock:%lld thispts:%lld next->pts:%lld \n", sys_clock, picture->pts, picture_pre->pts);
-                dtpicture_free (pic);
+                dtav_clear_frame(pic);
                 free(picture);
                 continue;
             }
@@ -252,7 +252,7 @@ static void *video_output_thread (void *args)
 
         /*update vpts */
         dtvideo_update_pts (vo->parent);
-        dtpicture_free (pic);
+        dtav_clear_frame(pic);
         free(picture);
         dt_usleep (REFRESH_DURATION);
     }

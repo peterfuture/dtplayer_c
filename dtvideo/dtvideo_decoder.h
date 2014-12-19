@@ -10,6 +10,5 @@ int video_decoder_init (dtvideo_decoder_t * decoder);
 int video_decoder_release (dtvideo_decoder_t * decoder);
 int video_decoder_stop (dtvideo_decoder_t * decoder);
 int video_decoder_start (dtvideo_decoder_t * decoder);
-void dtpicture_free (void *pic);
 
 #endif

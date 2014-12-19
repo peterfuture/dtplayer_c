@@ -296,15 +296,6 @@ int video_decoder_start (dtvideo_decoder_t * decoder)
     return 0;
 }
 
-void dtpicture_free (void *pic)
-{
-
-    dt_av_frame_t *picture = (dt_av_frame_t *) (pic);
-    if (picture->data)
-        free (picture->data[0]);
-    return;
-}
-
 int video_decoder_stop (dtvideo_decoder_t * decoder)
 {
     vd_wrapper_t *wrapper = decoder->wrapper;
@@ -319,7 +310,7 @@ int video_decoder_stop (dtvideo_decoder_t * decoder)
     queue_t *picture_queue = vctx->vo_queue;
     if (picture_queue)
     {
-        queue_free (picture_queue, (free_func) dtpicture_free);
+        queue_free (picture_queue, (free_func)dtav_clear_frame);
         picture_queue = NULL;
     }
     return 0;

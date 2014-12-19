@@ -38,3 +38,11 @@ int dtav_free_frame(dt_av_frame_t *frame)
     free(frame);
     return 0;
 }
+
+void dtav_clear_frame(void *pic)
+{
+    dt_av_frame_t *picture = (dt_av_frame_t *) (pic);
+    if (picture->data)
+        free (picture->data[0]);
+    return;
+}
