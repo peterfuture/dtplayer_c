@@ -1,3 +1,4 @@
+#include "dt_setting.h"
 #include "dtplayer.h"
 #include "dtdemuxer_api.h"
 
@@ -77,12 +78,7 @@ static void *player_io_thread (dtplayer_context_t * dtp_ctx)
     int frame_valid = 0;
     int ret = 0;
     
-    char value[512];
-    int dump_mode = 0;
-    if(GetEnv("PLAYER","dump.mode",value) > 0)
-    {
-        dump_mode = atoi(value);
-    }
+    int dump_mode = dtp_setting.dump_mode;
     dt_info(TAG,"dump mode:%d 0 nodump 1dumpaudio 2dumpvideo \n",dump_mode);
     
     do

@@ -205,6 +205,7 @@ CFLAGS      += $(DT_CFLAGS)
 SRCS_COMMON-$(DT_UTIL) += dtutils/dt_av.c
 SRCS_COMMON-$(DT_UTIL) += dtutils/dt_log.c
 SRCS_COMMON-$(DT_UTIL) += dtutils/dt_lock.c
+SRCS_COMMON-$(DT_UTIL) += dtutils/dt_setting.c
 SRCS_COMMON-$(DT_UTIL) += dtutils/dt_ini.c
 SRCS_COMMON-$(DT_UTIL) += dtutils/dt_time.c
 SRCS_COMMON-$(DT_UTIL) += dtutils/dt_event.c
