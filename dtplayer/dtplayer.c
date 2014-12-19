@@ -234,14 +234,14 @@ int player_prepare(dtplayer_context_t *dtp_ctx)
 {
     int ret = 0;
     pthread_t tid;
-
-    if(get_player_status(dtp_ctx)>= PLAYER_STATUS_START)
+    
+    if(get_player_status(dtp_ctx)>= PLAYER_STATUS_PREPARE_START)
     {
         dt_error(TAG,"player already started \n");
         return 0;
     }
 
-    set_player_status(dtp_ctx, PLAYER_STATUS_START);
+    set_player_status(dtp_ctx, PLAYER_STATUS_PREPARE_START);
 
     /* init & start player server first */
     player_server_init(dtp_ctx);
