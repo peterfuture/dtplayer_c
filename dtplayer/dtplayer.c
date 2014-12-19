@@ -84,6 +84,8 @@ int player_init(dtplayer_context_t * dtp_ctx)
         goto ERR0;
     }
 
+    dt_update_setting();
+
     set_player_status(dtp_ctx, PLAYER_STATUS_INIT_ENTER);
     dt_info(TAG, "[%s:%d] START PLAYER INIT\n", __FUNCTION__, __LINE__);
     dtp_ctx->file_name = dtp_ctx->player_para.file_name;
