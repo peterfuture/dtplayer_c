@@ -1,60 +1,60 @@
-[dtplayer]
+##dtplayer
 ========
 [![Build Status](https://travis-ci.org/peterfuture/dtplayer_c.svg?branch=master)](https://travis-ci.org/peterfuture/dtplayer_c)
 
-dtplayer is an open-sourced project, published under GPLv3 for individual/personal users .
+    dtplayer is an open-sourced project, published under GPLv3 for individual/personal users .
 
-This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+    This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-[Introduction]
+##Introduction
 ========
 
-dtplayer is based on C , aimed to provide multimedia playing service base on ffmpeg(linux version2.0+, older version for android).
+    dtplayer is based on C , aimed to provide multimedia playing service base on ffmpeg(linux version2.0+, older version for android).
 
-At present, dtplayer have provided examples on stream-demuxer-decoder-render modules. User can easily understand how to add new element.
+    At present, dtplayer have provided examples on stream-demuxer-decoder-render modules. User can easily understand how to add new element.
 
-User can also remove ffmpeg dependence through modifing makefile (set DT_FFMPEG = no), Then you will get a aac player for now.
+    User can also remove ffmpeg dependence through modifing makefile (set DT_FFMPEG = no), Then you will get a aac player for now.
 
-[Build]
+##Build
 ========
 
-Linux
+#Linux
 ----------------
 
-1 install sdl2.0
+    1 install sdl1.0
 
-2 install ffmpeg & libav
+    2 install ffmpeg & libav
 
-3 ./build.sh linux
+    3 ./build.sh linux
 
-Target: dtplayer.exe dtplayer_g.exe libdtp.so libdtp.a
+    Target: dtplayer.exe dtplayer_g.exe libdtp.so libdtp.a
 
-Android
+#Android
 ----------------
 
-1 install ffmpeg for android (refer to https://github.com/peterfuture/ffmpeg_android)
+    1 install ffmpeg for android (refer to https://github.com/peterfuture/ffmpeg_android)
 
-2 export DT_FFMPEG_ANDROID_DIR=/PATH/TO/FFmpeg-Android/build/ffmpeg/armv7
+    2 export DT_FFMPEG_ANDROID_DIR=/PATH/TO/FFmpeg-Android/build/ffmpeg/armv7
 
-3 ./build.sh android
+    3 ./build.sh android
 
-Target: libdtp.so
+    Target: libdtp.so
 
-for more details, refer to http://blog.csdn.net/u011350110/article/details/22585323
+    for more details, refer to http://blog.csdn.net/u011350110/article/details/22585323
 
-[Test]
+##Test
 ========
 
-./dt_player.exe url
+    ./dt_player.exe url
 
-[Demo Repo]
+##Demo Repo
 ========
 
-dttv-desktop:https://github.com/peterfuture/dttv-desktop
+    dttv-desktop:https://github.com/peterfuture/dttv-desktop
 
-dttv-android:https://github.com/peterfuture/dttv-android
+    dttv-android:https://github.com/peterfuture/dttv-android
 
-[Help]
+##Help
 =========
 
 Email: peter_future@outlook.com 
