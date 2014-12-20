@@ -112,46 +112,29 @@ int player_init(dtplayer_context_t * dtp_ctx)
     ctrl_info->has_audio = dtp_ctx->media_info->has_audio;
     ctrl_info->has_video = dtp_ctx->media_info->has_video;
     ctrl_info->has_sub = dtp_ctx->media_info->has_sub;
-
-    //parse ini file
-    char value[512];
-    ctrl_info->sync_enable = (int)(ctrl_info->has_audio && ctrl_info->has_video); // default
-    if(GetEnv("PLAYER", "player.syncenable", value)> 0)
-    {
-        dt_info(TAG,"sync enable set by ini, value:%d\n ",ctrl_info->sync_enable);
-        ctrl_info->sync_enable = atoi(value);
-    }
+    ctrl_info->sync_enable = dtp_setting.player_sync_enable;
+    if((ctrl_info->has_audio && ctrl_info->has_video) == 0)
+        ctrl_info->sync_enable = 0;
     dt_info(TAG, "initial setting, has audio:%d has video:%d has sub:%d sync_enable:%d\n", ctrl_info->has_audio, ctrl_info->has_video, ctrl_info->has_sub, ctrl_info->sync_enable);
 
-
-    if(GetEnv("PLAYER", "player.noaudio", value)> 0)
-    {
-        if(atoi(value) == 1)
-            ctrl_info->has_audio = 0;
-    }
-    if(GetEnv("PLAYER", "player.novideo", value)> 0)
-    {
-        if(atoi(value) == 1)
-            ctrl_info->has_video = 0;
-    }
-    if(GetEnv("PLAYER", "player.nosub", value)> 0)
-    {
-        if(atoi(value) == 1)
-            ctrl_info->has_sub = 0;
-    }
+    if(dtp_setting.player_noaudio)
+        ctrl_info->has_audio = 0;
+    if(dtp_setting.player_novideo)
+        ctrl_info->has_video = 0;
+    if(dtp_setting.player_nosub)
+        ctrl_info->has_sub = 0;
     dt_info(TAG, "after ini setting, has audio:%d has video:%d has sub:%d \n", ctrl_info->has_audio, ctrl_info->has_video, ctrl_info->has_sub);
 
+    //then update contrl info with para
+    if(para->disable_avsync == 1)
+        ctrl_info->sync_enable = 0;
+    if(para->disable_audio == 1)
+        ctrl_info->has_audio = 0;
+    if(para->disable_video == 1)
+        ctrl_info->has_video = 0;
+    if(para->disable_sub == 1)
+        ctrl_info->has_sub = 0;
 
-    //then use para update contrl info
-    if(para->disable_avsync != -1)
-        ctrl_info->sync_enable = !para->disable_avsync;
-
-    if(para->disable_audio != -1)
-        ctrl_info->has_audio = (!para->disable_audio);
-    if(para->disable_video != -1)
-        ctrl_info->has_video = (!para->disable_video);
-    if(para->disable_sub != -1)
-        ctrl_info->has_sub = (!para->disable_sub);
     ctrl_info->disable_hw_acodec = para->disable_hw_acodec; 
     ctrl_info->disable_hw_vcodec = para->disable_hw_vcodec; 
     ctrl_info->disable_hw_scodec = para->disable_hw_scodec; 
@@ -280,7 +263,6 @@ ERR3:
     return ret;
 
 }
-
 
 int player_start(dtplayer_context_t * dtp_ctx)
 {

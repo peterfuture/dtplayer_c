@@ -165,6 +165,7 @@ static int64_t pts_exchange(AVPacket * avpkt, dt_media_info_t * media_info)
     return result;
 }
 
+#ifdef ENABLE_ANDROID
 static int update_video_frame(demuxer_wrapper_t *wrapper, AVPacket *avpkt)
 {
     dtdemuxer_context_t *dem_ctx =(dtdemuxer_context_t *) wrapper->parent;
@@ -210,6 +211,7 @@ static int update_video_frame(demuxer_wrapper_t *wrapper, AVPacket *avpkt)
     *avpkt = pkt;
     return 0;
 }
+#endif
 
 static int demuxer_ffmpeg_read_frame(demuxer_wrapper_t * wrapper, dt_av_pkt_t * frame)
 {

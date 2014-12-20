@@ -1,5 +1,6 @@
 #include "dtdemuxer.h"
 #include "dtstream_api.h"
+#include "dt_setting.h"
 
 #include <unistd.h>
 
@@ -109,24 +110,11 @@ int demuxer_open(dtdemuxer_context_t * dem_ctx)
         return -1;
     }
    
-    char value[512];
-    int probe_enable = 0;
+    dt_info(TAG,"probe enable start \n");
+    int probe_enable = dtp_setting.demuxer_probe;
     int probe_size = dtstream_local(dem_ctx->stream_priv)?PROBE_LOCAL_SIZE:PROBE_STREAM_SIZE;
-    if(GetEnv("DEMUXER","demuxer.probe",value) > 0)
-    {
-        probe_enable = atoi(value);
-        dt_info(TAG,"probe enable:%d \n",probe_enable);
-    }
-    else
-        dt_info(TAG,"probe enable not set, use default:%d \n",probe_enable);
-
-    if(GetEnv("DEMUXER","demuxer.probesize",value) > 0)
-    {
-        probe_size = atoi(value);
-        dt_info(TAG,"probe size:%d \n",probe_size);
-    }
-    else
-        dt_info(TAG,"probe size not set, use default:%d \n",probe_size);
+    dt_info(TAG,"probe enable:%d \n",probe_enable);
+    dt_info(TAG,"probe size:%d \n",probe_size);
 
     if(probe_enable)
     {

@@ -136,7 +136,10 @@ int main(int argc, char **argv)
         width = 720;
     if(height <= 0 || height >2160)
         height = 480;
-    dt_info(TAG, "get video size, width: %d->%d height: %d->%d \n", vstream->width, width, vstream->height, height);
+    
+    if(info.has_video)
+        dt_info(TAG, "src-width: %d src-height: %d \n", vstream->width, vstream->height);
+    dt_info(TAG, "dst-width: %d dst-height: %d \n", width, height);
 
     ply_ctx.disp_width = width;
     ply_ctx.disp_height = height;
