@@ -481,17 +481,9 @@ static int stream_cache_open (stream_wrapper_t * wrapper,char *stream_name)
     }
     memcpy(info,&real_st->info,sizeof(stream_ctrl_t));
     
-    // ctx
     //get buf size
-    char value[512];
-    int cache_size = DEFAULT_CACHE_SIZE;
-    if(GetEnv("STREAM","stream.cachesize",value) > 0)
-    {
-        cache_size = atoi(value);
-        dt_info(TAG,"cache size:%d \n",cache_size);
-    }
-    else
-        dt_info(TAG,"cache size not set, use default:%d \n",cache_size);
+    int cache_size = dtp_setting.stream_cache_size;
+    dt_info(TAG,"cache size:%d \n",cache_size);
     
     cache_ctx_t *ctx = (cache_ctx_t *)malloc(sizeof(cache_ctx_t));
     if(!ctx)

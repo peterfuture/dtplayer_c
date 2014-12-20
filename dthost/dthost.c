@@ -211,15 +211,10 @@ int host_start (dthost_context_t * hctx)
             drop_flag = 0;
         
         //env set dropable
-        char value[512];
-        int drop_enable = 1;
-        if(GetEnv("HOST","drop.enable",value) > 0)
-        {
-            drop_enable = atoi(value);
-            dt_info(TAG,"HOST.drop.enable = %d \n",drop_enable);
-            if(drop_enable == 0)
+        int drop_enable = dtp_setting.host_drop;
+        dt_info(TAG,"HOST.drop.enable = %d \n",drop_enable);
+        if(drop_enable == 0)
                 drop_flag = 0;
-        }
         if (drop_flag)
         {
             if (hctx->pts_audio > hctx->pts_video)

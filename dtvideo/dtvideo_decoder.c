@@ -258,14 +258,8 @@ int video_decoder_init (dtvideo_decoder_t * decoder)
     ret = wrapper->init (decoder);
     if (ret < 0)
         return -1;
-    
-    pts_mode = 0;    
-    char value[512];
-    if(GetEnv("VIDEO","pts.mode",value) > 0)
-    {
-        pts_mode = atoi(value);
-        dt_info(TAG,"pts mode:%d fps:%f \n",pts_mode,decoder->para->fps);
-    }
+    pts_mode = dtp_setting.video_pts_mode;
+    dt_info(TAG,"pts mode:%d fps:%f \n",pts_mode,decoder->para->fps);
     
     dt_info (TAG, "[%s:%d] video decoder init ok\n", __FUNCTION__, __LINE__);
     /*init pcm buffer */

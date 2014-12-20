@@ -505,12 +505,8 @@ static int demuxer_ffmpeg_seek_frame(demuxer_wrapper_t * wrapper, int64_t timest
 
     int seek_flags = 0; //seek key frame as default
 
-    char value[512];
-    if(GetEnv("DEMUXER","demuxer.seek_keyframe",value) > 0)
-    {
-        seek_flags =(atoi(value)==0)?AVSEEK_FLAG_ANY:AVSEEK_FLAG_BACKWARD;
-        dt_info(TAG,"seek keyframe enabled:%d \n",atoi(value));
-    }
+    seek_flags =(dtp_setting.demuxer_seek_keyframe == 0)?AVSEEK_FLAG_ANY:AVSEEK_FLAG_BACKWARD;
+    dt_info(TAG,"seek keyframe enabled:%d \n", dtp_setting.demuxer_seek_keyframe);
     
     int64_t seek_target = timestamp;
     int64_t seek_min =(seek_target > 0) ? seek_target - timestamp + 2 : INT64_MIN;

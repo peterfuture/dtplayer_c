@@ -21,7 +21,7 @@ int dt_update_setting()
         dtp_setting.stream_cache = atoi(value);
     dtp_setting.stream_cache_size = 32*1024*1024; // remove later
     if(GetEnv("STREAM","stream.cachesize",value) > 0)
-        dtp_setting.stream_cache = atoi(value);
+        dtp_setting.stream_cache_size = atoi(value);
 
     // DEMUXER
     dtp_setting.demuxer_probe = 0;
@@ -30,6 +30,9 @@ int dt_update_setting()
     dtp_setting.demuxer_probe_size = 1024*1024;
     if(GetEnv("DEMUXER","demuxer.probesize",value) > 0)
         dtp_setting.demuxer_probe_size = atoi(value);
+    dtp_setting.demuxer_seek_keyframe = 1;
+    if(GetEnv("DEMUXER","demuxer.seek.keyframe",value) > 0)
+        dtp_setting.demuxer_seek_keyframe = atoi(value);
 
     // AUDIO
     dtp_setting.audio_downmix = 1;

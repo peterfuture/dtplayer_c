@@ -78,15 +78,8 @@ int stream_open (dtstream_context_t * stm_ctx)
     dt_info (TAG, "select stream:%s\n", wrapper->name);
 
     //stream buffer eanble check
-    char value[512];
-    int cache_enable = 0;
-    if(GetEnv("STREAM","stream.cache",value) > 0)
-    {
-        cache_enable = atoi(value);
-        dt_info(TAG,"cache enable:%d \n",cache_enable);
-    }
-    else
-        dt_info(TAG,"cache enable not set, use default:%d \n",cache_enable);
+    int cache_enable = dtp_setting.stream_cache;
+    dt_info(TAG,"cache enable:%d \n",cache_enable);
     if(cache_enable)
     {
         extern stream_wrapper_t stream_cache;

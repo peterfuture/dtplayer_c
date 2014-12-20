@@ -5,7 +5,6 @@
 int player_host_init (dtplayer_context_t * dtp_ctx)
 {
     int ret;
-    char value[512];
     
     dthost_para_t *host_para = &dtp_ctx->host_para;
     player_ctrl_t *pctrl = &dtp_ctx->ctrl_info;
@@ -37,15 +36,8 @@ int player_host_init (dtplayer_context_t * dtp_ctx)
         host_para->audio_format = astream->format;
         host_para->audio_channel = astream->channels;
         host_para->audio_samplerate = astream->sample_rate;
-        int downmix = 1;
-        if(GetEnv("AUDIO","audio.downmix",value) > 0)
-        {
-            downmix = atoi(value);
-            dt_info(TAG,"downmix:%d \n",downmix);
-        }
-        else
-            dt_info(TAG,"downmix:not found \n");
-
+        int downmix = dtp_setting.audio_downmix;
+        dt_info(TAG,"downmix:%d \n",downmix);
         if(downmix)
             host_para->audio_dst_channels = (astream->channels>2)?2:astream->channels;
         else    
@@ -87,15 +79,8 @@ int player_host_init (dtplayer_context_t * dtp_ctx)
             dt_info (TAG, "[%s:%d] disable omx\n", __FUNCTION__, __LINE__);
         }
 
-        char value[512];
-        int vout_type = 0;
-        if(GetEnv("VIDEO","vout.type",value) > 0)
-        {
-            vout_type = atoi(value);
-            dt_info(TAG,"vout type:%d - 0 yuv420 1 rgb565 2 rgb24 \n",vout_type);
-        }
-        else
-            dt_info(TAG,"vout type not set, use default: yuv420 \n");
+        int vout_type = dtp_setting.video_out_type;
+        dt_info(TAG,"vout type:%d - 0 yuv420 1 rgb565 2 rgb24 \n",vout_type);
 
         host_para->video_format = vstream->format;
         host_para->video_src_width = vstream->width;

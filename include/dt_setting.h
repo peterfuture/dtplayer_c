@@ -10,6 +10,7 @@ typedef struct dt_setting{
     // DEMUXER
     int demuxer_probe;
     int demuxer_probe_size;
+    int demuxer_seek_keyframe;
     // AUDIO
     int audio_downmix;
     //VIDEO

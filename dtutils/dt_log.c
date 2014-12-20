@@ -1,5 +1,6 @@
 #include "dt_log.h"
 #include "dt_ini.h"
+#include "dt_setting.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,9 +32,7 @@ static int dt_log_level = DT_LOG_INFO;
 
 static int check_level (int level)
 {
-    char valBuf[512];
-    if (GetEnv ("LOG", "log.level", valBuf) > 0)
-        dt_log_level = atoi (valBuf);
+    dt_log_level = dtp_setting.log_level;
     return level >= dt_log_level;
 }
 
