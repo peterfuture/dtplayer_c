@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stdarg.h>
 #include <time.h>
 
@@ -36,6 +37,16 @@ static int check_level (int level)
     return level >= dt_log_level;
 }
 
+static int tag_enable(char *filter, char *tag)
+{
+    // tag filter
+    if(strlen(filter) > 0 &&
+        strlen(tag) > 0 &&
+        strstr(filter, tag) == NULL)
+        return 0;
+    return 1;
+}
+
 static int display_time()
 {
     time_t timer;
@@ -52,6 +63,10 @@ void dt_log (void *tag, int level, const char *fmt, ...)
 {
     if (!check_level (level))
         return;
+
+    if(!tag_enable(dtp_setting.log_filter, (char *)tag))
+        return;
+
     dt_get_log_level (DT_LOG_ERROR);
     printf("[%s] ", (char *) tag);
     va_list vl;
@@ -63,6 +78,8 @@ void dt_log (void *tag, int level, const char *fmt, ...)
 void dt_error (void *tag, const char *fmt, ...)
 {
     if (!check_level (DT_LOG_ERROR))
+        return;
+    if(!tag_enable(dtp_setting.log_filter, (char *)tag))
         return;
     display_time();
     dt_get_log_level (DT_LOG_DEBUG);
@@ -78,6 +95,8 @@ void dt_debug (void *tag, const char *fmt, ...)
 {
     if (!check_level (DT_LOG_DEBUG))
         return;
+    if(!tag_enable(dtp_setting.log_filter, (char *)tag))
+        return;
     display_time();
     dt_get_log_level (DT_LOG_WARNING);
     printf ("[%s] ", (char *) tag);
@@ -91,6 +110,8 @@ void dt_warning (void *tag, const char *fmt, ...)
 {
     if (!check_level (DT_LOG_WARNING))
         return;
+    if(!tag_enable(dtp_setting.log_filter, (char *)tag))
+        return;
     display_time();
     dt_get_log_level (DT_LOG_INFO);
     printf ("[%s] ", (char *) tag);
@@ -103,6 +124,8 @@ void dt_warning (void *tag, const char *fmt, ...)
 void dt_info (void *tag, const char *fmt, ...)
 {
     if (!check_level (DT_LOG_INFO))
+        return;
+    if(!tag_enable(dtp_setting.log_filter, (char *)tag))
         return;
     display_time();
     dt_get_log_level (DT_LOG_INFO);

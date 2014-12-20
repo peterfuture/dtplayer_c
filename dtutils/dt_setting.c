@@ -3,6 +3,7 @@
 #include "dt_log.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 dt_setting_t dtp_setting;
 
@@ -15,6 +16,12 @@ int dt_update_setting()
     dtp_setting.log_level = 2;
     if(GetEnv("LOG","log.level",value) > 0)
         dtp_setting.log_level = atoi(value);
+    dtp_setting.log_filter;
+    memset(dtp_setting.log_filter, 0, 1024);
+    dtp_setting.log_filter[0] = '\0';
+    if(GetEnv("LOG","log.filter",value) > 0 && strlen(value) > 0)
+        memcpy(dtp_setting.log_filter, value, strlen(value));
+    dt_info(TAG, "log.filter:%s \n", dtp_setting.log_filter); 
     // STREAM
     dtp_setting.stream_cache = 0;
     if(GetEnv("STREAM","stream.cache",value) > 0)

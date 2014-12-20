@@ -4,6 +4,7 @@
 typedef struct dt_setting{
     // LOG
     int log_level;
+    char log_filter[1024];
     // STREAM
     int stream_cache;
     int stream_cache_size;
