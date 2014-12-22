@@ -79,27 +79,6 @@ static void *player_io_thread (dtplayer_context_t * dtp_ctx)
     int ret = 0;
     
     int dump_mode = dtp_setting.player_dump_mode;
-    if(frame.type == DT_TYPE_AUDIO && dump_mode == 1)
-    {
-        FILE *fp = fopen("./raw_audio.out","ab+");
-        fwrite(frame.data,1,frame.size,fp);
-        fclose(fp);
-    }
-    if(frame.type == DT_TYPE_VIDEO && dump_mode == 2)
-    {
-        FILE *fp = fopen("./raw_video.out","ab+");
-        fwrite(frame.data,1,frame.size,fp);
-        fclose(fp);
-    }
-    if(frame.type == DT_TYPE_VIDEO && dump_mode == 3)
-    {
-        FILE *fp = fopen("./raw_sub.out","ab+");
-        fwrite(frame.data,1,frame.size,fp);
-                fclose(fp);
-            }
-        }
- 
-
     dt_info(TAG,"dump mode:%d 0 nodump 1dumpaudio 2dumpvideo 3dump sub \n",dump_mode);
     
     do
