@@ -14,9 +14,13 @@ typedef struct dt_setting{
     int demuxer_seek_keyframe;
     // AUDIO
     int audio_downmix;
+    int audio_index;
     //VIDEO
     int video_pts_mode;
     int video_out_type;
+    int video_index;
+    // SUB
+    int sub_index;
     // PLAYER
     int player_noaudio;
     int player_novideo;

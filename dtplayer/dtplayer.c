@@ -139,6 +139,22 @@ int player_init(dtplayer_context_t * dtp_ctx)
     ctrl_info->disable_hw_vcodec = para->disable_hw_vcodec; 
     ctrl_info->disable_hw_scodec = para->disable_hw_scodec; 
 
+    // Update cur media index
+    if(dtp_setting.audio_index != -1)
+        ctrl_info->cur_ast_index = dtp_ctx->media_info->cur_ast_index = dtp_setting.audio_index;
+    else
+        ctrl_info->cur_ast_index = dtp_ctx->media_info->cur_ast_index;
+
+    if(dtp_setting.video_index != -1)
+        ctrl_info->cur_vst_index = dtp_ctx->media_info->cur_vst_index = dtp_setting.video_index;
+    else
+        ctrl_info->cur_vst_index = dtp_ctx->media_info->cur_vst_index; 
+
+    if(dtp_setting.sub_index != -1)
+        ctrl_info->cur_sst_index = dtp_ctx->media_info->cur_sst_index = dtp_setting.sub_index;
+    else
+        ctrl_info->cur_sst_index = dtp_ctx->media_info->cur_sst_index;
+
     if(para->audio_index != -1)
         ctrl_info->cur_ast_index = dtp_ctx->media_info->cur_ast_index = para->audio_index;
     else

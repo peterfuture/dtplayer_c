@@ -45,6 +45,9 @@ int dt_update_setting()
     dtp_setting.audio_downmix = 1;
     if(GetEnv("AUDIO","audio.downmix",value) > 0)
         dtp_setting.audio_downmix = atoi(value);
+    dtp_setting.audio_index = -1;
+    if(GetEnv("AUDIO","audio.index",value) > 0)
+        dtp_setting.audio_index = atoi(value);
 
     // VIDEO
     dtp_setting.video_pts_mode = 0;
@@ -53,6 +56,15 @@ int dt_update_setting()
     dtp_setting.video_out_type = 0;
     if(GetEnv("VIDEO","video.outtype",value) > 0)
         dtp_setting.video_out_type = atoi(value);
+    dtp_setting.video_index = -1;
+    if(GetEnv("VIDEO","video.index",value) > 0)
+        dtp_setting.video_index = atoi(value);
+
+    // SUB
+    dtp_setting.sub_index = -1;
+    if(GetEnv("SUB","sub.index",value) > 0)
+        dtp_setting.sub_index = atoi(value);
+
 
     // PLAYER
     dtp_setting.player_dump_mode = 0;
