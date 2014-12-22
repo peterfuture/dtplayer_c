@@ -27,12 +27,12 @@ int player_host_init (dtplayer_context_t * dtp_ctx)
             dt_info (TAG, "[%s:%d] disable omx\n", __FUNCTION__, __LINE__);
         }
 
-        if (pctrl->cur_ast_index >= media_info->ast_num)
+        if (media_info->cur_ast_index >= media_info->ast_num)
         {
             dt_warning (TAG, "audio index set exceed max audio num ,reset to 0 \n");
-            pctrl->cur_ast_index = 0;
+            media_info->cur_ast_index = 0;
         }
-        astream_info_t *astream = media_info->astreams[pctrl->cur_ast_index];
+        astream_info_t *astream = media_info->astreams[media_info->cur_ast_index];
         host_para->audio_format = astream->format;
         host_para->audio_channel = astream->channels;
         host_para->audio_samplerate = astream->sample_rate;
@@ -58,19 +58,19 @@ int player_host_init (dtplayer_context_t * dtp_ctx)
         }
         host_para->audio_filter = -1; //default
         host_para->audio_output = -1; //defualt
-        dt_info(TAG, "host-audio setup ok, cur index:%d \n", pctrl->cur_ast_index);
+        dt_info(TAG, "host-audio setup ok, cur index:%d \n", media_info->cur_ast_index);
         dt_info (TAG, "[%s:%d] audio extra_size:%d time_base.num:%d den:%d\n", __FUNCTION__, __LINE__, host_para->audio_extra_size, host_para->audio_num, host_para->audio_den);
     }
     //----video ----
     if (pctrl->has_video)
     {
-        if (pctrl->cur_vst_index >= media_info->vst_num)
+        if (media_info->cur_vst_index >= media_info->vst_num)
         {
             dt_warning (TAG, "video index set exceed max video num ,reset to 0 \n");
-            pctrl->cur_vst_index = 0;
+            media_info->cur_vst_index = 0;
         }
 
-        vstream_info_t *vstream = media_info->vstreams[pctrl->cur_vst_index];
+        vstream_info_t *vstream = media_info->vstreams[media_info->cur_vst_index];
 
         //disable hw vcodec
         if(pctrl->disable_hw_vcodec == 1)
@@ -115,26 +115,26 @@ int player_host_init (dtplayer_context_t * dtp_ctx)
         }
         host_para->video_filter = -1; //defualt
         host_para->video_output = -1; //defualt
-        dt_info(TAG, "host-video Setup ok, cur index:%d \n", pctrl->cur_vst_index);
+        dt_info(TAG, "host-video Setup ok, cur index:%d \n", media_info->cur_vst_index);
         dt_info(TAG, "[%s:%d]format:%d width:%d height:%d fmt:%d rate:%d ratio:%d fps:%g extra_size:%d\n", __FUNCTION__, __LINE__, host_para->video_format, host_para->video_src_width, host_para->video_src_height, host_para->video_src_pixfmt, host_para->video_rate, host_para->video_ratio, host_para->video_fps,host_para->video_extra_size);
         dt_info(TAG, "timebase->num:%d timebase->den:%d \n", host_para->video_num, host_para->video_den);
     }
     //----sub part------
     if (pctrl->has_sub)
     {
-        if (pctrl->cur_sst_index >= media_info->sst_num)
+        if (media_info->cur_sst_index >= media_info->sst_num)
         {
             dt_warning (TAG, "sub index set exceed max video num ,reset to 0 \n");
-            pctrl->cur_sst_index = 0;
+            media_info->cur_sst_index = 0;
         }
 
-        sstream_info_t *sstream = media_info->sstreams[pctrl->cur_sst_index];
+        sstream_info_t *sstream = media_info->sstreams[media_info->cur_sst_index];
 
         host_para->sub_format = sstream->format;
         host_para->sub_width = sstream->width;
         host_para->sub_height = sstream->height;
         host_para->sctx_priv = sstream->codec_priv;
-        dt_info(TAG, "host-sub setup ok, cur index:%d \n", pctrl->cur_sst_index);
+        dt_info(TAG, "host-sub setup ok, cur index:%d \n", media_info->cur_sst_index);
     }
 
     /* init dthost */

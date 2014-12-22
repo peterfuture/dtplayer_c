@@ -141,36 +141,21 @@ int player_init(dtplayer_context_t * dtp_ctx)
 
     // Update cur media index
     if(dtp_setting.audio_index != -1)
-        ctrl_info->cur_ast_index = dtp_ctx->media_info->cur_ast_index = dtp_setting.audio_index;
-    else
-        ctrl_info->cur_ast_index = dtp_ctx->media_info->cur_ast_index;
-
+        dtp_ctx->media_info->cur_ast_index = dtp_setting.audio_index;
     if(dtp_setting.video_index != -1)
-        ctrl_info->cur_vst_index = dtp_ctx->media_info->cur_vst_index = dtp_setting.video_index;
-    else
-        ctrl_info->cur_vst_index = dtp_ctx->media_info->cur_vst_index; 
-
+        dtp_ctx->media_info->cur_vst_index = dtp_setting.video_index;
     if(dtp_setting.sub_index != -1)
-        ctrl_info->cur_sst_index = dtp_ctx->media_info->cur_sst_index = dtp_setting.sub_index;
-    else
-        ctrl_info->cur_sst_index = dtp_ctx->media_info->cur_sst_index;
-
+        dtp_ctx->media_info->cur_sst_index = dtp_setting.sub_index;
     if(para->audio_index != -1)
-        ctrl_info->cur_ast_index = dtp_ctx->media_info->cur_ast_index = para->audio_index;
-    else
-        ctrl_info->cur_ast_index = dtp_ctx->media_info->cur_ast_index;
-
+        dtp_ctx->media_info->cur_ast_index = para->audio_index;
     if(para->video_index != -1)
-        ctrl_info->cur_vst_index = dtp_ctx->media_info->cur_vst_index = para->video_index;
-    else
-        ctrl_info->cur_vst_index = dtp_ctx->media_info->cur_vst_index; 
-
+        dtp_ctx->media_info->cur_vst_index = para->video_index;
     if(para->sub_index != -1)
-        ctrl_info->cur_sst_index = dtp_ctx->media_info->cur_sst_index = para->sub_index;
-    else
-        ctrl_info->cur_sst_index = dtp_ctx->media_info->cur_sst_index;
-
-    dt_info(TAG, "ast_idx:%d vst_idx:%d sst_idx:%d \n", ctrl_info->cur_ast_index, ctrl_info->cur_vst_index, ctrl_info->cur_sst_index);
+        dtp_ctx->media_info->cur_sst_index = para->sub_index;
+    dt_info(TAG, "ast_idx:%d vst_idx:%d sst_idx:%d \n", 
+            dtp_ctx->media_info->cur_ast_index, 
+            dtp_ctx->media_info->cur_vst_index, 
+            dtp_ctx->media_info->cur_sst_index);
 
     //Fixme cur index valid check ...
 

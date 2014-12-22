@@ -25,11 +25,6 @@ typedef struct
     /*stream info */
     int64_t start_time;
     int64_t first_time;
-
-    int cur_ast_index;
-    int cur_vst_index;
-    int cur_sst_index;
-
     /*dest width height */
     int width;
     int height;
