@@ -144,6 +144,7 @@ EXIT:
     if(ret < 0)
     {
         filter->wrapper = NULL;
+        ret = 0;
     }
 
     dt_unlock(&filter->mutex);
@@ -171,6 +172,7 @@ int video_filter_update(dtvideo_filter_t *filter)
 int video_filter_process(dtvideo_filter_t *filter, dt_av_frame_t *frame)
 {
     int ret = 0;
+
     if(filter->status == VF_STATUS_IDLE) // No need to Process
     {
         return 0;

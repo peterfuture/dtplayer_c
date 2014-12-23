@@ -128,11 +128,11 @@ static int64_t pts_exchange(AVPacket * avpkt, dt_media_info_t * media_info)
     int num, den;
     int has_video = media_info->has_video;
     int has_audio = media_info->has_audio;
-    //int has_sub = media_info->has_sub;
+    int has_sub = media_info->has_sub;
 
     int cur_vidx =(has_video) ? media_info->vstreams[media_info->cur_vst_index]->index : -1;
     int cur_aidx =(has_audio) ? media_info->astreams[media_info->cur_ast_index]->index : -1;
-    //int cur_sidx =(has_sub)?media_info->sstreams[media_info->cur_sst_index]->index:-1;
+    int cur_sidx =(has_sub)?media_info->sstreams[media_info->cur_sst_index]->index:-1;
 
     if(has_video && cur_vidx == avpkt->stream_index)
     {
@@ -145,6 +145,16 @@ static int64_t pts_exchange(AVPacket * avpkt, dt_media_info_t * media_info)
         num = media_info->astreams[media_info->cur_ast_index]->time_base.num;
         den = media_info->astreams[media_info->cur_ast_index]->time_base.den;
         exchange = DT_PTS_FREQ *(double) num / den;
+    }
+    else if(has_sub && cur_sidx == avpkt->stream_index)
+    {
+        //num = media_info->sstreams[media_info->cur_sst_index]->time_base.num;
+        //den = media_info->sstreams[media_info->cur_sst_index]->time_base.den;
+        num = den = 1;
+    }
+    else // err
+    {
+        num = den = 1;
     }
 
     //case 1: pts valid
@@ -274,7 +284,7 @@ static int demuxer_ffmpeg_read_frame(demuxer_wrapper_t * wrapper, dt_av_pkt_t * 
     frame->key_frame = avpkt.flags & AV_PKT_FLAG_KEY;
     if(frame->type ==(int)AVMEDIA_TYPE_AUDIO)
     {
-        dt_debug(TAG,"GET AUDIO FRAME, pts:%lld dts:%lld size:%d \n", frame->pts, frame->dts, frame->size);
+        dt_debug(TAG,"GET AUDIO FRAME, pts:%llx dts:%llx size:%d \n", frame->pts, frame->dts, frame->size);
     }
     if(frame->type ==(int)AVMEDIA_TYPE_VIDEO)
     {
@@ -285,7 +295,7 @@ static int demuxer_ffmpeg_read_frame(demuxer_wrapper_t * wrapper, dt_av_pkt_t * 
         dt_debug(TAG,"GET SUB FRAME, pts:%llx dts:%llx size:%d \n",frame->pts, frame->dts,frame->size);
     }
     //dt_info(TAG, "read ok,frame size:%d %02x %02x %02x %02x addr:%p type:%d\n", frame->size, frame->data[0], frame->data[1], frame->data[2], frame->data[3], frame->data,frame->type);
-    dt_debug(TAG, "SIDE_DATA_ELEMENT:%d \n", avpkt.side_data_elems);
+    //dt_debug(TAG, "SIDE_DATA_ELEMENT:%d \n", avpkt.side_data_elems);
 
     return DTERROR_NONE;
 }

@@ -140,9 +140,24 @@ int video_output_get_level (dtvideo_output_t * ao)
     //return ao->state.aout_buf_level;
 }
 
+static void dump_frame(dt_av_frame_t * pFrame, int width, int height, int index)
+{
+    FILE *pFile;
+    char szFilename[32];
+    int y;
+    sprintf(szFilename, "frame%d.ppm", index); // setup filename
+    pFile = fopen (szFilename, "wb");          // open file
+    if (pFile == NULL)
+        return;
+    fprintf (pFile, "P6\n%d %d\n255\n", width, height); // write header
+    // write pixel data
+    for (y = 0; y < height; y++)
+        fwrite (pFrame->data[0] + y * pFrame->linesize[0], 1, width * 3, pFile); 
+    fclose (pFile); // close
+}
+
 //output one frame to output gragh
 //using pts
-
 #define REFRESH_DURATION 10*1000 //us
 static void *video_output_thread (void *args)
 {
@@ -158,6 +173,8 @@ static void *video_output_thread (void *args)
     int64_t sys_clock;          //contrl video display
     int64_t cur_time, time_diff;
 
+    int dump_mode = dtp_setting.player_dump_mode; // 5 for video dump
+    int dump_index = 0;
     //Init filter first, Just do color space convert
     filter->para.d_width = filter->para.s_width;
     filter->para.d_height = filter->para.s_height;
@@ -248,6 +265,14 @@ static void *video_output_thread (void *args)
         {
             dt_error (TAG, "frame toggle failed! \n");
             usleep (1000);
+        }
+        else
+        {
+            // dump video check
+            if(dump_mode == 5 && dump_index < 5)
+            {
+                dump_frame(pic, filter->para.d_width, filter->para.d_height, dump_index++);
+            }
         }
 
         /*update vpts */
