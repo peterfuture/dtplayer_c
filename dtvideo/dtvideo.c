@@ -55,8 +55,8 @@ int64_t dtvideo_get_current_pts (dtvideo_context_t * vctx)
 int64_t video_get_first_pts (dtvideo_context_t * vctx)
 {
     if (vctx->video_status != VIDEO_STATUS_INITED)
-        return -1;
-    dt_debug (TAG, "fitst vpts:%lld \n", vctx->video_dec.pts_first);
+        return DT_NOPTS_VALUE;
+    dt_debug (TAG, "fitst vpts:%llx \n", vctx->video_dec.pts_first);
     return vctx->video_dec.pts_first;
 }
 

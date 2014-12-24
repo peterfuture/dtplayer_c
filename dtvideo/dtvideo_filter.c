@@ -193,8 +193,11 @@ int video_filter_stop(dtvideo_filter_t *filter)
 {
     dt_lock(&filter->mutex);
     vf_wrapper_t *wrapper = filter->wrapper;
+    if(!wrapper)
+        goto EXIT;
     if(filter->status == VF_STATUS_RUNNING)
         wrapper->release(filter);
+EXIT:
     filter->status = VF_STATUS_IDLE;
     dt_unlock(&filter->mutex);
     return 0;

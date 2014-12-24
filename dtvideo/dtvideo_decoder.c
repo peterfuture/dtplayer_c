@@ -161,7 +161,7 @@ static void *video_decode_loop (void *arg)
         ret = dtvideo_read_frame (decoder->parent, &frame);
         if (ret < 0)
         {
-            if(decoder->pts_first == -1 || decoder->pts_first == DT_NOPTS_VALUE)
+            if(decoder->pts_first == DT_NOPTS_VALUE)
             {
                 usleep(1000);
                 continue;
@@ -172,7 +172,7 @@ static void *video_decode_loop (void *arg)
         }
         /*read one frame,enter decode frame module */
         //will exec once for one time
-        ret = wrapper->decode_frame (decoder, &frame, &picture);
+        ret = wrapper->decode_frame(decoder, &frame, &picture);
         if (ret <= 0)
         {
             decoder->decode_err_cnt++;
@@ -194,14 +194,14 @@ static void *video_decode_loop (void *arg)
 
         decoder->frame_count++;
         //Got one frame
-        //picture->pts = frame.pts;
-        
+        dt_info (TAG, "[%s:%d]first frame decoded ok, pts:0x%llx dts:0x%llx pts_first:%llx \n", __FUNCTION__, __LINE__, picture->pts, picture->dts, decoder->pts_first);
         //update current pts, clear the buffer size
-        if (frame.pts >= 0 && decoder->pts_first == -1)
+        if (picture->pts >= 0 && decoder->pts_first == DT_NOPTS_VALUE)
         {
             //we will use first pts to estimate pts
-            dt_info (TAG, "[%s:%d]first frame decoded ok, pts:0x%llx dts:0x%llx duration:%d size:%d\n", __FUNCTION__, __LINE__, frame.pts, frame.dts, frame.duration, frame.size);
-            decoder->pts_first = pts_exchange (decoder, picture->pts);
+            //dt_info (TAG, "[%s:%d]first frame decoded ok, pts:0x%llx dts:0x%llx duration:%d size:%d\n", __FUNCTION__, __LINE__, frame.pts, frame.dts, frame.duration, frame.size);
+            dt_info (TAG, "[%s:%d]first frame decoded ok, pts:0x%llx dts:0x%llx\n", __FUNCTION__, __LINE__, picture->pts, picture->dts);
+            decoder->pts_first = pts_exchange(decoder, picture->pts);
             decoder->pts_current = decoder->pts_first;
         }
         else
@@ -226,7 +226,7 @@ static void *video_decode_loop (void *arg)
         picture = NULL;
       DECODE_END:
         //we successfully decodec one frame
-        if (frame.data)
+        if(frame.data)
         {
             if(frame.data)
                 free (frame.data);
@@ -253,7 +253,7 @@ int video_decoder_init (dtvideo_decoder_t * decoder)
 
     vd_wrapper_t *wrapper = decoder->wrapper; 
     /*init decoder */
-    decoder->pts_current = decoder->pts_first = -1;
+    decoder->pts_current = decoder->pts_first = DT_NOPTS_VALUE;
     decoder->vd_priv = decoder->para->avctx_priv;
     ret = wrapper->init (decoder);
     if (ret < 0)
