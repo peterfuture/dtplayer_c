@@ -224,106 +224,6 @@ static int update_video_frame(demuxer_wrapper_t *wrapper, AVPacket *avpkt)
 
 #endif
 
-#if 0
-
-static int annexb_write_avc_extradata(const uint8_t *data, uint8_t **out_buf, int *out_len)
-{
-    int len = *out_len;
-    if(len < 6)
-        return -1;
-    /* check for h264 start code */
-    if (DT_RB32(data) == 0x00000001 ||
-        DT_RB24(data) == 0x000001) {
-        uint8_t *buf=NULL, *end, *start;
-        uint32_t sps_size=0, pps_size=0;
-        uint8_t *sps=0, *pps=0;
-
-        int ret = ff_avc_parse_nal_units_buf(data, &buf, &len);
-        if (ret < 0)
-            return ret;
-
-        start = buf;
-        end = buf + len;
-
-        /* look for sps and pps */
-        while (end - buf > 4) {
-            uint32_t size;
-            uint8_t nal_type;
-            size = DT_MIN(DT_RB32(buf), end - buf - 4);
-            buf += 4;
-            nal_type = buf[0] & 0x1f;
-
-            if (nal_type == 7) { /* SPS */
-                sps = buf;
-                sps_size = size;
-            } else if (nal_type == 8) { /* PPS */
-                pps = buf;
-                pps_size = size;
-            }
-
-            buf += size;
-        }
-
-        if (!sps || !pps || sps_size < 4 || sps_size > UINT16_MAX || pps_size > UINT16_MAX)
-            return AVERROR_INVALIDDATA;
-        int out_size = 
-            1 + // version
-            1 + // profile
-            1 + // profile compat
-            1 + // level
-            1 + // 6 bits reserved (111111) + 2 bits nal size length - 1 (11) 
-            1 + // 3 bits reserved (111) + 5 bits number of sps (00001) 
-            2 + // sps size
-            sps_size + // sps data
-            1 + // num of pps
-            2 + // pps size
-            pps_size; // pps data
-
-        uint8_t *out = (uint8_t *)malloc(out_size);
-        *out_len = out_size;
-        int cur_pos = 0;
-        out[cur_pos++] = 0x1;
-        out[cur_pos++] = sps[1];
-        out[cur_pos++] = sps[2];
-        out[cur_pos++] = sps[3];
-        out[cur_pos++] = 0xff;
-        out[cur_pos++] = 0xe1;
-         
-        out[cur_pos++] = (uint8_t)((int)sps_size >> 8);
-        out[cur_pos++] = (uint8_t)sps_size;
-        memcpy(out[cur_pos], sps, sps_size);
-        cur_pos += sps_size;
-
-        out[cur_pos++] = (uint8_t)((int)pps_size >> 8);
-        out[cur_pos++] = (uint8_t)pps_size;
-        memcpy(out[cur_pos], pps, pps_size);
-        cur_pos += pps_size;
-        *out_buf = out;
-#if 0
-        avio_w8(pb, 1); /* version */
-        avio_w8(pb, sps[1]); /* profile */
-        avio_w8(pb, sps[2]); /* profile compat */
-        avio_w8(pb, sps[3]); /* level */
-        avio_w8(pb, 0xff); /* 6 bits reserved (111111) + 2 bits nal size length - 1 (11) */
-        avio_w8(pb, 0xe1); /* 3 bits reserved (111) + 5 bits number of sps (00001) */
-
-        avio_wb16(pb, sps_size);
-        avio_write(pb, sps, sps_size);
-        avio_w8(pb, 1); /* number of pps */
-        avio_wb16(pb, pps_size);
-        avio_write(pb, pps, pps_size);
-#endif
-        av_free(start);
-
-        return 0;
-    }
-
-    dt_info(TAG, "SHIT CONVERT FAILED \n");
-    return -1;
-}
-
-#endif
-
 static int demuxer_ffmpeg_read_frame(demuxer_wrapper_t * wrapper, dt_av_pkt_t * frame)
 {
     dtdemuxer_context_t *dem_ctx =(dtdemuxer_context_t *) wrapper->parent;
@@ -569,32 +469,15 @@ static int demuxer_ffmpeg_setup_info(demuxer_wrapper_t * wrapper, dt_media_info_
                     pCodec->extradata[6],
                     pCodec->extradata[7]
                     );
-//#if ENABLE_ANDROID
-#if 0
+#if ENABLE_ANDROID
+            //if(info->format == DT_MEDIA_FORMAT_MPEGTS)
+            // android no need extradata for H264
             if(pCodec->codec_id == AV_CODEC_ID_H264)
             {
-                uint8_t *ptr_extradata;
-                int extrasize = vst_info->extradata_size;
-                int result = annexb_write_avc_extradata(vst_info->extradata, &ptr_extradata, &extrasize);
-                if(result == 0)
-                {
-                    memcpy(vst_info->extradata, ptr_extradata, extrasize);
-                    vst_info->extradata_size = extrasize;
-                }
-                dt_info(TAG, "data: %02x %02x %02x %02x %02x %02x %02x %02x \n", 
-                    vst_info->extradata[0],
-                    vst_info->extradata[1],
-                    vst_info->extradata[2],
-                    vst_info->extradata[3],
-                    vst_info->extradata[4],
-                    vst_info->extradata[5],
-                    vst_info->extradata[6],
-                    vst_info->extradata[7]
-                    );
+                vst_info->extradata_size = 0;
+                dt_info(TAG, "TS no need extradata \n");
             }
 #endif
-
-
         }
         else if(pCodec->codec_type == AVMEDIA_TYPE_AUDIO)
         {
