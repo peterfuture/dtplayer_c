@@ -82,7 +82,7 @@ void vdec_remove_all ()
 static int select_video_decoder (dtvideo_decoder_t * decoder)
 {
     vd_wrapper_t **p;
-    dtvideo_para_t *para = decoder->para;
+    dtvideo_para_t *para = &decoder->para;
     p = &g_vd;
     while(*p != NULL)
     {
@@ -119,7 +119,7 @@ static void *video_decode_loop (void *arg)
 {
     dt_av_pkt_t frame;
     dtvideo_decoder_t *decoder = (dtvideo_decoder_t *) arg;
-    dtvideo_para_t *para = decoder->para;
+    dtvideo_para_t *para = &decoder->para;
     vd_wrapper_t *wrapper = decoder->wrapper;
     dtvideo_context_t *vctx = (dtvideo_context_t *) decoder->parent;
     dtvideo_filter_t *filter = (dtvideo_filter_t *) &(vctx->video_filt);
@@ -183,7 +183,6 @@ static void *video_decode_loop (void *arg)
         }
         if (!picture)
             goto DECODE_END;
-
         //got one frame, filter reset check
         if(wrapper->info_changed(decoder))
         {
@@ -191,10 +190,8 @@ static void *video_decode_loop (void *arg)
             memcpy(&filter->para, &wrapper->para, sizeof(dtvideo_para_t));
             video_filter_update(filter);
         }
-
         decoder->frame_count++;
         //Got one frame
-        dt_info (TAG, "[%s:%d]first frame decoded ok, pts:0x%llx dts:0x%llx pts_first:%llx \n", __FUNCTION__, __LINE__, picture->pts, picture->dts, decoder->pts_first);
         //update current pts, clear the buffer size
         if (picture->pts >= 0 && decoder->pts_first == DT_NOPTS_VALUE)
         {
@@ -208,7 +205,7 @@ static void *video_decode_loop (void *arg)
         {
             if(pts_mode)
             {
-                int fps = decoder->para->fps;
+                int fps = decoder->para.fps;
                 float dur_inc = 90000/fps;
                 picture->pts = decoder->pts_current + dur_inc;
                 decoder->pts_current = picture->pts; 
@@ -254,12 +251,12 @@ int video_decoder_init (dtvideo_decoder_t * decoder)
     vd_wrapper_t *wrapper = decoder->wrapper; 
     /*init decoder */
     decoder->pts_current = decoder->pts_first = DT_NOPTS_VALUE;
-    decoder->vd_priv = decoder->para->avctx_priv;
+    decoder->vd_priv = decoder->para.avctx_priv;
     ret = wrapper->init (decoder);
     if (ret < 0)
         return -1;
     pts_mode = dtp_setting.video_pts_mode;
-    dt_info(TAG,"pts mode:%d fps:%f \n",pts_mode,decoder->para->fps);
+    dt_info(TAG,"pts mode:%d fps:%f \n",pts_mode,decoder->para.fps);
     
     dt_info (TAG, "[%s:%d] video decoder init ok\n", __FUNCTION__, __LINE__);
     /*init pcm buffer */

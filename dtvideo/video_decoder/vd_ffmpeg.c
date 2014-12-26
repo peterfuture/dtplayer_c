@@ -36,8 +36,8 @@ static AVCodecContext * alloc_ffmpeg_ctx(dtvideo_decoder_t *decoder)
         return NULL;
     
     ctx->codec_type = AVMEDIA_TYPE_VIDEO;
-    ctx->codec_id = convert_to_id(decoder->para->vfmt);
-    dt_info(TAG, "vfmt->id  %d->%d \n", decoder->para->vfmt, ctx->codec_id);
+    ctx->codec_id = convert_to_id(decoder->para.vfmt);
+    dt_info(TAG, "vfmt->id  %d->%d \n", decoder->para.vfmt, ctx->codec_id);
     if(ctx->codec_id == -1)
     {
         av_free(ctx); 
@@ -83,7 +83,7 @@ int ffmpeg_vdec_init (dtvideo_decoder_t *decoder)
     dt_info (TAG, " [%s:%d] ffmpeg dec init ok \n", __FUNCTION__, __LINE__);
     //alloc one frame for decode
     vd_ctx->frame = av_frame_alloc ();
-    wrapper->para = decoder->para;
+    wrapper->para = &decoder->para;
     decoder->vd_priv = (void *)vd_ctx;
     return 0;
 }
@@ -124,7 +124,7 @@ static int convert_frame (dtvideo_decoder_t * decoder, AVFrame * src, int64_t pt
 
 static int copy_frame (dtvideo_decoder_t * decoder, AVFrame * src, int64_t pts, dt_av_frame_t ** p_pict)
 {
-    dtvideo_para_t *para = decoder->para;
+    dtvideo_para_t *para = &decoder->para;
     uint8_t *buffer;
     int buffer_size;
     int sw = para->s_width; 
