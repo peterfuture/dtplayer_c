@@ -168,7 +168,7 @@ static void *video_decode_loop (void *arg)
             }
             //no data left, maybe eof, need to flush left data
             memset(&frame,0,sizeof(dt_av_pkt_t));
-            dt_info (TAG, "[%s:%d] no video frame left, flush left frames \n", __FUNCTION__, __LINE__);
+            dt_debug(TAG, "[%s:%d] no video frame left, flush left frames \n", __FUNCTION__, __LINE__);
         }
         /*read one frame,enter decode frame module */
         //will exec once for one time
