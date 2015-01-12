@@ -70,7 +70,11 @@ static int ffmpeg_vf_init(dtvideo_filter_t *filter)
     int df = para->d_pixfmt;
     vf_ctx->need_process = !(sw == dw && sh == dh && sf == df);
     dt_info(TAG, "[%s:%d] sw:%d dw:%d sh:%d dh:%d sf:%d df:%d need_process:%d \n", __FUNCTION__, __LINE__, sw, dw, sh, dh, sf, df, vf_ctx->need_process);
-    
+
+#ifdef ENABLE_ANDROID
+    vf_ctx->need_process = 1; // android need setup yuv data
+#endif
+
     filter->vf_priv = vf_ctx;
     if(vf_ctx->need_process)
     {
