@@ -186,8 +186,8 @@ static void *video_decode_loop (void *arg)
         //got one frame, filter reset check
         if(wrapper->info_changed(decoder))
         {
-            memcpy(&decoder->para, &wrapper->para, sizeof(dtvideo_para_t));
-            memcpy(&filter->para, &wrapper->para, sizeof(dtvideo_para_t));
+            //memcpy(&decoder->para, wrapper->para, sizeof(dtvideo_para_t));// wrapper->para == decoder->para
+            memcpy(&filter->para, wrapper->para, sizeof(dtvideo_para_t));
             video_filter_update(filter);
         }
         decoder->frame_count++;

@@ -44,7 +44,7 @@ static int ffmpeg_vf_capable(vf_cap_t cap)
     int ffmpeg_cap = VF_CAP_COLORSPACE_CONVERT;
 #endif
 
-    dt_debug(TAG, "request cap: %x , %s support:%x \n", cap, "ffmpeg vf", ffmpeg_cap);
+    dt_info(TAG, "request cap: %x , %s support:%x \n", cap, "ffmpeg vf", ffmpeg_cap);
     return cap & ffmpeg_cap; 
 }
 
