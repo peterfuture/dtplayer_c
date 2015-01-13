@@ -27,6 +27,9 @@ void stream_register_all ()
 #ifdef ENABLE_STREAM_FILE
     REGISTER_STREAM (FILE, file);
 #endif
+#ifdef ENABLE_STREAM_CURL
+    REGISTER_STREAM (CURL, curl);
+#endif
 #ifdef ENABLE_STREAM_FFMPEG
     REGISTER_STREAM (FFMPEG, ffmpeg);
 #endif

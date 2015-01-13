@@ -72,6 +72,7 @@ DTAP=no
 
 #module
 DT_STREAM=yes
+DT_STREAM_CURL=no
 DT_DEMUXER=yes
 DT_UTIL=yes
 DT_AUDIO=yes
@@ -94,7 +95,10 @@ DTM_SERVER=
 DT_CFLAGS += -DENABLE_LINUX=1
 
 #stream
-#DT_CFLAGS += -DENABLE_STREAM_FILE=1
+DT_CFLAGS += -DENABLE_STREAM_FILE=1
+ifeq ($(DT_STREAM_CURL),yes)
+DT_CFLAGS += -DENABLE_STREAM_CURL=1
+endif
 ifeq ($(DT_FFMPEG),yes)
 	DT_CFLAGS += -DENABLE_STREAM_FFMPEG=1
 endif
@@ -213,11 +217,12 @@ SRCS_COMMON-$(DT_UTIL) += dtutils/dt_buffer.c
 SRCS_COMMON-$(DT_UTIL) += dtutils/dt_queue.c
 
 #dtstream
-SRCS_COMMON-$(DT_STREAM) +=dtstream/dtstream_api.c
-SRCS_COMMON-$(DT_STREAM) +=dtstream/dtstream.c
-SRCS_COMMON-$(DT_STREAM) +=dtstream/stream/stream_file.c
-SRCS_COMMON-$(DT_STREAM) +=dtstream/stream/stream_cache.c
-SRCS_COMMON-$(DT_FFMPEG) +=dtstream/stream/stream_ffmpeg.c
+SRCS_COMMON-$(DT_STREAM)      +=dtstream/dtstream_api.c
+SRCS_COMMON-$(DT_STREAM)      +=dtstream/dtstream.c
+SRCS_COMMON-$(DT_STREAM)      +=dtstream/stream/stream_file.c
+SRCS_COMMON-$(DT_STREAM_CURL) +=dtstream/stream/stream_curl.c
+SRCS_COMMON-$(DT_STREAM)      +=dtstream/stream/stream_cache.c
+SRCS_COMMON-$(DT_FFMPEG)      +=dtstream/stream/stream_ffmpeg.c
 
 #dtdemuxer
 SRCS_COMMON-$(DT_DEMUXER) +=dtdemux/dtdemuxer_api.c
