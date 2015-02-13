@@ -365,7 +365,7 @@ static int video_format_convert(enum AVCodecID id)
 
 static int subtitle_format_convert(int id)
 {
-    return DT_SUBTITLE_FORMAT_UNKOWN;
+    return DT_SUB_FORMAT_UNKOWN;
 
 }
 

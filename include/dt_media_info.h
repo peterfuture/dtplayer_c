@@ -74,7 +74,7 @@ typedef struct
     int height;
     int extradata_size;
     uint8_t *extradata;
-    dtsubtitle_format_t format;
+    dtsub_format_t format;
     void *codec_priv;
 } sstream_info_t;
 

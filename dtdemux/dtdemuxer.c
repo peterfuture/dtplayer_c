@@ -69,6 +69,7 @@ static void dump_media_info(dt_media_info_t * info)
     dt_info(TAG, "|====================MEDIA INFO====================| \n");
     dt_info(TAG, "|file_name:%s\n", info->file_name);
     dt_info(TAG, "|file_size:%lld \n", info->file_size);
+    dt_info(TAG, "|file_format:%s \n", dt_mediafmt2str(info->format));
     dt_info(TAG, "|duration:%lld bitrate:%d\n", info->duration, info->bit_rate);
     dt_info(TAG, "|has video:%d has audio:%d has sub:%d\n", info->has_video, info->has_audio, info->has_sub);
     dt_info(TAG, "|====================VIDEO INFO====================| \n");

@@ -13,13 +13,14 @@ void dt_free(void *ptr)
     free(ptr);
 }
 
+// structure
+
 dt_av_frame_t *dtav_new_frame()
 {
     dt_av_frame_t *frame = (dt_av_frame_t *)malloc(sizeof(dt_av_frame_t));
     return frame;
 }
 
-//clean data
 int dtav_unref_frame(dt_av_frame_t *frame)
 {
     if(!frame)
@@ -45,4 +46,52 @@ void dtav_clear_frame(void *pic)
     if (picture->data)
         free (picture->data[0]);
     return;
+}
+
+// av convert
+const char *dt_mediafmt2str(dtmedia_format_t format)
+{
+    switch(format)
+    {
+    case DT_MEDIA_FORMAT_MPEGTS:
+        return "mpegts";
+    case DT_MEDIA_FORMAT_MPEGPS:
+        return "mpegps";
+    case DT_MEDIA_FORMAT_RM:
+        return "rmvb";
+    case DT_MEDIA_FORMAT_AVI:
+        return "avi";
+    case DT_MEDIA_FORMAT_MKV:
+        return "mkv";
+    case DT_MEDIA_FORMAT_MOV:
+        return "mov,mp4,etc";
+    case DT_MEDIA_FORMAT_FLV:
+        return "flv";
+    case DT_MEDIA_FORMAT_AAC:
+        return "audio-aac";
+    case DT_MEDIA_FORMAT_AC3:
+        return "audio-ac3";
+    case DT_MEDIA_FORMAT_MP3:
+        return "audio-mp3";
+    case DT_MEDIA_FORMAT_WAV:
+        return "audio-wav";
+    case DT_MEDIA_FORMAT_DTS:
+        return "audio-dts";
+    case DT_MEDIA_FORMAT_FLAC:
+        return "audio-flac";
+    case DT_MEDIA_FORMAT_H264:
+        return "video-h264";
+    case DT_MEDIA_FORMAT_AVS:
+        return "avs";
+    case DT_MEDIA_FORMAT_M2V:
+        return "m2v";
+    case DT_MEDIA_FORMAT_ASF:
+        return "asf";
+    case DT_MEDIA_FORMAT_APE:
+        return "audio-ape";
+    case DT_MEDIA_FORMAT_AMR:
+        return "audio-amr";
+    default:
+        return "unkown";
+    }
 }
