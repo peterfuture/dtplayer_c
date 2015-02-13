@@ -3,6 +3,7 @@
 
 #include "libavformat/avformat.h"
 #include "libavformat/avio.h"
+#include "libavutil/dict.h"
 
 #include <string.h>
 
@@ -400,6 +401,7 @@ static int demuxer_ffmpeg_setup_info(demuxer_wrapper_t * wrapper, dt_media_info_
     astream_info_t *ast_info;
     sstream_info_t *sst_info;
     int i;
+    AVDictionaryEntry *t;
 
     /*reset vars */
     memset(info, 0, sizeof(*info));
@@ -452,6 +454,9 @@ static int demuxer_ffmpeg_setup_info(demuxer_wrapper_t * wrapper, dt_media_info_
             vst_info->codec_priv =(void *) pCodec;
             info->vstreams[info->vst_num] = vst_info;
             info->vst_num++;
+            t = av_dict_get(pStream->metadata, "language", NULL, 0);
+            if(t) strcpy(vst_info->language, t->value);
+            else  strcpy(vst_info->language, "und");
             if(pCodec->extradata_size)
             {
                 vst_info->extradata_size = pCodec->extradata_size;
@@ -492,6 +497,9 @@ static int demuxer_ffmpeg_setup_info(demuxer_wrapper_t * wrapper, dt_media_info_
             ast_info->time_base.num = pStream->time_base.num;
             ast_info->time_base.den = pStream->time_base.den;
             ast_info->bit_rate = pCodec->bit_rate;
+            t = av_dict_get(pStream->metadata, "language", NULL, 0);
+            if(t) strcpy(ast_info->language, t->value);
+            else  strcpy(ast_info->language, "und");
             ast_info->format = audio_format_convert(pCodec->codec_id);
             ast_info->codec_priv = (void *)pCodec;
             info->astreams[info->ast_num] = ast_info;
@@ -505,6 +513,9 @@ static int demuxer_ffmpeg_setup_info(demuxer_wrapper_t * wrapper, dt_media_info_
             sst_info->id = pStream->id;
             sst_info->width = pCodec->width;
             sst_info->height = pCodec->height;
+            t = av_dict_get(pStream->metadata, "language", NULL, 0);
+            if(t) strcpy(sst_info->language, t->value);
+            else  strcpy(sst_info->language, "und");
             sst_info->format = subtitle_format_convert(pCodec->codec_id);
             sst_info->codec_priv =(void *) pCodec;
             info->sstreams[info->sst_num] = sst_info;

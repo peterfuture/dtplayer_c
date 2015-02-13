@@ -77,14 +77,14 @@ static void dump_media_info(dt_media_info_t * info)
     int i = 0;
     for(i = 0; i < info->vst_num; i++)
     {
-        dt_info(TAG, "|--video stream:%d index:%d id:%d fmt:%s \n", i, info->vstreams[i]->index, info->vstreams[i]->id, type);
+        dt_info(TAG, "|--video stream:%d index:%d id:%d fmt:%s lang:%s \n", i, info->vstreams[i]->index, info->vstreams[i]->id, type, info->vstreams[i]->language);
         dt_info(TAG, "|--bitrate:%d width:%d height:%d duration:%lld \n", info->vstreams[i]->bit_rate, info->vstreams[i]->width, info->vstreams[i]->height, info->vstreams[i]->duration);
     }
     dt_info(TAG, "|====================AUDIO INFO====================| \n");
     dt_info(TAG, "|audio stream info,num:%d\n", info->ast_num);
     for(i = 0; i < info->ast_num; i++)
     {
-        dt_info(TAG, "|--audio stream:%d index:%d id:%d fmt:%s\n", i, info->astreams[i]->index, info->astreams[i]->id, type);
+        dt_info(TAG, "|--audio stream:%d index:%d id:%d fmt:%s lang:%s \n", i, info->astreams[i]->index, info->astreams[i]->id, type, info->astreams[i]->language);
         dt_info(TAG, "|--bitrate:%d sample_rate:%d channels:%d bps:%d duration:%lld \n", info->astreams[i]->bit_rate, info->astreams[i]->sample_rate, info->astreams[i]->channels, info->astreams[i]->bps, info->astreams[i]->duration);
     }
 
@@ -92,7 +92,7 @@ static void dump_media_info(dt_media_info_t * info)
     dt_info(TAG, "|subtitle stream num:%d\n", info->sst_num);
     for(i = 0; i < info->sst_num; i++)
     {
-        dt_info(TAG, "|--sub stream:%d index:%d id:%d fmt:%s\n", i, info->sstreams[i]->index, info->sstreams[i]->id, type);
+        dt_info(TAG, "|--sub stream:%d index:%d id:%d fmt:%s lang:%s \n", i, info->sstreams[i]->index, info->sstreams[i]->id, type, info->sstreams[i]->language);
         dt_info(TAG, "|--width:%d height:%d \n", info->sstreams[i]->width, info->sstreams[i]->height);
     }
     dt_info(TAG, "|==================================================|\n");

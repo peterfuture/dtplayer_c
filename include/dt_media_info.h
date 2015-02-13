@@ -11,6 +11,8 @@
 #define MAX_AUDIO_STREAM_NUM 20
 #define MAX_SUBTITLE_STREAM_NUM 20
 
+#define LANGUAGE_MAX_SIZE 1024
+
 typedef struct
 {
     int num;
@@ -31,6 +33,7 @@ typedef struct
     dtratio time_base;
     int extradata_size;
     uint8_t extradata[VIDEO_EXTRADATA_SIZE];
+    char language[LANGUAGE_MAX_SIZE];
     dtvideo_format_t format;
     void *codec_priv;
 } vstream_info_t;
@@ -60,6 +63,7 @@ typedef struct
     dtratio time_base;
     int extradata_size;
     uint8_t *extradata;
+    char language[LANGUAGE_MAX_SIZE];
     dtaudio_format_t format;
     album_info_t album_info; 
     void *codec_priv;
@@ -74,6 +78,7 @@ typedef struct
     int height;
     int extradata_size;
     uint8_t *extradata;
+    char language[LANGUAGE_MAX_SIZE];
     dtsub_format_t format;
     void *codec_priv;
 } sstream_info_t;
