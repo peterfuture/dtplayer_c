@@ -201,6 +201,7 @@ int main(int argc, char **argv)
                 break;
         }
 
+        usleep(10 * 1000);  // sleep 10ms
     }
 QUIT_CHECK:
     while(!ply_ctx.exit_flag)
