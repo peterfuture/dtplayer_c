@@ -291,6 +291,8 @@ enum{
 typedef enum
 {
     DT_AUDIO_FORMAT_INVALID = -1,
+    DT_AUDIO_FORMAT_MP2,
+    DT_AUDIO_FORMAT_MP3,
     DT_AUDIO_FORMAT_AAC,
     DT_AUDIO_FORMAT_AC3,
     DT_AUDIO_FORMAT_UNKOWN,
@@ -314,6 +316,8 @@ typedef enum _AO_ID_
 typedef enum
 {
     DT_SUB_FORMAT_INVALID = -1,
+    DT_SUB_FORMAT_DVD_SUB,
+    DT_SUB_FORMAT_DVB_SUB,
     DT_SUB_FORMAT_UNKOWN,
 } dtsub_format_t;
 
@@ -382,4 +386,7 @@ void *dt_malloc(size_t size);
 void dt_free(void *ptr);
 
 const char *dt_mediafmt2str(dtmedia_format_t format);
+const char *dt_afmt2str(dtaudio_format_t format);
+const char *dt_vfmt2str(dtvideo_format_t format);
+const char *dt_sfmt2str(dtsub_format_t format);
 #endif

@@ -338,8 +338,19 @@ static int media_format_convert(const char *name)
 dtaudio_format_t audio_format_convert(enum AVCodecID id)
 {
     dtaudio_format_t format = DT_AUDIO_FORMAT_INVALID;
-    switch(id)
-    {
+    switch(id){
+    case AV_CODEC_ID_AAC:
+        format = DT_AUDIO_FORMAT_AAC;
+        break;
+    case AV_CODEC_ID_AC3:
+        format = DT_AUDIO_FORMAT_AC3;
+        break;
+    case AV_CODEC_ID_MP2:
+        format = DT_AUDIO_FORMAT_MP2;
+        break;
+    case AV_CODEC_ID_MP3:
+        format = DT_AUDIO_FORMAT_MP3;
+        break;
     default:
         format = DT_AUDIO_FORMAT_UNKOWN;
         break;
@@ -351,30 +362,41 @@ dtaudio_format_t audio_format_convert(enum AVCodecID id)
 static int video_format_convert(enum AVCodecID id)
 {
     dtvideo_format_t format;
-    switch(id)
-    {
+    switch(id){
     case AV_CODEC_ID_H264:
         format = DT_VIDEO_FORMAT_H264;
         break;
     default:
-            format = DT_VIDEO_FORMAT_UNKOWN;
-            break;
+        format = DT_VIDEO_FORMAT_UNKOWN;
+        break;
     }
     dt_info(TAG, "[video_format_convert]video codec_id=0x%x format=%d\n", id, format);
     return format;
 }
 
-static int subtitle_format_convert(int id)
+static int subtitle_format_convert(enum AVCodecID id)
 {
-    return DT_SUB_FORMAT_UNKOWN;
 
+    dtsub_format_t format = DT_SUB_FORMAT_INVALID;
+    switch(id){
+    case AV_CODEC_ID_DVD_SUBTITLE:
+        format = DT_SUB_FORMAT_DVD_SUB;
+        break;
+    case AV_CODEC_ID_DVB_SUBTITLE:
+        format = DT_SUB_FORMAT_DVB_SUB;
+        break;
+    default:
+        format = DT_VIDEO_FORMAT_UNKOWN;
+        break;
+    }
+ 
+    return format;
 }
 
 static int format2bps(int fmt)
 {
     int ret;
-    switch(fmt)
-    {
+    switch(fmt){
     case AV_SAMPLE_FMT_U8:
         ret = 8;
         break;

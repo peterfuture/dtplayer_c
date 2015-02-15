@@ -51,8 +51,7 @@ void dtav_clear_frame(void *pic)
 // av convert
 const char *dt_mediafmt2str(dtmedia_format_t format)
 {
-    switch(format)
-    {
+    switch(format){
     case DT_MEDIA_FORMAT_MPEGTS:
         return "mpegts";
     case DT_MEDIA_FORMAT_MPEGPS:
@@ -94,4 +93,48 @@ const char *dt_mediafmt2str(dtmedia_format_t format)
     default:
         return "unkown";
     }
+}
+
+const char *dt_afmt2str(dtaudio_format_t format)
+{
+    switch(format){
+    case DT_AUDIO_FORMAT_MP2:
+        return "mp2";
+    case DT_AUDIO_FORMAT_MP3:
+        return "mp3";
+    case DT_AUDIO_FORMAT_AAC:
+        return "aac";
+    case DT_AUDIO_FORMAT_AC3:
+        return "ac3";
+    default:
+        return "und";
+    }
+
+    return "und";
+}
+
+const char *dt_vfmt2str(dtvideo_format_t format)
+{
+    switch(format){
+    case DT_VIDEO_FORMAT_H264:
+        return "h264";
+    default:
+        return "und";
+    }
+
+    return "und";
+}
+
+const char *dt_sfmt2str(dtsub_format_t format)
+{
+    switch(format){
+    case DT_SUB_FORMAT_DVD_SUB:
+        return "dvd-sub";
+    case DT_SUB_FORMAT_DVB_SUB:
+        return "dvb-sub";
+    default:
+        return "und";
+    }
+
+    return "und";
 }
