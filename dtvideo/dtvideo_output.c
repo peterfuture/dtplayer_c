@@ -214,6 +214,17 @@ static void *video_output_thread (void *args)
             picture_pre->pts = vctx->current_pts + 90000 / vo->para->fps;
         //update sys time
         dtvideo_update_systime (vo->parent, sys_clock);
+
+        // check video discontinue
+        if (vctx->last_valid_pts != -1 && picture_pre->pts != -1)
+        {
+            int64_t step = llabs(picture_pre->pts - vctx->last_valid_pts);
+            if(step/DT_PTS_FREQ_MS >= DT_SYNC_DISCONTINUE_THRESHOLD){
+                dt_info(TAG, "video discontinue occured, step:%lld(%d ms) \n", step, step/DT_PTS_FREQ_MS);
+            }
+        }
+
+
         //maybe need to block
         if (sys_clock < picture_pre->pts)
         {
@@ -249,6 +260,7 @@ static void *video_output_thread (void *args)
                 dt_debug (TAG, "can not get vpts from frame,estimate using fps:%d  \n", vo->para->fps);
                 picture_pre->pts = vctx->current_pts + 90000 / vo->para->fps;
             }
+
             if (sys_clock >= picture_pre->pts)
             {
                 dt_info (TAG, "drop frame,sys clock:%lld thispts:%lld next->pts:%lld \n", sys_clock, picture->pts, picture_pre->pts);
@@ -257,6 +269,7 @@ static void *video_output_thread (void *args)
                 continue;
             }
         }
+        
         /*display picture & update vpts */
         //before render, call vf
         video_filter_process(filter, picture);
