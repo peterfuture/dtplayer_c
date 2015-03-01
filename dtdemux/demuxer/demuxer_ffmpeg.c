@@ -286,11 +286,11 @@ static int demuxer_ffmpeg_read_frame(demuxer_wrapper_t * wrapper, dt_av_pkt_t * 
     frame->key_frame = avpkt.flags & AV_PKT_FLAG_KEY;
     if(frame->type ==(int)AVMEDIA_TYPE_AUDIO)
     {
-        dt_debug(TAG,"GET AUDIO FRAME, pts:%llx dts:%llx size:%d \n", frame->pts, frame->dts, frame->size);
+        dt_debug(TAG,"GET AUDIO FRAME, pts:%llx dts:%llx size:%d time:%lld\n", frame->pts, frame->dts, frame->size, frame->pts/90000);
     }
     if(frame->type ==(int)AVMEDIA_TYPE_VIDEO)
     {
-        dt_debug(TAG,"GET VIDEO FRAME, pts:%llx dts:%llx size:%d key:%d\n",frame->pts, frame->dts,frame->size,frame->key_frame);
+        dt_debug(TAG,"GET VIDEO FRAME, pts:%llx dts:%llx size:%d key:%d time:%lld\n",frame->pts, frame->dts,frame->size,frame->key_frame, frame->pts/90000);
     }
     if(frame->type == (int)AVMEDIA_TYPE_SUBTITLE)
     {

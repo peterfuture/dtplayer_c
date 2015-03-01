@@ -108,7 +108,7 @@ int host_update_vpts (dthost_context_t * hctx, int64_t vpts)
     //when sync == 0, update systime with vpts
     if (host_sync_enable(hctx) == 0 && avdiff > AVSYNC_THRESHOLD)
     {
-        dt_info(TAG, "[%s:%d] sync disable or avdiff too much, update systime with vpts, sys:%lld vpts:%lld\n", __FUNCTION__, __LINE__, sys_time, vpts);
+        dt_info(TAG, "[%s:%d] sync disable or avdiff too much, update systime with vpts, sys:%llx vpts:%llx apts:%llx diff:%llx\n", __FUNCTION__, __LINE__, sys_time, vpts, host_get_apts(hctx), avdiff);
         hctx->sys_time = vpts;
         return 0;
     }
