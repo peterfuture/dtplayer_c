@@ -94,13 +94,20 @@ int host_update_apts (dthost_context_t * hctx, int64_t apts)
 
 int host_update_vpts (dthost_context_t * hctx, int64_t vpts)
 {
+    int64_t jump = llabs(vpts - host_get_vpts(hctx));
+    if(jump/DT_PTS_FREQ_MS >= DT_SYNC_DISCONTINUE_THRESHOLD)
+    {
+        hctx->video_discontinue_flag = 1;
+        hctx->video_discontinue_step = jump;
+        dt_info(TAG, "vpts discontinue,jump:%llx :%llx -> %llx \n", jump, host_get_vpts(hctx), vpts);
+    }
+
+    dt_debug(TAG, "update vpts:%llx -> %llx \n", host_get_vpts(hctx), vpts);
     hctx->pts_video = vpts;
-    dt_debug(TAG, "update vpts:%llx \n", vpts);
     //maybe need to correct sys clock
     //int64_t apts = host_get_apts(hctx);
     int64_t sys_time = host_get_systime (hctx);
     int64_t avdiff = llabs(host_get_avdiff (hctx));
-    //int64_t vsdiff = llabs(vpts - hctx->sys_time)/90; //vpts sys_time diff
 
     if (sys_time == -1)
         return 0;
@@ -108,7 +115,7 @@ int host_update_vpts (dthost_context_t * hctx, int64_t vpts)
     //when sync == 0, update systime with vpts
     if (host_sync_enable(hctx) == 0 && avdiff > AVSYNC_THRESHOLD)
     {
-        dt_info(TAG, "[%s:%d] sync disable or avdiff too much, update systime with vpts, sys:0x%llx vpts:0x%llx apts:0x%llx diff:0x%llx\n", __FUNCTION__, __LINE__, sys_time, vpts, host_get_apts(hctx), avdiff);
+        dt_info(TAG, "[%s:%d] disable avsync, sys:0x%llx vpts:0x%llx apts:0x%llx diff:0x%llx\n", __FUNCTION__, __LINE__, sys_time, vpts, host_get_apts(hctx), avdiff);
         return 0;
     }
     
@@ -122,7 +129,7 @@ int host_update_vpts (dthost_context_t * hctx, int64_t vpts)
 
     if (hctx->sync_enable && hctx->sync_mode == DT_SYNC_VIDEO_MASTER && avdiff < AVSYNC_THRESHOLD_MAX)
     {
-        dt_info(TAG, "avdiff:%lld(ms) betwwen 0 -> %d ms, enable av sync \n", avdiff, AVSYNC_THRESHOLD_MAX);
+        dt_info(TAG, "[%s:%d]avdiff:%lld(ms) < %d ms, enable av sync \n", __FUNCTION__, __LINE__, avdiff, AVSYNC_THRESHOLD_MAX);
         hctx->sync_mode = DT_SYNC_AUDIO_MASTER;
     }
     return 0;

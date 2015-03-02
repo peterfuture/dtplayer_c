@@ -172,6 +172,7 @@ static void *video_output_thread (void *args)
     dt_av_frame_t *pic;
     int64_t sys_clock;          //contrl video display
     int64_t cur_time, time_diff;
+    int64_t video_discontinue = 0;
 
     int dump_mode = dtp_setting.player_dump_mode; // 5 for video dump
     int dump_index = 0;
@@ -220,17 +221,18 @@ static void *video_output_thread (void *args)
         {
             int64_t step = llabs(picture_pre->pts - vctx->last_valid_pts);
             if(step/DT_PTS_FREQ_MS >= DT_SYNC_DISCONTINUE_THRESHOLD){
+                video_discontinue = 1;
                 dt_info(TAG, "video discontinue occured, step:%lld(%d ms) \n", step, step/DT_PTS_FREQ_MS);
             }
         }
 
-
-        //maybe need to block
-        if (sys_clock < picture_pre->pts)
-        {
-            dt_debug(TAG, "[%s:%d] not to show ! pts:%lld systime:%lld  \n", __FUNCTION__, __LINE__, picture_pre->pts, sys_clock);
-            dt_usleep (REFRESH_DURATION);
-            continue;
+        if(video_discontinue == 0){ // if discontinue, display directly
+            //maybe need to block
+            if (sys_clock < picture_pre->pts){
+                dt_debug(TAG, "[%s:%d] not to show ! pts:%lld systime:%lld  \n", __FUNCTION__, __LINE__, picture_pre->pts, sys_clock);
+                dt_usleep (REFRESH_DURATION);
+                continue;
+            }
         }
         /*read data from filter or decode buffer */
         picture = (dt_av_frame_t *) dtvideo_output_read (vo->parent);
@@ -240,8 +242,8 @@ static void *video_output_thread (void *args)
             usleep (1000);
             continue;
         }
-        pic = (dt_av_frame_t *) picture;
 
+        pic = (dt_av_frame_t *) picture;
         //update pts
         if (vctx->last_valid_pts == -1)
             vctx->last_valid_pts = vctx->current_pts = picture->pts;
@@ -251,25 +253,25 @@ static void *video_output_thread (void *args)
             vctx->current_pts = picture->pts;
             //printf("[%s:%d]!update pts:%llu \n",__FUNCTION__,__LINE__,vctx->current_pts);
         }
-        /*read next frame ,check drop frame */
-        picture_pre = (dt_av_frame_t *) dtvideo_output_pre_read (vo->parent);
-        if (picture_pre)
-        {
-            if (picture_pre->pts == -1) //invalid pts, calc using last pts
-            {
-                dt_debug (TAG, "can not get vpts from frame,estimate using fps:%d  \n", vo->para->fps);
-                picture_pre->pts = vctx->current_pts + 90000 / vo->para->fps;
-            }
+        
+        if(video_discontinue == 0) {
+            /*read next frame ,check drop frame */
+            picture_pre = (dt_av_frame_t *) dtvideo_output_pre_read (vo->parent);
+            if (picture_pre){
+                if (picture_pre->pts == -1) {
+                    dt_debug (TAG, "can not get vpts from frame,estimate using fps:%d  \n", vo->para->fps);
+                    picture_pre->pts = vctx->current_pts + 90000 / vo->para->fps;
+                }
 
-            if (sys_clock >= picture_pre->pts)
-            {
-                dt_info (TAG, "drop frame,sys clock:%lld thispts:%lld next->pts:%lld \n", sys_clock, picture->pts, picture_pre->pts);
-                dtav_clear_frame(pic);
-                free(picture);
-                continue;
+                if (sys_clock >= picture_pre->pts){
+                    dt_info (TAG, "drop frame,sys clock:%lld thispts:%lld next->pts:%lld \n", sys_clock, picture->pts, picture_pre->pts);
+                    dtav_clear_frame(pic);
+                    free(picture);
+                    continue;
+                }
             }
         }
-        
+
         /*display picture & update vpts */
         //before render, call vf
         video_filter_process(filter, picture);
@@ -292,7 +294,8 @@ static void *video_output_thread (void *args)
         dtvideo_update_pts (vo->parent);
         dtav_clear_frame(pic);
         free(picture);
-        dt_usleep (REFRESH_DURATION);
+        video_discontinue = 0;
+        //dt_usleep (REFRESH_DURATION);
     }
   EXIT:
     dt_info (TAG, "[file:%s][%s:%d]ao playback thread exit\n", __FILE__, __FUNCTION__, __LINE__);

@@ -13,7 +13,11 @@ typedef struct
     dt_sync_mode_t av_sync;
     int64_t sys_time;
     int64_t pts_audio;
+    int     audio_discontinue_flag;
+    int64_t audio_discontinue_step;
     int64_t pts_video;
+    int     video_discontinue_flag;
+    int64_t video_discontinue_step;
     int64_t pts_sub;
     int sync_enable;
     int sync_mode;
