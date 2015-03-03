@@ -249,11 +249,21 @@ static void *audio_decode_loop (void *arg)
         if (decoder->status == ADEC_STATUS_EXIT)
             goto EXIT;
         /*write pcm */
-        if (buf_space (out) < pinfo->outlen)
+        // check latency
         {
-            dt_debug (TAG, "[%s:%d] output buffer do not left enough space ,space=%d level:%d outsie:%d \n", __FUNCTION__, __LINE__, buf_space (out), buf_level (out), pinfo->outlen);
-            usleep (1000);
-            goto REFILL_BUFFER;
+
+            float pts_ratio = (float) DT_PTS_FREQ / para->samplerate;
+            int64_t delay_pts = audio_output_get_latency (&actx->audio_out);
+            int len = out->level;
+            int frame_num = (len) / (para->bps * para->channels / 8);
+            delay_pts += (frame_num) * pts_ratio;
+ 
+            if (delay_pts/DT_PTS_FREQ_MS >= 500 || buf_space (out) < pinfo->outlen)
+            {
+                dt_debug (TAG, "[%s:%d] output buffer do not left enough space ,space=%d level:%d outsie:%d \n", __FUNCTION__, __LINE__, buf_space (out), buf_level (out), pinfo->outlen);
+                usleep (1000);
+                goto REFILL_BUFFER;
+            }
         }
         ret = buf_put (out, pinfo->outptr + fill_size, pinfo->outlen);
         fill_size += ret;
@@ -305,7 +315,12 @@ int audio_decoder_init (dtaudio_decoder_t * decoder)
     dt_info (TAG, "[%s:%d] audio decoder init ok\n", __FUNCTION__, __LINE__);
     /*init pcm buffer */
     dtaudio_context_t *actx = (dtaudio_context_t *) decoder->parent;
-    int size = DTAUDIO_PCM_BUF_SIZE;
+    int channels = actx->audio_param.dst_channels;
+    int sample_rate = actx->audio_param.samplerate;
+    int bps = actx->audio_param.bps;
+
+    int size = ((channels * sample_rate * 8) / bps) * DTAUDIO_PCM_BUF_SIZE_MS ;
+    dt_info (TAG, "[%s:%d] audio decoder out buffer: time:%d ms size:%d \n", __FUNCTION__, __LINE__,DTAUDIO_PCM_BUF_SIZE_MS, size);
     ret = buf_init (&actx->audio_decoded_buf, size);
     if (ret < 0)
     {
@@ -352,7 +367,6 @@ int audio_decoder_stop (dtaudio_decoder_t * decoder)
 }
 
 //====status & pts 
-#define DTAUDIO_PTS_FREQ    90000
 int64_t audio_decoder_get_pts (dtaudio_decoder_t * decoder)
 {
     int64_t pts, delay_pts;
@@ -369,7 +383,7 @@ int64_t audio_decoder_get_pts (dtaudio_decoder_t * decoder)
     channels = decoder->aparam.dst_channels;
     sample_rate = decoder->aparam.samplerate;
     bps = decoder->aparam.bps;
-    pts_ratio = (float) DTAUDIO_PTS_FREQ / sample_rate;
+    pts_ratio = (float) DT_PTS_FREQ / sample_rate;
     pts = 0;
     if (-1 == decoder->pts_first)
         return -1;
@@ -382,7 +396,7 @@ int64_t audio_decoder_get_pts (dtaudio_decoder_t * decoder)
         frame_num = (len) / (bps * channels / 8);
         pts += (frame_num) * pts_ratio;
         pts += decoder->pts_first;
-        dt_debug (TAG, "[%s:%d] first_pts:%llu pts:%llu pts_s:%d frame_num:%d len:%d pts_ratio:%5.1f\n", __FUNCTION__, __LINE__, decoder->pts_first, pts, pts / 90000, frame_num, len, pts_ratio);
+        dt_debug (TAG, "[%s:%d] first_pts:%llx pts:%llx pts_s:%lld frame_num:%d len:%d pts_ratio:%5.1f\n", __FUNCTION__, __LINE__, decoder->pts_first, pts, pts / 90000, frame_num, len, pts_ratio);
         return pts;
     }
     //case 2 current_pts invalid,calc pts mentally
@@ -390,7 +404,7 @@ int64_t audio_decoder_get_pts (dtaudio_decoder_t * decoder)
     len = decoder->pts_buffer_size - out->level - decoder->pts_cache_size;
     frame_num = (len) / (bps * channels / 8);
     delay_pts = (frame_num) * pts_ratio;
-    dt_debug (TAG, "[%s:%d] current_pts:%lld delay_pts:%lld  pts_s:%lld frame_num:%d pts_ratio:%f\n", __FUNCTION__, __LINE__, decoder->pts_current, delay_pts, pts / 90000, frame_num, pts_ratio);
+    dt_debug (TAG, "[%s:%d] current_pts:%llx delay_pts:%lld  pts_s:%lld frame_num:%d pts_ratio:%5.1f\n", __FUNCTION__, __LINE__, decoder->pts_current, delay_pts, pts / 90000, frame_num, pts_ratio);
     pts += delay_pts;
     if (pts < 0)
         pts = 0;

@@ -14,8 +14,10 @@
 #include <unistd.h>
 
 #define DTAUDIO_LOG_TAG "dtaudio"
-#define DTAUDIO_PCM_BUF_SIZE 5*1024*1024; // pcm tmp buffer
-#define MAX_DECODED_OUT_SIZE 19200 //max out size for decode one time
+// pcm out buffer size
+#define DTAUDIO_PCM_BUF_SIZE_MS 1000
+//max out size for decode one time
+#define MAX_DECODED_OUT_SIZE 19200 
 
 typedef struct
 {
