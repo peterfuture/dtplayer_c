@@ -83,7 +83,7 @@ static void *player_io_thread (dtplayer_context_t * dtp_ctx)
     
     do
     {
-        usleep (1000);
+        //usleep (1000);
         if (io_ctl->flag == IO_FLAG_PAUSE)
             io_ctl->status = IO_LOOP_PAUSED;
         if (io_ctl->status == IO_LOOP_QUIT)
