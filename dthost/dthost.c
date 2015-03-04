@@ -64,7 +64,7 @@ int host_update_apts (dthost_context_t * hctx, int64_t apts)
     int64_t vpts = host_get_vpts (hctx);
     int64_t sys_time = host_get_systime (hctx);
     int64_t avdiff = llabs(host_get_avdiff(hctx));
-    int64_t asdiff = (llabs) (apts - hctx->sys_time) / 90; //apts sys_time diff
+    int64_t asdiff = (llabs (apts - hctx->sys_time)) / 90; //apts sys_time diff
 
     if (sys_time == -1)         //if systime have not been set,wait
     {
@@ -86,7 +86,7 @@ int host_update_apts (dthost_context_t * hctx, int64_t apts)
     }   
     if (host_sync_enable (hctx))
     {
-        dt_debug(TAG, "[%s:%d] correct sys time apts:%llx vpts:%llx sys_time:%llx AVDIFF:%llx ASDIFF:%llx\n", __FUNCTION__, __LINE__, apts, vpts, sys_time, avdiff, asdiff);
+        dt_info(TAG, "[%s:%d] correct sys time apts:%llx vpts:%llx sys_time:%llx AVDIFF:%llx ASDIFF:%llx\n", __FUNCTION__, __LINE__, apts, vpts, sys_time, avdiff, asdiff);
         hctx->sys_time = apts;
     }
     return 0;

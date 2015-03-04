@@ -194,17 +194,17 @@ static void *video_output_thread (void *args)
         picture_pre = (dt_av_frame_t *) dtvideo_output_pre_read (vo->parent);
         if (!picture_pre)
         {
-            dt_debug (TAG, "[%s:%d]frame read failed ! \n", __FUNCTION__, __LINE__);
+            dt_debug(TAG, "[%s:%d]frame read failed ! \n", __FUNCTION__, __LINE__);
             usleep (100);
             continue;
         }
-        cur_time = (int64_t) dt_gettime ();
         sys_clock = dtvideo_get_systime (vo->parent);
         if (sys_clock == -1)
         {
             dt_info (TAG, "FIRST SYSCLOK:%lld \n", picture_pre->pts);
             sys_clock = picture_pre->pts;
         }
+        cur_time = (int64_t) dt_gettime ();
         if (last_time == -1)
             last_time = cur_time;
         time_diff = cur_time - last_time;

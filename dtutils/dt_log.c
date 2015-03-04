@@ -54,7 +54,7 @@ static int display_time()
     struct tm* tm_info;
     time(&timer);
     tm_info = localtime(&timer);
-    strftime(buffer, 25, "%Y:%m %d:%H:%M:%S", tm_info);
+    strftime(buffer, 25, "%Y-%m-%d %H:%M:%S", tm_info);
     printf("%s[%s]", KYEL, buffer);
     return 0;
 }
