@@ -387,19 +387,19 @@ int64_t audio_decoder_get_pts (dtaudio_decoder_t * decoder)
     pts = 0;
     if (-1 == decoder->pts_first)
         return -1;
-    if (-1 == decoder->pts_current) //case 1 current_pts valid
+    if (-1 == decoder->pts_current) //case 1 current_pts invalid
     {
-        //if(decoder->pts_last_valid)
-        //    pts=decoder->pts_last_valid;
-        //len = decoder->pts_cache_size + decoder->pts_buffer_size - out->level;
-        len = decoder->pts_buffer_size;
+        if(decoder->pts_last_valid)
+            pts=decoder->pts_last_valid;
+        len = decoder->pts_cache_size + decoder->pts_buffer_size - out->level;
+        //len = decoder->pts_buffer_size;
         frame_num = (len) / (bps * channels / 8);
         pts += (frame_num) * pts_ratio;
         pts += decoder->pts_first;
         dt_debug (TAG, "[%s:%d] first_pts:%llx pts:%llx pts_s:%lld frame_num:%d len:%d pts_ratio:%5.1f\n", __FUNCTION__, __LINE__, decoder->pts_first, pts, pts / 90000, frame_num, len, pts_ratio);
         return pts;
     }
-    //case 2 current_pts invalid,calc pts mentally
+    //case 2 current_pts valid,calc pts mentally
     pts = decoder->pts_current;
     len = decoder->pts_buffer_size - out->level - decoder->pts_cache_size;
     frame_num = (len) / (bps * channels / 8);

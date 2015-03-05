@@ -11,6 +11,7 @@ const char *ao_sdl_name = "SDL AO";
 
 typedef struct{
     SDL_AudioSpec wanted;     // config audio
+    SDL_AudioSpec spec;     // config audio
     dt_buffer_t dbt;
 }sdl_ao_ctx_t;
 
@@ -45,20 +46,32 @@ static int ao_sdl_init (dtaudio_output_t *aout, dtaudio_para_t *ppara)
         SDL_Init(SDL_INIT_AUDIO);
 
     SDL_AudioSpec *pwanted = &ctx->wanted;
+    SDL_AudioSpec *spec = &ctx->spec;
     //set audio paras
     pwanted->freq = ppara->dst_samplerate;       // sample rate
-    pwanted->format = AUDIO_S16;             // bps
+    pwanted->format = AUDIO_S16SYS;             // bps
+    pwanted->silence = 0;
     pwanted->channels = ppara->dst_channels;     // channels
     pwanted->samples = SDL_AUDIO_BUFFER_SIZE;// samples every time
     pwanted->callback = sdl_cb;              // callback
     pwanted->userdata = aout;
     
-    if (SDL_OpenAudio(pwanted, NULL)<0)      // open audio device
+    if (SDL_OpenAudio(pwanted, spec)<0)      // open audio device
     {
         printf("can't open audio.\n");
         ret = -1;
         goto FAIL;
     }
+
+    if (spec->format != AUDIO_S16SYS) {
+        dt_error(TAG,  "SDL advised audio format %d is not supported!\n", spec->format);
+        return -1;
+    }
+    if (spec->channels != pwanted->channels) {
+        dt_error(TAG, "SDL advised channel count %d is not supported!\n", spec->channels);
+        return -1;
+    }
+
     SDL_PauseAudio(0);
     dt_info(TAG,"SDL AO Init OK\n"); 
     return 0;
@@ -96,7 +109,7 @@ static int ao_sdl_level(dtaudio_output_t *ao)
 static int64_t ao_sdl_get_latency (dtaudio_output_t *ao)
 {
     sdl_ao_ctx_t *ctx = (sdl_ao_ctx_t *)ao->ao_priv;
-    int level = buf_level(&ctx->dbt);
+    int level = buf_level(&ctx->dbt) + ctx->spec.size*2;
     unsigned int sample_num;
     uint64_t latency;
     float pts_ratio = 0.0;
