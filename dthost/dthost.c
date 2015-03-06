@@ -122,8 +122,8 @@ int host_update_vpts (dthost_context_t * hctx, int64_t vpts)
     if (host_sync_enable (hctx) && avdiff > AVSYNC_THRESHOLD_MAX) //close sync
     {
         dt_info(TAG, "avdiff:0x%lld (ms) ecceed :%d ms, disable av sync \n", avdiff, AVSYNC_THRESHOLD_MAX);
-        hctx->sys_time_current = vpts;
         hctx->sync_mode = DT_SYNC_VIDEO_MASTER;
+        host_reset_systime(hctx, vpts);
         return 0;
     }
 
@@ -131,6 +131,7 @@ int host_update_vpts (dthost_context_t * hctx, int64_t vpts)
     {
         dt_info(TAG, "[%s:%d]avdiff:%lld(ms) < %d ms, enable av sync \n", __FUNCTION__, __LINE__, avdiff, AVSYNC_THRESHOLD_MAX);
         hctx->sync_mode = DT_SYNC_AUDIO_MASTER;
+        host_reset_systime(hctx, vpts);
     }
     return 0;
 }
@@ -145,6 +146,7 @@ int host_update_spts (dthost_context_t * hctx, int64_t spts)
 int host_reset_systime (dthost_context_t * hctx, int64_t sys_time)
 {
     // First assignment
+    dt_info(TAG, "[%s:%d] apts:%llx vpts:%llx sys_time:%llx->%llx\n", __FUNCTION__, __LINE__, host_get_apts(hctx), host_get_vpts(hctx), host_get_systime(hctx), sys_time);
     hctx->sys_time_last = hctx->sys_time_current;
     hctx->sys_time_start = sys_time;
     hctx->sys_time_current = sys_time;

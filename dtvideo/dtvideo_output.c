@@ -250,9 +250,9 @@ static void *video_output_thread (void *args)
         {
             vctx->last_valid_pts = vctx->current_pts;
             vctx->current_pts = picture->pts;
-            //printf("[%s:%d]!update pts:%llu \n",__FUNCTION__,__LINE__,vctx->current_pts);
+            if(video_discontinue) 
+                vctx->last_valid_pts = vctx->current_pts;
         }
-        
         if(video_discontinue == 0) {
             /*read next frame ,check drop frame */
             picture_pre = (dt_av_frame_t *) dtvideo_output_pre_read (vo->parent);
@@ -264,13 +264,13 @@ static void *video_output_thread (void *args)
 
                 if (sys_clock >= picture_pre->pts){
                     dt_info (TAG, "drop frame,sys clock:%lld thispts:%lld next->pts:%lld \n", sys_clock, picture->pts, picture_pre->pts);
+                    dtvideo_update_pts (vo->parent); // drop means not render, but need update vpts
                     dtav_clear_frame(pic);
                     free(picture);
                     continue;
                 }
             }
         }
-
         /*display picture & update vpts */
         //before render, call vf
         video_filter_process(filter, picture);
