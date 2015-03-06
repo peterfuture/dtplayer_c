@@ -23,7 +23,6 @@
 #define DT_SYNC_CORRECT_THRESHOLD          DT_PTS_FREQ_MS*150
 #define DT_NOPTS_VALUE         ((int64_t)UINT64_C(0x8000000000000000)) // EQUAL TO AV_NOPTS_VALUE IN FFMPEG
 
-
 /*************************************
 ** Host
 *************************************/

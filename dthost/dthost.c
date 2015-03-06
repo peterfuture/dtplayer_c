@@ -34,7 +34,7 @@ int64_t host_get_spts (dthost_context_t * hctx)
 
 int64_t host_get_systime (dthost_context_t * hctx)
 {
-    return hctx->sys_time;
+    return hctx->sys_time_current;
 }
 
 int64_t host_get_avdiff (dthost_context_t * hctx)
@@ -53,7 +53,7 @@ int host_update_apts (dthost_context_t * hctx, int64_t apts)
     dt_debug(TAG, "update apts:%llx \n", apts);
     if (!hctx->para.has_video)
     {
-        hctx->sys_time = apts;
+        hctx->sys_time_current = apts;
         return 0;
     }
     if (!hctx->para.sync_enable) //sync disable, video will correct systime
@@ -64,7 +64,7 @@ int host_update_apts (dthost_context_t * hctx, int64_t apts)
     int64_t vpts = host_get_vpts (hctx);
     int64_t sys_time = host_get_systime (hctx);
     int64_t avdiff = llabs(host_get_avdiff(hctx));
-    int64_t asdiff = (llabs (apts - hctx->sys_time)) / 90; //apts sys_time diff
+    int64_t asdiff = (llabs (apts - hctx->sys_time_current)) / 90; //apts sys_time diff
 
     if (sys_time == -1)         //if systime have not been set,wait
     {
@@ -87,7 +87,7 @@ int host_update_apts (dthost_context_t * hctx, int64_t apts)
     if (host_sync_enable (hctx))
     {
         dt_info(TAG, "[%s:%d] correct sys time apts:%llx vpts:%llx sys_time:%llx AVDIFF:%llx ASDIFF:%llx\n", __FUNCTION__, __LINE__, apts, vpts, sys_time, avdiff, asdiff);
-        //hctx->sys_time = apts;
+        host_reset_systime(apts);  
     }
     return 0;
 }
@@ -122,7 +122,7 @@ int host_update_vpts (dthost_context_t * hctx, int64_t vpts)
     if (host_sync_enable (hctx) && avdiff > AVSYNC_THRESHOLD_MAX) //close sync
     {
         dt_info(TAG, "avdiff:0x%lld (ms) ecceed :%d ms, disable av sync \n", avdiff, AVSYNC_THRESHOLD_MAX);
-        hctx->sys_time = vpts;
+        hctx->sys_time_current = vpts;
         hctx->sync_mode = DT_SYNC_VIDEO_MASTER;
         return 0;
     }
@@ -142,9 +142,29 @@ int host_update_spts (dthost_context_t * hctx, int64_t spts)
     return 0;
 }
 
+int host_reset_systime (dthost_context_t * hctx, int64_t sys_time)
+{
+    // First assignment
+    hctx->sys_time_last = hctx->sys_time_current;
+    hctx->sys_time_current = sys_time;
+    hctx->sys_time_start_time = dt_gettime();
+    return 0;
+}
+
 int host_update_systime (dthost_context_t * hctx, int64_t sys_time)
 {
-    hctx->sys_time = sys_time;
+    if(hctx->sys_time_current == DT_NOPTS_VALUE || hctx->sys_time_current == -1)
+    {
+        // First assignment
+        hctx->sys_time_current = hctx->sys_time_first = sys_time;
+        hctx->sys_time_start = hctx->sys_time_last = sys_time;
+        hctx->sys_time_start_time = dt_gettime();
+        return 0;
+    }
+
+    int64_t time_diff = dt_gettime() - hctx->sys_time_start_time;
+    hctx->sys_time_last = hctx->sys_time_current;
+    hctx->sys_time_current = hctx->sys_time_start + time_diff*9/100;
     return 0;
 }
 
@@ -158,8 +178,8 @@ int64_t host_get_current_time (dthost_context_t * hctx)
         atime = hctx->pts_audio;
     if (hctx->para.has_video)
         vtime = hctx->pts_video;
-    ctime = hctx->sys_time;
-    dt_debug (TAG, "ctime:%llx atime:%llx vtime:%llx sys_time:%llx av_diff:%x sync mode:%x\n", ctime, atime, vtime, hctx->sys_time, hctx->av_diff, hctx->av_sync);
+    ctime = hctx->sys_time_current;
+    dt_debug (TAG, "ctime:%llx atime:%llx vtime:%llx sys_time:%llx av_diff:%x sync mode:%x\n", ctime, atime, vtime, hctx->sys_time_current, hctx->av_diff, hctx->av_sync);
     return ctime;
 }
 
@@ -237,8 +257,8 @@ int host_start (dthost_context_t * hctx)
                 dtaudio_drop (hctx->audio_priv, hctx->pts_video);
         }
     }
-    hctx->sys_time = (has_video)?hctx->pts_video:hctx->pts_audio;
-    dt_info (TAG, "apts:%llx vpts:%llx sys_time:%llx avdiff: %lld\n", hctx->pts_audio, hctx->pts_video,hctx->sys_time, host_get_avdiff(hctx));
+    hctx->sys_time_first = (has_video)?hctx->pts_video:hctx->pts_audio;
+    dt_info (TAG, "apts:%llx vpts:%llx sys_time:%llx avdiff: %lld\n", hctx->pts_audio, hctx->pts_video,hctx->sys_time_first, host_get_avdiff(hctx));
 
     if (has_audio)
     {
@@ -364,7 +384,13 @@ int host_init (dthost_context_t * hctx)
         hctx->av_sync = DT_SYNC_VIDEO_MASTER;
     hctx->sync_enable = host_para->sync_enable;
     hctx->av_diff = 0;
-    hctx->pts_audio = hctx->pts_video = hctx->sys_time = -1;
+
+    hctx->sys_time_start =
+    hctx->sys_time_first = 
+    hctx->sys_time_last  = DT_NOPTS_VALUE;
+    hctx->sys_time_start_time = -1;
+    
+    hctx->pts_audio = hctx->pts_video = -1;
 
     /*init port */
     dtport_para_t port_para;
@@ -585,10 +611,10 @@ int host_get_state (dthost_context_t * hctx, host_state_t * state)
         state->cur_spts = -1;
     }
 
-    hctx->sys_time = (has_video)?hctx->pts_video:hctx->pts_audio;
+    //hctx->sys_time = (has_video)?hctx->pts_video:hctx->pts_audio;
 
-    dt_debug (TAG, "[%s:%d] apts:%lld vpts:%lld systime:%lld tsync_enable:%d sync_mode:%d \n", __FUNCTION__, __LINE__, hctx->pts_audio, hctx->pts_video, hctx->sys_time, hctx->sync_enable, hctx->sync_mode);
-    state->cur_systime = hctx->sys_time;
+    dt_debug (TAG, "[%s:%d] apts:%lld vpts:%lld systime:%lld tsync_enable:%d sync_mode:%d \n", __FUNCTION__, __LINE__, hctx->pts_audio, hctx->pts_video, hctx->sys_time_current, hctx->sync_enable, hctx->sync_mode);
+    state->cur_systime = hctx->sys_time_current;
     return 0;
 }
 

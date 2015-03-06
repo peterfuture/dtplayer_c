@@ -11,7 +11,12 @@ typedef struct
     dthost_para_t para;
     /*av sync */
     dt_sync_mode_t av_sync;
-    int64_t sys_time;
+    int64_t sys_time_start;
+    int64_t sys_time_start_time; // First SystemTime Assignment Time(us)
+    int64_t sys_time_first;      // First System Time - Equal To First_APTS OR FIRST_VPTS
+    int64_t sys_time_last;       // Last System Time
+    int64_t sys_time_current;    // Current System Time
+
     int64_t pts_audio;
     int     audio_discontinue_flag;
     int64_t audio_discontinue_step;
