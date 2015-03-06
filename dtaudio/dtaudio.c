@@ -111,7 +111,7 @@ void audio_update_pts (void *priv)
     delay_pts = audio_output_get_latency (&actx->audio_out);
     if (delay_pts == -1)
         delay_pts = 0;
-    dt_info (TAG, "[%s:%d] pts:%lld  delay:%lld  actual:%lld time:%d cur_time:%lld\n", __FUNCTION__, __LINE__, pts, delay_pts, pts - delay_pts, (pts - delay_pts) / 90000, dt_gettime());
+    dt_debug (TAG, "[%s:%d] pts:%lld  delay:%lld  actual:%lld time:%d cur_time:%lld\n", __FUNCTION__, __LINE__, pts, delay_pts, pts - delay_pts, (pts - delay_pts) / 90000, dt_gettime());
     if (delay_pts < pts)
         pts -= delay_pts;
     else

@@ -64,9 +64,9 @@ int host_update_apts (dthost_context_t * hctx, int64_t apts)
     int64_t vpts = host_get_vpts (hctx);
     int64_t sys_time = host_get_systime (hctx);
     int64_t avdiff = llabs(host_get_avdiff(hctx));
-    int64_t asdiff = (llabs (apts - hctx->sys_time_current)) / 90; //apts sys_time diff
+    int64_t asdiff = (llabs (apts - sys_time)) / 90; //apts sys_time diff
 
-    if (sys_time == -1)         //if systime have not been set,wait
+    if (sys_time == -1 || sys_time == DT_NOPTS_VALUE)         //if systime have not been set,wait
     {
         return 0;
     }
@@ -87,7 +87,7 @@ int host_update_apts (dthost_context_t * hctx, int64_t apts)
     if (host_sync_enable (hctx))
     {
         dt_info(TAG, "[%s:%d] correct sys time apts:%llx vpts:%llx sys_time:%llx AVDIFF:%llx ASDIFF:%llx\n", __FUNCTION__, __LINE__, apts, vpts, sys_time, avdiff, asdiff);
-        host_reset_systime(apts);  
+        host_reset_systime(hctx, apts);  
     }
     return 0;
 }
@@ -109,7 +109,7 @@ int host_update_vpts (dthost_context_t * hctx, int64_t vpts)
     int64_t sys_time = host_get_systime (hctx);
     int64_t avdiff = llabs(host_get_avdiff (hctx));
 
-    if (sys_time == -1)
+    if (sys_time == -1 || sys_time == DT_NOPTS_VALUE)
         return 0;
 
     //when sync == 0, update systime with vpts
@@ -146,6 +146,7 @@ int host_reset_systime (dthost_context_t * hctx, int64_t sys_time)
 {
     // First assignment
     hctx->sys_time_last = hctx->sys_time_current;
+    hctx->sys_time_start = sys_time;
     hctx->sys_time_current = sys_time;
     hctx->sys_time_start_time = dt_gettime();
     return 0;
@@ -268,7 +269,7 @@ int host_start (dthost_context_t * hctx)
             dt_error (TAG, "[%s:%d] dtaudio start failed \n", __FUNCTION__, __LINE__);
             return -1;
         }
-        dt_info (TAG, "[%s:%d] dtaudio start ok \n", __FUNCTION__, __LINE__);
+        dt_info (TAG, "[%s:%d]audio start ok \n", __FUNCTION__, __LINE__);
     }
     if (has_video)
     {
@@ -387,6 +388,7 @@ int host_init (dthost_context_t * hctx)
 
     hctx->sys_time_start =
     hctx->sys_time_first = 
+    hctx->sys_time_current = 
     hctx->sys_time_last  = DT_NOPTS_VALUE;
     hctx->sys_time_start_time = -1;
     
