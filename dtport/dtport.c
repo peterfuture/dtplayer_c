@@ -138,7 +138,7 @@ int port_get_state (dtport_context_t * pctx, buf_state_t * buf_state, int type)
         dt_warning (TAG, "[%s] unkown frame type audio or video \n", __FUNCTION__);
         return -1;
     }
-    printf("[%s:%d] start read status type:%d nb packets:%d\n",__FUNCTION__,__LINE__,type,queue->nb_packets);
+    dt_debug(TAG, "[%s:%d] start read status type:%d nb packets:%d\n",__FUNCTION__,__LINE__,type,queue->nb_packets);
     buf_state->data_len = queue->size;
     buf_state->size = queue->nb_packets;
     return 0;

@@ -170,8 +170,14 @@ static void *video_output_thread (void *args)
     dt_av_frame_t *picture_pre;
     dt_av_frame_t *picture;
     dt_av_frame_t *pic;
-    int64_t sys_clock;          //contrl video display
-    int64_t cur_time, time_diff;
+
+    // sys_clock_*** use to calc system time
+    int64_t sys_clock_now; 
+    int64_t sys_clock_last; 
+    int64_t sys_clock_start;
+    int64_t sys_clock_start_time;
+
+    int64_t cur_time, time_diff, start_time;
     int64_t video_discontinue = 0;
 
     int dump_mode = dtp_setting.player_dump_mode; // 5 for video dump
@@ -198,23 +204,25 @@ static void *video_output_thread (void *args)
             usleep (100);
             continue;
         }
-        sys_clock = dtvideo_get_systime (vo->parent);
-        if (sys_clock == -1)
+        sys_clock_last = dtvideo_get_systime (vo->parent);
+        if (sys_clock_last == -1)
         {
             dt_info (TAG, "FIRST SYSCLOK:%lld \n", picture_pre->pts);
-            sys_clock = picture_pre->pts;
+            sys_clock_start_time = dt_gettime();
+            sys_clock_start = picture_pre->pts;
+            sys_clock_now = picture_pre->pts;
+            sys_clock_last = picture_pre->pts;
+            dtvideo_update_systime (vo->parent, sys_clock_now);
         }
         cur_time = (int64_t) dt_gettime ();
-        if (last_time == -1)
-            last_time = cur_time;
-        time_diff = cur_time - last_time;
-        sys_clock += (time_diff * 9) / 100;
-        dt_debug(TAG, "time_diff:%lld pts_inc:%lld sys_clock:%lld nextpts:%lld cur_time:%llu last_time:%llu\n", time_diff, time_diff * 9 / 100, sys_clock, picture_pre->pts, cur_time, last_time);
+        time_diff = cur_time - sys_clock_start_time;
+        sys_clock_now = sys_clock_start + (time_diff * 9) / 100;
+        dt_info(TAG, "time_diff:%lld pts_inc:%lld sys_clock:%lld nextpts:%lld cur_time:%llu last_time:%llu cur:%lld\n", time_diff, time_diff * 9 / 100, sys_clock, picture_pre->pts, cur_time, last_time, dt_gettime());
         last_time = cur_time;
         if (picture_pre->pts == -1) //invalid pts, calc using last pts
             picture_pre->pts = vctx->current_pts + 90000 / vo->para->fps;
         //update sys time
-        dtvideo_update_systime (vo->parent, sys_clock);
+        dtvideo_update_systime (vo->parent, sys_clock_now);
 
         // check video discontinue
         if (vctx->last_valid_pts != -1 && picture_pre->pts != -1)

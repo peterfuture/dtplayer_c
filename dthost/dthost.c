@@ -87,7 +87,7 @@ int host_update_apts (dthost_context_t * hctx, int64_t apts)
     if (host_sync_enable (hctx))
     {
         dt_info(TAG, "[%s:%d] correct sys time apts:%llx vpts:%llx sys_time:%llx AVDIFF:%llx ASDIFF:%llx\n", __FUNCTION__, __LINE__, apts, vpts, sys_time, avdiff, asdiff);
-        hctx->sys_time = apts;
+        //hctx->sys_time = apts;
     }
     return 0;
 }
