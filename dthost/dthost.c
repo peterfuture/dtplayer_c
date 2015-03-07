@@ -49,6 +49,14 @@ int64_t host_get_avdiff (dthost_context_t * hctx)
 
 int host_update_apts (dthost_context_t * hctx, int64_t apts)
 {
+    int64_t jump = llabs(apts - host_get_apts(hctx));
+    if(jump/DT_PTS_FREQ_MS >= DT_SYNC_DISCONTINUE_THRESHOLD)
+    {
+        hctx->audio_discontinue_flag = 1;
+        hctx->audio_discontinue_step = jump;
+        dt_info(TAG, "apts discontinue,jump:%llx :%llx -> %llx \n", jump, host_get_apts(hctx), apts);
+    }
+    
     hctx->pts_audio = apts;
     dt_debug(TAG, "update apts:%llx \n", apts);
     if (!hctx->para.has_video)
@@ -60,7 +68,7 @@ int host_update_apts (dthost_context_t * hctx, int64_t apts)
     {
         return 0;
     }
-    //maybe need to correct sys clock
+    
     int64_t vpts = host_get_vpts (hctx);
     int64_t sys_time = host_get_systime (hctx);
     int64_t avdiff = llabs(host_get_avdiff(hctx));
@@ -77,8 +85,21 @@ int host_update_apts (dthost_context_t * hctx, int64_t apts)
         return 0;
     }
 
-    if (hctx->sync_enable && hctx->sync_mode == DT_SYNC_VIDEO_MASTER && avdiff < AVSYNC_THRESHOLD_MAX) // enable sync again
+    if (hctx->sync_enable && hctx->sync_mode == DT_SYNC_VIDEO_MASTER && avdiff < AVSYNC_THRESHOLD_MAX) 
+    {
         hctx->sync_mode = DT_SYNC_AUDIO_MASTER;
+    }
+
+    if(hctx->audio_discontinue_flag == 1 && hctx->video_discontinue_flag == 1)
+    {
+        if(avdiff < AVSYNC_THRESHOLD_MAX)
+        {
+            hctx->audio_discontinue_flag = 0;
+            hctx->video_discontinue_flag = 0;
+            dt_info(TAG, "[%s:%d]Clear av discontinue flag, sync again \n", __FUNCTION__, __LINE__);
+        }
+
+    }
 
     if (asdiff < AVSYNC_THRESHOLD)
     {
@@ -125,6 +146,17 @@ int host_update_vpts (dthost_context_t * hctx, int64_t vpts)
         hctx->sync_mode = DT_SYNC_VIDEO_MASTER;
         host_reset_systime(hctx, vpts);
         return 0;
+    }
+
+    if(hctx->audio_discontinue_flag == 1 && hctx->video_discontinue_flag == 1)
+    {
+        if(avdiff < AVSYNC_THRESHOLD_MAX)
+        {
+            hctx->audio_discontinue_flag = 0;
+            hctx->video_discontinue_flag = 0;
+            dt_info(TAG, "[%s:%d]Clear av discontinue flag, sync again \n", __FUNCTION__, __LINE__);
+        }
+
     }
 
     if (hctx->sync_enable && hctx->sync_mode == DT_SYNC_VIDEO_MASTER && avdiff < AVSYNC_THRESHOLD_MAX)
