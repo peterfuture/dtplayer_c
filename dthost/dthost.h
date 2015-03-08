@@ -17,13 +17,24 @@ typedef struct
     int64_t sys_time_last;       // Last System Time
     int64_t sys_time_current;    // Current System Time
 
+    int64_t pts_audio_first;
+    int64_t pts_audio_last;
+    int64_t pts_audio_current;
+    int64_t audio_discontinue_point;
     int64_t pts_audio;
     int     audio_discontinue_flag;
     int64_t audio_discontinue_step;
+    
+    int64_t pts_video_first;
+    int64_t pts_video_last;
+    int64_t pts_video_current;
+    int64_t video_discontinue_point;
     int64_t pts_video;
     int     video_discontinue_flag;
     int64_t video_discontinue_step;
+
     int64_t pts_sub;
+
     int sync_enable;
     int sync_mode;
     int64_t av_diff;
