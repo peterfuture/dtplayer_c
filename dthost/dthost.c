@@ -622,12 +622,10 @@ int host_get_state (dthost_context_t * hctx, host_state_t * state)
         dtaudio_get_state (hctx->audio_priv, &dec_state);
         state->abuf_level = buf_state.data_len;
         state->adec_err_cnt = dec_state.adec_error_count;
-        state->cur_apts = host_get_apts(hctx);
     }
     else
     {
         state->abuf_level = -1;
-        state->cur_apts = -1;
         state->adec_err_cnt = -1;
     }
 
@@ -637,12 +635,10 @@ int host_get_state (dthost_context_t * hctx, host_state_t * state)
         dtvideo_get_state (hctx->video_priv, &dec_state);
         state->vbuf_level = buf_state.data_len;
         state->vdec_err_cnt = dec_state.vdec_error_count;
-        state->cur_vpts = host_get_vpts(hctx);
     }
     else
     {
         state->vbuf_level = -1;
-        state->cur_vpts = -1;
         state->vdec_err_cnt = -1;
     }
 
@@ -651,19 +647,34 @@ int host_get_state (dthost_context_t * hctx, host_state_t * state)
         dtport_get_state(hctx->port_priv, &buf_state, DT_TYPE_SUBTITLE);
         state->sbuf_level = buf_state.data_len;
         state->sdec_err_cnt = 0;
-        state->cur_spts = -1;
     }
     else
     {
         state->sbuf_level = -1;
         state->sdec_err_cnt = -1;
-        state->cur_spts = -1;
     }
 
-    //hctx->sys_time = (has_video)?hctx->pts_video:hctx->pts_audio;
+    // Update pts
+    state->sys_time_start = hctx->sys_time_start;
+    state->sys_time_start_time = hctx->sys_time_start_time;
+    state->sys_time_first = hctx->sys_time_first; 
+    state->sys_time_last = hctx->sys_time_last;
+    state->sys_time_current = hctx->sys_time_current;
 
-    dt_debug (TAG, "[%s:%d] apts:%lld vpts:%lld systime:%lld tsync_enable:%d sync_mode:%d \n", __FUNCTION__, __LINE__, hctx->pts_audio_current, hctx->pts_video_current, hctx->sys_time_current, hctx->sync_enable, hctx->sync_mode);
-    state->cur_systime = hctx->sys_time_current;
+    state->pts_audio_first = hctx->pts_audio_first;
+    state->pts_audio_last = hctx->pts_audio_last;
+    state->pts_audio_current = hctx->pts_audio_current;
+    state->audio_discontinue_point = hctx->audio_discontinue_point;
+    state->audio_discontinue_flag = hctx->audio_discontinue_flag;
+    state->audio_discontinue_step = hctx->audio_discontinue_step;
+    
+    state->pts_video_first = hctx->pts_video_first;
+    state->pts_video_last = hctx->pts_video_last;
+    state->pts_video_current = hctx->pts_video_current;
+    state->video_discontinue_point = hctx->video_discontinue_point;
+    state->video_discontinue_flag = hctx->video_discontinue_flag;
+    state->video_discontinue_step = hctx->video_discontinue_step;
+
     return 0;
 }
 
