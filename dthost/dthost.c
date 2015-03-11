@@ -266,33 +266,37 @@ int host_start (dthost_context_t * hctx)
     }
 
     dt_info(TAG, "first apts:%lld first vpts:%lld \n", first_apts, first_vpts);
-    hctx->pts_audio_first = hctx->pts_audio_last = hctx->pts_audio_current = first_apts;
-    hctx->pts_video_first = hctx->pts_video_last = hctx->pts_video_current = first_vpts;
+    if(has_audio)
+        hctx->pts_audio_first = hctx->pts_audio_last = hctx->pts_audio_current = first_apts;
+    if(has_video)
+        hctx->pts_video_first = hctx->pts_video_last = hctx->pts_video_current = first_vpts;
 
-    int drop_flag = 0;
-    int av_diff_ms = abs (hctx->pts_video_first - hctx->pts_audio_first) / DT_PTS_FREQ_MS;
-    if (av_diff_ms > AVSYNC_DROP_THRESHOLD)
+
+    if (host_sync_enable (hctx))
     {
-        dt_info (TAG, "FIRST AV DIFF EXCEED %d MS,DO NOT DROP\n",AVSYNC_DROP_THRESHOLD);
-        hctx->sync_mode = DT_SYNC_VIDEO_MASTER;
-    }
-    else
-    {
-        drop_flag = (av_diff_ms > 100 && av_diff_ms < AVSYNC_DROP_THRESHOLD);
-        if (!host_sync_enable (hctx))
-            drop_flag = 0;
-        
-        //env set dropable
-        int drop_enable = dtp_setting.host_drop;
-        dt_info(TAG,"HOST.drop.enable = %d \n",drop_enable);
-        if(drop_enable == 0)
-                drop_flag = 0;
-        if (drop_flag)
+        int drop_flag = 0;
+        int av_diff_ms = abs (hctx->pts_video_first - hctx->pts_audio_first) / DT_PTS_FREQ_MS;
+        if (av_diff_ms > AVSYNC_DROP_THRESHOLD)
         {
-            if (hctx->pts_audio_first > hctx->pts_video_first)
-                dtvideo_drop (hctx->video_priv, hctx->pts_audio_first);
-            else
-                dtaudio_drop (hctx->audio_priv, hctx->pts_video_first);
+            dt_info (TAG, "FIRST AV DIFF EXCEED %d MS,DO NOT DROP\n",AVSYNC_DROP_THRESHOLD);
+            hctx->sync_mode = DT_SYNC_VIDEO_MASTER;
+        }
+        else
+        {
+            drop_flag = (av_diff_ms > 100 && av_diff_ms < AVSYNC_DROP_THRESHOLD);
+        
+            //env set dropable
+            int drop_enable = dtp_setting.host_drop;
+            dt_info(TAG,"HOST.drop.enable = %d \n",drop_enable);
+            if(drop_enable == 0)
+                drop_flag = 0;
+            if (drop_flag)
+            {
+                if (hctx->pts_audio_first > hctx->pts_video_first)
+                    dtvideo_drop (hctx->video_priv, hctx->pts_audio_first);
+                else
+                    dtaudio_drop (hctx->audio_priv, hctx->pts_video_first);
+            }
         }
     }
     hctx->sys_time_first = (has_video)?hctx->pts_video_current:hctx->pts_audio_current;
@@ -423,7 +427,7 @@ int host_init (dthost_context_t * hctx)
         hctx->av_sync = DT_SYNC_AUDIO_MASTER;
     else
         hctx->av_sync = DT_SYNC_VIDEO_MASTER;
-    hctx->sync_enable = host_para->sync_enable;
+    hctx->sync_enable = (host_para->has_audio && host_para->has_video) && host_para->sync_enable;
     hctx->av_diff = 0;
 
     hctx->sys_time_start =
