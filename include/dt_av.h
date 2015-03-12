@@ -19,8 +19,7 @@
 // =================================================
 // MEDIA
 // Equal to ffmpeg
-typedef enum DT_AVMediaType
-{
+typedef enum DT_AVMediaType {
     DT_TYPE_UNKNOWN = -1,
     DT_TYPE_VIDEO,
     DT_TYPE_AUDIO,
@@ -30,8 +29,7 @@ typedef enum DT_AVMediaType
     DT_TYPE_NB
 } dt_media_type_t;
 
-typedef enum
-{
+typedef enum {
     DT_MEDIA_FORMAT_INVALID = -1,
     DT_MEDIA_FORMAT_MPEGTS,
     DT_MEDIA_FORMAT_MPEGPS,
@@ -59,10 +57,9 @@ typedef enum
 } dtmedia_format_t;
 
 // =================================================
-// STRUCTURE 
+// STRUCTURE
 // original packet
-typedef struct dt_av_pkt
-{
+typedef struct dt_av_pkt {
     uint8_t *data;
     int size;
     int64_t pts;
@@ -72,8 +69,7 @@ typedef struct dt_av_pkt
     dt_media_type_t type;
 } dt_av_pkt_t;
 
-typedef struct
-{
+typedef struct {
     // Equal to ffmpeg
     uint8_t *data[8];
     int linesize[8];
@@ -93,21 +89,19 @@ typedef struct
 
 // =================================================
 // VIDEO
-typedef enum
-{
+typedef enum {
     DT_VIDEO_FORMAT_INVALID = -1,
     DT_VIDEO_FORMAT_H264,
     DT_VIDEO_FORMAT_UNKOWN,
 } dtvideo_format_t;
 
-typedef enum{
+typedef enum {
     DTAV_FLAG_NONE = 0x0,
     DTAV_FLAG_DISABLE_HW_CODEC = 0x1,
-}dtvideo_flag_t;
+} dtvideo_flag_t;
 
 //From ffmpeg
-typedef enum DT_AVPixelFormat
-{
+typedef enum DT_AVPixelFormat {
     DTAV_PIX_FMT_NONE = -1,
     DTAV_PIX_FMT_YUV420P,       ///< planar YUV 4:2:0, 12bpp, (1 Cr & Cb sample per 2x2 Y samples)
     DTAV_PIX_FMT_YUYV422,       ///< packed YUV 4:2:2, 16bpp, Y0 Cb Y1 Cr
@@ -217,11 +211,11 @@ typedef enum DT_AVPixelFormat
     DTAV_PIX_FMT_GBRP16BE,      ///< planar GBR 4:4:4 48bpp, big-endian
     DTAV_PIX_FMT_GBRP16LE,      ///< planar GBR 4:4:4 48bpp, little-endian
 
- /**
-     * duplicated pixel formats for compatibility with libav.
-     * FFmpeg supports these formats since May 8 2012 and Jan 28 2012 (commits f9ca1ac7 and 143a5c55)
-     * Libav added them Oct 12 2012 with incompatible values (commit 6d5600e85)
-     */
+    /**
+        * duplicated pixel formats for compatibility with libav.
+        * FFmpeg supports these formats since May 8 2012 and Jan 28 2012 (commits f9ca1ac7 and 143a5c55)
+        * Libav added them Oct 12 2012 with incompatible values (commit 6d5600e85)
+        */
     DTAV_PIX_FMT_YUVA422P_LIBAV, ///< planar YUV 4:2:2 24bpp, (1 Cr & Cb sample per 2x1 Y & A samples)
     DTAV_PIX_FMT_YUVA444P_LIBAV, ///< planar YUV 4:4:4 32bpp, (1 Cr & Cb sample per 1x1 Y & A samples)
 
@@ -279,7 +273,7 @@ typedef enum DT_AVPixelFormat
 
 } dt_pixfmt_t;
 
-enum{
+enum {
     DT_SCREEN_MODE_NORMAL,
     DT_SCREEN_MODE_FULL,
     DT_SCREEN_MODE_4_3,
@@ -288,8 +282,7 @@ enum{
 
 // =================================================
 // AUDIO
-typedef enum
-{
+typedef enum {
     DT_AUDIO_FORMAT_INVALID = -1,
     DT_AUDIO_FORMAT_MP2,
     DT_AUDIO_FORMAT_MP3,
@@ -298,8 +291,7 @@ typedef enum
     DT_AUDIO_FORMAT_UNKOWN,
 } dtaudio_format_t;
 
-typedef enum _AO_ID_
-{
+typedef enum _AO_ID_ {
     AO_ID_EXAMPLE = -1,
     AO_ID_EX,                   // ex ao set to 0 default
     AO_ID_ALSA,                 // 0 default
@@ -313,8 +305,7 @@ typedef enum _AO_ID_
 
 // =================================================
 // SUBTITLE
-typedef enum
-{
+typedef enum {
     DT_SUB_FORMAT_INVALID = -1,
     DT_SUB_FORMAT_DVD_SUB,
     DT_SUB_FORMAT_DVB_SUB,
@@ -337,7 +328,7 @@ typedef enum dtav_sub_type {
      * authoritative. pict and text fields may contain approximations.
      */
     DT_SUBTITLE_ASS,
-}dtav_sub_type_t;
+} dtav_sub_type_t;
 
 
 typedef struct dt_sub_Rect {
@@ -365,7 +356,7 @@ typedef struct dt_sub_Rect {
     char *ass;
 
     int flags;
-}dtav_sub_rect_t;
+} dtav_sub_rect_t;
 
 typedef struct dtav_subtitle {
     uint16_t format; /* 0 = graphics */
@@ -374,7 +365,7 @@ typedef struct dtav_subtitle {
     unsigned num_rects;
     dtav_sub_rect_t **rects;
     int64_t pts;    ///< Same as packet pts, in AV_TIME_BASE
-}dtav_sub_frame_t;
+} dtav_sub_frame_t;
 
 
 dt_av_frame_t *dtav_new_frame();

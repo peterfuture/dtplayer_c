@@ -3,8 +3,7 @@
 
 #include "dt_media_info.h"
 
-typedef enum
-{
+typedef enum {
     PLAYER_STATUS_INVALID = -1,
     PLAYER_STATUS_IDLE,
 
@@ -28,8 +27,7 @@ typedef enum
     PLAYER_STATUS_EXIT,
 } player_status_t;
 
-typedef struct
-{
+typedef struct {
     /* player state */
     player_status_t cur_status;
     player_status_t last_status;
@@ -41,8 +39,7 @@ typedef struct
     int64_t start_time;
 } player_state_t;
 
-typedef struct dtplayer_para
-{
+typedef struct dtplayer_para {
     char *file_name;
     int video_index;
     int audio_index;
@@ -59,9 +56,9 @@ typedef struct dtplayer_para
 
     int width;
     int height;
-    
+
     void *cookie;
-    int (*update_cb) (void *cookie, player_state_t * sta);
+    int (*update_cb)(void *cookie, player_state_t * sta);
 } dtplayer_para_t;
 
 #endif
