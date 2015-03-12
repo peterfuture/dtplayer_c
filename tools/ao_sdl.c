@@ -9,41 +9,41 @@
 
 const char *ao_sdl_name = "SDL AO";
 
-typedef struct{
+typedef struct {
     SDL_AudioSpec wanted;     // config audio
     SDL_AudioSpec spec;     // config audio
     dt_buffer_t dbt;
-}sdl_ao_ctx_t;
+} sdl_ao_ctx_t;
 
-static void sdl_cb(void *userdata,uint8_t *buf,int size)
+static void sdl_cb(void *userdata, uint8_t *buf, int size)
 {
     dtaudio_output_t *ao = (dtaudio_output_t *)userdata;
     sdl_ao_ctx_t *ctx = (sdl_ao_ctx_t *)ao->ao_priv;
-    if(buf_level(&ctx->dbt) < size)
+    if (buf_level(&ctx->dbt) < size) {
         return;
-    buf_get(&ctx->dbt,buf,size);
+    }
+    buf_get(&ctx->dbt, buf, size);
     return;
 }
 
-static int ao_sdl_init (dtaudio_output_t *aout, dtaudio_para_t *ppara)
+static int ao_sdl_init(dtaudio_output_t *aout, dtaudio_para_t *ppara)
 {
     int ret = 0;
     sdl_ao_ctx_t *ctx = malloc(sizeof(*ctx));
-    if(!ctx)
-    {
-        dt_info(TAG,"SDL CTX MALLOC FAILED \n");
+    if (!ctx) {
+        dt_info(TAG, "SDL CTX MALLOC FAILED \n");
         return -1;
     }
-    memset(ctx,0,sizeof(*ctx));
-    if(buf_init(&ctx->dbt,ppara->dst_samplerate * 4 / 10) < 0) // 100ms
-    {
+    memset(ctx, 0, sizeof(*ctx));
+    if (buf_init(&ctx->dbt, ppara->dst_samplerate * 4 / 10) < 0) { // 100ms
         ret = -1;
         goto FAIL;
     }
     aout->ao_priv = ctx;
 
-    if (!SDL_WasInit(SDL_INIT_AUDIO))
+    if (!SDL_WasInit(SDL_INIT_AUDIO)) {
         SDL_Init(SDL_INIT_AUDIO);
+    }
 
     SDL_AudioSpec *pwanted = &ctx->wanted;
     SDL_AudioSpec *spec = &ctx->spec;
@@ -55,9 +55,8 @@ static int ao_sdl_init (dtaudio_output_t *aout, dtaudio_para_t *ppara)
     pwanted->samples = SDL_AUDIO_BUFFER_SIZE;// samples every time
     pwanted->callback = sdl_cb;              // callback
     pwanted->userdata = aout;
-    
-    if (SDL_OpenAudio(pwanted, spec)<0)      // open audio device
-    {
+
+    if (SDL_OpenAudio(pwanted, spec) < 0) {  // open audio device
         printf("can't open audio.\n");
         ret = -1;
         goto FAIL;
@@ -73,7 +72,7 @@ static int ao_sdl_init (dtaudio_output_t *aout, dtaudio_para_t *ppara)
     }
 
     SDL_PauseAudio(0);
-    dt_info(TAG,"SDL AO Init OK\n"); 
+    dt_info(TAG, "SDL AO Init OK\n");
     return 0;
 FAIL:
     buf_release(&ctx->dbt);
@@ -82,19 +81,19 @@ FAIL:
     return ret;
 }
 
-static int ao_sdl_play (dtaudio_output_t *ao, uint8_t * buf, int size)
+static int ao_sdl_play(dtaudio_output_t *ao, uint8_t * buf, int size)
 {
     sdl_ao_ctx_t *ctx = (sdl_ao_ctx_t *)ao->ao_priv;
-    return buf_put(&ctx->dbt,buf,size);
+    return buf_put(&ctx->dbt, buf, size);
 }
 
-static int ao_sdl_pause (dtaudio_output_t *ao)
+static int ao_sdl_pause(dtaudio_output_t *ao)
 {
     SDL_PauseAudio(1);
     return 0;
 }
 
-static int ao_sdl_resume (dtaudio_output_t *ao)
+static int ao_sdl_resume(dtaudio_output_t *ao)
 {
     SDL_PauseAudio(0);
     return 0;
@@ -106,10 +105,10 @@ static int ao_sdl_level(dtaudio_output_t *ao)
     return ctx->dbt.level;
 }
 
-static int64_t ao_sdl_get_latency (dtaudio_output_t *ao)
+static int64_t ao_sdl_get_latency(dtaudio_output_t *ao)
 {
     sdl_ao_ctx_t *ctx = (sdl_ao_ctx_t *)ao->ao_priv;
-    int level = buf_level(&ctx->dbt) + ctx->spec.size*2;
+    int level = buf_level(&ctx->dbt) + ctx->spec.size * 2;
     unsigned int sample_num;
     uint64_t latency;
     float pts_ratio = 0.0;
@@ -119,10 +118,9 @@ static int64_t ao_sdl_get_latency (dtaudio_output_t *ao)
     return latency;
 }
 
-static int ao_sdl_stop (dtaudio_output_t *ao)
+static int ao_sdl_stop(dtaudio_output_t *ao)
 {
-    if(ao->ao_priv)
-    {
+    if (ao->ao_priv) {
         sdl_ao_ctx_t *ctx = (sdl_ao_ctx_t *)ao->ao_priv;
         SDL_CloseAudio();
         buf_release(&ctx->dbt);
@@ -135,19 +133,21 @@ static int ao_sdl_stop (dtaudio_output_t *ao)
 
 static int ao_sdl_get_volume(ao_wrapper_t *ao)
 {
-    dt_info(TAG,"getvolume: \n");
+    dt_info(TAG, "getvolume: \n");
     return 0;
 }
 
 static int ao_sdl_set_volume(ao_wrapper_t *ao, int value)
 {
-    dt_info(TAG,"setvolume: %d \n", value);
+    dt_info(TAG, "setvolume: %d \n", value);
     return 0;
 }
 
 void ao_sdl_setup(ao_wrapper_t *wrapper)
 {
-    if(wrapper == NULL) return;
+    if (wrapper == NULL) {
+        return;
+    }
     wrapper->id = AO_ID_SDL;
     wrapper->name = ao_sdl_name;
     wrapper->ao_init = ao_sdl_init;

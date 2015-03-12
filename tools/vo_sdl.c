@@ -8,8 +8,7 @@
 
 #define TAG "VO-SDL"
 
-typedef struct
-{
+typedef struct {
     SDL_Surface *screen;
     SDL_Overlay *overlay;
     dt_lock_t vo_mutex;
@@ -18,7 +17,7 @@ typedef struct
 
     ui_ctx_t *ui_ctx;
     ply_ctx_t *ply_ctx;
-}sdl_ctx_t;
+} sdl_ctx_t;
 
 static sdl_ctx_t sdl_ctx;
 
@@ -29,14 +28,13 @@ int sdl_init(ply_ctx_t *ply_ctx, ui_ctx_t *ui_ctx)
     memset(&sdl_ctx, 0, sizeof(sdl_ctx_t));
     sdl_ctx.ui_ctx = ui_ctx;
     sdl_ctx.ply_ctx = ply_ctx;
- 
-    putenv ("SDL_VIDEO_WINDOW_POS=center");
-    putenv ("SDL_VIDEO_CENTERED=1");
+
+    putenv("SDL_VIDEO_WINDOW_POS=center");
+    putenv("SDL_VIDEO_CENTERED=1");
 
     flags = SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER;
-    if(SDL_Init(flags))
-    {
-        dt_error ("initialize SDL: %s\n", SDL_GetError ());
+    if (SDL_Init(flags)) {
+        dt_error("initialize SDL: %s\n", SDL_GetError());
         return -1;
     }
 
@@ -58,7 +56,7 @@ int sdl_init(ply_ctx_t *ply_ctx, ui_ctx_t *ui_ctx)
     //SDL_WM_SetIcon(SDL_LoadBMP("icon.bmp"), NULL);
     sdl_ctx.screen = SDL_SetVideoMode(ui_ctx->cur_width, ui_ctx->cur_height, 0, flags);
     SDL_WM_SetCaption(sdl_ctx.ply_ctx->file_name, sdl_ctx.ply_ctx->file_name);
-    
+
     dt_lock_init(&sdl_ctx.vo_mutex, NULL);
     return 0;
 }
@@ -66,7 +64,7 @@ int sdl_init(ply_ctx_t *ply_ctx, ui_ctx_t *ui_ctx)
 int sdl_window_resize(int w, int h)
 {
     sdl_ctx_t *ctx = &sdl_ctx;
-    dt_lock (&ctx->vo_mutex);
+    dt_lock(&ctx->vo_mutex);
 
     ctx->ui_ctx->cur_width = w;
     ctx->ui_ctx->cur_height = h;
@@ -74,20 +72,21 @@ int sdl_window_resize(int w, int h)
     sdl_ctx.vf.para.d_width = w;
     sdl_ctx.vf.para.d_height = h;
     video_filter_update(&sdl_ctx.vf);
-    
+
     SDL_FreeYUVOverlay(sdl_ctx.overlay);
     dt_info(TAG, "W:%d H:%d \n", w, h);
     int flags = SDL_HWSURFACE | SDL_ASYNCBLIT | SDL_HWACCEL;
-    if(sdl_ctx.ui_ctx->max_width == w)
+    if (sdl_ctx.ui_ctx->max_width == w) {
         flags |= SDL_FULLSCREEN;
-    else
+    } else {
         flags |= SDL_RESIZABLE;
-    
+    }
+
     sdl_ctx.screen = SDL_SetVideoMode(w, h, 0, flags);
     SDL_WM_SetCaption(sdl_ctx.ply_ctx->file_name, sdl_ctx.ply_ctx->file_name);
     sdl_ctx.overlay = SDL_CreateYUVOverlay(w, h, SDL_YV12_OVERLAY, sdl_ctx.screen);
-    
-    dt_unlock (&ctx->vo_mutex);
+
+    dt_unlock(&ctx->vo_mutex);
     return 0;
 }
 
@@ -100,7 +99,7 @@ static int vo_sdl_init(dtvideo_output_t * vo)
 {
     int cur_width = sdl_ctx.ui_ctx->cur_width;
     int cur_height = sdl_ctx.ui_ctx->cur_height;
-    
+
     sdl_ctx.overlay = SDL_CreateYUVOverlay(cur_width, cur_height, SDL_YV12_OVERLAY, sdl_ctx.screen);
 
     //Init vf
@@ -109,8 +108,8 @@ static int vo_sdl_init(dtvideo_output_t * vo)
     sdl_ctx.vf.para.s_pixfmt = sdl_ctx.vf.para.d_pixfmt;
     sdl_ctx.vf.para.d_width = sdl_ctx.ui_ctx->cur_width;
     sdl_ctx.vf.para.d_height = sdl_ctx.ui_ctx->cur_height;
-    video_filter_init(&sdl_ctx.vf); 
- 
+    video_filter_init(&sdl_ctx.vf);
+
     dt_lock_init(&sdl_ctx.vo_mutex, NULL);
 
     dt_info(TAG, "w:%d h:%d planes:%d \n", sdl_ctx.overlay->w, sdl_ctx.overlay->h, sdl_ctx.overlay->planes);
@@ -138,7 +137,7 @@ static int vo_sdl_render(dtvideo_output_t * vo, dt_av_frame_t * frame)
     dt_lock(&sdl_ctx.vo_mutex);
 
     video_filter_process(&sdl_ctx.vf, frame);
-    
+
     SDL_Rect rect;
     SDL_LockYUVOverlay(sdl_ctx.overlay);
 
@@ -158,7 +157,7 @@ static int vo_sdl_render(dtvideo_output_t * vo, dt_av_frame_t * frame)
     rect.h = cur_height;
     SDL_DisplayYUVOverlay(sdl_ctx.overlay, &rect);
 
-    dt_unlock (&sdl_ctx.vo_mutex);
+    dt_unlock(&sdl_ctx.vo_mutex);
     return 0;
 }
 
@@ -166,7 +165,9 @@ const char *vo_sdl_name = "SDL VO";
 
 void vo_sdl_setup(vo_wrapper_t *wrapper)
 {
-    if(!wrapper) return;
+    if (!wrapper) {
+        return;
+    }
     wrapper->id = VO_ID_SDL;
     wrapper->name = vo_sdl_name;
     wrapper->vo_init = vo_sdl_init;

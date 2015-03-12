@@ -3,7 +3,7 @@
 
 #include "dt_player.h"
 
-typedef enum{
+typedef enum {
     EVENT_INVALID = -1,
     EVENT_NONE,
     EVENT_PAUSE,
@@ -11,16 +11,16 @@ typedef enum{
     EVENT_STOP,
     EVENT_SEEK,
     EVENT_RESIZE,
-    
+
     EVENT_VOLUME_ADD,
 
     //AE
     EVENT_AE,
 
     EVENT_MAX      = 0x800
-}player_event_t;
+} player_event_t;
 
-typedef struct ui_ctx{
+typedef struct ui_ctx {
     int full_screen_flag;
 
     int max_width;
@@ -35,9 +35,9 @@ typedef struct ui_ctx{
     int cur_height;
 
     void *context;
-}ui_ctx_t;
+} ui_ctx_t;
 
-player_event_t get_event (args_t *arg,ply_ctx_t *ctx);
+player_event_t get_event(args_t *arg, ply_ctx_t *ctx);
 int ui_init(ply_ctx_t *ply_ctx, ui_ctx_t *ui_ctx);
 int ui_get_orig_size(int *w, int *h);
 int ui_get_max_size(int *w, int *h);

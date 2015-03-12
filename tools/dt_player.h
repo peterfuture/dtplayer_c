@@ -5,19 +5,17 @@
 #include "ao_wrapper.h"
 #include "vo_wrapper.h"
 
-typedef struct
-{
+typedef struct {
     int arg1;
     int arg2;
-}args_t;
+} args_t;
 
 struct ui_ctx;
 
-typedef struct ply_ctx
-{
+typedef struct ply_ctx {
     char *file_name;
     void * handle; // player handle
-    
+
     int64_t cur_time;
     int64_t cur_time_ms;
     int64_t duration;
@@ -31,6 +29,6 @@ typedef struct ply_ctx
     int exit_flag;
 
     struct ui_ctx *ui_ctx;
-}ply_ctx_t;
+} ply_ctx_t;
 
 #endif
