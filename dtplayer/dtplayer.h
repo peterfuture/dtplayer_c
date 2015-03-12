@@ -13,15 +13,13 @@
 #include <string.h>
 #include <stdio.h>
 
-typedef struct
-{
+typedef struct {
     int status;                 // 0 start 1 pause 2 quit
     int flag;
     pthread_t tid;
 } io_loop_t;
 
-typedef struct
-{
+typedef struct {
     /*stream info */
     int64_t start_time;
     int64_t first_time;
@@ -41,8 +39,7 @@ typedef struct
 
 } player_ctrl_t;
 
-typedef struct dtplayer_context
-{
+typedef struct dtplayer_context {
     char *file_name;
     dtplayer_para_t player_para;
 
@@ -54,7 +51,7 @@ typedef struct dtplayer_context
     void *host_priv;
 
     player_state_t state;
-    int (*update_cb) (void *cookie, player_state_t * state); // update player info to uplevel
+    int (*update_cb)(void *cookie, player_state_t * state);  // update player info to uplevel
 
     io_loop_t io_loop;
     pthread_t event_loop_id;

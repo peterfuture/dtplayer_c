@@ -2,25 +2,24 @@
 
 #define TAG "PLAYER-UPDATE"
 
-static int calc_cur_time (dtplayer_context_t * dtp_ctx, host_state_t * host_state)
+static int calc_cur_time(dtplayer_context_t * dtp_ctx, host_state_t * host_state)
 {
     player_ctrl_t *ctrl_info = &dtp_ctx->ctrl_info;
     player_state_t *play_stat = &dtp_ctx->state;
 
-    if (ctrl_info->start_time > 0)
-    {
+    if (ctrl_info->start_time > 0) {
         play_stat->start_time = ctrl_info->start_time;
-        dt_info (TAG, "START TIME:%lld \n", ctrl_info->start_time);
+        dt_info(TAG, "START TIME:%lld \n", ctrl_info->start_time);
     }
 
-    if (ctrl_info->first_time == -1 && host_state->sys_time_current != -1)
-    {
+    if (ctrl_info->first_time == -1 && host_state->sys_time_current != -1) {
         ctrl_info->first_time = host_state->sys_time_current;
-        dt_info (TAG, "SET FIRST TIME:%lld \n", ctrl_info->first_time);
+        dt_info(TAG, "SET FIRST TIME:%lld \n", ctrl_info->first_time);
     }
 
-    if(play_stat->full_time == 0)
+    if (play_stat->full_time == 0) {
         play_stat->full_time = dtp_ctx->media_info->duration;
+    }
 
     int64_t sys_time = (host_state->sys_time_current > ctrl_info->first_time) ? (host_state->sys_time_current - ctrl_info->first_time) : host_state->sys_time_current;
     play_stat->cur_time = sys_time / 90000;
@@ -31,16 +30,17 @@ static int calc_cur_time (dtplayer_context_t * dtp_ctx, host_state_t * host_stat
 /*
  * handle callback, update status and cur_time to uplevel
  * */
-int player_handle_cb (dtplayer_context_t * dtp_ctx)
+int player_handle_cb(dtplayer_context_t * dtp_ctx)
 {
     player_state_t *state = &dtp_ctx->state;
-    if (dtp_ctx->update_cb)
+    if (dtp_ctx->update_cb) {
         dtp_ctx->update_cb(dtp_ctx->cookie, state);
+    }
     return 0;
 
 }
 
-void player_update_state (dtplayer_context_t * dtp_ctx)
+void player_update_state(dtplayer_context_t * dtp_ctx)
 {
     player_state_t *play_stat = &dtp_ctx->state;
     host_state_t host_state;

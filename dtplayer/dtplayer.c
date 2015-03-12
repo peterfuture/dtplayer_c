@@ -18,8 +18,7 @@ static void *event_handle_loop(dtplayer_context_t * dtp_ctx);
 static int register_ok = 0;
 void player_register_all()
 {
-    if(!register_ok)
-    {
+    if (!register_ok) {
         stream_register_all();
         demuxer_register_all();
         audio_register_all();
@@ -31,8 +30,7 @@ void player_register_all()
 
 void player_remove_all()
 {
-    if(register_ok)
-    {
+    if (register_ok) {
         stream_remove_all();
         demuxer_remove_all();
         audio_remove_all();
@@ -77,10 +75,9 @@ int player_init(dtplayer_context_t * dtp_ctx)
     int ret = 0;
     dtplayer_para_t *para = &dtp_ctx->player_para;
     player_ctrl_t *ctrl_info = &dtp_ctx->ctrl_info;
-    
-    if(get_player_status(dtp_ctx)>= PLAYER_STATUS_INIT_ENTER)
-    {
-        dt_error(TAG,"player already inited \n");
+
+    if (get_player_status(dtp_ctx) >= PLAYER_STATUS_INIT_ENTER) {
+        dt_error(TAG, "player already inited \n");
         goto ERR0;
     }
 
@@ -94,15 +91,14 @@ int player_init(dtplayer_context_t * dtp_ctx)
     dtdemuxer_para_t demux_para;
     demux_para.file_name = dtp_ctx->file_name;
     ret = dtdemuxer_open(&dtp_ctx->demuxer_priv, &demux_para, dtp_ctx);
-    if(ret < 0)
-    {
+    if (ret < 0) {
         ret = -1;
         goto ERR0;
     }
     dtp_ctx->media_info = dtdemuxer_get_media_info(dtp_ctx->demuxer_priv);
 
-    /* setup player ctrl info 
-     * 
+    /* setup player ctrl info
+     *
      * have two ways to contrl, priority as follows
      * para
      * sys_set.ini
@@ -113,48 +109,62 @@ int player_init(dtplayer_context_t * dtp_ctx)
     ctrl_info->has_video = dtp_ctx->media_info->has_video;
     ctrl_info->has_sub = dtp_ctx->media_info->has_sub;
     ctrl_info->sync_enable = dtp_setting.player_sync_enable;
-    if((ctrl_info->has_audio && ctrl_info->has_video) == 0)
+    if ((ctrl_info->has_audio && ctrl_info->has_video) == 0) {
         ctrl_info->sync_enable = 0;
+    }
     dt_info(TAG, "initial setting, has audio:%d has video:%d has sub:%d sync_enable:%d\n", ctrl_info->has_audio, ctrl_info->has_video, ctrl_info->has_sub, ctrl_info->sync_enable);
 
-    if(dtp_setting.player_noaudio)
+    if (dtp_setting.player_noaudio) {
         ctrl_info->has_audio = 0;
-    if(dtp_setting.player_novideo)
+    }
+    if (dtp_setting.player_novideo) {
         ctrl_info->has_video = 0;
-    if(dtp_setting.player_nosub)
+    }
+    if (dtp_setting.player_nosub) {
         ctrl_info->has_sub = 0;
+    }
     dt_info(TAG, "after ini setting, has audio:%d has video:%d has sub:%d \n", ctrl_info->has_audio, ctrl_info->has_video, ctrl_info->has_sub);
 
     //then update contrl info with para
-    if(para->disable_avsync == 1)
+    if (para->disable_avsync == 1) {
         ctrl_info->sync_enable = 0;
-    if(para->disable_audio == 1)
+    }
+    if (para->disable_audio == 1) {
         ctrl_info->has_audio = 0;
-    if(para->disable_video == 1)
+    }
+    if (para->disable_video == 1) {
         ctrl_info->has_video = 0;
-    if(para->disable_sub == 1)
+    }
+    if (para->disable_sub == 1) {
         ctrl_info->has_sub = 0;
+    }
 
-    ctrl_info->disable_hw_acodec = para->disable_hw_acodec; 
-    ctrl_info->disable_hw_vcodec = para->disable_hw_vcodec; 
-    ctrl_info->disable_hw_scodec = para->disable_hw_scodec; 
+    ctrl_info->disable_hw_acodec = para->disable_hw_acodec;
+    ctrl_info->disable_hw_vcodec = para->disable_hw_vcodec;
+    ctrl_info->disable_hw_scodec = para->disable_hw_scodec;
 
     // Update cur media index
-    if(dtp_setting.audio_index != -1)
+    if (dtp_setting.audio_index != -1) {
         dtp_ctx->media_info->cur_ast_index = dtp_setting.audio_index;
-    if(dtp_setting.video_index != -1)
+    }
+    if (dtp_setting.video_index != -1) {
         dtp_ctx->media_info->cur_vst_index = dtp_setting.video_index;
-    if(dtp_setting.sub_index != -1)
+    }
+    if (dtp_setting.sub_index != -1) {
         dtp_ctx->media_info->cur_sst_index = dtp_setting.sub_index;
-    if(para->audio_index != -1)
+    }
+    if (para->audio_index != -1) {
         dtp_ctx->media_info->cur_ast_index = para->audio_index;
-    if(para->video_index != -1)
+    }
+    if (para->video_index != -1) {
         dtp_ctx->media_info->cur_vst_index = para->video_index;
-    if(para->sub_index != -1)
+    }
+    if (para->sub_index != -1) {
         dtp_ctx->media_info->cur_sst_index = para->sub_index;
-    dt_info(TAG, "ast_idx:%d vst_idx:%d sst_idx:%d \n", 
-            dtp_ctx->media_info->cur_ast_index, 
-            dtp_ctx->media_info->cur_vst_index, 
+    }
+    dt_info(TAG, "ast_idx:%d vst_idx:%d sst_idx:%d \n",
+            dtp_ctx->media_info->cur_ast_index,
+            dtp_ctx->media_info->cur_vst_index,
             dtp_ctx->media_info->cur_sst_index);
 
     //Fixme cur index valid check ...
@@ -166,8 +176,7 @@ int player_init(dtplayer_context_t * dtp_ctx)
     ctrl_info->height = para->height;
 
     //invalid check
-    if(!ctrl_info->has_audio && !ctrl_info->has_video)
-    {
+    if (!ctrl_info->has_audio && !ctrl_info->has_video) {
         dt_info(TAG, "HAVE NO A-V STREAM \n");
         goto ERR0;
     }
@@ -192,27 +201,24 @@ ERR0:
 int player_set_video_size(dtplayer_context_t * dtp_ctx, int width, int height)
 {
     player_ctrl_t *pctrl = &dtp_ctx->ctrl_info;
-    dt_info(TAG,"[%s:%d] width:%d height:%d\n",__FUNCTION__,__LINE__,width,height);
-   
-    if(pctrl->width == -1)
-    {
+    dt_info(TAG, "[%s:%d] width:%d height:%d\n", __FUNCTION__, __LINE__, width, height);
+
+    if (pctrl->width == -1) {
         pctrl->width = width;
         pctrl->height = height;
     }
-     
-    if(pctrl->width == width && pctrl->height == height)
-    {
+
+    if (pctrl->width == width && pctrl->height == height) {
         return -1;
     }
-    
+
     int ret = player_host_resize(dtp_ctx, width, height);
-    if(ret == 0)
-    {
+    if (ret == 0) {
         pctrl->width = width;
         pctrl->height = height;
     }
-    
-    dt_info(TAG,"set dst width:%d height:%d \n",pctrl->width,pctrl->height);
+
+    dt_info(TAG, "set dst width:%d height:%d \n", pctrl->width, pctrl->height);
     return 0;
 }
 
@@ -220,10 +226,9 @@ int player_prepare(dtplayer_context_t *dtp_ctx)
 {
     int ret = 0;
     pthread_t tid;
-    
-    if(get_player_status(dtp_ctx)>= PLAYER_STATUS_PREPARE_START)
-    {
-        dt_error(TAG,"player already started \n");
+
+    if (get_player_status(dtp_ctx) >= PLAYER_STATUS_PREPARE_START) {
+        dt_error(TAG, "player already started \n");
         return 0;
     }
 
@@ -231,9 +236,8 @@ int player_prepare(dtplayer_context_t *dtp_ctx)
 
     /* init & start player server first */
     player_server_init(dtp_ctx);
-    ret = pthread_create(&tid, NULL,(void *)&event_handle_loop,(void *)dtp_ctx);
-    if(ret == -1)
-    {
+    ret = pthread_create(&tid, NULL, (void *)&event_handle_loop, (void *)dtp_ctx);
+    if (ret == -1) {
         dt_error(TAG "file:%s [%s:%d] player io thread start failed \n", __FILE__, __FUNCTION__, __LINE__);
         player_server_release(dtp_ctx);
         goto ERR3;
@@ -242,14 +246,12 @@ int player_prepare(dtplayer_context_t *dtp_ctx)
     dtp_ctx->event_loop_id = tid;
 
     ret = player_host_init(dtp_ctx);
-    if(ret < 0)
-    {
+    if (ret < 0) {
         dt_error(TAG, "[%s:%d] player_host_init failed!\n", __FUNCTION__, __LINE__);
         goto ERR3;
     }
     ret = start_io_thread(dtp_ctx);
-    if(ret == -1)
-    {
+    if (ret == -1) {
         dt_error(TAG "file:%s [%s:%d] player io thread start failed \n", __FILE__, __FUNCTION__, __LINE__);
         goto ERR2;
     }
@@ -268,18 +270,17 @@ ERR3:
 int player_start(dtplayer_context_t * dtp_ctx)
 {
     int ret;
-    
-    if(get_player_status(dtp_ctx) < PLAYER_STATUS_PREPARE_START)
-    {
+
+    if (get_player_status(dtp_ctx) < PLAYER_STATUS_PREPARE_START) {
         ret = player_prepare(dtp_ctx);
-        if(ret < 0)
+        if (ret < 0) {
             return ret;
+        }
     }
 
     set_player_status(dtp_ctx, PLAYER_STATUS_START);
     ret = player_host_start(dtp_ctx);
-    if(ret != 0)
-    {
+    if (ret != 0) {
         dt_error(TAG "file:%s [%s:%d] player host start failed \n", __FILE__, __FUNCTION__, __LINE__);
         set_player_status(dtp_ctx, PLAYER_STATUS_ERROR);
         goto ERR1;
@@ -301,11 +302,11 @@ ERR1:
 
 int player_pause(dtplayer_context_t * dtp_ctx)
 {
-    if(get_player_status(dtp_ctx) == PLAYER_STATUS_PAUSED)
+    if (get_player_status(dtp_ctx) == PLAYER_STATUS_PAUSED) {
         return player_resume(dtp_ctx);
+    }
 
-    if(player_host_pause(dtp_ctx) == -1)
-    {
+    if (player_host_pause(dtp_ctx) == -1) {
         dt_error(TAG, "PAUSE NOT HANDLED\n");
         return -1;
     }
@@ -316,10 +317,10 @@ int player_pause(dtplayer_context_t * dtp_ctx)
 
 int player_resume(dtplayer_context_t * dtp_ctx)
 {
-    if(get_player_status(dtp_ctx)!= PLAYER_STATUS_PAUSED)
+    if (get_player_status(dtp_ctx) != PLAYER_STATUS_PAUSED) {
         return -1;
-    if(player_host_resume(dtp_ctx) == -1)
-    {
+    }
+    if (player_host_resume(dtp_ctx) == -1) {
         dt_error(TAG, "RESUME NOT HANDLED\n");
         return -1;
     }
@@ -332,32 +333,36 @@ int player_resume(dtplayer_context_t * dtp_ctx)
 int player_seekto(dtplayer_context_t * dtp_ctx, int seek_time)
 {
     player_ctrl_t *ctrl_info = &dtp_ctx->ctrl_info;
-    
-    if(get_player_status(dtp_ctx)< PLAYER_STATUS_INIT_EXIT)
+
+    if (get_player_status(dtp_ctx) < PLAYER_STATUS_INIT_EXIT) {
         return -1;
-    
+    }
+
     player_state_t *play_stat = &dtp_ctx->state;
     play_stat->cur_time = seek_time;
-    play_stat->cur_time_ms = seek_time*1000;
- 
-    set_player_status(dtp_ctx, PLAYER_STATUS_SEEK_ENTER);
-    if(io_thread_running(dtp_ctx))
-        pause_io_thread(dtp_ctx);
-    player_host_pause(dtp_ctx);
-    
+    play_stat->cur_time_ms = seek_time * 1000;
 
-    int64_t start_time = (ctrl_info->first_time != -1)?ctrl_info->first_time : ctrl_info->start_time;
-    int64_t target_time = seek_time * 1000000 + start_time; 
+    set_player_status(dtp_ctx, PLAYER_STATUS_SEEK_ENTER);
+    if (io_thread_running(dtp_ctx)) {
+        pause_io_thread(dtp_ctx);
+    }
+    player_host_pause(dtp_ctx);
+
+
+    int64_t start_time = (ctrl_info->first_time != -1) ? ctrl_info->first_time : ctrl_info->start_time;
+    int64_t target_time = seek_time * 1000000 + start_time;
     int ret = dtdemuxer_seekto(dtp_ctx->demuxer_priv, target_time);
-    if(ret == -1)
+    if (ret == -1) {
         goto FAIL;
+    }
     player_host_stop(dtp_ctx);
     player_host_init(dtp_ctx);
-    if(io_thread_running(dtp_ctx))// maybe io thread already quit
+    if (io_thread_running(dtp_ctx)) { // maybe io thread already quit
         resume_io_thread(dtp_ctx);
-    else
+    } else {
         start_io_thread(dtp_ctx);
-    
+    }
+
     player_update_state(dtp_ctx);
     set_player_status(dtp_ctx, PLAYER_STATUS_SEEK_EXIT);
     player_handle_cb(dtp_ctx);
@@ -365,9 +370,8 @@ int player_seekto(dtplayer_context_t * dtp_ctx, int seek_time)
     //check if another seek event comming soom
     event_server_t *server = (event_server_t *)dtp_ctx->player_server;
     event_t *event = dt_peek_event(server);
-    if(event != NULL && event->type == PLAYER_EVENT_SEEK)
-    {
-        dt_info(TAG,"execute queue seekto event \n");
+    if (event != NULL && event->type == PLAYER_EVENT_SEEK) {
+        dt_info(TAG, "execute queue seekto event \n");
         return 0;
     }
     player_host_start(dtp_ctx);
@@ -376,12 +380,13 @@ int player_seekto(dtplayer_context_t * dtp_ctx, int seek_time)
     player_handle_cb(dtp_ctx);
 
     return 0;
-  FAIL:
+FAIL:
     //seek fail, continue running
-    dt_error(TAG,"[%s:%d] seek failed, continue playing \n",__FUNCTION__,__LINE__);
+    dt_error(TAG, "[%s:%d] seek failed, continue playing \n", __FUNCTION__, __LINE__);
     resume_io_thread(dtp_ctx);
-    if(io_thread_running(dtp_ctx))
+    if (io_thread_running(dtp_ctx)) {
         player_host_resume(dtp_ctx);
+    }
     set_player_status(dtp_ctx, PLAYER_STATUS_SEEK_EXIT);
     player_handle_cb(dtp_ctx);
     set_player_status(dtp_ctx, PLAYER_STATUS_RUNNING);
@@ -391,10 +396,11 @@ int player_seekto(dtplayer_context_t * dtp_ctx, int seek_time)
 
 int player_get_mediainfo(dtplayer_context_t * dtp_ctx, dt_media_info_t *info)
 {
-	if(!dtp_ctx->media_info)
-		return -1;
-	memcpy(info,dtp_ctx->media_info,sizeof(dt_media_info_t));
-	return 0;
+    if (!dtp_ctx->media_info) {
+        return -1;
+    }
+    memcpy(info, dtp_ctx->media_info, sizeof(dt_media_info_t));
+    return 0;
 }
 
 int player_stop(dtplayer_context_t * dtp_ctx)
@@ -406,8 +412,7 @@ int player_stop(dtplayer_context_t * dtp_ctx)
 
 static char * get_event_name(int cmd)
 {
-    switch(cmd)
-    {
+    switch (cmd) {
     case PLAYER_EVENT_START:
         return "player_event_start";
     case PLAYER_EVENT_PAUSE:
@@ -429,14 +434,12 @@ static int player_handle_event(dtplayer_context_t * dtp_ctx)
     event_server_t *server = (event_server_t *)dtp_ctx->player_server;
     event_t *event = dt_get_event(server);
 START:
-    if(!event)
-    {
+    if (!event) {
         dt_debug(TAG, "GET EVENT NULL \n");
         return 0;
     }
-    dt_info(TAG, "GET EVENT:%d %s\n", event->type,get_event_name(event->type));
-    switch(event->type)
-    {
+    dt_info(TAG, "GET EVENT:%d %s\n", event->type, get_event_name(event->type));
+    switch (event->type) {
     case PLAYER_EVENT_START:
         player_start(dtp_ctx);
         break;
@@ -455,16 +458,14 @@ START:
     default:
         break;
     }
-    if(event)
-    {
+    if (event) {
         free(event);
         event = NULL;
     }
 
     //check if still have event
     event = dt_peek_event(server);
-    if(event)
-    {
+    if (event) {
         event = dt_get_event(server);
         goto START;
     }
@@ -473,24 +474,28 @@ START:
 
 static void *event_handle_loop(dtplayer_context_t * dtp_ctx)
 {
-    while(1)
-    {
+    while (1) {
         player_handle_event(dtp_ctx);
-        if(get_player_status(dtp_ctx) == PLAYER_STATUS_STOP)
+        if (get_player_status(dtp_ctx) == PLAYER_STATUS_STOP) {
             goto QUIT;
+        }
         usleep(300 * 1000);    // 1/3s update
-        if(get_player_status(dtp_ctx)!= PLAYER_STATUS_RUNNING)
+        if (get_player_status(dtp_ctx) != PLAYER_STATUS_RUNNING) {
             continue;
-        if(get_player_status(dtp_ctx) == PLAYER_STATUS_RUNNING)
+        }
+        if (get_player_status(dtp_ctx) == PLAYER_STATUS_RUNNING) {
             player_update_state(dtp_ctx);
+        }
         player_handle_cb(dtp_ctx);
-        if(!dtp_ctx->ctrl_info.eof_flag)
+        if (!dtp_ctx->ctrl_info.eof_flag) {
             continue;
-        if(dthost_get_out_closed(dtp_ctx->host_priv) == 1)
+        }
+        if (dthost_get_out_closed(dtp_ctx->host_priv) == 1) {
             goto QUIT;
+        }
     }
     /* when playend itself ,we need to release manually */
-  QUIT:
+QUIT:
     stop_io_thread(dtp_ctx);
     player_host_stop(dtp_ctx);
     dtdemuxer_close(dtp_ctx->demuxer_priv);
