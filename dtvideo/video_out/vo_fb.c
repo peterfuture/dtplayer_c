@@ -24,28 +24,27 @@
 
 static pthread_mutex_t vo_mutex;
 
-static void vo_lock_init ()
+static void vo_lock_init()
 {
-    pthread_mutex_init (&vo_mutex, NULL);
+    pthread_mutex_init(&vo_mutex, NULL);
 }
 
-static void vo_lock_free ()
+static void vo_lock_free()
 {
-    pthread_mutex_destroy (&vo_mutex);
+    pthread_mutex_destroy(&vo_mutex);
 }
 
-static void vo_lock ()
+static void vo_lock()
 {
-    pthread_mutex_lock (&vo_mutex);
+    pthread_mutex_lock(&vo_mutex);
 }
 
-static void vo_unlock ()
+static void vo_unlock()
 {
-    pthread_mutex_unlock (&vo_mutex);
+    pthread_mutex_unlock(&vo_mutex);
 }
 
-typedef struct
-{
+typedef struct {
     char *dev;
     int fb;
     uint8_t *orig_mem;
@@ -59,43 +58,39 @@ typedef struct
 static FBContext fbctx, *fbctxp = &fbctx;
 static AVPicture *my_pic;
 
-void clear_fb_screen (void)
+void clear_fb_screen(void)
 {
-    memset (fbctxp->orig_mem, 0, fbctxp->fixinfo.smem_len);
+    memset(fbctxp->orig_mem, 0, fbctxp->fixinfo.smem_len);
 }
 
-static int vo_fb_init (void)
+static int vo_fb_init(void)
 {
-    if (!(fbctxp->dev = getenv ("FRAMEBUFFER")))
+    if (!(fbctxp->dev = getenv("FRAMEBUFFER"))) {
         fbctxp->dev = "/dev/fb0";
-
-    fbctxp->fb = open (fbctxp->dev, O_RDWR);
-    if (fbctxp->fb < 0)
-    {
-        av_log (NULL, AV_LOG_ERROR, "Error opening %s: %m. Check kernel config\n", fbctxp->dev);
-        return -1;
-    }
-    if (-1 == ioctl (fbctxp->fb, FBIOGET_VSCREENINFO, &(fbctxp->varinfo)))
-    {
-        av_log (NULL, AV_LOG_ERROR, "ioctl FBIOGET_VSCREENINFO\n");
-        return -1;
-    }
-    if (-1 == ioctl (fbctxp->fb, FBIOGET_FSCREENINFO, &(fbctxp->fixinfo)))
-    {
-        av_log (NULL, AV_LOG_ERROR, "ioctl FBIOGET_FSCREENINFO\n");
-        return -1;
     }
 
-    fbctxp->orig_mem = (uint8_t *) mmap (NULL, fbctxp->fixinfo.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fbctxp->fb, 0);
-
-    if (-1L == (long) fbctxp->orig_mem)
-    {
-        av_log (NULL, AV_LOG_ERROR, "mmap error\n");
+    fbctxp->fb = open(fbctxp->dev, O_RDWR);
+    if (fbctxp->fb < 0) {
+        av_log(NULL, AV_LOG_ERROR, "Error opening %s: %m. Check kernel config\n", fbctxp->dev);
+        return -1;
+    }
+    if (-1 == ioctl(fbctxp->fb, FBIOGET_VSCREENINFO, &(fbctxp->varinfo))) {
+        av_log(NULL, AV_LOG_ERROR, "ioctl FBIOGET_VSCREENINFO\n");
+        return -1;
+    }
+    if (-1 == ioctl(fbctxp->fb, FBIOGET_FSCREENINFO, &(fbctxp->fixinfo))) {
+        av_log(NULL, AV_LOG_ERROR, "ioctl FBIOGET_FSCREENINFO\n");
         return -1;
     }
 
-    if (dlpctxp->fs)
-    {
+    fbctxp->orig_mem = (uint8_t *) mmap(NULL, fbctxp->fixinfo.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fbctxp->fb, 0);
+
+    if (-1L == (long) fbctxp->orig_mem) {
+        av_log(NULL, AV_LOG_ERROR, "mmap error\n");
+        return -1;
+    }
+
+    if (dlpctxp->fs) {
         int t1, t2, drate;
 
         t1 = fbctxp->varinfo.xres / dlpctxp->pwidth;
@@ -105,9 +100,7 @@ static int vo_fb_init (void)
 
         fbctxp->dw = dlpctxp->pwidth * drate;
         fbctxp->dh = dlpctxp->pheight * drate;
-    }
-    else
-    {
+    } else {
         fbctxp->dw = dlpctxp->pwidth;
         fbctxp->dh = dlpctxp->pheight;
     }
@@ -118,8 +111,7 @@ static int vo_fb_init (void)
 
     fbctxp->mem = fbctxp->orig_mem + (fbctxp->fixinfo.line_length * fbctxp->dy) + ((fbctxp->varinfo.bits_per_pixel / 8) * fbctxp->dx);
 
-    switch (fbctxp->varinfo.bits_per_pixel)
-    {
+    switch (fbctxp->varinfo.bits_per_pixel) {
     case 32:
         fbctxp->pixfmt = PIX_FMT_RGB32;
         break;
@@ -137,78 +129,75 @@ static int vo_fb_init (void)
         break;
     }
 
- /*-----------------------------------------------------------------------------
-	 *  my picture for rgb
-	 *-----------------------------------------------------------------------------*/
-    my_pic = av_mallocz (sizeof (AVPicture));
-    if (-1 == avpicture_alloc (my_pic, fbctxp->pixfmt, fbctxp->dw, fbctxp->dh))
-    {
-        av_log (NULL, AV_LOG_ERROR, "avpicture alloc error\n");
+    /*-----------------------------------------------------------------------------
+     *  my picture for rgb
+     *-----------------------------------------------------------------------------*/
+    my_pic = av_mallocz(sizeof(AVPicture));
+    if (-1 == avpicture_alloc(my_pic, fbctxp->pixfmt, fbctxp->dw, fbctxp->dh)) {
+        av_log(NULL, AV_LOG_ERROR, "avpicture alloc error\n");
         return -1;
     }
 
-    vo_lock_init ();
+    vo_lock_init();
 
     return 0;
 }
 
-static int vo_fb_uninit (void)
+static int vo_fb_uninit(void)
 {
-    vo_lock ();
+    vo_lock();
 
-    close (fbctxp->fb);
+    close(fbctxp->fb);
     fbctxp->fb = -1;
 
-    avpicture_free (my_pic);
-    av_free (my_pic);
+    avpicture_free(my_pic);
+    av_free(my_pic);
     my_pic = NULL;
 
-    vo_lock_free ();
+    vo_lock_free();
 
     return 0;
 }
 
-static int vo_fb_vfmt2rgb (AVPicture * dst, AVPicture * src)
+static int vo_fb_vfmt2rgb(AVPicture * dst, AVPicture * src)
 {
     static struct SwsContext *img_convert_ctx;
 
-    img_convert_ctx = sws_getCachedContext (img_convert_ctx, dlpctxp->pwidth, dlpctxp->pheight, dlpctxp->pixfmt, fbctxp->dw, fbctxp->dh, fbctxp->pixfmt, SWS_BICUBIC, NULL, NULL, NULL);
+    img_convert_ctx = sws_getCachedContext(img_convert_ctx, dlpctxp->pwidth, dlpctxp->pheight, dlpctxp->pixfmt, fbctxp->dw, fbctxp->dh, fbctxp->pixfmt, SWS_BICUBIC, NULL, NULL, NULL);
 
-    sws_scale (img_convert_ctx, src->data, src->linesize, 0, fbctxp->dh, dst->data, dst->linesize);
+    sws_scale(img_convert_ctx, src->data, src->linesize, 0, fbctxp->dh, dst->data, dst->linesize);
 
     return 0;
 }
 
-static void vo_fb_display (AVPicture * pic)
+static void vo_fb_display(AVPicture * pic)
 {
     int i;
     uint8_t *src, *dst = fbctxp->mem;
 
-    vo_lock ();
+    vo_lock();
 
-    vo_fb_vfmt2rgb (my_pic, pic);
+    vo_fb_vfmt2rgb(my_pic, pic);
     src = my_pic->data[0];
 
-    for (i = 0; i < fbctxp->dh; i++)
-    {
-        memcpy (dst, src, fbctxp->dw * (fbctxp->varinfo.bits_per_pixel / 8));
+    for (i = 0; i < fbctxp->dh; i++) {
+        memcpy(dst, src, fbctxp->dw * (fbctxp->varinfo.bits_per_pixel / 8));
         dst += fbctxp->fixinfo.line_length;
         src += my_pic->linesize[0];
     }
 
-    vo_unlock ();
+    vo_unlock();
 }
 
-static void toggle_full_screen (void)
+static void toggle_full_screen(void)
 {
-    vo_lock ();
+    vo_lock();
 
-    avpicture_free (my_pic);
-    av_free (my_pic);
+    avpicture_free(my_pic);
+    av_free(my_pic);
     my_pic = NULL;
 
-    if (dlpctxp->fs)
-    {
+    if (dlpctxp->fs) {
         int t1, t2, drate;
 
         t1 = fbctxp->varinfo.xres / dlpctxp->pwidth;
@@ -218,9 +207,7 @@ static void toggle_full_screen (void)
 
         fbctxp->dw = dlpctxp->pwidth * drate;
         fbctxp->dh = dlpctxp->pheight * drate;
-    }
-    else
-    {
+    } else {
         fbctxp->dw = dlpctxp->pwidth;
         fbctxp->dh = dlpctxp->pheight;
     }
@@ -231,30 +218,28 @@ static void toggle_full_screen (void)
 
     fbctxp->mem = fbctxp->orig_mem + (fbctxp->fixinfo.line_length * fbctxp->dy) + ((fbctxp->varinfo.bits_per_pixel / 8) * fbctxp->dx);
 
-    clear_fb_screen ();
+    clear_fb_screen();
 
-    my_pic = av_mallocz (sizeof (AVPicture));
-    if (-1 == avpicture_alloc (my_pic, fbctxp->pixfmt, fbctxp->dw, fbctxp->dh))
-    {
-        av_log (NULL, AV_LOG_ERROR, "toggle full: avpicture alloc error\n");
-        dlp_exit (-1);
+    my_pic = av_mallocz(sizeof(AVPicture));
+    if (-1 == avpicture_alloc(my_pic, fbctxp->pixfmt, fbctxp->dw, fbctxp->dh)) {
+        av_log(NULL, AV_LOG_ERROR, "toggle full: avpicture alloc error\n");
+        dlp_exit(-1);
     }
 
-    vo_unlock ();
+    vo_unlock();
 }
 
-static void vo_fb_zoom (int mulriple)
+static void vo_fb_zoom(int mulriple)
 {
-    if (dlpctxp->pwidth * mulriple > fbctxp->varinfo.xres || dlpctxp->pheight * mulriple > fbctxp->varinfo.yres)
-    {
-        av_log (NULL, AV_LOG_INFO, "vo fb: zoom %d will > fullscrren\n", mulriple);
+    if (dlpctxp->pwidth * mulriple > fbctxp->varinfo.xres || dlpctxp->pheight * mulriple > fbctxp->varinfo.yres) {
+        av_log(NULL, AV_LOG_INFO, "vo fb: zoom %d will > fullscrren\n", mulriple);
         return;
     }
 
-    vo_lock ();
+    vo_lock();
 
-    avpicture_free (my_pic);
-    av_free (my_pic);
+    avpicture_free(my_pic);
+    av_free(my_pic);
     my_pic = NULL;
 
     fbctxp->dw = dlpctxp->pwidth * mulriple;
@@ -266,30 +251,28 @@ static void vo_fb_zoom (int mulriple)
 
     fbctxp->mem = fbctxp->orig_mem + (fbctxp->fixinfo.line_length * fbctxp->dy) + ((fbctxp->varinfo.bits_per_pixel / 8) * fbctxp->dx);
 
-    clear_fb_screen ();
+    clear_fb_screen();
 
-    my_pic = av_mallocz (sizeof (AVPicture));
-    if (-1 == avpicture_alloc (my_pic, fbctxp->pixfmt, fbctxp->dw, fbctxp->dh))
-    {
-        av_log (NULL, AV_LOG_ERROR, "toggle full: avpicture alloc error\n");
-        dlp_exit (-1);
+    my_pic = av_mallocz(sizeof(AVPicture));
+    if (-1 == avpicture_alloc(my_pic, fbctxp->pixfmt, fbctxp->dw, fbctxp->dh)) {
+        av_log(NULL, AV_LOG_ERROR, "toggle full: avpicture alloc error\n");
+        dlp_exit(-1);
     }
 
-    vo_unlock ();
+    vo_unlock();
 }
 
-static int vo_fb_control (int cmd, void *arg)
+static int vo_fb_control(int cmd, void *arg)
 {
-    switch (cmd)
-    {
+    switch (cmd) {
     case VO_TOGGLE_FULLSCREEN:
-        toggle_full_screen ();
+        toggle_full_screen();
         break;
     case VO_ZOOM:
-        vo_fb_zoom (*((int *) arg));
+        vo_fb_zoom(*((int *) arg));
         break;
     default:
-        av_log (NULL, AV_LOG_ERROR, "vo x11: cmd not support now!\n");
+        av_log(NULL, AV_LOG_ERROR, "vo x11: cmd not support now!\n");
         break;
     }
     return 0;
