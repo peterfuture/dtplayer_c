@@ -13,17 +13,17 @@
 
 const char *ao_sdl2_name = "SDL2 AO";
 
-typedef struct{
+typedef struct {
     SDL_AudioSpec wanted;     // config audio
     dt_buffer_t dbt;
-}sdl_ao_ctx_t;
+} sdl_ao_ctx_t;
 
 ao_wrapper_t ao_sdl2_ops;
 static ao_wrapper_t *wrapper = &ao_sdl2_ops;
 
 #ifdef ENABLE_DTAP
-    dtap_context_t ap_ctx;
-    int cur_ae_id = EQ_EFFECT_FLAT;
+dtap_context_t ap_ctx;
+int cur_ae_id = EQ_EFFECT_FLAT;
 int dtap_change_effect(ao_wrapper_t *wrapper)
 {
     cur_ae_id = (cur_ae_id + 1) % 9;
@@ -34,36 +34,36 @@ int dtap_change_effect(ao_wrapper_t *wrapper)
 }
 #endif
 
-static void sdl2_cb(void *userdata,uint8_t *buf,int size)
+static void sdl2_cb(void *userdata, uint8_t *buf, int size)
 {
     ao_wrapper_t *wrapper = (ao_wrapper_t *)userdata;
     sdl_ao_ctx_t *ctx = (sdl_ao_ctx_t *)wrapper->ao_priv;
-    if(buf_level(&ctx->dbt) < size)
+    if (buf_level(&ctx->dbt) < size) {
         return;
-    buf_get(&ctx->dbt,buf,size);
+    }
+    buf_get(&ctx->dbt, buf, size);
     return;
 }
 
-static int ao_sdl2_init (dtaudio_output_t *aout, dtaudio_para_t *para)
+static int ao_sdl2_init(dtaudio_output_t *aout, dtaudio_para_t *para)
 {
     int ret = 0;
-    memcpy(&wrapper->para,para,sizeof(dtaudio_para_t));
+    memcpy(&wrapper->para, para, sizeof(dtaudio_para_t));
     sdl_ao_ctx_t *ctx = malloc(sizeof(*ctx));
-    if(!ctx)
-    {
-        dt_info(TAG,"SDL CTX MALLOC FAILED \n");
+    if (!ctx) {
+        dt_info(TAG, "SDL CTX MALLOC FAILED \n");
         return -1;
     }
-    memset(ctx,0,sizeof(*ctx));
-    if(buf_init(&ctx->dbt,para->dst_samplerate * 4 / 10) < 0) // 100ms
-    {
+    memset(ctx, 0, sizeof(*ctx));
+    if (buf_init(&ctx->dbt, para->dst_samplerate * 4 / 10) < 0) { // 100ms
         ret = -1;
         goto FAIL;
     }
     wrapper->ao_priv = ctx;
 
-    if (!SDL_WasInit(SDL_INIT_AUDIO))
+    if (!SDL_WasInit(SDL_INIT_AUDIO)) {
         SDL_Init(SDL_INIT_AUDIO);
+    }
 
     SDL_AudioSpec *pwanted = &ctx->wanted;
     //set audio paras
@@ -73,11 +73,10 @@ static int ao_sdl2_init (dtaudio_output_t *aout, dtaudio_para_t *para)
     pwanted->samples = SDL_AUDIO_BUFFER_SIZE;// samples every time
     pwanted->callback = sdl2_cb;              // callback
     pwanted->userdata = wrapper;
-   
-    dt_info(TAG,"sr:%d channels:%d \n",para->dst_samplerate,para->dst_channels);
 
-    if (SDL_OpenAudio(pwanted, NULL)<0)      // open audio device
-    {
+    dt_info(TAG, "sr:%d channels:%d \n", para->dst_samplerate, para->dst_channels);
+
+    if (SDL_OpenAudio(pwanted, NULL) < 0) {  // open audio device
         printf("can't open audio.\n");
         ret = -1;
         goto FAIL;
@@ -93,8 +92,8 @@ static int ao_sdl2_init (dtaudio_output_t *aout, dtaudio_para_t *para)
     ap_ctx.para.item = cur_ae_id;
     dtap_init(&ap_ctx);
 #endif
-    
-    dt_info(TAG,"SDL2 AO Init OK\n");
+
+    dt_info(TAG, "SDL2 AO Init OK\n");
     return 0;
 FAIL:
     buf_release(&ctx->dbt);
@@ -103,32 +102,34 @@ FAIL:
     return ret;
 }
 
-static int ao_sdl2_play (dtaudio_output_t *aout, uint8_t * buf, int size)
+static int ao_sdl2_play(dtaudio_output_t *aout, uint8_t * buf, int size)
 {
     sdl_ao_ctx_t *ctx = (sdl_ao_ctx_t *)wrapper->ao_priv;
 
     //write ok or failed
-    if(buf_space(&ctx->dbt) < size)
+    if (buf_space(&ctx->dbt) < size) {
         return 0;
+    }
 
 #ifdef ENABLE_DTAP
     dtap_frame_t frame;
     frame.in = buf;
     frame.in_size = size;
-    if(ap_ctx.para.item != EQ_EFFECT_FLAT)
+    if (ap_ctx.para.item != EQ_EFFECT_FLAT) {
         dtap_process(&ap_ctx, &frame);
+    }
 #endif
 
-    return buf_put(&ctx->dbt,buf,size);
+    return buf_put(&ctx->dbt, buf, size);
 }
 
-static int ao_sdl2_pause (dtaudio_output_t *aout)
+static int ao_sdl2_pause(dtaudio_output_t *aout)
 {
     SDL_PauseAudio(1);
     return 0;
 }
 
-static int ao_sdl2_resume (dtaudio_output_t *aout)
+static int ao_sdl2_resume(dtaudio_output_t *aout)
 {
     SDL_PauseAudio(0);
     return 0;
@@ -140,10 +141,10 @@ static int ao_sdl2_level(dtaudio_output_t *aout)
     return ctx->dbt.level;
 }
 
-static int64_t ao_sdl2_get_latency (dtaudio_output_t *aout)
+static int64_t ao_sdl2_get_latency(dtaudio_output_t *aout)
 {
     sdl_ao_ctx_t *ctx = (sdl_ao_ctx_t *)wrapper->ao_priv;
-    
+
     int level = buf_level(&ctx->dbt);
     unsigned int sample_num;
     uint64_t latency;
@@ -154,10 +155,9 @@ static int64_t ao_sdl2_get_latency (dtaudio_output_t *aout)
     return latency;
 }
 
-static int ao_sdl2_stop (dtaudio_output_t *aout)
+static int ao_sdl2_stop(dtaudio_output_t *aout)
 {
-    if(wrapper->ao_priv)
-    {
+    if (wrapper->ao_priv) {
         sdl_ao_ctx_t *ctx = (sdl_ao_ctx_t *)wrapper->ao_priv;
         SDL_CloseAudio();
         buf_release(&ctx->dbt);
@@ -169,7 +169,7 @@ static int ao_sdl2_stop (dtaudio_output_t *aout)
 
 #ifdef ENABLE_DTAP
     memset(&ap_ctx, 0 , sizeof(dtap_context_t));
-    dtap_release(&ap_ctx);    
+    dtap_release(&ap_ctx);
 #endif
 
 
@@ -178,19 +178,21 @@ static int ao_sdl2_stop (dtaudio_output_t *aout)
 
 static int ao_sdl2_get_volume(ao_wrapper_t *ao)
 {
-    dt_info(TAG,"getvolume: \n");
+    dt_info(TAG, "getvolume: \n");
     return 0;
 }
 
 static int ao_sdl2_set_volume(ao_wrapper_t *ao, int value)
 {
-    dt_info(TAG,"setvolume: %d \n", value);
+    dt_info(TAG, "setvolume: %d \n", value);
     return 0;
 }
 
 void ao_sdl2_setup(ao_wrapper_t *wrapper)
 {
-    if(wrapper == NULL) return;
+    if (wrapper == NULL) {
+        return;
+    }
     wrapper->id = AO_ID_SDL;
     wrapper->name = ao_sdl2_name;
     wrapper->ao_init = ao_sdl2_init;

@@ -1,14 +1,14 @@
-int audio_filter_init ()
+int audio_filter_init()
 {
     return 0;
 }
 
-int audio_filter_start ()
+int audio_filter_start()
 {
     return 0;
 }
 
-int audio_filter_stop ()
+int audio_filter_stop()
 {
     return 0;
 }
