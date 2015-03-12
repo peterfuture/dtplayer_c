@@ -8,7 +8,7 @@
   like windows do it. It's also avaiable as a C++ class.
 
   --[ History ] ----------------------------------------------------------
-	
+
   0.10: Original file by Carsten Breuer. First beta version.
   0.20: Some bugs resolved and some suggestions from
         jim hall (freedos.org) implemented.
@@ -16,7 +16,7 @@
         Thanks to Dieter Engelbrecht (dieter@wintop.net).
   0.40: Bug at WriteString fixed.
   0.50: Problem with file pointer solved
-  0.51: We better do smaller steps now. I have reformated to tab4. Sorry 
+  0.51: We better do smaller steps now. I have reformated to tab4. Sorry
         New function DeletepKey added. Thanks for the guy who post this.
 
  --[ How to compile ]----------------------------------------------------
@@ -75,12 +75,12 @@ static char Result[260] = { "" };
 static FILE *IniFile;
 
 /* Private functions declarations */
-void AddpKey (struct ENTRY *Entry, cchr * pKey, cchr * Value);
-void FreeMem (void *Ptr);
-void FreeAllMem (void);
-bool FindpKey (cchr * Section, cchr * pKey, EFIND * List);
-bool AddSectionAndpKey (cchr * Section, cchr * pKey, cchr * Value);
-struct ENTRY *MakeNewEntry (void);
+void AddpKey(struct ENTRY *Entry, cchr * pKey, cchr * Value);
+void FreeMem(void *Ptr);
+void FreeAllMem(void);
+bool FindpKey(cchr * Section, cchr * pKey, EFIND * List);
+bool AddSectionAndpKey(cchr * Section, cchr * pKey, cchr * Value);
+struct ENTRY *MakeNewEntry(void);
 
 /*=========================================================================
    strupr -de-
@@ -90,14 +90,12 @@ struct ENTRY *MakeNewEntry (void);
 /*========================================================================*/
 #ifdef DONT_HAVE_STRUPR
 /* DONT_HAVE_STRUPR is set when INI_REMOVE_CR is defined */
-void strupr (char *str)
+void strupr(char *str)
 {
     // We dont check the ptr because the original also dont do it.
-    while (*str != 0)
-    {
-        if (islower (*str))
-        {
-            *str = toupper (*str);
+    while (*str != 0) {
+        if (islower(*str)) {
+            *str = toupper(*str);
         }
         str++;
     }
@@ -115,77 +113,62 @@ void strupr (char *str)
 */
 
 /*========================================================================*/
-bool OpenIniFile (cchr * FileName)
+bool OpenIniFile(cchr * FileName)
 {
     char Str[255];
     char *pStr;
     struct ENTRY *pEntry;
 
-    FreeAllMem ();
+    FreeAllMem();
 
-    if (FileName == NULL)
-    {
+    if (FileName == NULL) {
         return FALSE;
     }
-    if ((IniFile = fopen (FileName, "r")) == NULL)
-    {
+    if ((IniFile = fopen(FileName, "r")) == NULL) {
         return FALSE;
     }
 
-    while (fgets (Str, 255, IniFile) != NULL)
-    {
-        pStr = strchr (Str, '\n');
-        if (pStr != NULL)
-        {
+    while (fgets(Str, 255, IniFile) != NULL) {
+        pStr = strchr(Str, '\n');
+        if (pStr != NULL) {
             *pStr = 0;
         }
-        pEntry = MakeNewEntry ();
-        if (pEntry == NULL)
-        {
+        pEntry = MakeNewEntry();
+        if (pEntry == NULL) {
             return FALSE;
         }
 
 #ifdef INI_REMOVE_CR
-        int Len = strlen (Str);
-        if (Len > 0)
-        {
-            if (Str[Len - 1] == '\r')
-            {
+        int Len = strlen(Str);
+        if (Len > 0) {
+            if (Str[Len - 1] == '\r') {
                 Str[Len - 1] = '\0';
             }
         }
 #endif
 
-        pEntry->Text = (char *) malloc (strlen (Str) + 1);
-        if (pEntry->Text == NULL)
-        {
-            FreeAllMem ();
+        pEntry->Text = (char *) malloc(strlen(Str) + 1);
+        if (pEntry->Text == NULL) {
+            FreeAllMem();
             return FALSE;
         }
-        strcpy (pEntry->Text, Str);
-        pStr = strchr (Str, ';');
-        if (pStr != NULL)
-        {
+        strcpy(pEntry->Text, Str);
+        pStr = strchr(Str, ';');
+        if (pStr != NULL) {
             *pStr = 0;
         }                       /* Cut all comments */
-        if ((strstr (Str, "[") > 0) && (strstr (Str, "]") > 0)) /* Is Section */
-        {
+        if ((strstr(Str, "[") > 0) && (strstr(Str, "]") > 0)) { /* Is Section */
             pEntry->Type = tpSECTION;
-        }
-        else
-        {
-            if (strstr (Str, "=") > 0)
-            {
+        } else {
+            if (strstr(Str, "=") > 0) {
                 pEntry->Type = tpKEYVALUE;
-            }
-            else
-            {
+            } else {
                 pEntry->Type = tpCOMMENT;
             }
         }
         CurEntry = pEntry;
     }
-    fclose (IniFile);
+    fclose(IniFile);
     IniFile = NULL;
     return TRUE;
 }
@@ -198,12 +181,11 @@ bool OpenIniFile (cchr * FileName)
          WriteIniFile instead.
 */
 /*========================================================================*/
-void CloseIniFile (void)
+void CloseIniFile(void)
 {
-    FreeAllMem ();
-    if (IniFile != NULL)
-    {
-        fclose (IniFile);
+    FreeAllMem();
+    if (IniFile != NULL) {
+        fclose(IniFile);
         IniFile = NULL;
     }
 }
@@ -215,35 +197,31 @@ void CloseIniFile (void)
          allocated by WriteIniFile;
 */
 /*========================================================================*/
-bool WriteIniFile (const char *FileName)
+bool WriteIniFile(const char *FileName)
 {
     struct ENTRY *pEntry = Entry;
     //IniFile = NULL;
-    if (IniFile != NULL)
-    {
-        fclose (IniFile);
+    if (IniFile != NULL) {
+        fclose(IniFile);
     }
-    if ((IniFile = fopen (FileName, "wb")) == NULL)
-    {
-        FreeAllMem ();
+    if ((IniFile = fopen(FileName, "wb")) == NULL) {
+        FreeAllMem();
         return FALSE;
     }
 
-    while (pEntry != NULL)
-    {
-        if (pEntry->Type != tpNULL)
-        {
+    while (pEntry != NULL) {
+        if (pEntry->Type != tpNULL) {
 
 #ifdef INI_REMOVE_CR
-            fprintf (IniFile, "%s\n", pEntry->Text);
+            fprintf(IniFile, "%s\n", pEntry->Text);
 #else
-            fprintf (IniFile, "%s\r\n", pEntry->Text);
+            fprintf(IniFile, "%s\r\n", pEntry->Text);
 #endif
             pEntry = pEntry->pNext;
         }
     }
-    fflush (IniFile);
-    fclose (IniFile);
+    fflush(IniFile);
+    fclose(IniFile);
     IniFile = NULL;
     return TRUE;
 }
@@ -251,31 +229,24 @@ bool WriteIniFile (const char *FileName)
 /*=========================================================================
    WriteString : Writes a string to the ini file
 *========================================================================*/
-void WriteString (cchr * Section, cchr * pKey, cchr * Value)
+void WriteString(cchr * Section, cchr * pKey, cchr * Value)
 {
     EFIND List;
     char Str[255];
 
-    if (ArePtrValid (Section, pKey, Value) == FALSE)
-    {
+    if (ArePtrValid(Section, pKey, Value) == FALSE) {
         return;
     }
-    if (FindpKey (Section, pKey, &List) == TRUE)
-    {
-        sprintf (Str, "%s=%s%s", List.KeyText, Value, List.Comment);
-        FreeMem (List.pKey->Text);
-        List.pKey->Text = (char *) malloc (strlen (Str) + 1);
-        strcpy (List.pKey->Text, Str);
-    }
-    else
-    {
-        if ((List.pSec != NULL) && (List.pKey == NULL)) /* section exist, pKey not */
-        {
-            AddpKey (List.pSec, pKey, Value);
-        }
-        else
-        {
-            AddSectionAndpKey (Section, pKey, Value);
+    if (FindpKey(Section, pKey, &List) == TRUE) {
+        sprintf(Str, "%s=%s%s", List.KeyText, Value, List.Comment);
+        FreeMem(List.pKey->Text);
+        List.pKey->Text = (char *) malloc(strlen(Str) + 1);
+        strcpy(List.pKey->Text, Str);
+    } else {
+        if ((List.pSec != NULL) && (List.pKey == NULL)) { /* section exist, pKey not */
+            AddpKey(List.pSec, pKey, Value);
+        } else {
+            AddSectionAndpKey(Section, pKey, Value);
         }
     }
 }
@@ -283,49 +254,46 @@ void WriteString (cchr * Section, cchr * pKey, cchr * Value)
 /*=========================================================================
    WriteBool : Writes a boolean to the ini file
 *========================================================================*/
-void WriteBool (cchr * Section, cchr * pKey, bool Value)
+void WriteBool(cchr * Section, cchr * pKey, bool Value)
 {
     char Val[2] = { '0', 0 };
-    if (Value != 0)
-    {
+    if (Value != 0) {
         Val[0] = '1';
     }
-    WriteString (Section, pKey, Val);
+    WriteString(Section, pKey, Val);
 }
 
 /*=========================================================================
    WriteInt : Writes an integer to the ini file
 *========================================================================*/
-void WriteInt (cchr * Section, cchr * pKey, int Value)
+void WriteInt(cchr * Section, cchr * pKey, int Value)
 {
     char Val[12];               /* 32bit maximum + sign + \0 */
-    sprintf (Val, "%d", Value);
-    WriteString (Section, pKey, Val);
+    sprintf(Val, "%d", Value);
+    WriteString(Section, pKey, Val);
 }
 
 /*=========================================================================
    WriteDouble : Writes a double to the ini file
 *========================================================================*/
-void WriteDouble (cchr * Section, cchr * pKey, double Value)
+void WriteDouble(cchr * Section, cchr * pKey, double Value)
 {
     char Val[32];               /* DDDDDDDDDDDDDDD+E308\0 */
-    sprintf (Val, "%1.10lE", Value);
-    WriteString (Section, pKey, Val);
+    sprintf(Val, "%1.10lE", Value);
+    WriteString(Section, pKey, Val);
 }
 
 /*=========================================================================
    ReadString : Reads a string from the ini file
 *========================================================================*/
-const char *ReadString (cchr * Section, cchr * pKey, cchr * Default)
+const char *ReadString(cchr * Section, cchr * pKey, cchr * Default)
 {
     EFIND List;
-    if (ArePtrValid (Section, pKey, Default) == FALSE)
-    {
+    if (ArePtrValid(Section, pKey, Default) == FALSE) {
         return Default;
     }
-    if (FindpKey (Section, pKey, &List) == TRUE)
-    {
-        strcpy (Result, List.ValText);
+    if (FindpKey(Section, pKey, &List) == TRUE) {
+        strcpy(Result, List.ValText);
         return Result;
     }
     return Default;
@@ -334,34 +302,33 @@ const char *ReadString (cchr * Section, cchr * pKey, cchr * Default)
 /*=========================================================================
    ReadBool : Reads a boolean from the ini file
 *========================================================================*/
-bool ReadBool (cchr * Section, cchr * pKey, bool Default)
+bool ReadBool(cchr * Section, cchr * pKey, bool Default)
 {
     char Val[2] = { "0" };
-    if (Default != 0)
-    {
+    if (Default != 0) {
         Val[0] = '1';
     }
-    return (atoi (ReadString (Section, pKey, Val)) ? 1 : 0); /* Only 0 or 1 allowed */
+    return (atoi(ReadString(Section, pKey, Val)) ? 1 : 0);   /* Only 0 or 1 allowed */
 }
 
 /*=========================================================================
    ReadInt : Reads a integer from the ini file
 *========================================================================*/
-int ReadInt (cchr * Section, cchr * pKey, int Default)
+int ReadInt(cchr * Section, cchr * pKey, int Default)
 {
     char Val[12];
-    sprintf (Val, "%d", Default);
-    return (atoi (ReadString (Section, pKey, Val)));
+    sprintf(Val, "%d", Default);
+    return (atoi(ReadString(Section, pKey, Val)));
 }
 
 /*=========================================================================
    ReadDouble : Reads a double from the ini file
 *========================================================================*/
-double ReadDouble (cchr * Section, cchr * pKey, double Default)
+double ReadDouble(cchr * Section, cchr * pKey, double Default)
 {
     double Val;
-    sprintf (Result, "%1.10lE", Default);
-    sscanf (ReadString (Section, pKey, Result), "%lE", &Val);
+    sprintf(Result, "%1.10lE", Default);
+    sscanf(ReadString(Section, pKey, Result), "%lE", &Val);
     return Val;
 }
 
@@ -369,26 +336,23 @@ double ReadDouble (cchr * Section, cchr * pKey, double Default)
    DeleteKey : Deletes a pKey from the ini file.
 *========================================================================*/
 
-bool DeleteKey (cchr * Section, cchr * pKey)
+bool DeleteKey(cchr * Section, cchr * pKey)
 {
     EFIND List;
     struct ENTRY *pPrev;
     struct ENTRY *pNext;
 
-    if (FindpKey (Section, pKey, &List) == TRUE)
-    {
+    if (FindpKey(Section, pKey, &List) == TRUE) {
         pPrev = List.pKey->pPrev;
         pNext = List.pKey->pNext;
-        if (pPrev)
-        {
+        if (pPrev) {
             pPrev->pNext = pNext;
         }
-        if (pNext)
-        {
+        if (pNext) {
             pNext->pPrev = pPrev;
         }
-        FreeMem (List.pKey->Text);
-        FreeMem (List.pKey);
+        FreeMem(List.pKey->Text);
+        FreeMem(List.pKey);
         return TRUE;
     }
     return FALSE;
@@ -398,35 +362,32 @@ bool DeleteKey (cchr * Section, cchr * pKey)
 /*=========================================================================
    FreeMem : Frees a pointer. It is set to NULL by Free AllMem
 *========================================================================*/
-void FreeMem (void *Ptr)
+void FreeMem(void *Ptr)
 {
-    if (Ptr != NULL)
-    {
-        free (Ptr);
+    if (Ptr != NULL) {
+        free(Ptr);
     }
 }
 
 /*=========================================================================
    FreeAllMem : Frees all allocated memory and set the pointer to NULL.
-             	Thats IMO one of the most important issues relating
-             	to pointers :
+                Thats IMO one of the most important issues relating
+                to pointers :
 
-             	A pointer is valid or NULL.
+                A pointer is valid or NULL.
 *========================================================================*/
-void FreeAllMem (void)
+void FreeAllMem(void)
 {
     struct ENTRY *pEntry;
     struct ENTRY *pNextEntry;
     pEntry = Entry;
-    while (1)
-    {
-        if (pEntry == NULL)
-        {
+    while (1) {
+        if (pEntry == NULL) {
             break;
         }
         pNextEntry = pEntry->pNext;
-        FreeMem (pEntry->Text); /* Frees the pointer if not NULL */
-        FreeMem (pEntry);
+        FreeMem(pEntry->Text);  /* Frees the pointer if not NULL */
+        FreeMem(pEntry);
         pEntry = pNextEntry;
     }
     Entry = NULL;
@@ -439,22 +400,19 @@ void FreeAllMem (void)
    Return Value: NULL at an error or a pointer to the ENTRY structure
                  if succeed.
 *========================================================================*/
-struct ENTRY *FindSection (cchr * Section)
+struct ENTRY *FindSection(cchr * Section)
 {
     char Sec[130];
     char iSec[130];
     struct ENTRY *pEntry;
-    sprintf (Sec, "[%s]", Section);
-    strupr (Sec);
+    sprintf(Sec, "[%s]", Section);
+    strupr(Sec);
     pEntry = Entry;             /* Get a pointer to the first Entry */
-    while (pEntry != NULL)
-    {
-        if (pEntry->Type == tpSECTION)
-        {
-            strcpy (iSec, pEntry->Text);
-            strupr (iSec);
-            if (strcmp (Sec, iSec) == 0)
-            {
+    while (pEntry != NULL) {
+        if (pEntry->Type == tpSECTION) {
+            strcpy(iSec, pEntry->Text);
+            strupr(iSec);
+            if (strcmp(Sec, iSec) == 0) {
                 return pEntry;
             }
         }
@@ -468,7 +426,7 @@ struct ENTRY *FindSection (cchr * Section)
    Return Value: NULL at an error or a pointer to the ENTRY structure
                  if succeed.
 *========================================================================*/
-bool FindpKey (cchr * Section, cchr * pKey, EFIND * List)
+bool FindpKey(cchr * Section, cchr * pKey, EFIND * List)
 {
     char Search[130];
     char Found[130];
@@ -477,9 +435,8 @@ bool FindpKey (cchr * Section, cchr * pKey, EFIND * List)
     struct ENTRY *pEntry;
     List->pSec = NULL;
     List->pKey = NULL;
-    pEntry = FindSection (Section);
-    if (pEntry == NULL)
-    {
+    pEntry = FindSection(Section);
+    if (pEntry == NULL) {
         return FALSE;
     }
     List->pSec = pEntry;
@@ -487,40 +444,33 @@ bool FindpKey (cchr * Section, cchr * pKey, EFIND * List)
     List->ValText[0] = 0;
     List->Comment[0] = 0;
     pEntry = pEntry->pNext;
-    if (pEntry == NULL)
-    {
+    if (pEntry == NULL) {
         return FALSE;
     }
-    sprintf (Search, "%s", pKey);
-    strupr (Search);
-    while (pEntry != NULL)
-    {
+    sprintf(Search, "%s", pKey);
+    strupr(Search);
+    while (pEntry != NULL) {
         if ((pEntry->Type == tpSECTION) || /* Stop after next section or EOF */
-            (pEntry->Type == tpNULL))
-        {
+            (pEntry->Type == tpNULL)) {
             return FALSE;
         }
-        if (pEntry->Type == tpKEYVALUE)
-        {
-            strcpy (Text, pEntry->Text);
-            pText = strchr (Text, ';');
-            if (pText != NULL)
-            {
-                strcpy (List->Comment, Text);
+        if (pEntry->Type == tpKEYVALUE) {
+            strcpy(Text, pEntry->Text);
+            pText = strchr(Text, ';');
+            if (pText != NULL) {
+                strcpy(List->Comment, Text);
                 *pText = 0;
             }
-            pText = strchr (Text, '=');
-            if (pText != NULL)
-            {
+            pText = strchr(Text, '=');
+            if (pText != NULL) {
                 *pText = 0;
-                strcpy (List->KeyText, Text);
-                strcpy (Found, Text);
+                strcpy(List->KeyText, Text);
+                strcpy(Found, Text);
                 *pText = '=';
-                strupr (Found);
+                strupr(Found);
                 /* printf ("%s,%s\n", Search, Found); */
-                if (strcmp (Found, Search) == 0)
-                {
-                    strcpy (List->ValText, pText + 1);
+                if (strcmp(Found, Search) == 0) {
+                    strcpy(List->ValText, pText + 1);
                     List->pKey = pEntry;
                     return TRUE;
                 }
@@ -534,24 +484,21 @@ bool FindpKey (cchr * Section, cchr * pKey, EFIND * List)
 /*=========================================================================
    AddItem  : Adds an item (pKey or section) to the chaines list
 *========================================================================*/
-bool AddItem (char Type, cchr * Text)
+bool AddItem(char Type, cchr * Text)
 {
-    struct ENTRY *pEntry = MakeNewEntry ();
-    if (pEntry == NULL)
-    {
+    struct ENTRY *pEntry = MakeNewEntry();
+    if (pEntry == NULL) {
         return FALSE;
     }
     pEntry->Type = Type;
-    pEntry->Text = (char *) malloc (strlen (Text) + 1);
-    if (pEntry->Text == NULL)
-    {
-        free (pEntry);
+    pEntry->Text = (char *) malloc(strlen(Text) + 1);
+    if (pEntry->Text == NULL) {
+        free(pEntry);
         return FALSE;
     }
-    strcpy (pEntry->Text, Text);
+    strcpy(pEntry->Text, Text);
     pEntry->pNext = NULL;
-    if (CurEntry != NULL)
-    {
+    if (CurEntry != NULL) {
         CurEntry->pNext = pEntry;
     }
     CurEntry = pEntry;
@@ -565,32 +512,26 @@ bool AddItem (char Type, cchr * Text)
                Before : A.Next = &B
                After  : A.Next = &NewItem, NewItem.Next = &B
 *========================================================================*/
-bool AddItemAt (struct ENTRY * EntryAt, char Mode, cchr * Text)
+bool AddItemAt(struct ENTRY * EntryAt, char Mode, cchr * Text)
 {
     struct ENTRY *pNewEntry;
-    if (EntryAt == NULL)
-    {
+    if (EntryAt == NULL) {
         return FALSE;
     }
-    pNewEntry = (struct ENTRY *) malloc (sizeof (ENTRY));
-    if (pNewEntry == NULL)
-    {
+    pNewEntry = (struct ENTRY *) malloc(sizeof(ENTRY));
+    if (pNewEntry == NULL) {
         return FALSE;
     }
-    pNewEntry->Text = (char *) malloc (strlen (Text) + 1);
-    if (pNewEntry->Text == NULL)
-    {
-        free (pNewEntry);
+    pNewEntry->Text = (char *) malloc(strlen(Text) + 1);
+    if (pNewEntry->Text == NULL) {
+        free(pNewEntry);
         return FALSE;
     }
-    strcpy (pNewEntry->Text, Text);
-    if (EntryAt->pNext == NULL) /* No following nodes. */
-    {
+    strcpy(pNewEntry->Text, Text);
+    if (EntryAt->pNext == NULL) { /* No following nodes. */
         EntryAt->pNext = pNewEntry;
         pNewEntry->pNext = NULL;
-    }
-    else
-    {
+    } else {
         pNewEntry->pNext = EntryAt->pNext;
         EntryAt->pNext = pNewEntry;
     }
@@ -602,26 +543,25 @@ bool AddItemAt (struct ENTRY * EntryAt, char Mode, cchr * Text)
 /*=========================================================================
    AddSectionAndpKey  : Adds a section and then a pKey to the chained list
 *========================================================================*/
-bool AddSectionAndpKey (cchr * Section, cchr * pKey, cchr * Value)
+bool AddSectionAndpKey(cchr * Section, cchr * pKey, cchr * Value)
 {
     char Text[255];
-    sprintf (Text, "[%s]", Section);
-    if (AddItem (tpSECTION, Text) == FALSE)
-    {
+    sprintf(Text, "[%s]", Section);
+    if (AddItem(tpSECTION, Text) == FALSE) {
         return FALSE;
     }
-    sprintf (Text, "%s=%s", pKey, Value);
-    return AddItem (tpKEYVALUE, Text);
+    sprintf(Text, "%s=%s", pKey, Value);
+    return AddItem(tpKEYVALUE, Text);
 }
 
 /*=========================================================================
    AddpKey  : Adds a pKey to the chained list
 *========================================================================*/
-void AddpKey (struct ENTRY *SecEntry, cchr * pKey, cchr * Value)
+void AddpKey(struct ENTRY *SecEntry, cchr * pKey, cchr * Value)
 {
     char Text[255];
-    sprintf (Text, "%s=%s", pKey, Value);
-    AddItemAt (SecEntry, tpKEYVALUE, Text);
+    sprintf(Text, "%s=%s", pKey, Value);
+    AddItemAt(SecEntry, tpKEYVALUE, Text);
 }
 
 /*=========================================================================
@@ -631,25 +571,22 @@ void AddpKey (struct ENTRY *SecEntry, cchr * pKey, cchr * Value)
    Info          : This is only a internal function. You dont have to call
                    it from outside.
 *==========================================================================*/
-struct ENTRY *MakeNewEntry (void)
+struct ENTRY *MakeNewEntry(void)
 {
     struct ENTRY *pEntry;
-    pEntry = (struct ENTRY *) malloc (sizeof (ENTRY));
-    if (pEntry == NULL)
-    {
-        FreeAllMem ();
+    pEntry = (struct ENTRY *) malloc(sizeof(ENTRY));
+    if (pEntry == NULL) {
+        FreeAllMem();
         return NULL;
     }
-    if (Entry == NULL)
-    {
+    if (Entry == NULL) {
         Entry = pEntry;
     }
     pEntry->Type = tpNULL;
     pEntry->pPrev = CurEntry;
     pEntry->pNext = NULL;
     pEntry->Text = NULL;
-    if (CurEntry != NULL)
-    {
+    if (CurEntry != NULL) {
         CurEntry->pNext = pEntry;
     }
     return pEntry;
@@ -659,13 +596,13 @@ struct ENTRY *MakeNewEntry (void)
 //
 
 static int s_read_flags = 0;
-int OpenTypeFile (char *filNam)
+int OpenTypeFile(char *filNam)
 {
-    while (s_read_flags)
-        usleep (10000);
+    while (s_read_flags) {
+        usleep(10000);
+    }
 
-    if (!OpenIniFile (filNam))
-    {
+    if (!OpenIniFile(filNam)) {
         return 0;
     }
     s_read_flags = 1;
@@ -673,154 +610,128 @@ int OpenTypeFile (char *filNam)
 
 }
 
-int GetTypeKeyVal (char *appNam, char *keyNam, char *keyVal)
+int GetTypeKeyVal(char *appNam, char *keyNam, char *keyVal)
 {
-    if (s_read_flags)
-    {
+    if (s_read_flags) {
         char tmpBuf[CONF_MAX_PATH];
-        memcpy (tmpBuf, ReadString (appNam, keyNam, "NotFound"), CONF_MAX_PATH);
-        if (!strcmp (tmpBuf, "NotFound"))
-        {
+        memcpy(tmpBuf, ReadString(appNam, keyNam, "NotFound"), CONF_MAX_PATH);
+        if (!strcmp(tmpBuf, "NotFound")) {
             keyVal[0] = '\0';
+        } else {
+            memcpy(keyVal, tmpBuf, strlen(tmpBuf) + 1);
         }
-        else
-        {
-            memcpy (keyVal, tmpBuf, strlen (tmpBuf) + 1);
-        }
-        return strlen (keyVal);
-    }
-    else
-    {
+        return strlen(keyVal);
+    } else {
         keyVal[0] = '\0';
         return 0;
     }
 
 }
 
-void CloseTypeFile ()
+void CloseTypeFile()
 {
-    CloseIniFile ();
+    CloseIniFile();
     s_read_flags = 0;
 }
 
 static int FileIsOpen = 0;
 
-int GetPrivateProfileString (char *appNam, char *keyNam, char *keyVal, char *filNam)
+int GetPrivateProfileString(char *appNam, char *keyNam, char *keyVal, char *filNam)
 {
-    while (s_read_flags)
-        usleep (10000);
+    while (s_read_flags) {
+        usleep(10000);
+    }
     s_read_flags = 1;
 
-    if (FileIsOpen == 1)
-    {
+    if (FileIsOpen == 1) {
         char tmpBuf[CONF_MAX_PATH];
-        memcpy (tmpBuf, ReadString (appNam, keyNam, "NotFound"), CONF_MAX_PATH);
-        if (!strcmp (tmpBuf, "NotFound"))
-        {
+        memcpy(tmpBuf, ReadString(appNam, keyNam, "NotFound"), CONF_MAX_PATH);
+        if (!strcmp(tmpBuf, "NotFound")) {
             //  printf("get appNam=%s,keyNam=%s,NotFound\n",appNam,keyNam);
             keyVal[0] = '\0';
-        }
-        else
-        {
-            memcpy (keyVal, tmpBuf, strlen (tmpBuf) + 1);
+        } else {
+            memcpy(keyVal, tmpBuf, strlen(tmpBuf) + 1);
         }
         s_read_flags = 0;
-        return strlen (keyVal);
+        return strlen(keyVal);
     }
 
-    if (OpenIniFile (filNam))
-    {
+    if (OpenIniFile(filNam)) {
         char tmpBuf[CONF_MAX_PATH];
-        memcpy (tmpBuf, ReadString (appNam, keyNam, "NotFound"), CONF_MAX_PATH);
-        if (!strcmp (tmpBuf, "NotFound"))
-        {
+        memcpy(tmpBuf, ReadString(appNam, keyNam, "NotFound"), CONF_MAX_PATH);
+        if (!strcmp(tmpBuf, "NotFound")) {
             //  printf("get appNam=%s,keyNam=%s,NotFound\n",appNam,keyNam);
             keyVal[0] = '\0';
-        }
-        else
-        {
-            memcpy (keyVal, tmpBuf, strlen (tmpBuf) + 1);
+        } else {
+            memcpy(keyVal, tmpBuf, strlen(tmpBuf) + 1);
         }
 
         //CloseIniFile ();
         s_read_flags = 0;
         FileIsOpen = 1;
-        return strlen (keyVal);
-    }
-    else
-    {
+        return strlen(keyVal);
+    } else {
         keyVal[0] = '\0';
         s_read_flags = 0;
         return 0;
     }
 }
 
-int SetTypeKeyVal (char *appNam, char *keyNam, char *keyVal)
+int SetTypeKeyVal(char *appNam, char *keyNam, char *keyVal)
 {
-    if (s_read_flags)
-    {
+    if (s_read_flags) {
         char tmpBuf[CONF_MAX_PATH];
-        memcpy (tmpBuf, ReadString (appNam, keyNam, "NotFound"), CONF_MAX_PATH);
-        if (!strcmp (tmpBuf, "NotFound"))
-        {
-            printf ("set appNam=%s,keyNam=%s,NotFound\n", appNam, keyNam);
+        memcpy(tmpBuf, ReadString(appNam, keyNam, "NotFound"), CONF_MAX_PATH);
+        if (!strcmp(tmpBuf, "NotFound")) {
+            printf("set appNam=%s,keyNam=%s,NotFound\n", appNam, keyNam);
             return 0;
+        } else {
+            WriteString(appNam, keyNam, keyVal);
         }
-        else
-        {
-            WriteString (appNam, keyNam, keyVal);
-        }
-    }
-    else
-    {
+    } else {
         return 0;
     }
     return 1;
 }
 
-void CloseWriteFile (char *filNam)
+void CloseWriteFile(char *filNam)
 {
-    WriteIniFile (filNam);
-    CloseTypeFile ();
+    WriteIniFile(filNam);
+    CloseTypeFile();
 }
 
-int WritePrivateProfileString (char *appNam, char *keyNam, char *keyVal, char *filNam)
+int WritePrivateProfileString(char *appNam, char *keyNam, char *keyVal, char *filNam)
 {
-    while (s_read_flags)
-        usleep (10000);
+    while (s_read_flags) {
+        usleep(10000);
+    }
     s_read_flags = 1;
-    if (OpenIniFile (filNam))
-    {
+    if (OpenIniFile(filNam)) {
         char tmpBuf[CONF_MAX_PATH];
-        memcpy (tmpBuf, ReadString (appNam, keyNam, "NotFound"), CONF_MAX_PATH);
-        if (!strcmp (tmpBuf, "NotFound"))
-        {
-            printf ("set appNam=%s,keyNam=%s,NotFound\n", appNam, keyNam);
-            CloseIniFile ();
+        memcpy(tmpBuf, ReadString(appNam, keyNam, "NotFound"), CONF_MAX_PATH);
+        if (!strcmp(tmpBuf, "NotFound")) {
+            printf("set appNam=%s,keyNam=%s,NotFound\n", appNam, keyNam);
+            CloseIniFile();
             s_read_flags = 0;
             return 0;
+        } else {
+            WriteString(appNam, keyNam, keyVal);
         }
-        else
-        {
-            WriteString (appNam, keyNam, keyVal);
-        }
-        WriteIniFile (filNam);
-        CloseIniFile ();
+        WriteIniFile(filNam);
+        CloseIniFile();
         s_read_flags = 0;
         return 1;
-    }
-    else
-    {
+    } else {
         s_read_flags = 0;
         return 0;
     }
 }
 
-/* api add by dtsoft 
+/* api add by dtsoft
  *
  *get Env from ini file
  *
- * KEY-VALUE EXAMPLE: 
+ * KEY-VALUE EXAMPLE:
  * [PLAYER]
  * PLAYER.NOAUDIO = 1
  *
@@ -830,23 +741,23 @@ int WritePrivateProfileString (char *appNam, char *keyNam, char *keyVal, char *f
  *
  * */
 
-int GetEnv (char *appNam, char *keyNam, char *keyVal)
+int GetEnv(char *appNam, char *keyNam, char *keyVal)
 {
     char *fileNam = INI_FILE;
-    return GetPrivateProfileString (appNam, keyNam, keyVal, fileNam);
+    return GetPrivateProfileString(appNam, keyNam, keyVal, fileNam);
 }
 
 //#define INIFILE_TEST_THIS_FILE 1
 #ifdef INIFILE_TEST_THIS_FILE
-int main (void)
+int main(void)
 {
-    printf ("Hello World\n");
+    printf("Hello World\n");
     char valBuf[CONF_MAX_PATH];
-    GetPrivateProfileString ("SystemSet", "Volume", valBuf, "./systemset.ini");
-    printf ("valBuf=%s\n", valBuf);
-    WritePrivateProfileString ("SystemSet", "Volume", "ssg", "./systemset.ini");
-    GetPrivateProfileString ("SystemSet", "Volume", valBuf, "./systemset.ini");
-    printf ("valBuf=%s\n", valBuf);
+    GetPrivateProfileString("SystemSet", "Volume", valBuf, "./systemset.ini");
+    printf("valBuf=%s\n", valBuf);
+    WritePrivateProfileString("SystemSet", "Volume", "ssg", "./systemset.ini");
+    GetPrivateProfileString("SystemSet", "Volume", valBuf, "./systemset.ini");
+    printf("valBuf=%s\n", valBuf);
     return 0;
 }
 #endif

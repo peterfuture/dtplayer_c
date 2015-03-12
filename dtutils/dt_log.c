@@ -31,7 +31,7 @@
 static int dt_log_level = DT_LOG_INFO;
 //static FILE * dt_fp = NULL;
 
-static int check_level (int level)
+static int check_level(int level)
 {
     dt_log_level = dtp_setting.log_level;
     return level >= dt_log_level;
@@ -40,10 +40,11 @@ static int check_level (int level)
 static int tag_enable(char *filter, char *tag)
 {
     // tag filter
-    if(strlen(filter) > 0 &&
+    if (strlen(filter) > 0 &&
         strlen(tag) > 0 &&
-        strstr(filter, tag) == NULL)
+        strstr(filter, tag) == NULL) {
         return 0;
+    }
     return 1;
 }
 
@@ -59,134 +60,143 @@ static int display_time()
     return 0;
 }
 
-void dt_log (void *tag, int level, const char *fmt, ...)
+void dt_log(void *tag, int level, const char *fmt, ...)
 {
-    if (!check_level (level))
+    if (!check_level(level)) {
         return;
+    }
 
-    if(!tag_enable(dtp_setting.log_filter, (char *)tag))
+    if (!tag_enable(dtp_setting.log_filter, (char *)tag)) {
         return;
+    }
 
-    dt_get_log_level (DT_LOG_ERROR);
+    dt_get_log_level(DT_LOG_ERROR);
     printf("[%s] ", (char *) tag);
     va_list vl;
-    va_start (vl, fmt);
-    vprintf (fmt, vl);
-    va_end (vl);
+    va_start(vl, fmt);
+    vprintf(fmt, vl);
+    va_end(vl);
 }
 
-void dt_error (void *tag, const char *fmt, ...)
+void dt_error(void *tag, const char *fmt, ...)
 {
-    if (!check_level (DT_LOG_ERROR))
+    if (!check_level(DT_LOG_ERROR)) {
         return;
-    if(!tag_enable(dtp_setting.log_filter, (char *)tag))
+    }
+    if (!tag_enable(dtp_setting.log_filter, (char *)tag)) {
         return;
+    }
     display_time();
-    dt_get_log_level (DT_LOG_DEBUG);
-    printf ("[%s] ", (char *) tag);
+    dt_get_log_level(DT_LOG_DEBUG);
+    printf("[%s] ", (char *) tag);
     va_list vl;
-    va_start (vl, fmt);
-    vprintf (fmt, vl);
-    va_end (vl);
+    va_start(vl, fmt);
+    vprintf(fmt, vl);
+    va_end(vl);
 
 }
 
-void dt_debug (void *tag, const char *fmt, ...)
+void dt_debug(void *tag, const char *fmt, ...)
 {
-    if (!check_level (DT_LOG_DEBUG))
+    if (!check_level(DT_LOG_DEBUG)) {
         return;
-    if(!tag_enable(dtp_setting.log_filter, (char *)tag))
+    }
+    if (!tag_enable(dtp_setting.log_filter, (char *)tag)) {
         return;
+    }
     display_time();
-    dt_get_log_level (DT_LOG_WARNING);
-    printf ("[%s] ", (char *) tag);
+    dt_get_log_level(DT_LOG_WARNING);
+    printf("[%s] ", (char *) tag);
     va_list vl;
-    va_start (vl, fmt);
-    vprintf (fmt, vl);
-    va_end (vl);
+    va_start(vl, fmt);
+    vprintf(fmt, vl);
+    va_end(vl);
 }
 
-void dt_warning (void *tag, const char *fmt, ...)
+void dt_warning(void *tag, const char *fmt, ...)
 {
-    if (!check_level (DT_LOG_WARNING))
+    if (!check_level(DT_LOG_WARNING)) {
         return;
-    if(!tag_enable(dtp_setting.log_filter, (char *)tag))
+    }
+    if (!tag_enable(dtp_setting.log_filter, (char *)tag)) {
         return;
+    }
     display_time();
-    dt_get_log_level (DT_LOG_INFO);
-    printf ("[%s] ", (char *) tag);
+    dt_get_log_level(DT_LOG_INFO);
+    printf("[%s] ", (char *) tag);
     va_list vl;
-    va_start (vl, fmt);
-    vprintf (fmt, vl);
-    va_end (vl);
+    va_start(vl, fmt);
+    vprintf(fmt, vl);
+    va_end(vl);
 }
 
-void dt_info (void *tag, const char *fmt, ...)
+void dt_info(void *tag, const char *fmt, ...)
 {
-    if (!check_level (DT_LOG_INFO))
+    if (!check_level(DT_LOG_INFO)) {
         return;
-    if(!tag_enable(dtp_setting.log_filter, (char *)tag))
+    }
+    if (!tag_enable(dtp_setting.log_filter, (char *)tag)) {
         return;
+    }
     display_time();
-    dt_get_log_level (DT_LOG_INFO);
-    printf ("[%s] ", (char *) tag);
+    dt_get_log_level(DT_LOG_INFO);
+    printf("[%s] ", (char *) tag);
     va_list vl;
-    va_start (vl, fmt);
-    vprintf (fmt, vl);
-    va_end (vl);
+    va_start(vl, fmt);
+    vprintf(fmt, vl);
+    va_end(vl);
 }
 
-void dt_set_log_level (int level)
+void dt_set_log_level(int level)
 {
     dt_log_level = level;
-    printf ("after set log level :%d ", dt_log_level);
-    dt_get_log_level (dt_log_level);
-    printf ("\n");
+    printf("after set log level :%d ", dt_log_level);
+    dt_get_log_level(dt_log_level);
+    printf("\n");
 }
 
 /*get log level string desc*/
-void dt_get_log_level (int level)
+void dt_get_log_level(int level)
 {
-    switch (level)
-    {
+    switch (level) {
     case DT_LOG_INVALID:
-        printf ("[Invalid]");
+        printf("[Invalid]");
         break;
     case DT_LOG_ERROR:
-        printf ("%s[ERROR]", KRED);
+        printf("%s[ERROR]", KRED);
         break;
     case DT_LOG_DEBUG:
-        printf ("%s[DEBUG]", KBLU);
+        printf("%s[DEBUG]", KBLU);
         break;
     case DT_LOG_WARNING:
-        printf ("%s[WARNING]", KGRN);
+        printf("%s[WARNING]", KGRN);
         break;
     case DT_LOG_INFO:
-        printf ("[INFO]");
+        printf("[INFO]");
         break;
     case DT_LOG_MAX:
-        printf ("%s[Invalid]", KRED);
+        printf("%s[Invalid]", KRED);
         break;
     default:
-        printf ("%s[Invalid]", KRED);
+        printf("%s[Invalid]", KRED);
         break;
     }
     printf("%s: ", KNRM);
 }
 
 #if 0
-int main ()
+int main()
 {
-    dt_get_log_level ();
-    dt_info ("TEST", "this is info level test \n");
-    dt_error ("TEST", "this is error level test \n");
-    dt_debug ("TEST", "this is debug level test \n");
-    dt_warning ("TEST", "this is warnning level test \n");
-    dt_set_log_level (1);
-    dt_info ("TEST", "this is info level test \n");
-    dt_error ("TEST", "this is error level test \n");
-    dt_debug ("TEST", "this is debug level test \n");
-    dt_warning ("TEST", "this is warning level test \n");
+    dt_get_log_level();
+    dt_info("TEST", "this is info level test \n");
+    dt_error("TEST", "this is error level test \n");
+    dt_debug("TEST", "this is debug level test \n");
+    dt_warning("TEST", "this is warnning level test \n");
+    dt_set_log_level(1);
+    dt_info("TEST", "this is info level test \n");
+    dt_error("TEST", "this is error level test \n");
+    dt_debug("TEST", "this is debug level test \n");
+    dt_warning("TEST", "this is warning level test \n");
     return;
 }
 #endif

@@ -3,7 +3,9 @@
 void *dt_malloc(size_t size)
 {
     void *ptr = malloc(size);
-    if(!ptr) return ptr;
+    if (!ptr) {
+        return ptr;
+    }
     memset(ptr, 0, size);
     return ptr;
 }
@@ -23,35 +25,40 @@ dt_av_frame_t *dtav_new_frame()
 
 int dtav_unref_frame(dt_av_frame_t *frame)
 {
-    if(!frame)
+    if (!frame) {
         return 0;
-    if (frame->data)
-        free (frame->data[0]);
+    }
+    if (frame->data) {
+        free(frame->data[0]);
+    }
     return 0;
 }
 
 int dtav_free_frame(dt_av_frame_t *frame)
 {
-    if(!frame)
+    if (!frame) {
         return 0;
-    if (frame->data)
-        free (frame->data[0]);
+    }
+    if (frame->data) {
+        free(frame->data[0]);
+    }
     free(frame);
     return 0;
 }
 
 void dtav_clear_frame(void *pic)
 {
-    dt_av_frame_t *picture = (dt_av_frame_t *) (pic);
-    if (picture->data)
-        free (picture->data[0]);
+    dt_av_frame_t *picture = (dt_av_frame_t *)(pic);
+    if (picture->data) {
+        free(picture->data[0]);
+    }
     return;
 }
 
 // av convert
 const char *dt_mediafmt2str(dtmedia_format_t format)
 {
-    switch(format){
+    switch (format) {
     case DT_MEDIA_FORMAT_MPEGTS:
         return "mpegts";
     case DT_MEDIA_FORMAT_MPEGPS:
@@ -97,7 +104,7 @@ const char *dt_mediafmt2str(dtmedia_format_t format)
 
 const char *dt_afmt2str(dtaudio_format_t format)
 {
-    switch(format){
+    switch (format) {
     case DT_AUDIO_FORMAT_MP2:
         return "mp2";
     case DT_AUDIO_FORMAT_MP3:
@@ -115,7 +122,7 @@ const char *dt_afmt2str(dtaudio_format_t format)
 
 const char *dt_vfmt2str(dtvideo_format_t format)
 {
-    switch(format){
+    switch (format) {
     case DT_VIDEO_FORMAT_H264:
         return "h264";
     default:
@@ -127,7 +134,7 @@ const char *dt_vfmt2str(dtvideo_format_t format)
 
 const char *dt_sfmt2str(dtsub_format_t format)
 {
-    switch(format){
+    switch (format) {
     case DT_SUB_FORMAT_DVD_SUB:
         return "dvd-sub";
     case DT_SUB_FORMAT_DVB_SUB:
