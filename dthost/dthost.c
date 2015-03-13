@@ -336,6 +336,13 @@ int host_resume(dthost_context_t * hctx)
     has_video = hctx->para.has_video;
     has_sub = hctx->para.has_sub;
 
+    // startup pts
+    if (has_video) {
+        host_reset_systime(hctx, host_get_vpts(hctx));
+    } else if (has_audio) {
+        host_reset_systime(hctx, host_get_apts(hctx));
+    }
+
     if (has_audio) {
         ret = dtaudio_resume(hctx->audio_priv);
         if (ret < 0) {
