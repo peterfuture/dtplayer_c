@@ -35,8 +35,8 @@ typedef struct {
     int64_t cur_time_ms;
     int64_t cur_time;
     int64_t full_time;
-
     int64_t start_time;
+    int64_t discontinue_point_ms;
 } player_state_t;
 
 typedef struct dtplayer_para {

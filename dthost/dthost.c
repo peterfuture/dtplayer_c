@@ -52,7 +52,7 @@ int host_update_apts(dthost_context_t * hctx, int64_t apts)
     int64_t jump = llabs(apts - host_get_apts(hctx));
     if (jump / DT_PTS_FREQ_MS >= DT_SYNC_DISCONTINUE_THRESHOLD) {
         hctx->audio_discontinue_flag = 1;
-        hctx->audio_discontinue_point = host_get_apts(hctx);
+        hctx->audio_discontinue_point = apts;
         hctx->audio_discontinue_step = jump;
         dt_info(TAG, "apts discontinue,jump:%llx :%llx -> %llx \n", jump, host_get_apts(hctx), apts);
     }
@@ -86,15 +86,6 @@ int host_update_apts(dthost_context_t * hctx, int64_t apts)
         hctx->sync_mode = DT_SYNC_AUDIO_MASTER;
     }
 
-    if (hctx->audio_discontinue_flag == 1 && hctx->video_discontinue_flag == 1) {
-        if (avdiff < AVSYNC_THRESHOLD_MAX) {
-            hctx->audio_discontinue_flag = 0;
-            hctx->video_discontinue_flag = 0;
-            dt_info(TAG, "[%s:%d]Clear av discontinue flag, sync again \n", __FUNCTION__, __LINE__);
-        }
-
-    }
-
     if (asdiff < AVSYNC_THRESHOLD) {
         return 0;
     }
@@ -110,7 +101,7 @@ int host_update_vpts(dthost_context_t * hctx, int64_t vpts)
     int64_t jump = llabs(vpts - host_get_vpts(hctx));
     if (jump / DT_PTS_FREQ_MS >= DT_SYNC_DISCONTINUE_THRESHOLD) {
         hctx->video_discontinue_flag = 1;
-        hctx->video_discontinue_point = host_get_vpts(hctx);
+        hctx->video_discontinue_point = vpts;
         hctx->video_discontinue_step = jump;
         dt_info(TAG, "vpts discontinue,jump:%llx :%llx -> %llx \n", jump, host_get_vpts(hctx), vpts);
     }
@@ -137,15 +128,6 @@ int host_update_vpts(dthost_context_t * hctx, int64_t vpts)
         hctx->sync_mode = DT_SYNC_VIDEO_MASTER;
         host_reset_systime(hctx, vpts);
         return 0;
-    }
-
-    if (hctx->audio_discontinue_flag == 1 && hctx->video_discontinue_flag == 1) {
-        if (avdiff < AVSYNC_THRESHOLD_MAX) {
-            hctx->audio_discontinue_flag = 0;
-            hctx->video_discontinue_flag = 0;
-            dt_info(TAG, "[%s:%d]Clear av discontinue flag, sync again \n", __FUNCTION__, __LINE__);
-        }
-
     }
 
     if (hctx->sync_enable && hctx->sync_mode == DT_SYNC_VIDEO_MASTER && avdiff < AVSYNC_THRESHOLD_MAX) {
@@ -187,6 +169,14 @@ int host_update_systime(dthost_context_t * hctx, int64_t sys_time)
     int64_t time_diff = dt_gettime() - hctx->sys_time_start_time;
     hctx->sys_time_last = hctx->sys_time_current;
     hctx->sys_time_current = hctx->sys_time_start + time_diff * 9 / 100;
+    return 0;
+}
+
+int host_clear_discontinue_flag(dthost_context_t * hctx)
+{
+    hctx->audio_discontinue_flag = 0;
+    hctx->video_discontinue_flag = 0;
+    dt_info(TAG, "[%s:%d]Clear av discontinue flag \n", __FUNCTION__, __LINE__);
     return 0;
 }
 
@@ -419,11 +409,11 @@ int host_init(dthost_context_t * hctx)
     hctx->sys_time_start_time = -1;
 
     hctx->pts_audio_first = hctx->pts_audio_last = hctx->pts_audio_current = DT_NOPTS_VALUE;
-    hctx->audio_discontinue_flag = -1;
+    hctx->audio_discontinue_flag = 0;
     hctx->audio_discontinue_point = -1;
     hctx->audio_discontinue_step = -1;
     hctx->pts_video_first = hctx->pts_video_last = hctx->pts_video_current = DT_NOPTS_VALUE;
-    hctx->video_discontinue_flag = -1;
+    hctx->video_discontinue_flag = 0;
     hctx->video_discontinue_point = -1;
     hctx->video_discontinue_step = -1;
 
@@ -624,24 +614,13 @@ int host_get_state(dthost_context_t * hctx, host_state_t * state)
 
     // Update pts
     state->sys_time_start = hctx->sys_time_start;
-    state->sys_time_start_time = hctx->sys_time_start_time;
-    state->sys_time_first = hctx->sys_time_first;
-    state->sys_time_last = hctx->sys_time_last;
     state->sys_time_current = hctx->sys_time_current;
-
-    state->pts_audio_first = hctx->pts_audio_first;
-    state->pts_audio_last = hctx->pts_audio_last;
     state->pts_audio_current = hctx->pts_audio_current;
-    state->audio_discontinue_point = hctx->audio_discontinue_point;
     state->audio_discontinue_flag = hctx->audio_discontinue_flag;
-    state->audio_discontinue_step = hctx->audio_discontinue_step;
-
-    state->pts_video_first = hctx->pts_video_first;
-    state->pts_video_last = hctx->pts_video_last;
+    state->audio_discontinue_point = hctx->audio_discontinue_point;
     state->pts_video_current = hctx->pts_video_current;
-    state->video_discontinue_point = hctx->video_discontinue_point;
     state->video_discontinue_flag = hctx->video_discontinue_flag;
-    state->video_discontinue_step = hctx->video_discontinue_step;
+    state->video_discontinue_point = hctx->video_discontinue_point;
 
     return 0;
 }

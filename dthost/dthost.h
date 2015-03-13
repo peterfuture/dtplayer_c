@@ -63,6 +63,7 @@ int host_update_apts(dthost_context_t * hctx, int64_t apts);
 int host_update_vpts(dthost_context_t * hctx, int64_t vpts);
 int host_update_spts(dthost_context_t * hctx, int64_t spts);
 int host_update_systime(dthost_context_t * hctx, int64_t sys_time);
+int host_clear_discontinue_flag(dthost_context_t * hctx);
 int host_get_state(dthost_context_t * hctx, host_state_t * state);
 int host_get_out_closed(dthost_context_t * hctx);
 

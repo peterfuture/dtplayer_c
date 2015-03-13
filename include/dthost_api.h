@@ -71,27 +71,14 @@ typedef struct {
     int vdec_err_cnt;
     int sdec_err_cnt;
 
-
-    // From dthost_context_t
     int64_t sys_time_start;
-    int64_t sys_time_start_time; // First SystemTime Assignment Time(us)
-    int64_t sys_time_first;      // First System Time - Equal To First_APTS OR FIRST_VPTS
-    int64_t sys_time_last;       // Last System Time
-    int64_t sys_time_current;    // Current System Time
-
-    int64_t pts_audio_first;
-    int64_t pts_audio_last;
+    int64_t sys_time_current;
     int64_t pts_audio_current;
-    int64_t audio_discontinue_point;
     int     audio_discontinue_flag;
-    int64_t audio_discontinue_step;
-
-    int64_t pts_video_first;
-    int64_t pts_video_last;
+    int64_t audio_discontinue_point;
     int64_t pts_video_current;
-    int64_t video_discontinue_point;
     int     video_discontinue_flag;
-    int64_t video_discontinue_step;
+    int64_t video_discontinue_point;
 } host_state_t;
 
 int dthost_start(void *host_priv);
@@ -113,6 +100,7 @@ int dthost_get_avdiff(void *host_priv);
 int64_t dthost_get_current_time(void *host_priv);
 int64_t dthost_get_systime(void *host_priv);
 void dthost_update_systime(void *host_priv, int64_t systime);
+void dthost_clear_discontinue_flag(void *host_priv);
 int dthost_get_state(void *host_priv, host_state_t * state);
 int dthost_get_out_closed(void *host_priv);
 

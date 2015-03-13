@@ -209,6 +209,16 @@ void dthost_update_systime(void *host_priv, int64_t systime)
     return;
 }
 
+void dthost_clear_discontinue_flag(void *host_priv)
+{
+    if (!host_priv) {
+        return;
+    }
+    dthost_context_t *hctx = (dthost_context_t *)(host_priv);
+    host_clear_discontinue_flag(hctx);
+    return;
+}
+
 //==Part4:Status Relative
 
 int dthost_get_state(void *host_priv, host_state_t * state)
