@@ -60,7 +60,7 @@ static int para_setup(int argc, char **argv, dtplayer_para_t *para)
 
     para->disable_audio = 0;
     para->disable_video = 0;
-    para->disable_sub = 1;
+    para->disable_sub = 0;
     para->disable_avsync = 0;
 
     para->cookie = NULL;
