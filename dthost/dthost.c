@@ -409,10 +409,10 @@ int host_init(dthost_context_t * hctx)
     hctx->sync_enable = (host_para->has_audio && host_para->has_video) && host_para->sync_enable;
     hctx->av_diff = 0;
 
-    hctx->sys_time_start =
-        hctx->sys_time_first =
-            hctx->sys_time_current =
-                hctx->sys_time_last  = DT_NOPTS_VALUE;
+    hctx->sys_time_start = DT_NOPTS_VALUE;
+    hctx->sys_time_first = DT_NOPTS_VALUE;
+    hctx->sys_time_current = DT_NOPTS_VALUE;
+    hctx->sys_time_last  = DT_NOPTS_VALUE;
     hctx->sys_time_start_time = -1;
 
     hctx->pts_audio_first = hctx->pts_audio_last = hctx->pts_audio_current = DT_NOPTS_VALUE;

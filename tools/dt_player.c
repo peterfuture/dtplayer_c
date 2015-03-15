@@ -51,9 +51,9 @@ static int para_setup(int argc, char **argv, dtplayer_para_t *para)
         para->width = -1;
 
     para->loop_mode = 0;
-    para->audio_index =
-        para->video_index =
-            para->sub_index = -1;
+    para->audio_index = -1;
+    para->video_index = -1;
+    para->sub_index = -1;
 
     para->file_name = argv[1];
     para->update_cb = (void *)update_cb;
