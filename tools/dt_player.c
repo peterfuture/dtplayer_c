@@ -144,7 +144,7 @@ int main(int argc, char **argv)
 {
     int ret = 0;
     dtplayer_para_t para;
-
+    memset(&para, 0, sizeof(dtplayer_para_t));
     command_t program;
     command_init(&program, "dtplayer", VERSION);
     program.data = &para;

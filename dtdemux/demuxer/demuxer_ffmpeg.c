@@ -127,9 +127,9 @@ static int64_t pts_exchange(AVPacket * avpkt, dt_media_info_t * media_info)
     int has_audio = media_info->has_audio;
     int has_sub = media_info->has_sub;
 
-    int cur_vidx = (has_video) ? media_info->vstreams[media_info->cur_vst_index]->index : -1;
-    int cur_aidx = (has_audio) ? media_info->astreams[media_info->cur_ast_index]->index : -1;
-    int cur_sidx = (has_sub) ? media_info->sstreams[media_info->cur_sst_index]->index : -1;
+    int cur_vidx = (has_video && !media_info->disable_video) ? media_info->vstreams[media_info->cur_vst_index]->index : -1;
+    int cur_aidx = (has_audio && !media_info->disable_audio) ? media_info->astreams[media_info->cur_ast_index]->index : -1;
+    int cur_sidx = (has_sub && !media_info->disable_sub) ? media_info->sstreams[media_info->cur_sst_index]->index : -1;
 
     if (has_video && cur_vidx == avpkt->stream_index) {
         num = media_info->vstreams[media_info->cur_vst_index]->time_base.num;
