@@ -519,6 +519,7 @@ int host_init(dthost_context_t * hctx)
         sub_para.sfmt = host_para->sub_format;
         sub_para.width = host_para->sub_width;
         sub_para.height = host_para->sub_height;
+        sub_para.sub_output = -1;
         sub_para.avctx_priv = host_para->sctx_priv;
         ret = dtsub_init(&hctx->sub_priv, &sub_para, hctx);
         if (ret < 0) {
