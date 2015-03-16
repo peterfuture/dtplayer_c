@@ -10,6 +10,7 @@
 
 #include "dtplayer_api.h"
 #include "dtplayer.h"
+#include "commander.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -78,10 +79,93 @@ static void register_ex_all()
     //dtplayer_register_ext_vd(&vd_ex_ops);
 }
 
+static void on_log(command_t *self)
+{
+    return;
+}
+
+static void on_set_width(command_t *self)
+{
+    dtplayer_para_t *para = (dtplayer_para_t *)self->data;
+    para->width = atoi(self->arg);
+}
+
+static void on_set_height(command_t *self)
+{
+    dtplayer_para_t *para = (dtplayer_para_t *)self->data;
+    para->height = atoi(self->arg);
+}
+
+static void on_disable_audio(command_t *self)
+{
+    dtplayer_para_t *para = (dtplayer_para_t *)self->data;
+    para->disable_audio = atoi(self->arg);
+}
+
+static void on_disable_video(command_t *self)
+{
+    dtplayer_para_t *para = (dtplayer_para_t *)self->data;
+    para->disable_video = atoi(self->arg);
+}
+
+static void on_disable_sub(command_t *self)
+{
+    dtplayer_para_t *para = (dtplayer_para_t *)self->data;
+    para->disable_sub = atoi(self->arg);
+}
+
+static void on_select_audio(command_t *self)
+{
+    dtplayer_para_t *para = (dtplayer_para_t *)self->data;
+    para->audio_index = atoi(self->arg);
+}
+
+static void on_select_video(command_t *self)
+{
+    dtplayer_para_t *para = (dtplayer_para_t *)self->data;
+    para->video_index = atoi(self->arg);
+}
+
+static void on_select_sub(command_t *self)
+{
+    dtplayer_para_t *para = (dtplayer_para_t *)self->data;
+    para->sub_index = atoi(self->arg);
+}
+
+static void on_disable_sync(command_t *self)
+{
+    dtplayer_para_t *para = (dtplayer_para_t *)self->data;
+    para->disable_avsync = atoi(self->arg);
+}
+
+#define VERSION "0.1"
 int main(int argc, char **argv)
 {
     int ret = 0;
-    version_info();
+
+    dtplayer_para_t para;
+    command_t program;
+    command_init(&program, "dtplayer", VERSION);
+    program.data = &para;
+    program.usage = "[options] <command>";
+    command_option(&program, "-l", "--log <path>", "specify logfile [dtp.log]", on_log);
+    command_option(&program, "-dw", "--width <n>", "specify destiny width", on_set_width);
+    command_option(&program, "-dh", "--height <n>", "specify destiny height", on_set_height);
+    command_option(&program, "-na", "--disable_audio", "disable audio", on_disable_audio);
+    command_option(&program, "-nv", "--disable_video", "disable video", on_disable_video);
+    command_option(&program, "-ns", "--disable_sub", "disable sub", on_disable_sub);
+    command_option(&program, "-ai", "--audio_index <n>", "specify audio index", on_select_audio);
+    command_option(&program, "-vi", "--video_index <n>", "specify video index", on_select_video);
+    command_option(&program, "-si", "--sub_index <n>", "sepecify sub index", on_select_sub);
+    command_option(&program, "-nS", "--disable-sync <n>", "disable avsync", on_disable_sync);
+
+    command_parse(&program, argc, argv);
+
+    para_setup(argc, argv, &para);
+    ply_ctx.file_name = para.file_name;
+
+
+    //version_info();
     if (argc < 2) {
         dt_info("", " no enough args\n");
         show_usage();
@@ -103,10 +187,6 @@ int main(int argc, char **argv)
 
     player_register_all();
     register_ex_all();
-
-    dtplayer_para_t para;
-    para_setup(argc, argv, &para);
-    ply_ctx.file_name = para.file_name;
 
     void *player_priv = NULL;
     dt_media_info_t info;
