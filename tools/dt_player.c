@@ -79,9 +79,10 @@ static void register_ex_all()
     //dtplayer_register_ext_vd(&vd_ex_ops);
 }
 
-static void on_log(command_t *self)
+static void on_loop(command_t *self)
 {
-    return;
+    dtplayer_para_t *para = (dtplayer_para_t *)self->data;
+    para->loop_mode = atoi(self->arg);
 }
 
 static void on_set_width(command_t *self)
@@ -99,19 +100,19 @@ static void on_set_height(command_t *self)
 static void on_disable_audio(command_t *self)
 {
     dtplayer_para_t *para = (dtplayer_para_t *)self->data;
-    para->disable_audio = atoi(self->arg);
+    para->disable_audio = 1;
 }
 
 static void on_disable_video(command_t *self)
 {
     dtplayer_para_t *para = (dtplayer_para_t *)self->data;
-    para->disable_video = atoi(self->arg);
+    para->disable_video = 1;
 }
 
 static void on_disable_sub(command_t *self)
 {
     dtplayer_para_t *para = (dtplayer_para_t *)self->data;
-    para->disable_sub = atoi(self->arg);
+    para->disable_sub = 1;
 }
 
 static void on_select_audio(command_t *self)
@@ -135,33 +136,35 @@ static void on_select_sub(command_t *self)
 static void on_disable_sync(command_t *self)
 {
     dtplayer_para_t *para = (dtplayer_para_t *)self->data;
-    para->disable_avsync = atoi(self->arg);
+    para->disable_avsync = 1;
 }
 
 #define VERSION "0.1"
 int main(int argc, char **argv)
 {
     int ret = 0;
-
     dtplayer_para_t para;
+
     command_t program;
     command_init(&program, "dtplayer", VERSION);
     program.data = &para;
-    program.usage = "[options] <command>";
-    command_option(&program, "-l", "--log <path>", "specify logfile [dtp.log]", on_log);
+    program.usage = "[options] <url>";
     command_option(&program, "-dw", "--width <n>", "specify destiny width", on_set_width);
     command_option(&program, "-dh", "--height <n>", "specify destiny height", on_set_height);
     command_option(&program, "-na", "--disable_audio", "disable audio", on_disable_audio);
     command_option(&program, "-nv", "--disable_video", "disable video", on_disable_video);
     command_option(&program, "-ns", "--disable_sub", "disable sub", on_disable_sub);
-    command_option(&program, "-ai", "--audio_index <n>", "specify audio index", on_select_audio);
-    command_option(&program, "-vi", "--video_index <n>", "specify video index", on_select_video);
-    command_option(&program, "-si", "--sub_index <n>", "sepecify sub index", on_select_sub);
-    command_option(&program, "-nS", "--disable-sync <n>", "disable avsync", on_disable_sync);
+    command_option(&program, "-ast", "--audio_index <n>", "specify audio index", on_select_audio);
+    command_option(&program, "-vst", "--video_index <n>", "specify video index", on_select_video);
+    command_option(&program, "-sst", "--sub_index <n>", "specify sub index", on_select_sub);
+    command_option(&program, "-l", "--loop <n>", "enable loop", on_loop);
+    command_option(&program, "-nsy", "--disable-sync", "disable avsync", on_disable_sync);
 
     command_parse(&program, argc, argv);
 
-    para_setup(argc, argv, &para);
+    //para_setup(argc, argv, &para);
+    para.update_cb = update_cb;
+    para.file_name = argv[argc - 1];
     ply_ctx.file_name = para.file_name;
 
 
@@ -206,8 +209,8 @@ int main(int argc, char **argv)
     int height = 480;
     vstream_info_t *vstream = info.vstreams[0];
     if (info.has_video) {
-        width = vstream->width;
-        height = vstream->height;
+        width = (para.width) ? para.width : vstream->width;
+        height = (para.height) ? para.height : vstream->height;
     }
     if (width <= 0 || width > 4096) {
         width = 720;

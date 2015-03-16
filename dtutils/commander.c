@@ -49,7 +49,7 @@ command_help(command_t *self)
 
     for (i = 0; i < self->option_count; ++i) {
         command_option_t *option = &self->options[i];
-        printf("    %s, %-25s %s\n"
+        printf("    %-4s, %-25s %s\n"
                , option->small
                , option->large_with_arg
                , option->description);
@@ -141,12 +141,12 @@ normalize_args(int *argc, char **argv)
     int size = 0;
     int alloc = *argc + 1;
     char **nargv = malloc(alloc * sizeof(char *));
-    int i, j;
+    int i;
 
     for (i = 0; argv[i]; ++i) {
         const char *arg = argv[i];
         int len = strlen(arg);
-
+#if 0
         // short flag
         if (len > 2 && '-' == arg[0] && !strchr(arg + 1, '-')) {
             alloc += len - 2;
@@ -158,7 +158,7 @@ normalize_args(int *argc, char **argv)
             }
             continue;
         }
-
+#endif
         // regular arg
         nargv[size] = malloc(len + 1);
         strcpy(nargv[size], arg);
@@ -216,7 +216,6 @@ command_parse_args(command_t *self, int argc, char **argv)
         const char *arg = argv[i];
         for (j = 0; j < self->option_count; ++j) {
             command_option_t *option = &self->options[j];
-
             // match flag
             if (!strcmp(arg, option->small) || !strcmp(arg, option->large)) {
                 self->arg = NULL;
