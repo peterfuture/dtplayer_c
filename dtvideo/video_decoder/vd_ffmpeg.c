@@ -42,8 +42,6 @@ static AVCodecContext * alloc_ffmpeg_ctx(dtvideo_decoder_t *decoder)
         av_free(ctx);
         return NULL;
     }
-    //maybe ffmpeg not register
-    av_register_all();
     return ctx;
 }
 

@@ -80,7 +80,6 @@ static int demuxer_ffmpeg_open(demuxer_wrapper_t * wrapper)
     memset(ffmpeg_ctx, 0, sizeof(ffmpeg_ctx_t));
     av_register_all();
     AVFormatContext *ic = avformat_alloc_context();
-    AVInputFormat *iformat = NULL;
     /*register ext stream, ffmpeg will use */
     //==================================================
     ffmpeg_ctx->stream_ext = ctx->stream_priv;

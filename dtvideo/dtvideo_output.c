@@ -10,8 +10,6 @@
         register_vo(&vo_##x##_ops); \
     }
 
-static int64_t last_time = -1;
-
 static vo_wrapper_t *g_vo = NULL;
 
 static void register_vo(vo_wrapper_t * vo)
@@ -175,8 +173,6 @@ static void *video_output_thread(void *args)
 
     // sys_clock_*** use to calc system time
     int64_t sys_clock;
-
-    int64_t cur_time, time_diff, start_time;
     int64_t video_discontinue = 0;
 
     int dump_mode = dtp_setting.player_dump_mode; // 5 for video dump

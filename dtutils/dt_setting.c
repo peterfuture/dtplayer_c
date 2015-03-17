@@ -17,7 +17,6 @@ int dt_update_setting()
     if (GetEnv("LOG", "log.level", value) > 0) {
         dtp_setting.log_level = atoi(value);
     }
-    dtp_setting.log_filter;
     memset(dtp_setting.log_filter, 0, 1024);
     dtp_setting.log_filter[0] = '\0';
     if (GetEnv("LOG", "log.filter", value) > 0 && strlen(value) > 0) {

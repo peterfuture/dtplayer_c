@@ -46,28 +46,6 @@ static int update_cb(void *cookie, player_state_t * state)
     return 0;
 }
 
-static int para_setup(int argc, char **argv, dtplayer_para_t *para)
-{
-    para->height =
-        para->width = -1;
-
-    para->loop_mode = 0;
-    para->audio_index = -1;
-    para->video_index = -1;
-    para->sub_index = -1;
-
-    para->file_name = argv[1];
-    para->update_cb = (void *)update_cb;
-
-    para->disable_audio = 0;
-    para->disable_video = 0;
-    para->disable_sub = 0;
-    para->disable_avsync = 0;
-
-    para->cookie = NULL;
-    return 0;
-}
-
 extern vd_wrapper_t vd_ex_ops;
 static void register_ex_all()
 {

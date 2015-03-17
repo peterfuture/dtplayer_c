@@ -68,7 +68,6 @@ static int demuxer_select(dtdemuxer_context_t * dem_ctx)
 
 static void dump_media_info(dt_media_info_t * info)
 {
-    const char *type = "ung";
     dt_info(TAG, "|====================MEDIA INFO====================| \n");
     dt_info(TAG, "|file_name:%s\n", info->file_name);
     dt_info(TAG, "|file_size:%lld \n", info->file_size);
