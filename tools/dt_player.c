@@ -162,19 +162,16 @@ int main(int argc, char **argv)
 
     command_parse(&program, argc, argv);
 
-    //para_setup(argc, argv, &para);
+    //version_info();
+    if (argc < 2) {
+        command_help(&program);
+        return 0;
+    }
+
+    memset(&ply_ctx, 0, sizeof(ply_ctx_t));
     para.update_cb = update_cb;
     para.file_name = argv[argc - 1];
     ply_ctx.file_name = para.file_name;
-
-
-    //version_info();
-    if (argc < 2) {
-        dt_info("", " no enough args\n");
-        show_usage();
-        return 0;
-    }
-    memset(&ply_ctx, 0, sizeof(ply_ctx_t));
 
 #ifdef ENABLE_AO_SDL2
     ao_sdl2_setup(&ply_ctx.ao);
@@ -290,6 +287,7 @@ QUIT_CHECK:
         break;
     }
     ui_stop();
+    command_free(&program);
     dt_info("", "QUIT DTPLAYER-TEST\n");
     return 0;
 }
