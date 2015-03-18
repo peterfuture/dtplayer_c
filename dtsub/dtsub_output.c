@@ -176,6 +176,7 @@ int sub_output_stop(dtsub_output_t * so)
 ***********************************************************************/
 static void dtsub_frame_free(void *frame)
 {
+    return 0;
     int i;
 
     dtav_sub_frame_t *sub =(dtav_sub_frame_t *)(frame);
