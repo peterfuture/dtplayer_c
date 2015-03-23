@@ -19,7 +19,7 @@ User can also remove ffmpeg dependence through modifing makefile (set DT_FFMPEG 
 
 ### Android
 
-- install ffmpeg for android (refer to https://github.com/peterfuture/ffmpeg_android)
+- install ffmpeg for android (refer to [ffmpeg-android](https://github.com/peterfuture/ffmpeg_android))
 
 - export DT_FFMPEG_ANDROID_DIR=/PATH/TO/FFmpeg-Android/build/ffmpeg/armv7
 
@@ -28,6 +28,7 @@ User can also remove ffmpeg dependence through modifing makefile (set DT_FFMPEG 
 
 ## Usage
 
+```
 Usage: dtplayer [options] <url>
 
 Options:
@@ -45,6 +46,7 @@ Options:
     -l  , --loop <n>                enable loop
     -nsy, --disable-sync            disable avsync
 
+```
 
 ## Links
 
