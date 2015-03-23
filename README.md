@@ -1,59 +1,66 @@
-dtplayer
-====
-[![Build Status](https://travis-ci.org/peterfuture/dtplayer_c.svg?branch=master)](https://travis-ci.org/peterfuture/dtplayer_c)
+# dtplayer
 
-dtplayer is an open-sourced project, published under GPLv3 for individual/personal users .
-
-This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-Introduction
-====
-dtplayer is based on C , aimed to provide multimedia playing service base on ffmpeg(linux version2.0+, older version for android).
+dtplayer is an open-source project based on C , aimed to provide multimedia playing service base on ffmpeg(linux version2.0+).
 
 At present, dtplayer have provided examples on stream-demuxer-decoder-render modules. User can easily understand how to add new element.
 
-User can also remove ffmpeg dependence through modifing makefile (set DT_FFMPEG = no), Then you will get a aac player for now.
+User can also remove ffmpeg dependence through modifing makefile (set DT_FFMPEG = no), Then you will get an aac player for now.
 
-Build
-====
-Linux
-----------------
 
-1 install sdl1.0
+## Installation
 
-2 install ffmpeg & libav
+### Linux
 
-3 ./build.sh linux
+- install sdl1.0
 
-Target: dtplayer.exe dtplayer_g.exe libdtp.so libdtp.a
+- install ffmpeg & libav
 
-Android
-----------------
+- ./build.sh linux
 
-1 install ffmpeg for android (refer to https://github.com/peterfuture/ffmpeg_android)
+### Android
 
-2 export DT_FFMPEG_ANDROID_DIR=/PATH/TO/FFmpeg-Android/build/ffmpeg/armv7
+- install ffmpeg for android (refer to https://github.com/peterfuture/ffmpeg_android)
 
-3 ./build.sh android
+- export DT_FFMPEG_ANDROID_DIR=/PATH/TO/FFmpeg-Android/build/ffmpeg/armv7
 
-Target: libdtp.so
+- ./build.sh android
 
-for more details, refer to http://blog.csdn.net/u011350110/article/details/22585323
 
-Test
-====
-./dt_player.exe url
+## Usage
 
-Demo Repo
-====
-dttv-desktop:https://github.com/peterfuture/dttv-desktop
+Usage: dtplayer [options] <url>
 
-dttv-android:https://github.com/peterfuture/dttv-android
+Options:
 
-Author
-====
-Email: peter_future@outlook.com 
+    -V  , --version                 output program version
+    -h  , --help                    output help information
+    -dw , --width <n>               specify destiny width
+    -dh , --height <n>              specify destiny height
+    -na , --disable_audio           disable audio
+    -nv , --disable_video           disable video
+    -ns , --disable_sub             disable sub
+    -ast, --audio_index <n>         specify audio index
+    -vst, --video_index <n>         specify video index
+    -sst, --sub_index <n>           specify sub index
+    -l  , --loop <n>                enable loop
+    -nsy, --disable-sync            disable avsync
 
-QQ: peter_future@outlook.com
 
-blog: http://blog.csdn.net/dtplayer
+## Links
+
+Demos build with `dtplayer`:
+
+- [dttv-desktop](https://github.com/peterfuture/dttv-desktop) - pc multimedia player
+- [dttv-android](https://github.com/peterfuture/dttv-android) - android multimedia player
+
+## Author
+
+peter_future@outlook.com
+
+# Licence
+
+GPL v3.0
+
+# Build Status
+
+[![Build Status](https://travis-ci.org/peterfuture/dtplayer_c.svg?branch=master)](https://travis-ci.org/peterfuture/dtplayer_c)
