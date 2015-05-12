@@ -31,6 +31,10 @@ typedef struct vd_wrapper {
     void *parent;
 } vd_wrapper_t;
 
+typedef struct {
+    int decoded_frame_count;
+} vd_statistics_info_t;
+
 typedef struct dtvideo_decoder {
     dtvideo_para_t para;
     vd_wrapper_t *wrapper;
@@ -46,6 +50,7 @@ typedef struct dtvideo_decoder {
     int frame_count;
 
     dt_buffer_t *buf_out;
+    vd_statistics_info_t statistics_info;
     void *parent;
     void *vd_priv;
 } dtvideo_decoder_t;

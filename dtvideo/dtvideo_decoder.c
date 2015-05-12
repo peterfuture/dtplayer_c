@@ -115,6 +115,7 @@ static void *video_decode_loop(void *arg)
     dtvideo_decoder_t *decoder = (dtvideo_decoder_t *) arg;
     dtvideo_para_t *para = &decoder->para;
     vd_wrapper_t *wrapper = decoder->wrapper;
+    vd_statistics_info_t *p_vd_statistics_info = &decoder->statistics_info;
     dtvideo_context_t *vctx = (dtvideo_context_t *) decoder->parent;
     dtvideo_filter_t *filter = (dtvideo_filter_t *) & (vctx->video_filt);
     queue_t *picture_queue = vctx->vo_queue;
@@ -170,6 +171,11 @@ static void *video_decode_loop(void *arg)
         if (!picture) {
             goto DECODE_END;
         }
+
+        // statistics collection
+        {
+            p_vd_statistics_info->decoded_frame_count++;
+        }
         //got one frame, filter reset check
         if (wrapper->info_changed(decoder)) {
             //memcpy(&decoder->para, wrapper->para, sizeof(dtvideo_para_t));// wrapper->para == decoder->para
@@ -193,7 +199,6 @@ static void *video_decode_loop(void *arg)
                 decoder->pts_current = picture->pts;
             }
         }
-
 
         // setup some common info
         picture->width = para->d_width;
@@ -268,10 +273,19 @@ int video_decoder_start(dtvideo_decoder_t * decoder)
     return 0;
 }
 
+static void dump_vd_statistics_info(dtvideo_decoder_t * decoder)
+{
+    vd_statistics_info_t *p_info = &decoder->statistics_info;
+    dt_info(TAG, "==============vd statistics info============== \n");
+    dt_info(TAG, "DecodedVideoFrameCount: %d\n", p_info->decoded_frame_count);
+    dt_info(TAG, "=================================================== \n");
+}
+
 int video_decoder_stop(dtvideo_decoder_t * decoder)
 {
-    vd_wrapper_t *wrapper = decoder->wrapper;
+    vd_wrapper_t *wrapper = decoder->wrapper; 
 
+    dump_vd_statistics_info(decoder);
     /*Decode thread exit */
     decoder->status = VDEC_STATUS_EXIT;
     pthread_join(decoder->video_decoder_pid, NULL);

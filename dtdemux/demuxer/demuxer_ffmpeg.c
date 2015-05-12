@@ -214,6 +214,7 @@ static int demuxer_ffmpeg_read_frame(demuxer_wrapper_t * wrapper, dt_av_pkt_t * 
 {
     dtdemuxer_context_t *dem_ctx = (dtdemuxer_context_t *) wrapper->parent;
     dt_media_info_t *media_info = &dem_ctx->media_info;
+    demuxer_statistics_info_t *p_statistics_info = &dem_ctx->statistics_info; 
 
     int has_audio = (media_info->disable_audio) ? 0 : media_info->has_audio;
     int has_video = (media_info->disable_video) ? 0 : media_info->has_video;
@@ -266,12 +267,17 @@ static int demuxer_ffmpeg_read_frame(demuxer_wrapper_t * wrapper, dt_av_pkt_t * 
     frame->duration = avpkt.duration;
     frame->key_frame = avpkt.flags & AV_PKT_FLAG_KEY;
     if (frame->type == (int)AVMEDIA_TYPE_AUDIO) {
+        p_statistics_info->audio_frame_count++;
         dt_debug(TAG, "GET AUDIO FRAME, pts:%llx dts:%llx size:%d time:%lld\n", frame->pts, frame->dts, frame->size, frame->pts / 90000);
     }
     if (frame->type == (int)AVMEDIA_TYPE_VIDEO) {
+        p_statistics_info->video_frame_count++;
+        if(frame->key_frame)
+            p_statistics_info->video_keyframe_count++;
         dt_debug(TAG, "GET VIDEO FRAME, pts:%llx dts:%llx size:%d key:%d time:%lld\n", frame->pts, frame->dts, frame->size, frame->key_frame, frame->pts / 90000);
     }
     if (frame->type == (int)AVMEDIA_TYPE_SUBTITLE) {
+        p_statistics_info->sub_frame_count++;
         dt_debug(TAG, "GET SUB FRAME, pts:%llx dts:%llx size:%d time:%lld\n", frame->pts, frame->dts, frame->size, frame->pts/90000);
     }
     //dt_info(TAG, "read ok,frame size:%d %02x %02x %02x %02x addr:%p type:%d\n", frame->size, frame->data[0], frame->data[1], frame->data[2], frame->data[3], frame->data,frame->type);
@@ -558,10 +564,24 @@ static int demuxer_ffmpeg_seek_frame(demuxer_wrapper_t * wrapper, int64_t timest
     return -1;
 }
 
+static void dump_demuxer_statics_info(dtdemuxer_context_t *dem_ctx)
+{
+    demuxer_statistics_info_t *p_info = &dem_ctx->statistics_info;
+    dt_info(TAG, "==============demuxer statistics info============== \n");
+    dt_info(TAG, "AudioFrameCount: %d \n", p_info->audio_frame_count);
+    dt_info(TAG, "VideoFrameCount: %d Key:%d \n", p_info->video_frame_count, p_info->video_keyframe_count);
+    dt_info(TAG, "SubFrameCount: %d \n", p_info->sub_frame_count);
+    dt_info(TAG, "=================================================== \n");
+}
+
 static int demuxer_ffmpeg_close(demuxer_wrapper_t * wrapper)
 {
+    dtdemuxer_context_t *dem_ctx = (dtdemuxer_context_t *) wrapper->parent;
     ffmpeg_ctx_t *ctx = (ffmpeg_ctx_t *)wrapper->demuxer_priv;
     AVFormatContext *ic = ctx->ic;
+
+    dump_demuxer_statics_info(dem_ctx);
+
     if (ic) {
         avformat_close_input(&ic);
     }

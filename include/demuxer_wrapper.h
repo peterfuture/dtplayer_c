@@ -32,10 +32,18 @@ typedef struct demuxer_wrapper {
 } demuxer_wrapper_t;
 
 typedef struct {
+    int audio_frame_count;
+    int video_frame_count;
+    int video_keyframe_count;
+    int sub_frame_count;
+} demuxer_statistics_info_t;
+
+typedef struct {
     char *file_name;
     dt_media_info_t media_info;
     demuxer_wrapper_t *demuxer;
     dt_buffer_t probe_buf;
+    demuxer_statistics_info_t statistics_info;
     void *stream_priv;
     void *parent;
 } dtdemuxer_context_t;
