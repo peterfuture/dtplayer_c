@@ -182,7 +182,8 @@ int ffmpeg_vdec_decode(dtvideo_decoder_t *decoder, dt_av_pkt_t * dt_frame, dt_av
     AVFrame *frame = vd_ctx->frame;
     avcodec_decode_video2(avctxp, frame, &got_picture, &pkt);
     if (got_picture) {
-        ret = copy_frame(decoder, frame, av_frame_get_best_effort_timestamp(frame), pic);
+        //ret = copy_frame(decoder, frame, av_frame_get_best_effort_timestamp(frame), pic);
+        ret = copy_frame(decoder, frame, frame->pkt_pts, pic);
         //ret = convert_frame (decoder, frame, av_frame_get_best_effort_timestamp (frame), pic);
         if (ret == -1) {
             ret = 0;
