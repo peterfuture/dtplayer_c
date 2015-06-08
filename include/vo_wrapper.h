@@ -31,7 +31,7 @@ typedef enum {
 } vo_status_t;
 
 typedef enum _VO_ID_ {
-    VO_ID_EXAMPLE = -1,
+    VO_ID_NULL = 0,
     VO_ID_EX,            // ex vo need set to 0 default
     VO_ID_SDL,
     VO_ID_X11,

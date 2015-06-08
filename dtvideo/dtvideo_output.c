@@ -42,7 +42,7 @@ void vout_register_ext(vo_wrapper_t * vo)
 void vout_register_all()
 {
     /*Register all audio_output */
-    //REGISTER_VO(NULL, null);
+    REGISTER_VO(NULL, null);
 
 #if 0
 #ifdef ENABLE_VO_SDL
