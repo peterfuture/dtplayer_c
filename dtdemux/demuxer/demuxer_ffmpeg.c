@@ -133,11 +133,11 @@ static int64_t pts_exchange(AVPacket * avpkt, dt_media_info_t * media_info)
     if (has_video && cur_vidx == avpkt->stream_index) {
         num = media_info->vstreams[media_info->cur_vst_index]->time_base.num;
         den = media_info->vstreams[media_info->cur_vst_index]->time_base.den;
-        exchange = DT_PTS_FREQ * num / (double)den;
+        exchange = DT_PTS_FREQ * ((double)num / (double)den);
     } else if (has_audio && cur_aidx == avpkt->stream_index) {
         num = media_info->astreams[media_info->cur_ast_index]->time_base.num;
         den = media_info->astreams[media_info->cur_ast_index]->time_base.den;
-        exchange = DT_PTS_FREQ * (double) num / den;
+        exchange = DT_PTS_FREQ * ((double)num / (double)den);
     } else if (has_sub && cur_sidx == avpkt->stream_index) {
         //num = media_info->sstreams[media_info->cur_sst_index]->time_base.num;
         //den = media_info->sstreams[media_info->cur_sst_index]->time_base.den;
