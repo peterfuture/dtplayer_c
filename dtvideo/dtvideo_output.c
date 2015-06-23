@@ -214,7 +214,7 @@ static void *video_output_thread(void *args)
         // check video discontinue
         if (vctx->last_valid_pts != -1 && picture_pre->pts != -1) {
             int64_t step = llabs(picture_pre->pts - vctx->last_valid_pts);
-            if (step / DT_PTS_FREQ_MS >= DT_SYNC_DISCONTINUE_THRESHOLD) {
+            if (step >= DT_SYNC_DISCONTINUE_THRESHOLD) {
                 video_discontinue = 1;
                 dt_info(TAG, "video discontinue occured, step:%lld(%d ms) \n", step, step / DT_PTS_FREQ_MS);
             }
