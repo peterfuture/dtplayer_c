@@ -113,7 +113,7 @@ int player_host_init(dtplayer_context_t * dtp_ctx)
         host_para->video_filter = -1; //defualt
         host_para->video_output = -1; //defualt
         dt_info(TAG, "host-video Setup ok, cur index:%d \n", media_info->cur_vst_index);
-        dt_info(TAG, "[%s:%d]format:%d width:%d height:%d fmt:%d rate:%d ratio:%d fps:%g extra_size:%d\n", __FUNCTION__, __LINE__, host_para->video_format, host_para->video_src_width, host_para->video_src_height, host_para->video_src_pixfmt, host_para->video_rate, host_para->video_ratio, host_para->video_fps, host_para->video_extra_size);
+        dt_info(TAG, "[%s:%d]format:%d width:%d->%d height:%d->%d fmt:%d rate:%d ratio:%d fps:%g extra_size:%d\n", __FUNCTION__, __LINE__, host_para->video_format, host_para->video_src_width, host_para->video_dest_width, host_para->video_src_height, host_para->video_dest_height, host_para->video_src_pixfmt, host_para->video_rate, host_para->video_ratio, host_para->video_fps, host_para->video_extra_size);
         dt_info(TAG, "timebase->num:%d timebase->den:%d \n", host_para->video_num, host_para->video_den);
     }
     //----sub part------

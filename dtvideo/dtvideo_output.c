@@ -178,8 +178,8 @@ static void *video_output_thread(void *args)
     int dump_mode = dtp_setting.player_dump_mode; // 5 for video dump
     int dump_index = 0;
     //Init filter first, Just do color space convert
-    filter->para.d_width = filter->para.s_width;
-    filter->para.d_height = filter->para.s_height;
+    //filter->para.d_width = filter->para.s_width;
+    //filter->para.d_height = filter->para.s_height;
     video_filter_init(filter);
 
     for (;;) {
