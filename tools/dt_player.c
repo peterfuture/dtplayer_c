@@ -192,8 +192,8 @@ int main(int argc, char **argv)
     int height = 480;
     vstream_info_t *vstream = info.vstreams[0];
     if (info.has_video) {
-        width = (para.width) ? para.width : vstream->width;
-        height = (para.height) ? para.height : vstream->height;
+        width = (para.width > 0) ? para.width : vstream->width;
+        height = (para.height > 0) ? para.height : vstream->height;
     }
     if (width <= 0 || width > 4096) {
         width = 720;

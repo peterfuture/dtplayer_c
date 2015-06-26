@@ -79,8 +79,8 @@ int player_host_init(dtplayer_context_t * dtp_ctx)
         host_para->video_format = vstream->format;
         host_para->video_src_width = vstream->width;
         host_para->video_src_height = vstream->height;
-        host_para->video_dest_width = (pctrl->width == -1) ? vstream->width : pctrl->width;
-        host_para->video_dest_height = (pctrl->height == -1) ? vstream->height : pctrl->height;
+        host_para->video_dest_width = (pctrl->width <= 0) ? vstream->width : pctrl->width;
+        host_para->video_dest_height = (pctrl->height <= 0) ? vstream->height : pctrl->height;
 
         host_para->video_ratio = (vstream->sample_aspect_ratio.num << 16) | vstream->sample_aspect_ratio.den;
         host_para->video_num = vstream->time_base.num;
