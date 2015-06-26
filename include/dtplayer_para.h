@@ -53,6 +53,7 @@ typedef struct dtplayer_para {
     int disable_hw_acodec;
     int disable_hw_vcodec;
     int disable_hw_scodec;
+    int video_pixel_format;
 
     int width;
     int height;

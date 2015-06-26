@@ -17,7 +17,7 @@ typedef struct dt_setting {
     int audio_index;
     //VIDEO
     int video_pts_mode;
-    int video_out_type;
+    int video_pixel_format;
     int video_index;
     // SUB
     int sub_index;

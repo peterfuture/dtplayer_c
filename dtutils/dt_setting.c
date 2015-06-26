@@ -62,9 +62,9 @@ int dt_update_setting()
     if (GetEnv("VIDEO", "video.pts_mode", value) > 0) {
         dtp_setting.video_pts_mode = atoi(value);
     }
-    dtp_setting.video_out_type = 0;
-    if (GetEnv("VIDEO", "video.outtype", value) > 0) {
-        dtp_setting.video_out_type = atoi(value);
+    dtp_setting.video_pixel_format = 0;
+    if (GetEnv("VIDEO", "video.pixelformat", value) > 0) {
+        dtp_setting.video_pixel_format = atoi(value);
     }
     dtp_setting.video_index = -1;
     if (GetEnv("VIDEO", "video.index", value) > 0) {

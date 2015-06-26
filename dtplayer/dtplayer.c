@@ -142,6 +142,7 @@ int player_init(dtplayer_context_t * dtp_ctx)
     ctrl_info->disable_hw_acodec = para->disable_hw_acodec;
     ctrl_info->disable_hw_vcodec = para->disable_hw_vcodec;
     ctrl_info->disable_hw_scodec = para->disable_hw_scodec;
+    ctrl_info->video_pixel_format = (para->video_pixel_format == -1) ? dtp_setting.video_pixel_format : para->video_pixel_format;
 
     // Update cur media index
     if (dtp_setting.audio_index != -1) {

@@ -73,7 +73,7 @@ int player_host_init(dtplayer_context_t * dtp_ctx)
             dt_info(TAG, "[%s:%d] disable omx\n", __FUNCTION__, __LINE__);
         }
 
-        int vout_type = dtp_setting.video_out_type;
+        int vout_type = pctrl->video_pixel_format;
         dt_info(TAG, "vout type:%d - 0 yuv420 1 rgb565 2 rgb24 \n", vout_type);
 
         host_para->video_format = vstream->format;

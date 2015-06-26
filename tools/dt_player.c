@@ -117,12 +117,19 @@ static void on_disable_sync(command_t *self)
     para->disable_avsync = 1;
 }
 
+static void on_select_video_pixel_format(command_t *self)
+{
+    dtplayer_para_t *para = (dtplayer_para_t *)self->data;
+    para->video_pixel_format = atoi(self->arg);
+}
+
 #define VERSION "0.1"
 int main(int argc, char **argv)
 {
     int ret = 0;
     dtplayer_para_t para;
     memset(&para, 0, sizeof(dtplayer_para_t));
+
     command_t program;
     command_init(&program, "dtplayer", VERSION);
     program.data = &para;
@@ -137,6 +144,7 @@ int main(int argc, char **argv)
     command_option(&program, "-sst", "--sub_index <n>", "specify sub index", on_select_sub);
     command_option(&program, "-l", "--loop <n>", "enable loop", on_loop);
     command_option(&program, "-nsy", "--disable-sync", "disable avsync", on_disable_sync);
+    command_option(&program, "-vpf", "--video_pixel_format <n>", "video pixel format: 0-yuv420 1-rgb", on_select_video_pixel_format);
 
     command_parse(&program, argc, argv);
 

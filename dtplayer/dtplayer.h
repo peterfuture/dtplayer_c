@@ -37,6 +37,7 @@ typedef struct {
     int has_video;
     int has_sub;
 
+    int video_pixel_format;
 } player_ctrl_t;
 
 typedef struct dtplayer_context {
