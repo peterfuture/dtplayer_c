@@ -59,7 +59,7 @@ int dt_update_setting()
 
     // VIDEO
     dtp_setting.video_pts_mode = 0;
-    if (GetEnv("VIDEO", "video.pts_mode", value) > 0) {
+    if (GetEnv("VIDEO", "video.ptsmode", value) > 0) {
         dtp_setting.video_pts_mode = atoi(value);
     }
     dtp_setting.video_pixel_format = 0;

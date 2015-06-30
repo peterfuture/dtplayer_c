@@ -160,7 +160,7 @@ static int64_t pts_exchange(AVPacket * avpkt, dt_media_info_t * media_info)
 
     //dts valid case
     result = (int64_t)(exchange * avpkt->dts);
-    dt_debug(TAG, "pts:%llx setup from dts: %llx  exchange:%f \n", result, avpkt->dts, (float)exchange);
+    dt_debug(TAG, "pts:%llx dts: %llx  exchange:%f -> %llx\n", avpkt->pts, avpkt->dts, (float)exchange, result);
     return result;
 }
 
@@ -214,7 +214,7 @@ static int demuxer_ffmpeg_read_frame(demuxer_wrapper_t * wrapper, dt_av_pkt_t * 
 {
     dtdemuxer_context_t *dem_ctx = (dtdemuxer_context_t *) wrapper->parent;
     dt_media_info_t *media_info = &dem_ctx->media_info;
-    demuxer_statistics_info_t *p_statistics_info = &dem_ctx->statistics_info; 
+    demuxer_statistics_info_t *p_statistics_info = &dem_ctx->statistics_info;
 
     int has_audio = (media_info->disable_audio) ? 0 : media_info->has_audio;
     int has_video = (media_info->disable_video) ? 0 : media_info->has_video;
@@ -272,13 +272,14 @@ static int demuxer_ffmpeg_read_frame(demuxer_wrapper_t * wrapper, dt_av_pkt_t * 
     }
     if (frame->type == (int)AVMEDIA_TYPE_VIDEO) {
         p_statistics_info->video_frame_count++;
-        if(frame->key_frame)
+        if (frame->key_frame) {
             p_statistics_info->video_keyframe_count++;
+        }
         dt_debug(TAG, "GET VIDEO FRAME, pts:%llx dts:%llx size:%d key:%d time:%lld\n", frame->pts, frame->dts, frame->size, frame->key_frame, frame->pts / 90000);
     }
     if (frame->type == (int)AVMEDIA_TYPE_SUBTITLE) {
         p_statistics_info->sub_frame_count++;
-        dt_debug(TAG, "GET SUB FRAME, pts:%llx dts:%llx size:%d time:%lld\n", frame->pts, frame->dts, frame->size, frame->pts/90000);
+        dt_debug(TAG, "GET SUB FRAME, pts:%llx dts:%llx size:%d time:%lld\n", frame->pts, frame->dts, frame->size, frame->pts / 90000);
     }
     //dt_info(TAG, "read ok,frame size:%d %02x %02x %02x %02x addr:%p type:%d\n", frame->size, frame->data[0], frame->data[1], frame->data[2], frame->data[3], frame->data,frame->type);
     //dt_debug(TAG, "SIDE_DATA_ELEMENT:%d \n", avpkt.side_data_elems);
