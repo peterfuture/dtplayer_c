@@ -200,7 +200,7 @@ static void *video_output_thread(void *args)
 
         sys_clock = dtvideo_get_systime(vo->parent);
         if (sys_clock == -1 || sys_clock == DT_NOPTS_VALUE) {
-            dt_info(TAG, "SETTING FIRST SYSCLOK:%lld \n", picture_pre->pts);
+            dt_info(TAG, "SETTING FIRST SYSCLOK:%llx \n", picture_pre->pts);
             sys_clock = picture_pre->pts;
             dtvideo_update_systime(vo->parent, sys_clock);
         }

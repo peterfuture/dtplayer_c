@@ -185,18 +185,21 @@ static void *video_decode_loop(void *arg)
         decoder->frame_count++;
         //Got one frame
         //update current pts, clear the buffer size
-        if (picture->pts >= 0 && decoder->pts_first == DT_NOPTS_VALUE) {
-            //we will use first pts to estimate pts
-            //dt_info (TAG, "[%s:%d]first frame decoded ok, pts:0x%llx dts:0x%llx duration:%d size:%d\n", __FUNCTION__, __LINE__, frame.pts, frame.dts, frame.duration, frame.size);
+        if (PTS_INVALID(decoder->pts_first)) {
+            if (PTS_INVALID(picture->pts)) {
+                decoder->pts_first = decoder->pts_current = 0;
+            } else {
+                decoder->pts_first = pts_exchange(decoder, picture->pts);
+                decoder->pts_current = decoder->pts_first;
+            }
             dt_info(TAG, "[%s:%d]first frame decoded ok, pts:0x%llx dts:0x%llx\n", __FUNCTION__, __LINE__, picture->pts, picture->dts);
-            decoder->pts_first = pts_exchange(decoder, picture->pts);
-            decoder->pts_current = decoder->pts_first;
         } else {
-            if (pts_mode) {
+            if (pts_mode || PTS_INVALID(picture->pts)) {
                 int fps = decoder->para.fps;
                 float dur_inc = 90000 / fps;
                 picture->pts = decoder->pts_current + dur_inc;
                 decoder->pts_current = picture->pts;
+                dt_debug(TAG, "vpts inc itself. pts_mode:%d \n", pts_mode);
             }
         }
 
@@ -283,7 +286,7 @@ static void dump_vd_statistics_info(dtvideo_decoder_t * decoder)
 
 int video_decoder_stop(dtvideo_decoder_t * decoder)
 {
-    vd_wrapper_t *wrapper = decoder->wrapper; 
+    vd_wrapper_t *wrapper = decoder->wrapper;
 
     dump_vd_statistics_info(decoder);
     /*Decode thread exit */
