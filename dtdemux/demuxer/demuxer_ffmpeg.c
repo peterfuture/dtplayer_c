@@ -262,7 +262,8 @@ static int demuxer_ffmpeg_read_frame(demuxer_wrapper_t * wrapper, dt_av_pkt_t * 
     //setup frame
     frame->data = avpkt.data;
     frame->size = avpkt.size;
-    frame->pts = pts_exchange(&avpkt, media_info);
+    //frame->pts = pts_exchange(&avpkt, media_info);
+    frame->pts = avpkt.pts;
     frame->dts = avpkt.dts;
     frame->duration = avpkt.duration;
     frame->key_frame = avpkt.flags & AV_PKT_FLAG_KEY;

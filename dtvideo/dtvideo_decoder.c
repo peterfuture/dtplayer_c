@@ -106,7 +106,16 @@ static int select_video_decoder(dtvideo_decoder_t * decoder)
 
 static int64_t pts_exchange(dtvideo_decoder_t * decoder, int64_t pts)
 {
-    return pts;
+    int num = decoder->para.num;
+    int den = decoder->para.den;
+    double exchange = DT_PTS_FREQ * ((double)num / (double)den);
+    int64_t result = DT_NOPTS_VALUE;
+    if (PTS_VALID(pts)) {
+        result = (int64_t)(pts * exchange);
+    } else {
+        result = pts;
+    }
+    return result;
 }
 
 static void *video_decode_loop(void *arg)
@@ -185,12 +194,14 @@ static void *video_decode_loop(void *arg)
         decoder->frame_count++;
         //Got one frame
         //update current pts, clear the buffer size
+        if (PTS_VALID(picture->pts)) {
+            picture->pts = pts_exchange(decoder, picture->pts);
+        }
         if (PTS_INVALID(decoder->pts_first)) {
             if (PTS_INVALID(picture->pts)) {
                 decoder->pts_first = decoder->pts_current = 0;
             } else {
-                decoder->pts_first = pts_exchange(decoder, picture->pts);
-                decoder->pts_current = decoder->pts_first;
+                decoder->pts_first = decoder->pts_current = picture->pts;
             }
             dt_info(TAG, "[%s:%d]first frame decoded ok, pts:0x%llx dts:0x%llx\n", __FUNCTION__, __LINE__, picture->pts, picture->dts);
         } else {

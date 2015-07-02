@@ -75,7 +75,16 @@ int transport_direct(char *inbuf, int *inlen, char *outbuf, int *outlen)
 
 static int64_t pts_exchange(dtaudio_decoder_t * decoder, int64_t pts)
 {
-    return pts;
+    int num = decoder->aparam.num;
+    int den = decoder->aparam.den;
+    double exchange = DT_PTS_FREQ * ((double)num / (double)den);
+    int64_t result = DT_NOPTS_VALUE;
+    if (PTS_VALID(pts)) {
+        result = (int64_t)(pts * exchange);
+    } else {
+        result = pts;
+    }
+    return result;
 }
 
 #define MAX_ONE_FRAME_OUT_SIZE 192000
@@ -138,19 +147,24 @@ static void *audio_decode_loop(void *arg)
             continue;
         }
         //read ok,update current pts, clear the buffer size
-        if (frame.pts >= 0) {
-            if (decoder->pts_first == -1) {
-                if (frame.pts == DT_NOPTS_VALUE) {
-                    frame.pts = 0;
-                }
-                decoder->pts_first = pts_exchange(decoder, frame.pts);
-                dt_info(TAG, "first frame pts:%lld dts:%lld duration:%d size:%d\n", decoder->pts_first, frame.dts, frame.duration, frame.size);
-            }
-            decoder->pts_current = pts_exchange(decoder, frame.pts);
-            dt_debug(TAG, "pkt pts:%lld current:%lld duration:%d pts_s:%lld dts:%lld buf_size:%d \n", frame.pts, decoder->pts_current, frame.duration, frame.pts / 90000, frame.dts, decoder->pts_buffer_size);
-            decoder->pts_last_valid = decoder->pts_current;
-            decoder->pts_buffer_size = 0;
+        if (PTS_VALID(frame.pts)) {
+            frame.pts = pts_exchange(decoder, frame.pts);
         }
+
+        if (PTS_INVALID(decoder->pts_first)) {
+            if (PTS_INVALID(frame.pts)) {
+                decoder->pts_first = decoder->pts_current = 0;
+            } else {
+                decoder->pts_first = decoder->pts_current = decoder->pts_last_valid = frame.pts;
+            }
+            dt_info(TAG, "[%s:%d]Audio first frame decoded ok, pts:0x%llx dts:0x%llx\n", __FUNCTION__, __LINE__, frame.pts, frame.dts);
+        } else {
+            decoder->pts_last_valid = decoder->pts_current;
+            decoder->pts_current = frame.pts;
+            decoder->pts_buffer_size = 0;
+            dt_debug(TAG, "pkt pts:%lld current:%lld duration:%d pts_s:%lld dts:%lld buf_size:%d \n", frame.pts, decoder->pts_current, frame.duration, frame.pts / 90000, frame.dts, decoder->pts_buffer_size);
+        }
+
         //repack the frame
         if (frame_data) {
             free(frame_data);
