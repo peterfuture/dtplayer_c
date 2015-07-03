@@ -43,7 +43,7 @@ void adec_remove_all()
 static int select_audio_decoder(dtaudio_decoder_t * decoder)
 {
     ad_wrapper_t **p;
-    dtaudio_para_t *para = &(decoder->aparam);
+    dtaudio_para_t *para = &(decoder->para);
     p = &g_ad;
     while (*p != NULL) {
         if ((*p)->afmt == DT_AUDIO_FORMAT_UNKOWN) {
@@ -75,8 +75,8 @@ int transport_direct(char *inbuf, int *inlen, char *outbuf, int *outlen)
 
 static int64_t pts_exchange(dtaudio_decoder_t * decoder, int64_t pts)
 {
-    int num = decoder->aparam.num;
-    int den = decoder->aparam.den;
+    int num = decoder->para.num;
+    int den = decoder->para.den;
     double exchange = DT_PTS_FREQ * ((double)num / (double)den);
     int64_t result = DT_NOPTS_VALUE;
     if (PTS_VALID(pts)) {
@@ -92,7 +92,7 @@ static void *audio_decode_loop(void *arg)
 {
     int ret;
     dtaudio_decoder_t *decoder = (dtaudio_decoder_t *) arg;
-    dtaudio_para_t *para = &decoder->aparam;
+    dtaudio_para_t *para = &decoder->para;
     dt_av_pkt_t frame;
     ad_wrapper_t *wrapper = decoder->wrapper;
     dtaudio_context_t *actx = (dtaudio_context_t *) decoder->parent;
@@ -306,11 +306,11 @@ int audio_decoder_init(dtaudio_decoder_t * decoder)
     }
     /*init decoder */
     decoder->pts_current = decoder->pts_first = -1;
-    decoder->decoder_priv = decoder->aparam.avctx_priv;
-    if (decoder->aparam.num == 0 || decoder->aparam.den == 0) {
-        decoder->aparam.num = decoder->aparam.den = 1;
+    decoder->decoder_priv = decoder->para.avctx_priv;
+    if (decoder->para.num == 0 || decoder->para.den == 0) {
+        decoder->para.num = decoder->para.den = 1;
     } else {
-        dt_info(TAG, "[%s:%d] param: num:%d den:%d\n", __FUNCTION__, __LINE__, decoder->aparam.num, decoder->aparam.den);
+        dt_info(TAG, "[%s:%d] param: num:%d den:%d\n", __FUNCTION__, __LINE__, decoder->para.num, decoder->para.den);
     }
 
     ad_wrapper_t *wrapper = decoder->wrapper;
@@ -386,9 +386,9 @@ int64_t audio_decoder_get_pts(dtaudio_decoder_t * decoder)
     if (decoder->status == ADEC_STATUS_IDLE || decoder->status == ADEC_STATUS_EXIT) {
         return -1;
     }
-    channels = decoder->aparam.dst_channels;
-    sample_rate = decoder->aparam.samplerate;
-    bps = decoder->aparam.bps;
+    channels = decoder->para.dst_channels;
+    sample_rate = decoder->para.samplerate;
+    bps = decoder->para.bps;
     pts_ratio = (float) DT_PTS_FREQ / sample_rate;
     pts = 0;
     if (-1 == decoder->pts_first) {

@@ -35,13 +35,13 @@ static AVCodecContext * alloc_ffmpeg_ctx(dtaudio_decoder_t *decoder)
     }
 
     ctx->codec_type = AVMEDIA_TYPE_AUDIO;
-    ctx->codec_id = convert_to_id(decoder->aparam.afmt);
+    ctx->codec_id = convert_to_id(decoder->para.afmt);
     if (ctx->codec_id == 0) {
         av_free(ctx);
         return NULL;
     }
-    ctx->channels = decoder->aparam.channels;
-    ctx->sample_rate = decoder->aparam.samplerate;
+    ctx->channels = decoder->para.channels;
+    ctx->sample_rate = decoder->para.samplerate;
     ctx->sample_fmt = AV_SAMPLE_FMT_S16;
     ctx->internal = NULL;
 
@@ -65,8 +65,8 @@ int ffmpeg_adec_init(ad_wrapper_t *wrapper, void *parent)
         return -1;
     }
     enum AVCodecID id = avctxp->codec_id;
-    dt_info(TAG, "[%s:%d] param-- src channel:%d sample:%d id:%d format:%d \n", __FUNCTION__, __LINE__, avctxp->channels, avctxp->sample_rate, id, decoder->aparam.afmt);
-    dt_info(TAG, "[%s:%d] param-- dst channels:%d samplerate:%d \n", __FUNCTION__, __LINE__, decoder->aparam.dst_channels, decoder->aparam.dst_samplerate);
+    dt_info(TAG, "[%s:%d] param-- src channel:%d sample:%d id:%d format:%d \n", __FUNCTION__, __LINE__, avctxp->channels, avctxp->sample_rate, id, decoder->para.afmt);
+    dt_info(TAG, "[%s:%d] param-- dst channels:%d samplerate:%d \n", __FUNCTION__, __LINE__, decoder->para.dst_channels, decoder->para.dst_samplerate);
     codec = avcodec_find_decoder(id);
     if (NULL == codec) {
         dt_error(TAG, "[%s:%d] video codec find failed \n", __FILE__, __FUNCTION__, __LINE__);
@@ -99,7 +99,7 @@ static void audio_convert(dtaudio_decoder_t *decoder, AVFrame * dst, AVFrame * s
     *dst = *src;
 
     dst->data[0] = NULL;
-    out_channels = decoder->aparam.dst_channels;
+    out_channels = decoder->para.dst_channels;
     nb_sample = frame->nb_samples;
     dst_buf_size = nb_sample * av_get_bytes_per_sample(dst_fmt) * out_channels;
     dst->data[0] = (uint8_t *) av_malloc(dst_buf_size);
@@ -107,7 +107,7 @@ static void audio_convert(dtaudio_decoder_t *decoder, AVFrame * dst, AVFrame * s
     avcodec_fill_audio_frame(dst, out_channels, dst_fmt, dst->data[0], dst_buf_size, 0);
     dt_debug(TAG, "SRCFMT:%d dst_fmt:%d \n", src_fmt, dst_fmt);
     /* resample toAV_SAMPLE_FMT_S16 */
-    if (src_fmt != dst_fmt || out_channels != decoder->aparam.channels) {
+    if (src_fmt != dst_fmt || out_channels != decoder->para.channels) {
         if (!m_swr_ctx) {
             uint64_t in_channel_layout = av_get_default_channel_layout(avctxp->channels);
             uint64_t out_channel_layout = av_get_default_channel_layout(out_channels);

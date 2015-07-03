@@ -134,10 +134,10 @@ int audio_get_dec_state(dtaudio_context_t * actx, dec_state_t * dec_state)
         return -1;
     }
     dtaudio_decoder_t *adec = &actx->audio_dec;
-    dec_state->adec_channels = adec->aparam.channels;
+    dec_state->adec_channels = adec->para.channels;
     dec_state->adec_error_count = adec->decode_err_cnt;
-    dec_state->adec_bps = adec->aparam.bps;
-    dec_state->adec_sample_rate = adec->aparam.samplerate;
+    dec_state->adec_bps = adec->para.bps;
+    dec_state->adec_sample_rate = adec->para.samplerate;
     dec_state->adec_status = adec->status;
     return 0;
 }
@@ -310,8 +310,8 @@ int audio_init(dtaudio_context_t * actx)
 
     /*audio decoder init */
     memset(audio_dec, 0, sizeof(dtaudio_decoder_t));
-    memset(&audio_dec->aparam, 0, sizeof(dtaudio_para_t));
-    memcpy(&audio_dec->aparam, &actx->audio_param, sizeof(dtaudio_para_t));
+    memset(&audio_dec->para, 0, sizeof(dtaudio_para_t));
+    memcpy(&audio_dec->para, &actx->audio_param, sizeof(dtaudio_para_t));
     audio_dec->parent = actx;
     ret = audio_decoder_init(audio_dec);
     if (ret < 0) {

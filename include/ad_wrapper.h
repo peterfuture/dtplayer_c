@@ -39,7 +39,7 @@ typedef struct ad_wrapper {
 } ad_wrapper_t;
 
 typedef struct dtaudio_decoder {
-    dtaudio_para_t aparam;
+    dtaudio_para_t para;
     ad_wrapper_t *wrapper;
     pthread_t audio_decoder_pid;
     adec_status_t status;
