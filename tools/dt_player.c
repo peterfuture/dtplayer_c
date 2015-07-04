@@ -144,7 +144,7 @@ int main(int argc, char **argv)
     command_option(&program, "-sst", "--sub_index <n>", "specify sub index", on_select_sub);
     command_option(&program, "-l", "--loop <n>", "enable loop", on_loop);
     command_option(&program, "-nsy", "--disable-sync", "disable avsync", on_disable_sync);
-    command_option(&program, "-vpf", "--video_pixel_format <n>", "video pixel format: 0-yuv420 1-rgb", on_select_video_pixel_format);
+    command_option(&program, "-vpf", "--video_pixel_format <n>", "video pixel format: 0-yuv420 1-rgb565 2-rgb24 3-rgba", on_select_video_pixel_format);
 
     command_parse(&program, argc, argv);
 

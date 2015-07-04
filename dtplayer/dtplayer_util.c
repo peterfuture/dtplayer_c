@@ -74,7 +74,7 @@ int player_host_init(dtplayer_context_t * dtp_ctx)
         }
 
         int vout_type = pctrl->video_pixel_format;
-        dt_info(TAG, "vout type:%d - 0 yuv420 1 rgb565 2 rgb24 \n", vout_type);
+        dt_info(TAG, "vout type:%d - 0 yuv420 1 rgb565 2 rgb24 3 rgba \n", vout_type);
 
         host_para->video_format = vstream->format;
         host_para->video_src_width = vstream->width;
@@ -102,6 +102,9 @@ int player_host_init(dtplayer_context_t * dtp_ctx)
         }
         if (vout_type == 2) {
             host_para->video_dest_pixfmt = DTAV_PIX_FMT_RGB24;
+        }
+        if (vout_type == 3) {
+            host_para->video_dest_pixfmt = DTAV_PIX_FMT_RGBA;
         }
 
         host_para->vctx_priv = vstream->codec_priv;
