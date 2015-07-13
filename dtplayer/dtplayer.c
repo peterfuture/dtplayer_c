@@ -145,30 +145,50 @@ int player_init(dtplayer_context_t * dtp_ctx)
     ctrl_info->video_pixel_format = (para->video_pixel_format == -1) ? dtp_setting.video_pixel_format : para->video_pixel_format;
 
     // Update cur media index
-    if (dtp_setting.audio_index != -1) {
-        dtp_ctx->media_info->cur_ast_index = dtp_setting.audio_index;
-    }
-    if (dtp_setting.video_index != -1) {
-        dtp_ctx->media_info->cur_vst_index = dtp_setting.video_index;
-    }
-    if (dtp_setting.sub_index != -1) {
-        dtp_ctx->media_info->cur_sst_index = dtp_setting.sub_index;
-    }
     if (para->audio_index != -1) {
         dtp_ctx->media_info->cur_ast_index = para->audio_index;
+    } else if (dtp_setting.audio_index != -1) {
+        dtp_ctx->media_info->cur_ast_index = dtp_setting.audio_index;
+    } else {
+        dtp_ctx->media_info->cur_ast_index = 0;
     }
+
     if (para->video_index != -1) {
         dtp_ctx->media_info->cur_vst_index = para->video_index;
+    } else if (dtp_setting.video_index != -1) {
+        dtp_ctx->media_info->cur_vst_index = dtp_setting.video_index;
+    } else {
+        dtp_ctx->media_info->cur_vst_index = 0;
     }
+
     if (para->sub_index != -1) {
         dtp_ctx->media_info->cur_sst_index = para->sub_index;
+    } else if (dtp_setting.sub_index != -1) {
+        dtp_ctx->media_info->cur_sst_index = dtp_setting.sub_index;
+    } else {
+        dtp_ctx->media_info->cur_sst_index = 0;
     }
+
+    //Fixme cur index valid check ...
+    if (dtp_ctx->media_info->cur_ast_index >= dtp_ctx->media_info->ast_num) {
+        dt_info(TAG, "Warnning, invalid ast index:%d max:%d reset to 0\n", dtp_ctx->media_info->cur_ast_index, dtp_ctx->media_info->ast_num - 1);
+        dtp_ctx->media_info->cur_ast_index = 0;
+    }
+
+    if (dtp_ctx->media_info->cur_vst_index >= dtp_ctx->media_info->vst_num) {
+        dt_info(TAG, "Warnning, invalid vst index:%d max:%d reset to 0\n", dtp_ctx->media_info->cur_vst_index, dtp_ctx->media_info->vst_num - 1);
+        dtp_ctx->media_info->cur_vst_index = 0;
+    }
+
+    if (dtp_ctx->media_info->cur_sst_index >= dtp_ctx->media_info->sst_num) {
+        dt_info(TAG, "Warnning, invalid sst index:%d max:%d reset to 0\n", dtp_ctx->media_info->cur_sst_index, dtp_ctx->media_info->sst_num - 1);
+        dtp_ctx->media_info->cur_sst_index = 0;
+    }
+
     dt_info(TAG, "ast_idx:%d vst_idx:%d sst_idx:%d \n",
             dtp_ctx->media_info->cur_ast_index,
             dtp_ctx->media_info->cur_vst_index,
             dtp_ctx->media_info->cur_sst_index);
-
-    //Fixme cur index valid check ...
 
     //other info setup
     ctrl_info->start_time = dtp_ctx->media_info->start_time;
