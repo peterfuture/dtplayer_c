@@ -269,18 +269,21 @@ static int demuxer_ffmpeg_read_frame(demuxer_wrapper_t * wrapper, dt_av_pkt_t * 
     frame->key_frame = avpkt.flags & AV_PKT_FLAG_KEY;
     if (frame->type == (int)AVMEDIA_TYPE_AUDIO) {
         p_statistics_info->audio_frame_count++;
-        dt_debug(TAG, "GET AUDIO FRAME, pts:%llx dts:%llx time:%lld size:%d \n", frame->pts, frame->dts, frame->pts / 90000, frame->size);
+        dt_debug(TAG, "GET AUDIO FRAME, pts:0x%llx dts:0x%llx time:%lld offset:0x%llx size:%d \n", frame->pts, frame->dts, frame->pts / 90000, p_statistics_info->a_offset, frame->size);
+        p_statistics_info->a_offset += frame->size;
     }
     if (frame->type == (int)AVMEDIA_TYPE_VIDEO) {
         p_statistics_info->video_frame_count++;
         if (frame->key_frame) {
             p_statistics_info->video_keyframe_count++;
         }
-        dt_debug(TAG, "GET VIDEO FRAME, pts:%llx dts:%llx time:%lld size:%d key:%d\n", frame->pts, frame->dts, frame->pts / 90000, frame->size, frame->key_frame);
+        dt_debug(TAG, "GET VIDEO FRAME, pts:0x%llx dts:0x%llx time:%lld offset:0x%llx size:%d key:%d\n", frame->pts, frame->dts, frame->pts / 90000, p_statistics_info->v_offset, frame->size, frame->key_frame);
+        p_statistics_info->v_offset += frame->size;
     }
     if (frame->type == (int)AVMEDIA_TYPE_SUBTITLE) {
         p_statistics_info->sub_frame_count++;
-        dt_debug(TAG, "GET SUB FRAME, pts:%llx dts:%llx size:%d time:%lld\n", frame->pts, frame->dts, frame->size, frame->pts / 90000);
+        dt_debug(TAG, "GET SUB FRAME, pts:0x%llx dts:0x%llx size:%d time:%lld offset:0x%llx \n", frame->pts, frame->dts, frame->size, frame->pts / 90000, p_statistics_info->s_offset);
+        p_statistics_info->s_offset += frame->size;
     }
     //dt_info(TAG, "read ok,frame size:%d %02x %02x %02x %02x addr:%p type:%d\n", frame->size, frame->data[0], frame->data[1], frame->data[2], frame->data[3], frame->data,frame->type);
     //dt_debug(TAG, "SIDE_DATA_ELEMENT:%d \n", avpkt.side_data_elems);
@@ -573,9 +576,9 @@ static void dump_demuxer_statics_info(dtdemuxer_context_t *dem_ctx)
 {
     demuxer_statistics_info_t *p_info = &dem_ctx->statistics_info;
     dt_info(TAG, "==============demuxer statistics info============== \n");
-    dt_info(TAG, "AudioFrameCount: %d \n", p_info->audio_frame_count);
-    dt_info(TAG, "VideoFrameCount: %d Key:%d \n", p_info->video_frame_count, p_info->video_keyframe_count);
-    dt_info(TAG, "SubFrameCount: %d \n", p_info->sub_frame_count);
+    dt_info(TAG, "AudioFrameCount: %d  size:%lld \n", p_info->audio_frame_count, p_info->a_offset);
+    dt_info(TAG, "VideoFrameCount: %d Key:%d size:%lld \n", p_info->video_frame_count, p_info->video_keyframe_count, p_info->v_offset);
+    dt_info(TAG, "SubFrameCount: %d size:%lld \n", p_info->sub_frame_count, p_info->s_offset);
     dt_info(TAG, "=================================================== \n");
 }
 

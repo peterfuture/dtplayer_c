@@ -36,6 +36,9 @@ typedef struct {
     int video_frame_count;
     int video_keyframe_count;
     int sub_frame_count;
+    int64_t a_offset;
+    int64_t v_offset;
+    int64_t s_offset;
 } demuxer_statistics_info_t;
 
 typedef struct {
