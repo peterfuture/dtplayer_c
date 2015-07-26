@@ -14,6 +14,9 @@ int sdl2_window_resize(int w, int h);
 #include <SDL/SDL.h>
 int sdl_init(ply_ctx_t *ply_ctx, ui_ctx_t *ui_ctx);
 int sdl_stop();
+int sdl_get_orig_size(int *w, int *h);
+int sdl_get_max_size(int *w, int *h);
+int sdl_window_resize(int w, int h);
 #endif
 
 int ui_init(ply_ctx_t *ply_ctx, ui_ctx_t *ui_ctx)
@@ -45,6 +48,10 @@ int ui_get_orig_size(int *w, int *h)
 #ifdef ENABLE_VO_SDL2
     sdl2_get_orig_size(w, h);
 #endif
+#ifdef ENABLE_VO_SDL
+    sdl_get_orig_size(w, h);
+#endif
+
     return 0;
 }
 
@@ -53,6 +60,10 @@ int ui_get_max_size(int *w, int *h)
 #ifdef ENABLE_VO_SDL2
     sdl2_get_max_size(w, h);
 #endif
+#ifdef ENABLE_VO_SDL
+    sdl_get_max_size(w, h);
+#endif
+
     return 0;
 }
 
@@ -90,7 +101,6 @@ player_event_t get_event(args_t *arg, ply_ctx_t *ctx)
                 arg->arg2 = ctx->ui_ctx->orig_height;
                 full_screen = 0;
             }
-
             return EVENT_RESIZE;
         case SDLK_p:
         case SDLK_SPACE:

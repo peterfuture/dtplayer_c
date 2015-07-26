@@ -6,7 +6,6 @@
 #include "ad_wrapper.h"
 #include "vo_wrapper.h"
 #include "vd_wrapper.h"
-#include "ui.h"
 
 #include "dtplayer_api.h"
 #include "dtplayer.h"
@@ -17,36 +16,28 @@
 
 #define TAG "DT-PLAYER"
 
-static ply_ctx_t ply_ctx;
+static player_t player;
 
 #ifdef ENABLE_DTAP
 int dtap_change_effect(ao_wrapper_t *wrapper);
-#endif
-
-#ifdef ENABLE_AO_SDL2
-void ao_sdl2_setup(ao_wrapper_t *wrapper);
-#endif
-#ifdef ENABLE_AO_SDL
-void ao_sdl_setup(ao_wrapper_t *wrapper);
-void vo_sdl_setup(vo_wrapper_t *wrapper);
 #endif
 
 static int update_cb(void *cookie, player_state_t * state)
 {
     if (state->cur_status == PLAYER_STATUS_EXIT) {
         dt_info(TAG, "RECEIVE EXIT CMD\n");
-        ply_ctx.exit_flag = 1;
+        player.quit = 1;
     }
-    ply_ctx.cur_time = state->cur_time;
-    ply_ctx.cur_time_ms = state->cur_time_ms;
-    ply_ctx.duration = state->full_time;
+    play_info_t *pinfo = &player.info;
+    pinfo->cur_time = state->cur_time;
+    pinfo->cur_time_ms = state->cur_time_ms;
+    pinfo->duration = state->full_time;
 
     dt_debug(TAG, "UPDATECB CURSTATUS:%x \n", state->cur_status);
     dt_info(TAG, "CUR TIME %lld S  FULL TIME:%lld  \n", state->cur_time, state->full_time);
     return 0;
 }
 
-extern vd_wrapper_t vd_ex_ops;
 static void register_ex_all()
 {
     //player_register_ex_stream();
@@ -54,7 +45,6 @@ static void register_ex_all()
     //player_register_ex_ao();
     //player_register_ex_ad();
     //player_register_ex_vo();
-    //dtplayer_register_ext_vd(&vd_ex_ops);
 }
 
 static void on_loop(command_t *self)
@@ -117,7 +107,7 @@ static void on_disable_sync(command_t *self)
     para->disable_avsync = 1;
 }
 
-static void on_select_video_pixel_format(command_t *self)
+static void on_select_vpf(command_t *self)
 {
     dtplayer_para_t *para = (dtplayer_para_t *)self->data;
     para->video_pixel_format = atoi(self->arg);
@@ -144,7 +134,7 @@ int main(int argc, char **argv)
     command_option(&program, "-sst", "--sub_index <n>", "specify sub index", on_select_sub);
     command_option(&program, "-l", "--loop <n>", "enable loop", on_loop);
     command_option(&program, "-nsy", "--disable-sync", "disable avsync", on_disable_sync);
-    command_option(&program, "-vpf", "--video_pixel_format <n>", "video pixel format: 0-yuv420 1-rgb565 2-rgb24 3-rgba", on_select_video_pixel_format);
+    command_option(&program, "-vpf", "--video_pixel_format <n>", "video pixel format: 0-yuv420 1-rgb565 2-rgb24 3-rgba", on_select_vpf);
 
     command_parse(&program, argc, argv);
 
@@ -154,22 +144,10 @@ int main(int argc, char **argv)
         return 0;
     }
 
-    memset(&ply_ctx, 0, sizeof(ply_ctx_t));
+    memset(&player, 0, sizeof(player_t));
     para.update_cb = update_cb;
     para.file_name = argv[argc - 1];
-    ply_ctx.file_name = para.file_name;
-
-#ifdef ENABLE_AO_SDL2
-    ao_sdl2_setup(&ply_ctx.ao);
-    dtplayer_register_ext_ao(&ply_ctx.ao);
-#endif
-
-#ifdef ENABLE_AO_SDL
-    ao_sdl_setup(&ply_ctx.ao);
-    dtplayer_register_ext_ao(&ply_ctx.ao);
-    vo_sdl_setup(&ply_ctx.vo);
-    dtplayer_register_ext_vo(&ply_ctx.vo);
-#endif
+    player.file_name = para.file_name;
 
     player_register_all();
     register_ex_all();
@@ -180,6 +158,7 @@ int main(int argc, char **argv)
     if (!player_priv) {
         return -1;
     }
+
     ret = dtplayer_get_mediainfo(player_priv, &info);
     if (ret < 0) {
         dt_info(TAG, "get mediainfo failed, quit \n");
@@ -207,27 +186,41 @@ int main(int argc, char **argv)
     }
     dt_info(TAG, "dst-width: %d dst-height: %d \n", width, height);
 
-    ply_ctx.disp_width = width;
-    ply_ctx.disp_height = height;
+    player.disp_width = width;
+    player.disp_height = height;
 
-    ply_ctx.ui_ctx = (ui_ctx_t *)dt_malloc(sizeof(ui_ctx_t));
-    ui_init(&ply_ctx, ply_ctx.ui_ctx);
+    // setup gui
+    gui_para_t gui_para;
+    gui_para.width = width;
+    gui_para.height = height;
+    gui_para.pixfmt = (para.video_pixel_format > 0) ? para.video_pixel_format : 0; // yuv420 default
 
+    ret = setup_gui(&player.gui, &gui_para);
+    if (ret < 0) {
+        return -1;
+    }
+    if (info.has_video) {
+        setup_vo(&player.vo);
+        dtplayer_register_ext_vo(&player.vo);
+    }
+    if (info.has_audio) {
+        setup_ao(&player.ao);
+        dtplayer_register_ext_ao(&player.ao);
+    }
     dtplayer_start(player_priv);
 
     //event handle
-    player_event_t event = EVENT_NONE;
+    gui_event_t event = EVENT_NONE;
     args_t arg;
     while (1) {
-        if (ply_ctx.exit_flag == 1) {
+        if (player.quit == 1) {
             break;
         }
-        event = get_event(&arg, &ply_ctx);
+        event = player.gui->get_event(player.gui, &arg);
         if (event == EVENT_NONE) {
             usleep(100);
             continue;
         }
-
         switch (event) {
         case EVENT_PAUSE:
             dtplayer_pause(player_priv);
@@ -236,24 +229,28 @@ int main(int argc, char **argv)
             dtplayer_resume(player_priv);
             break;
         case EVENT_SEEK:
-            dtplayer_seekto(player_priv, arg.arg1);
+            dtplayer_seekto(player_priv, player.info.cur_time + arg.arg1);
             break;
+        case EVENT_SEEK_RATIO: {
+            int target_ts = player.info.cur_time * arg.arg1 / arg.arg2;
+            dtplayer_seekto(player_priv, target_ts);
+            break;
+        }
         case EVENT_STOP:
             dtplayer_stop(player_priv);
             goto QUIT_CHECK;
             break;
         case EVENT_RESIZE:
             dt_info(TAG, "resize, w:%d h:%d \n", arg.arg1, arg.arg2);
-            ui_window_resize(arg.arg1, arg.arg2);
-            ply_ctx.disp_width = arg.arg1;
-            ply_ctx.disp_height = arg.arg2;
+            player.disp_width = arg.arg1;
+            player.disp_height = arg.arg2;
             //dtplayer_set_video_size(player_priv, arg.arg1, arg.arg2);
             break;
         case EVENT_VOLUME_ADD:
             dt_info(TAG, " volume add \n");
-            ply_ctx.volume++;
-            ply_ctx.volume = ply_ctx.volume % 10;
-            ply_ctx.ao.ao_set_volume(&ply_ctx.ao, ply_ctx.volume);
+            //player.volume++;
+            //player.volume = ply_ctx.volume % 10;
+            //player.ao.ao_set_volume(&ply_ctx.ao, ply_ctx.volume);
             break;
 #ifdef ENABLE_DTAP
         case EVENT_AE:
@@ -264,16 +261,16 @@ int main(int argc, char **argv)
             dt_info(TAG, "UNKOWN CMD, IGNORE \n");
             break;
         }
-
         usleep(10 * 1000);  // sleep 10ms
     }
 QUIT_CHECK:
-    while (!ply_ctx.exit_flag) {
+    while (!player.quit) {
         usleep(100);
         break;
     }
-    ui_stop();
+    player.gui->stop(player.gui);
     command_free(&program);
     dt_info("", "QUIT DTPLAYER-TEST\n");
+
     return 0;
 }

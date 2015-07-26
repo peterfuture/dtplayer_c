@@ -12,9 +12,8 @@ typedef struct {
     SDL_Surface *screen;
     SDL_Overlay *overlay;
     dt_lock_t vo_mutex;
-
     dtvideo_filter_t vf;
-
+    int resize_flag;
     ui_ctx_t *ui_ctx;
     ply_ctx_t *ply_ctx;
 } sdl_ctx_t;
@@ -58,6 +57,23 @@ int sdl_init(ply_ctx_t *ply_ctx, ui_ctx_t *ui_ctx)
     SDL_WM_SetCaption(sdl_ctx.ply_ctx->file_name, sdl_ctx.ply_ctx->file_name);
 
     dt_lock_init(&sdl_ctx.vo_mutex, NULL);
+    dt_info(TAG, "cur size <%d - %d> max size <%d - %d> \n", ui_ctx->cur_width, ui_ctx->cur_height, ui_ctx->max_width, ui_ctx->max_height);
+    return 0;
+}
+
+int sdl_get_orig_size(int *w, int *h)
+{
+    sdl_ctx_t *ctx = &sdl_ctx;
+    *w = ctx->ui_ctx->orig_width;
+    *h = ctx->ui_ctx->orig_height;
+    return 0;
+}
+
+int sdl_get_max_size(int *w, int *h)
+{
+    sdl_ctx_t *ctx = &sdl_ctx;
+    *w = ctx->ui_ctx->max_width;
+    *h = ctx->ui_ctx->max_height;
     return 0;
 }
 
@@ -71,19 +87,19 @@ int sdl_window_resize(int w, int h)
 
     sdl_ctx.vf.para.d_width = w;
     sdl_ctx.vf.para.d_height = h;
-    video_filter_update(&sdl_ctx.vf);
-
-    SDL_FreeYUVOverlay(sdl_ctx.overlay);
+    ctx->resize_flag = 1;
     dt_info(TAG, "W:%d H:%d \n", w, h);
+
+    video_filter_update(&sdl_ctx.vf);
+    SDL_FreeYUVOverlay(sdl_ctx.overlay);
     int flags = SDL_HWSURFACE | SDL_ASYNCBLIT | SDL_HWACCEL;
-    if (sdl_ctx.ui_ctx->max_width == w) {
+    if (sdl_ctx.ui_ctx->max_width == ctx->ui_ctx->cur_width) {
         flags |= SDL_FULLSCREEN;
     } else {
         flags |= SDL_RESIZABLE;
     }
-
-    sdl_ctx.screen = SDL_SetVideoMode(w, h, 0, flags);
-    SDL_WM_SetCaption(sdl_ctx.ply_ctx->file_name, sdl_ctx.ply_ctx->file_name);
+    sdl_ctx.screen = SDL_SetVideoMode(w , h, 0, flags);
+    //SDL_WM_SetCaption(sdl_ctx.ply_ctx->file_name, sdl_ctx.ply_ctx->file_name);
     sdl_ctx.overlay = SDL_CreateYUVOverlay(w, h, SDL_YV12_OVERLAY, sdl_ctx.screen);
 
     dt_unlock(&ctx->vo_mutex);
@@ -155,6 +171,7 @@ static int vo_sdl_render(dtvideo_output_t * vo, dt_av_frame_t * frame)
     rect.y = cur_y_pos;
     rect.w = cur_width;
     rect.h = cur_height;
+    dt_info(TAG, "-%d-%d-%d-%d-\n", rect.x, rect.y, rect.w, rect.h);
     SDL_DisplayYUVOverlay(sdl_ctx.overlay, &rect);
 
     dt_unlock(&sdl_ctx.vo_mutex);

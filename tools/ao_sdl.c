@@ -143,10 +143,10 @@ static int ao_sdl_set_volume(ao_wrapper_t *ao, int value)
     return 0;
 }
 
-void ao_sdl_setup(ao_wrapper_t *wrapper)
+int setup_ao(ao_wrapper_t *wrapper)
 {
     if (wrapper == NULL) {
-        return;
+        return -1;
     }
     wrapper->id = AO_ID_SDL;
     wrapper->name = ao_sdl_name;
@@ -159,6 +159,7 @@ void ao_sdl_setup(ao_wrapper_t *wrapper)
     wrapper->ao_latency = ao_sdl_get_latency;
     wrapper->ao_get_volume = ao_sdl_get_volume;
     wrapper->ao_set_volume = ao_sdl_set_volume;
+    return 0;
 }
 
 ao_wrapper_t ao_sdl_ops = {
