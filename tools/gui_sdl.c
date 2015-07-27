@@ -152,6 +152,10 @@ static gui_event_t sdl_get_event(gui_ctx_t *ctx , args_t *arg)
         return EVENT_SEEK_RATIO;
     }
     break;
+    case SDL_VIDEORESIZE:
+        arg->arg1 = event.resize.w;
+        arg->arg2 = event.resize.h;
+        return EVENT_RESIZE;
     case SDL_QUIT:
         return EVENT_STOP;
     default:
@@ -180,6 +184,7 @@ static int sdl_set_info(gui_ctx_t *ctx, gui_cmd_t cmd, args_t arg)
             else
                 flags |= SDL_RESIZABLE;
             window.screen = SDL_SetVideoMode(width , height, 0, flags);
+            SDL_WM_SetCaption("dtplayer", "dttv");
             sdl_gui.window_w = width;
             sdl_gui.window_h = height;
             sdl_gui.rect.w = width;
@@ -266,7 +271,6 @@ static int vo_sdl_render(dtvideo_output_t * vo, dt_av_frame_t * frame)
     } else if (sdl_gui.pixfmt == 1) {
         window.overlay = SDL_CreateYUVOverlay(width, height, SDL_YV12_OVERLAY, window.screen);
     }
-
 
     SDL_LockYUVOverlay(window.overlay);
 

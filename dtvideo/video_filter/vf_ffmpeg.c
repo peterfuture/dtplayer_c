@@ -171,7 +171,6 @@ static int ffmpeg_vf_process(dtvideo_filter_t *filter, dt_av_frame_t *frame)
         dt_info(TAG, "[%s:%d] vf process failed \n", __FUNCTION__, __LINE__);
     }
 
-    dt_info(TAG, "[%s:%d] vf process ok \n", __FUNCTION__, __LINE__);
     return ret;
 }
 
