@@ -245,6 +245,7 @@ int main(int argc, char **argv)
             player.disp_width = arg.arg1;
             player.disp_height = arg.arg2;
             //dtplayer_set_video_size(player_priv, arg.arg1, arg.arg2);
+            player.gui->set_info(player.gui, GUI_CMD_SET_SIZE, arg);
             break;
         case EVENT_VOLUME_ADD:
             dt_info(TAG, " volume add \n");

@@ -5,6 +5,18 @@
 #include "vo_wrapper.h"
 
 typedef enum {
+    GUI_CMD_UNKOWN = -1,
+    GUI_CMD_GET_WINDOW_SIZE = 0,
+    GUI_CMD_GET_MAX_SIZE,
+    GUI_CMD_GET_MODE,
+    
+    GUI_CMD_SET_SIZE = 0x100,
+    GUI_CMD_SET_MODE,
+
+    GUI_CMD_MAX      = 0xFFFF
+} gui_cmd_t;
+
+typedef enum {
     EVENT_INVALID = -1,
     EVENT_NONE,
     EVENT_PAUSE,
@@ -62,8 +74,8 @@ typedef struct gui_ctx {
 
     int (*init)(struct gui_ctx *ctx);
     gui_event_t (*get_event)(struct gui_ctx *ctx, args_t *arg);
-    int (*get_info)(struct gui_ctx *ctx);
-    int (*set_info)(struct gui_ctx *ctx);
+    int (*get_info)(struct gui_ctx *ctx, gui_cmd_t cmd, args_t *arg);
+    int (*set_info)(struct gui_ctx *ctx, gui_cmd_t cmd, args_t arg);
     int (*stop)(struct gui_ctx *ctx);
 } gui_ctx_t;
 
