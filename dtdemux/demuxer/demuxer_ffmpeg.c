@@ -227,6 +227,7 @@ static int demuxer_ffmpeg_read_frame(demuxer_wrapper_t * wrapper, dt_av_pkt_t * 
     ffmpeg_ctx_t *ctx = (ffmpeg_ctx_t *)wrapper->demuxer_priv;
     AVFormatContext *ic = ctx->ic;
     AVPacket avpkt;
+    int64_t exchange_pts;
     int ret = av_read_frame(ic, &avpkt);
     if (ret < 0) {
         if (AVERROR(EAGAIN) != ret) {
@@ -262,14 +263,14 @@ static int demuxer_ffmpeg_read_frame(demuxer_wrapper_t * wrapper, dt_av_pkt_t * 
     //setup frame
     frame->data = avpkt.data;
     frame->size = avpkt.size;
-    //frame->pts = pts_exchange(&avpkt, media_info);
+    exchange_pts = pts_exchange(&avpkt, media_info);
     frame->pts = avpkt.pts;
     frame->dts = avpkt.dts;
     frame->duration = avpkt.duration;
     frame->key_frame = avpkt.flags & AV_PKT_FLAG_KEY;
     if (frame->type == (int)AVMEDIA_TYPE_AUDIO) {
         p_statistics_info->audio_frame_count++;
-        dt_debug(TAG, "GET AUDIO FRAME, pts:0x%llx dts:0x%llx time:%lld offset:0x%llx size:%d \n", frame->pts, frame->dts, frame->pts / 90000, p_statistics_info->a_offset, frame->size);
+        dt_debug(TAG, "GET AUDIO FRAME, pts:0x%llx dts:0x%llx time:%lld exchange_pts:%llx offset:0x%llx size:%d \n", frame->pts, frame->dts, frame->pts / 90000, exchange_pts, p_statistics_info->a_offset, frame->size);
         p_statistics_info->a_offset += frame->size;
     }
     if (frame->type == (int)AVMEDIA_TYPE_VIDEO) {
@@ -277,12 +278,12 @@ static int demuxer_ffmpeg_read_frame(demuxer_wrapper_t * wrapper, dt_av_pkt_t * 
         if (frame->key_frame) {
             p_statistics_info->video_keyframe_count++;
         }
-        dt_debug(TAG, "GET VIDEO FRAME, pts:0x%llx dts:0x%llx time:%lld offset:0x%llx size:%d key:%d\n", frame->pts, frame->dts, frame->pts / 90000, p_statistics_info->v_offset, frame->size, frame->key_frame);
+        dt_debug(TAG, "GET VIDEO FRAME, pts:0x%llx dts:0x%llx time:%lld exchange_pts:%llx offset:0x%llx size:%d key:%d\n", frame->pts, frame->dts, frame->pts / 90000, exchange_pts, p_statistics_info->v_offset, frame->size, frame->key_frame);
         p_statistics_info->v_offset += frame->size;
     }
     if (frame->type == (int)AVMEDIA_TYPE_SUBTITLE) {
         p_statistics_info->sub_frame_count++;
-        dt_debug(TAG, "GET SUB FRAME, pts:0x%llx dts:0x%llx size:%d time:%lld offset:0x%llx \n", frame->pts, frame->dts, frame->size, frame->pts / 90000, p_statistics_info->s_offset);
+        dt_debug(TAG, "GET SUB FRAME, pts:0x%llx dts:0x%llx size:%d time:%lld exchange_pts:%llx offset:0x%llx \n", frame->pts, frame->dts, frame->size, frame->pts / 90000, exchange_pts, p_statistics_info->s_offset);
         p_statistics_info->s_offset += frame->size;
     }
     //dt_info(TAG, "read ok,frame size:%d %02x %02x %02x %02x addr:%p type:%d\n", frame->size, frame->data[0], frame->data[1], frame->data[2], frame->data[3], frame->data,frame->type);
