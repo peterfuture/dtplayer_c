@@ -20,7 +20,7 @@ int player_host_init(dtplayer_context_t * dtp_ctx)
     //----audio ----
     dt_info(TAG, "[%s:%d] has video:%d has audio:%d has sub:%d \n", __FUNCTION__, __LINE__, host_para->has_video, host_para->has_audio, host_para->has_sub);
     if (pctrl->has_audio) {
-        if (pctrl->disable_hw_vcodec == 1) {
+        if (pctrl->disable_hw_acodec == 1) {
             host_para->aflag |= DTAV_FLAG_DISABLE_HW_CODEC;
             dt_info(TAG, "[%s:%d] disable omx\n", __FUNCTION__, __LINE__);
         }

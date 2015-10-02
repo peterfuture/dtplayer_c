@@ -232,7 +232,7 @@ int main(int argc, char **argv)
             dtplayer_seekto(player_priv, player.info.cur_time + arg.arg1);
             break;
         case EVENT_SEEK_RATIO: {
-            int target_ts = player.info.cur_time * arg.arg1 / arg.arg2;
+            int target_ts = player.info.duration * arg.arg1 / arg.arg2;
             dtplayer_seekto(player_priv, target_ts);
             break;
         }

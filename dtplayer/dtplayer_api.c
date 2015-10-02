@@ -127,7 +127,7 @@ int dtplayer_stop(void *player_priv)
     //here has no need to block ,player will
     //exit after receiving quit status through update_cb in dtplayer.c
 
-    //pthread_join(dtp_ctx->event_loop_id, NULL);
+    pthread_join(dtp_ctx->event_loop_id, NULL);
     return 0;
 }
 
@@ -162,6 +162,7 @@ int dtplayer_seekto(void *player_priv, int s_time)
     dtplayer_context_t *dtp_ctx = (dtplayer_context_t *)player_priv;
 
     //get current time
+    dt_info(TAG, "seek to :%d s \n", s_time);
     int64_t full_time = dtp_ctx->media_info->duration;
     int seek_time = s_time;
     if (seek_time < 0) {
