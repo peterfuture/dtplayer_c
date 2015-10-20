@@ -564,7 +564,7 @@ static int demuxer_ffmpeg_seek_frame(demuxer_wrapper_t * wrapper, int64_t timest
     int64_t s_time = timestamp / AV_TIME_BASE;
     if(duration > 0 && (s_time <= 1 || s_time >= duration - 10)) {
         seek_flags = AVSEEK_FLAG_BACKWARD;
-        dt_info(TAG, "seek to head or tail, set backward flag\n", dtp_setting.demuxer_seek_keyframe);
+        dt_info(TAG, "seek to head or tail, set backward flag\n");
     }
 #if 0
     int64_t seek_target = timestamp;
@@ -572,6 +572,7 @@ static int demuxer_ffmpeg_seek_frame(demuxer_wrapper_t * wrapper, int64_t timest
     int64_t seek_max = (seek_target < 0) ? seek_target - timestamp - 2 : INT64_MAX;
     int64_t ret = avformat_seek_file(ic, -1, seek_min, seek_target, seek_max, seek_flags);
 #endif
+    dt_info(TAG, "seekto: %lld (%lld s) duration:%lld \n", timestamp, s_time, duration);
     int64_t ret = av_seek_frame(ic, -1, timestamp, seek_flags);
 
     if (ret >= 0) {

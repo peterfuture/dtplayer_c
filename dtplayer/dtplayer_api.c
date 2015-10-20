@@ -168,8 +168,8 @@ int dtplayer_seekto(void *player_priv, int s_time)
     if (seek_time < 0) {
         seek_time = 0;
     }
-    if (seek_time > full_time) {
-        seek_time = full_time;
+    if (seek_time > (int)full_time) {
+        seek_time = (int)full_time;
     }
     event_t *event = dt_alloc_event();
     event->next = NULL;
