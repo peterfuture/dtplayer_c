@@ -8,11 +8,11 @@
 
 static const char prefix[] = "ffmpeg://";
 
-#ifndef AVSEEK_SIZE 
+#ifndef AVSEEK_SIZE
 #define AVSEEK_SIZE 0x10000
 #endif
 
-static int stream_ffmpeg_open (stream_wrapper_t * wrapper,char *stream_name)
+static int stream_ffmpeg_open(stream_wrapper_t * wrapper, char *stream_name)
 {
     const char *filename = stream_name;
     AVIOContext *ctx = NULL;
@@ -24,43 +24,44 @@ static int stream_ffmpeg_open (stream_wrapper_t * wrapper,char *stream_name)
     av_register_all();
     avformat_network_init();
 
-    if (!strncmp(filename, prefix, strlen(prefix)))
+    if (!strncmp(filename, prefix, strlen(prefix))) {
         filename += strlen(prefix);
+    }
     dummy = !strncmp(filename, "rtsp:", 5);
     dt_info(TAG, "[ffmpeg] Opening %s\n", filename);
-    if (!dummy && avio_open(&ctx, filename, flags) < 0)
+    if (!dummy || avio_open(&ctx, filename, flags) < 0) {
         return -1;
+    }
     wrapper->stream_priv = ctx;
     size = dummy ? 0 : avio_size(ctx);
     info->stream_size = size;
     info->seek_support = ctx->seekable;
-    
+
     return DTERROR_NONE;
 }
 
-static int stream_ffmpeg_read (stream_wrapper_t * wrapper,uint8_t *buf,int len)
+static int stream_ffmpeg_read(stream_wrapper_t * wrapper, uint8_t *buf, int len)
 {
     AVIOContext *ctx = (AVIOContext *)wrapper->stream_priv;
     stream_ctrl_t *info = &wrapper->info;
     int r = avio_read(ctx, buf, len);
-    if(r>0)
+    if (r > 0) {
         info->cur_pos += r;
-    if(r<=0)
-    {
+    }
+    if (r <= 0) {
         dt_info(TAG, "[ffmpeg] ffmpeg read failed, ret :%d \n", r);
         info->eof_flag = 1;
     }
     return (r <= 0) ? -1 : r;
 }
 
-static int stream_ffmpeg_seek (stream_wrapper_t * wrapper, int64_t pos, int whence)
+static int stream_ffmpeg_seek(stream_wrapper_t * wrapper, int64_t pos, int whence)
 {
     AVIOContext *ctx = (AVIOContext *)wrapper->stream_priv;
     stream_ctrl_t *info = &wrapper->info;
-    info->eof_flag = 0;    
-    if(whence == AVSEEK_SIZE)
-    {
-        dt_debug(TAG,"REQUEST STREAM SIZE:%lld \n",info->stream_size);
+    info->eof_flag = 0;
+    if (whence == AVSEEK_SIZE) {
+        dt_debug(TAG, "REQUEST STREAM SIZE:%lld \n", info->stream_size);
         return info->stream_size;
     }
 
@@ -68,17 +69,20 @@ static int stream_ffmpeg_seek (stream_wrapper_t * wrapper, int64_t pos, int when
         info->eof_flag = 1;
         return -1;
     }
-    if(whence == SEEK_SET)
+    if (whence == SEEK_SET) {
         info->cur_pos = pos;
-    if(whence == SEEK_CUR)
+    }
+    if (whence == SEEK_CUR) {
         info->cur_pos += pos;
+    }
     return DTERROR_NONE;
 }
 
-static int stream_ffmpeg_close (stream_wrapper_t * wrapper)
+static int stream_ffmpeg_close(stream_wrapper_t * wrapper)
 {
-    if(wrapper->stream_priv)
+    if (wrapper->stream_priv) {
         avio_close(wrapper->stream_priv);
+    }
     wrapper->stream_priv = NULL;
     return 0;
 }

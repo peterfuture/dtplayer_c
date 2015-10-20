@@ -82,16 +82,19 @@ static int demuxer_ffmpeg_open(demuxer_wrapper_t * wrapper)
     AVFormatContext *ic = avformat_alloc_context();
     /*register ext stream, ffmpeg will use */
     //==================================================
-    ffmpeg_ctx->stream_ext = ctx->stream_priv;
-    ffmpeg_ctx->buf = (uint8_t *)malloc(FFMPEG_BUF_SIZE);
-    if (!ffmpeg_ctx->buf) {
-        dt_error(TAG, "[%s:%d] buf malloc failed\n", __FUNCTION__, __LINE__);
-        ffmpeg_ctx->buf = NULL;
-        return -1;
+    if (ctx->stream_priv) {
+        ffmpeg_ctx->stream_ext = ctx->stream_priv;
+        ffmpeg_ctx->buf = (uint8_t *)malloc(FFMPEG_BUF_SIZE);
+        if (!ffmpeg_ctx->buf) {
+            dt_error(TAG, "[%s:%d] buf malloc failed\n", __FUNCTION__, __LINE__);
+            ffmpeg_ctx->buf = NULL;
+            return -1;
+        }
+        AVIOContext *io_ctx = avio_alloc_context(ffmpeg_ctx->buf, FFMPEG_BUF_SIZE, 0, ffmpeg_ctx->stream_ext, read_packet, NULL, seek_packet);
+        ic->pb = io_ctx; // Here to replace AVIOContext
+    } else {
+        dt_info(TAG, "dtstream null, use ffmpeg instead \n");
     }
-    AVIOContext *io_ctx = avio_alloc_context(ffmpeg_ctx->buf, FFMPEG_BUF_SIZE, 0, ffmpeg_ctx->stream_ext, read_packet, NULL, seek_packet);
-    ic->pb = io_ctx; // Here to replace AVIOContext
-
     err = avformat_open_input(&ic, file_name, ic->iformat, NULL);
     if (err < 0) {
         dt_error(TAG, "avformat_open_input failed, err:%x - %x \n", err, AVUNERROR(err));
@@ -562,7 +565,7 @@ static int demuxer_ffmpeg_seek_frame(demuxer_wrapper_t * wrapper, int64_t timest
     // when seek to 0 or end, set backward flag
     int64_t duration = ((double) ic->duration / AV_TIME_BASE);
     int64_t s_time = timestamp / AV_TIME_BASE;
-    if(duration > 0 && (s_time <= 1 || s_time >= duration - 10)) {
+    if (duration > 0 && (s_time <= 1 || s_time >= duration - 10)) {
         seek_flags = AVSEEK_FLAG_BACKWARD;
         dt_info(TAG, "seek to head or tail, set backward flag\n");
     }

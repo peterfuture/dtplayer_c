@@ -106,7 +106,7 @@ int demuxer_open(dtdemuxer_context_t * dem_ctx)
     ret = dtstream_open(&dem_ctx->stream_priv, &para, dem_ctx);
     if (ret != DTERROR_NONE) {
         dt_error(TAG, "stream open failed \n");
-        return -1;
+        goto DEMUXER_SELECT;
     }
 
     dt_info(TAG, "probe enable start \n");
@@ -171,7 +171,7 @@ int demuxer_open(dtdemuxer_context_t * dem_ctx)
         ret = dtstream_seek(dem_ctx->stream_priv, old_pos, SEEK_SET);
         dt_info(TAG, "seek back to:%lld ret:%d \n", old_pos, ret);
     }
-
+DEMUXER_SELECT:
     /* select demuxer */
     if (demuxer_select(dem_ctx) == -1) {
         dt_error(TAG, "select demuxer failed \n");
