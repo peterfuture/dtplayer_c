@@ -556,6 +556,8 @@ static int demuxer_ffmpeg_seek_frame(demuxer_wrapper_t * wrapper, int64_t timest
 {
     ffmpeg_ctx_t *ctx = (ffmpeg_ctx_t *)wrapper->demuxer_priv;
     AVFormatContext *ic = ctx->ic;
+    dtdemuxer_context_t *dem_ctx = (dtdemuxer_context_t *) wrapper->parent;
+    dt_media_info_t *media_info = &dem_ctx->media_info;
 
     int seek_flags = 0; //seek key frame as default
 
@@ -569,15 +571,24 @@ static int demuxer_ffmpeg_seek_frame(demuxer_wrapper_t * wrapper, int64_t timest
         seek_flags = AVSEEK_FLAG_BACKWARD;
         dt_info(TAG, "seek to head or tail, set backward flag\n");
     }
+#define MAX_DURATION_S 10*3600
+    // invalid duration seek check
+    if (duration >= MAX_DURATION_S) {
+        seek_flags = AVSEEK_FLAG_BYTE;
+        timestamp = (int64_t)(media_info->file_size * (double)s_time / duration);
+        dt_info(TAG, "Duration(%lld s) invalid, seek by bytes\n", duration);
+    }
+
 #if 0
     int64_t seek_target = timestamp;
     int64_t seek_min = (seek_target > 0) ? seek_target - timestamp + 2 : INT64_MIN;
     int64_t seek_max = (seek_target < 0) ? seek_target - timestamp - 2 : INT64_MAX;
     int64_t ret = avformat_seek_file(ic, -1, seek_min, seek_target, seek_max, seek_flags);
-#endif
+#else
     dt_info(TAG, "seekto: %lld (%lld s) duration:%lld \n", timestamp, s_time, duration);
     int64_t ret = av_seek_frame(ic, -1, timestamp, seek_flags);
 
+#endif
     if (ret >= 0) {
         dt_info(TAG, "AV_FORMAT_SEEK_FILE OK \n");
         return 0;
