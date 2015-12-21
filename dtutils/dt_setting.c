@@ -95,6 +95,10 @@ int dt_update_setting()
     if (GetEnv("PLAYER", "player.sync.enable", value) > 0) {
         dtp_setting.player_sync_enable = atoi(value);
     }
+    dtp_setting.player_seekmode = 0;
+    if (GetEnv("PLAYER", "player.seekmode", value) > 0) {
+        dtp_setting.player_seekmode = atoi(value);
+    }
 
     // HOST
     dtp_setting.host_drop = 1;

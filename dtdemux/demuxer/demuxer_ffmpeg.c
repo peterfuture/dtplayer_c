@@ -409,7 +409,7 @@ static int demuxer_ffmpeg_setup_info(demuxer_wrapper_t * wrapper, dt_media_info_
     vstream_info_t *vst_info;
     astream_info_t *ast_info;
     sstream_info_t *sst_info;
-    int i;
+    int i, j;
     AVDictionaryEntry *t;
 
     /*reset vars */
@@ -476,18 +476,25 @@ static int demuxer_ffmpeg_setup_info(demuxer_wrapper_t * wrapper, dt_media_info_
                 vst_info->extradata_size = pCodec->extradata_size;
                 memcpy(vst_info->extradata, pCodec->extradata, pCodec->extradata_size);
             }
+            // Extra data details
             dt_info(TAG, "VIDEO EXTRA DATA SIZE:%d - %d \n", pCodec->extradata_size, vst_info->extradata_size);
-            if (pCodec->extradata_size > 0)
-                dt_info(TAG, "data: %02x %02x %02x %02x %02x %02x %02x %02x \n",
-                        pCodec->extradata[0],
-                        pCodec->extradata[1],
-                        pCodec->extradata[2],
-                        pCodec->extradata[3],
-                        pCodec->extradata[4],
-                        pCodec->extradata[5],
-                        pCodec->extradata[6],
-                        pCodec->extradata[7]
-                       );
+            dt_info(TAG, "Extradata contert:\n");
+            if (pCodec->extradata_size > 0) {
+                for (j = 0; j < pCodec->extradata_size && j > 10; j += 10)
+                    dt_info(TAG, "%02x %02x %02x %02x %02x %02x %02x %02x %02x %02x\n",
+                            pCodec->extradata[j],
+                            pCodec->extradata[j + 1],
+                            pCodec->extradata[j + 2],
+                            pCodec->extradata[j + 3],
+                            pCodec->extradata[j + 4],
+                            pCodec->extradata[j + 5],
+                            pCodec->extradata[j + 6],
+                            pCodec->extradata[j + 7],
+                            pCodec->extradata[j + 8],
+                            pCodec->extradata[j + 9]
+                           );
+            }
+            dt_info(TAG, "End\n");
 #if ENABLE_ANDROID
             //if(info->format == DT_MEDIA_FORMAT_MPEGTS)
             // android no need extradata for H264
@@ -577,6 +584,13 @@ static int demuxer_ffmpeg_seek_frame(demuxer_wrapper_t * wrapper, int64_t timest
         seek_flags = AVSEEK_FLAG_BYTE;
         timestamp = (int64_t)(media_info->file_size * (double)s_time / duration);
         dt_info(TAG, "Duration(%lld s) invalid, seek by bytes\n", duration);
+    }
+
+    // fix seek by bytes
+    if (dtp_setting.player_seekmode == 1) {
+        seek_flags = AVSEEK_FLAG_BYTE;
+        timestamp = (int64_t)(media_info->file_size * (double)s_time / duration);
+        dt_info(TAG, "Fixed seek by bytes. Duration(%lld s) invalid, seek by bytes\n", duration);
     }
 
 #if 0

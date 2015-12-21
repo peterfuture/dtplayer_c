@@ -27,6 +27,7 @@ typedef struct dt_setting {
     int player_nosub;
     int player_sync_enable;
     int player_dump_mode;
+    int player_seekmode;
 
     // HOST
     int host_drop;
