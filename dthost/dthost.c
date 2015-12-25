@@ -62,6 +62,10 @@ int host_update_apts(dthost_context_t * hctx, int64_t apts)
     dt_debug(TAG, "update apts:%llx \n", apts);
     if (!hctx->para.has_video) {
         hctx->sys_time_current = apts;
+        if (hctx->sys_time_start == DT_NOPTS_VALUE) {
+            hctx->sys_time_start = apts;
+        }
+
         return 0;
     }
     if (!hctx->para.sync_enable) { //sync disable, video will correct systime
