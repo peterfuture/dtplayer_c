@@ -122,6 +122,10 @@ static void *player_io_thread(dtplayer_context_t * dtp_ctx)
                 play_ctrl->ctrl_wait_key_frame = 0;
             } else {
                 dt_info(TAG, "wait key frame skip:type:%s pts:%lld (%lld ms)\n", (frame.type == DT_TYPE_VIDEO) ? "VIDEO" : "AUDIO", frame.pts, frame.pts / 90);
+                if (frame_valid == 1) {
+                    free(frame.data);
+                }
+                frame_valid = 0;
                 continue;
             }
         }
