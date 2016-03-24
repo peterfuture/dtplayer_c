@@ -376,6 +376,8 @@ int player_seekto(dtplayer_context_t * dtp_ctx, int seek_time)
     if (ret == -1) {
         goto FAIL;
     }
+    // key frame waiting
+    ctrl_info->ctrl_wait_key_frame = 1;
     player_host_stop(dtp_ctx);
     player_host_init(dtp_ctx);
     if (io_thread_running(dtp_ctx)) { // maybe io thread already quit

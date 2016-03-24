@@ -73,6 +73,7 @@ int io_thread_running(dtplayer_context_t *dtp_ctx)
 
 static void *player_io_thread(dtplayer_context_t * dtp_ctx)
 {
+    player_ctrl_t *play_ctrl = &dtp_ctx->ctrl_info;
     io_loop_t *io_ctl = &dtp_ctx->io_loop;
     dt_av_pkt_t frame;
     int frame_valid = 0;
@@ -114,6 +115,17 @@ static void *player_io_thread(dtplayer_context_t * dtp_ctx)
             usleep(100);
             continue;
         }
+
+        // key frame check
+        if (play_ctrl->ctrl_wait_key_frame == 1) {
+            if (frame.type == DT_TYPE_VIDEO && frame.key_frame == 1) {
+                play_ctrl->ctrl_wait_key_frame = 0;
+            } else {
+                dt_info(TAG, "wait key frame skip:type:%s pts:%lld (%lld ms)\n", (frame.type == DT_TYPE_VIDEO) ? "VIDEO" : "AUDIO", frame.pts, frame.pts / 90);
+                continue;
+            }
+        }
+
         dt_debug(TAG, "read ok size:%d pts:%llx \n", frame.size, frame.pts);
 WRITE_FRAME:
         ret = player_write_frame(dtp_ctx, &frame);

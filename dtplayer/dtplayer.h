@@ -20,24 +20,29 @@ typedef struct {
 } io_loop_t;
 
 typedef struct {
-    /*stream info */
+    // basic control
+    int has_audio;
+    int has_video;
+    int has_sub;
+    int video_pixel_format;
+
+    // stream info
     int64_t start_time;
     int64_t first_time;
-    /*dest width height */
+
+    // dest width height
     int width;
     int height;
-    /*ctrl flag */
+
+    // ctrl flag
     int eof_flag;
     int sync_enable;
     int disable_hw_acodec;
     int disable_hw_vcodec;
     int disable_hw_scodec;
 
-    int has_audio;
-    int has_video;
-    int has_sub;
-
-    int video_pixel_format;
+    // seek contrl
+    int ctrl_wait_key_frame;
 } player_ctrl_t;
 
 typedef struct dtplayer_context {
