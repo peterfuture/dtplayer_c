@@ -512,6 +512,10 @@ static int demuxer_ffmpeg_setup_info(demuxer_wrapper_t * wrapper, dt_media_info_
             }
 #endif
         } else if (pCodec->codec_type == AVMEDIA_TYPE_AUDIO) {
+            if (pCodec->channels <= 0 || pCodec->sample_rate <= 0) {
+                dt_info(TAG, "Audio info invalid, skip audio track. channel:%d samplerate:%d \n", pCodec->channels, pCodec->sample_rate);
+                continue;
+            }
             ast_info = (astream_info_t *) malloc(sizeof(astream_info_t));
             memset(ast_info, 0, sizeof(astream_info_t));
             ast_info->index = pStream->index;
