@@ -1,6 +1,6 @@
-#include "dtplayer_util.h"
+#include "dtplayer_host.h"
 
-#define TAG "PLAYER-UTIL"
+#define TAG "PLAYER-HOST"
 
 int player_host_init(dtplayer_context_t * dtp_ctx)
 {
@@ -173,4 +173,14 @@ int player_host_stop(dtplayer_context_t * dtp_ctx)
 int player_host_resize(dtplayer_context_t * dtp_ctx, int w, int h)
 {
     return dthost_video_resize(dtp_ctx->host_priv, w, h);
+}
+
+int player_host_get_info(dtplayer_context_t *dtp_ctx, enum HOST_CMD cmd, unsigned long arg)
+{
+    return dthost_get_info(dtp_ctx->host_priv, cmd, arg);
+}
+
+int player_host_set_info(dtplayer_context_t *dtp_ctx, enum HOST_CMD cmd, unsigned long arg)
+{
+    return dthost_set_info(dtp_ctx->host_priv, cmd, arg);
 }

@@ -124,7 +124,7 @@ void audio_update_pts(void *priv)
     } else {
         pts = 0;
     }
-    dthost_update_apts(actx->parent, pts);
+    dthost_set_info(actx->parent, HOST_CMD_SET_APTS, (unsigned long)(&pts));
     return;
 }
 

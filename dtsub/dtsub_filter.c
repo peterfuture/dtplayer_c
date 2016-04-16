@@ -4,7 +4,7 @@
 **  Summary: sub pp wrapper
 **  Section: dtsub
 **  Author : peter
-**  Notes  : 
+**  Notes  :
 **
 ***********************************************************************/
 
@@ -13,11 +13,11 @@
 
 #define TAG "SUB-FILTER"
 
-#define REGISTER_SF(X,x)	 	\
-	{							\
-		extern sf_wrapper_t sf_##x##_ops; 	\
-		register_sf(&sf_##x##_ops); 	\
-	}
+#define REGISTER_SF(X,x)        \
+    {                           \
+        extern sf_wrapper_t sf_##x##_ops;   \
+        register_sf(&sf_##x##_ops);     \
+    }
 
 static sf_wrapper_t *g_sf = NULL;
 
@@ -31,12 +31,11 @@ static void register_sf(sf_wrapper_t * sf)
 {
     sf_wrapper_t **p;
     p = &g_sf;
-    while (*p != NULL)
-    {
+    while (*p != NULL) {
         p = &(*p)->next;
     }
     *p = sf;
-    dt_info (TAG, "[%s:%d] register internal sf, name:%s \n", __FUNCTION__, __LINE__, (*p)->name);
+    dt_info(TAG, "[%s:%d] register internal sf, name:%s \n", __FUNCTION__, __LINE__, (*p)->name);
     sf->next = NULL;
     return;
 }
@@ -50,17 +49,14 @@ void sf_register_ext(sf_wrapper_t *sf)
 {
     sf_wrapper_t **p;
     p = &g_sf;
-    if(*p == NULL)
-    {
+    if (*p == NULL) {
         *p = sf;
         sf->next = NULL;
-    }
-    else
-    {
+    } else {
         sf->next = *p;
         *p = sf;
     }
-    dt_info (TAG, "[%s:%d]register external sf. name:%s \n",__FUNCTION__,__LINE__, sf->name);
+    dt_info(TAG, "[%s:%d]register external sf. name:%s \n", __FUNCTION__, __LINE__, sf->name);
     return;
 }
 
@@ -69,7 +65,7 @@ void sf_register_ext(sf_wrapper_t *sf)
 ** register all internal filters
 **
 ***********************************************************************/
-void sf_register_all ()
+void sf_register_all()
 {
     return;
 }
@@ -79,7 +75,7 @@ void sf_register_all ()
 ** remove all internal filters
 **
 ***********************************************************************/
-void sf_remove_all ()
+void sf_remove_all()
 {
     g_sf = NULL;
     return;
@@ -96,13 +92,12 @@ static int select_sf(dtsub_filter_t *filter, sf_cap_t cap)
     int ret = -1;
     sf_wrapper_t *sf = g_sf;
 
-    if(!sf)
+    if (!sf) {
         return ret;
+    }
 
-    while(sf != NULL)
-    {
-        if(sf->capable(cap) == cap) // maybe cap have several elements
-        {
+    while (sf != NULL) {
+        if (sf->capable(cap) == cap) { // maybe cap have several elements
             ret = 0;
             break;
         }
@@ -110,10 +105,11 @@ static int select_sf(dtsub_filter_t *filter, sf_cap_t cap)
     }
 
     filter->wrapper = sf;
-    if(sf) 
-        dt_info (TAG, "[%s:%d] %s sub filter selected \n", __FUNCTION__, __LINE__, g_sf->name);
-    else
-        dt_info (TAG, "[%s:%d] No sub filter selected \n", __FUNCTION__, __LINE__, g_sf->name);
+    if (sf) {
+        dt_info(TAG, "[%s:%d] %s sub filter selected \n", __FUNCTION__, __LINE__, g_sf->name);
+    } else {
+        dt_info(TAG, "[%s:%d] No sub filter selected \n", __FUNCTION__, __LINE__, g_sf->name);
+    }
     return ret;
 }
 
@@ -130,7 +126,7 @@ int sub_filter_init(dtsub_filter_t *filter)
 /***********************************************************************
 **
 ** update sub filter
-** reset para in filter first 
+** reset para in filter first
 **
 ***********************************************************************/
 int sub_filter_update(dtsub_filter_t *filter)

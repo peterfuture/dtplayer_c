@@ -8,6 +8,29 @@
 #define AUDIO_EXTR_DATA_SIZE 4096
 #define VIDEO_EXTR_DATA_SIZE 4096
 
+enum HOST_CMD {
+    HOST_CMD_UNKOWN = -1,
+
+    HOST_CMD_GET_APTS = 0x100,
+    HOST_CMD_SET_APTS,
+    HOST_CMD_GET_VPTS,
+    HOST_CMD_SET_VPTS,
+    HOST_CMD_GET_SPTS,
+    HOST_CMD_SET_SPTS,
+    HOST_CMD_GET_SYSTIME,
+    HOST_CMD_SET_SYSTIME,
+    HOST_CMD_GET_AVDIFF,
+    HOST_CMD_GET_CURRENT_TIME,
+
+    HOST_CMD_GET_DISCONTINUE_FLAG,
+    HOST_CMD_SET_DISCONTINUE_FLAG,
+
+    HOST_CMD_GET_RENDER_CLOSED,
+    HOST_CMD_GET_STATE,
+
+    HOST_CMD_MAX = 0x10000
+};
+
 typedef struct {
     /*flag */
     int has_audio;
@@ -90,18 +113,8 @@ int dthost_video_resize(void **host_priv, int w, int h);
 
 int dthost_read_frame(void *host_priv, dt_av_pkt_t * frame, int type);
 int dthost_write_frame(void *host_priv, dt_av_pkt_t * frame, int type);
-int64_t dthost_get_apts(void *host_priv);
-int64_t dthost_update_apts(void *host_priv, int64_t pts);
-int64_t dthost_get_vpts(void *host_priv);
-void dthost_update_vpts(void *host_priv, int64_t vpts);
-int64_t dthost_get_spts(void *host_priv);
-void dthost_update_spts(void *host_priv, int64_t spts);
-int dthost_get_avdiff(void *host_priv);
-int64_t dthost_get_current_time(void *host_priv);
-int64_t dthost_get_systime(void *host_priv);
-void dthost_update_systime(void *host_priv, int64_t systime);
-void dthost_clear_discontinue_flag(void *host_priv);
-int dthost_get_state(void *host_priv, host_state_t * state);
-int dthost_get_out_closed(void *host_priv);
+
+int dthost_get_info(void *host_priv, enum HOST_CMD cmd, unsigned long arg);
+int dthost_set_info(void *host_priv, enum HOST_CMD cmd, unsigned long arg);
 
 #endif

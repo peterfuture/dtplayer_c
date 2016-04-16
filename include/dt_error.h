@@ -20,6 +20,7 @@
 #define DTERROR_READ_EOF           DTERROR(150)
 
 //dthost
+#define DTERROR_INVALID_CMD        DTERROR(200)
 //dtport
 //dtaudio
 //dtvideo

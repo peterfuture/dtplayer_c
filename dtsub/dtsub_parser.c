@@ -4,7 +4,7 @@
 **  Summary: external sub parser module
 **  Section: dtsub
 **  Author : peter
-**  Notes  : 
+**  Notes  :
 **           For internal sub, demuxer will provide sub info
 **           For external sub, need to parse
 **

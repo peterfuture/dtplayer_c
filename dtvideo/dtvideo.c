@@ -38,7 +38,9 @@ dt_av_frame_t *dtvideo_output_pre_read(void *priv)
 int dtvideo_get_avdiff(void *priv)
 {
     dtvideo_context_t *vctx = (dtvideo_context_t *) priv;
-    return dthost_get_avdiff(vctx->parent);
+    int avdiff = 0;
+    dthost_get_info(vctx->parent, HOST_CMD_GET_AVDIFF, (unsigned long)(&avdiff));
+    return avdiff;
 }
 
 int64_t dtvideo_get_current_pts(dtvideo_context_t * vctx)
@@ -103,7 +105,9 @@ int64_t dtvideo_get_systime(void *priv)
     if (vctx->video_status <= VIDEO_STATUS_INITED) {
         return -1;
     }
-    return dthost_get_systime(vctx->parent);
+    int systime = 0;
+    dthost_get_info(vctx->parent, HOST_CMD_GET_SYSTIME, (unsigned long)(&systime));
+    return systime;
 }
 
 void dtvideo_update_systime(void *priv, int64_t sys_time)
@@ -112,7 +116,7 @@ void dtvideo_update_systime(void *priv, int64_t sys_time)
     if (vctx->video_status <= VIDEO_STATUS_INITED) {
         return;
     }
-    dthost_update_systime(vctx->parent, sys_time);
+    dthost_set_info(vctx->parent, HOST_CMD_SET_SYSTIME, (unsigned long)(&sys_time));
     return;
 }
 
@@ -122,7 +126,7 @@ void dtvideo_update_pts(void *priv)
     if (vctx->video_status < VIDEO_STATUS_INITED) {
         return;
     }
-    dthost_update_vpts(vctx->parent, vctx->current_pts);
+    dthost_set_info(vctx->parent, HOST_CMD_SET_VPTS, (unsigned long)(&vctx->current_pts));
     return;
 }
 

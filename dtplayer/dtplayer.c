@@ -1,7 +1,7 @@
 #include "dtplayer.h"
 #include "dtdemuxer_api.h"
 #include "dtplayer_io.h"
-#include "dtplayer_util.h"
+#include "dtplayer_host.h"
 #include "dtplayer_update.h"
 #include "dt_ini.h"
 #include "dtstream.h"
@@ -497,6 +497,7 @@ START:
 
 static void *event_handle_loop(dtplayer_context_t * dtp_ctx)
 {
+    int render_closed = 0;
     while (1) {
         player_handle_event(dtp_ctx);
         if (get_player_status(dtp_ctx) == PLAYER_STATUS_STOP) {
@@ -513,7 +514,8 @@ static void *event_handle_loop(dtplayer_context_t * dtp_ctx)
         if (!dtp_ctx->ctrl_info.eof_flag) {
             continue;
         }
-        if (dthost_get_out_closed(dtp_ctx->host_priv) == 1) {
+        player_host_get_info(dtp_ctx, HOST_CMD_GET_RENDER_CLOSED, (unsigned long)(&render_closed));
+        if (render_closed == 1) {
             goto QUIT;
         }
     }

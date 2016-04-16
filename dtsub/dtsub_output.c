@@ -4,7 +4,7 @@
 **  Summary: sub render module
 **  Section: dtsub
 **  Author : peter
-**  Notes  : 
+**  Notes  :
 **
 ***********************************************************************/
 
@@ -14,11 +14,11 @@
 
 #define TAG "SUB-OUT"
 
-#define REGISTER_SO(X, x)	 	\
-	{							\
-		extern so_wrapper_t so_##x##_ops; \
-		register_so(&so_##x##_ops); \
-	}
+#define REGISTER_SO(X, x)       \
+    {                           \
+        extern so_wrapper_t so_##x##_ops; \
+        register_so(&so_##x##_ops); \
+    }
 
 static so_wrapper_t *g_so = NULL;
 
@@ -33,8 +33,9 @@ static void register_so(so_wrapper_t * so)
 {
     so_wrapper_t **p;
     p = &g_so;
-    while(*p != NULL)
+    while (*p != NULL) {
         p = &((*p)->next);
+    }
     *p = so;
     so->next = NULL;
     dt_info(TAG, "register so. id:%d name:%s \n", so->id, so->name);
@@ -51,17 +52,14 @@ void so_register_ext(so_wrapper_t * so)
 {
     so_wrapper_t **p;
     p = &g_so;
-    if(*p == NULL)
-    {
+    if (*p == NULL) {
         *p = so;
         so->next = NULL;
-    }
-    else
-    {
+    } else {
         so->next = *p;
         *p = so;
     }
-    
+
     dt_info(TAG, "register ext so. id:%d name:%s \n", so->id, so->name);
 }
 
@@ -98,26 +96,24 @@ int select_so_device(dtsub_output_t * so, int id)
     so_wrapper_t **p;
     p = &g_so;
 
-    if(id == -1) // user did not choose vo,use default one
-    {
-        if(!*p)
+    if (id == -1) { // user did not choose vo,use default one
+        if (!*p) {
             return -1;
+        }
         so->wrapper = *p;
-        dt_info(TAG,"SELECT SO:%s \n",(*p)->name);
+        dt_info(TAG, "SELECT SO:%s \n", (*p)->name);
         return 0;
     }
 
-    while(*p != NULL &&(*p)->id != id)
-    {
+    while (*p != NULL && (*p)->id != id) {
         p = &(*p)->next;
     }
-    if(!*p)
-    {
+    if (!*p) {
         dt_error(TAG, "no valid so device found\n");
         return -1;
     }
     so->wrapper = *p;
-    dt_info(TAG,"SELECT SO:%s \n",(*p)->name);
+    dt_info(TAG, "SELECT SO:%s \n", (*p)->name);
     return 0;
 }
 
@@ -179,7 +175,7 @@ static void dtsub_frame_free(void *frame)
     return 0;
     int i;
 
-    dtav_sub_frame_t *sub =(dtav_sub_frame_t *)(frame);
+    dtav_sub_frame_t *sub = (dtav_sub_frame_t *)(frame);
     for (i = 0; i < sub->num_rects; i++) {
         free(&sub->rects[i]->pict.data[0]);
         free(&sub->rects[i]->pict.data[1]);
@@ -205,8 +201,8 @@ static void dtsub_frame_free(void *frame)
 #define REFRESH_DURATION 10*1000 //us
 static void *sub_output_thread(void *args)
 {
-    dtsub_output_t *so =(dtsub_output_t *) args;
-    dtsub_context_t *sctx =(dtsub_context_t *) so->parent;
+    dtsub_output_t *so = (dtsub_output_t *) args;
+    dtsub_context_t *sctx = (dtsub_context_t *) so->parent;
     so_wrapper_t *wrapper = so->wrapper;
     int ret, wlen;
     ret = wlen = 0;
@@ -214,64 +210,55 @@ static void *sub_output_thread(void *args)
     dtav_sub_frame_t *frame;
     int64_t sys_time;          //contrl sub display
 
-    for(;;)
-    {
-        if(so->status == SO_STATUS_EXIT)
+    for (;;) {
+        if (so->status == SO_STATUS_EXIT) {
             goto EXIT;
-        if(so->status == SO_STATUS_IDLE || so->status == SO_STATUS_PAUSE)
-        {
+        }
+        if (so->status == SO_STATUS_IDLE || so->status == SO_STATUS_PAUSE) {
             usleep(100);
             continue;
         }
         /*pre read frame and update sys time */
-        frame_pre =(dtav_sub_frame_t *)dtsub_output_pre_read(so->parent);
-        if(!frame_pre)
-        {
+        frame_pre = (dtav_sub_frame_t *)dtsub_output_pre_read(so->parent);
+        if (!frame_pre) {
             dt_debug(TAG, "[%s:%d]frame read failed ! \n", __FUNCTION__, __LINE__);
             usleep(100);
             continue;
         }
         sys_time = dtsub_get_systime(so->parent);
-        if(sys_time == -1)
-        {
+        if (sys_time == -1) {
             continue; // av not ready
         }
-        if(frame_pre->pts == -1) //invalid pts, calc using last pts
-        {
+        if (frame_pre->pts == -1) { //invalid pts, calc using last pts
             dt_error(TAG, "Err: sub frame pts invalid \n");
         }
-        dt_info(TAG, "read one sub frame, pts:%lld systime:%lld \n", frame_pre->pts, sys_time); 
+        dt_info(TAG, "read one sub frame, pts:%lld systime:%lld \n", frame_pre->pts, sys_time);
         //maybe need to block
-        if(sys_time < frame_pre->pts)
-        {
+        if (sys_time < frame_pre->pts) {
             dt_debug(TAG, "[%s:%d] not to show ! \n", __FUNCTION__, __LINE__);
             dt_usleep(REFRESH_DURATION);
             continue;
         }
         /*read data from decoder buffer */
-        frame =(dtav_sub_frame_t *) dtsub_output_read(so->parent);
-        if(!frame)
-        {
+        frame = (dtav_sub_frame_t *) dtsub_output_read(so->parent);
+        if (!frame) {
             dt_error(TAG, "[%s:%d]frame read failed ! \n", __FUNCTION__, __LINE__);
             usleep(1000);
             continue;
         }
 
         //update pts
-        if(sctx->last_valid_pts == -1)
+        if (sctx->last_valid_pts == -1) {
             sctx->last_valid_pts = sctx->current_pts = frame->pts;
-        else
-        {
+        } else {
             sctx->last_valid_pts = sctx->current_pts;
             sctx->current_pts = frame->pts;
             //printf("[%s:%d]!update pts:%llu \n",__FUNCTION__,__LINE__,sctx->current_pts);
         }
         /*read next frame ,check drop frame */
-        frame_pre =(dtav_sub_frame_t *) dtsub_output_pre_read(so->parent);
-        if(frame_pre)
-        {
-            if(sys_time >= frame_pre->pts)
-            {
+        frame_pre = (dtav_sub_frame_t *) dtsub_output_pre_read(so->parent);
+        if (frame_pre) {
+            if (sys_time >= frame_pre->pts) {
                 dt_info(TAG, "drop frame,sys time:%lld thispts:%lld next->pts:%lld \n", sys_time, frame->pts, frame_pre->pts);
                 dtsub_frame_free(frame);
                 free(frame);
@@ -279,8 +266,7 @@ static void *sub_output_thread(void *args)
             }
         }
         ret = wrapper->so_render(so, frame);
-        if(ret < 0)
-        {
+        if (ret < 0) {
             dt_error(TAG, "frame toggle failed! \n");
             usleep(1000);
         }
@@ -291,7 +277,7 @@ static void *sub_output_thread(void *args)
         free(frame);
         dt_usleep(REFRESH_DURATION);
     }
-  EXIT:
+EXIT:
     dt_info(TAG, "[file:%s][%s:%d]so playback thread exit\n", __FILE__, __FUNCTION__, __LINE__);
     pthread_exit(NULL);
     return NULL;
@@ -306,19 +292,19 @@ int sub_output_init(dtsub_output_t * so, int so_id)
 {
     int ret = 0;
     pthread_t tid;
-        
+
     /*select ao device */
     ret = select_so_device(so, so_id);
-    if(ret < 0)
+    if (ret < 0) {
         return -1;
+    }
     so_wrapper_t *wrapper = so->wrapper;
     wrapper->so_init(so);
     dt_info(TAG, "[%s:%d] sub output init success\n", __FUNCTION__, __LINE__);
 
     /*start aout pthread */
-    ret = pthread_create(&tid, NULL, sub_output_thread,(void *) so);
-    if(ret != 0)
-    {
+    ret = pthread_create(&tid, NULL, sub_output_thread, (void *) so);
+    if (ret != 0) {
         dt_error(TAG, "[%s:%d] create sub output thread failed\n", __FUNCTION__, __LINE__);
         return ret;
     }

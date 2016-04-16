@@ -1,4 +1,5 @@
 #include "dtplayer_update.h"
+#include "dtplayer_host.h"
 
 #define TAG "PLAYER-UPDATE"
 
@@ -35,12 +36,13 @@ static int calc_cur_time(dtplayer_context_t * dtp_ctx, host_state_t * host_state
     int avdiff = llabs(pts_audio_current - pts_video_current) / DT_PTS_FREQ_MS;
     int64_t sys_time = -1;
     int64_t start_time = ctrl_info->first_time;
+    int discontinue_flag = 0;
 
     if (has_audio && has_video) {
         if (audio_discontinue_flag && video_discontinue_flag) { // both discontinue occured
             play_stat->discontinue_point_ms = play_stat->cur_time_ms;
             if (avdiff < AVSYNC_THRESHOLD_MAX) {
-                dthost_clear_discontinue_flag(dtp_ctx->host_priv);
+                player_host_set_info(dtp_ctx, HOST_CMD_SET_DISCONTINUE_FLAG, (unsigned long)(&discontinue_flag));
             }
             sys_time = pts_video_current;
             if (audio_discontinue_point > 0) {
@@ -48,7 +50,7 @@ static int calc_cur_time(dtplayer_context_t * dtp_ctx, host_state_t * host_state
             }
         } else if (audio_discontinue_flag) { // only audio discontinue occured
             if (avdiff < AVSYNC_THRESHOLD_MAX) {
-                dthost_clear_discontinue_flag(dtp_ctx->host_priv);
+                player_host_set_info(dtp_ctx, HOST_CMD_SET_DISCONTINUE_FLAG, (unsigned long)(&discontinue_flag));
             }
             sys_time = pts_video_current;
             if (video_discontinue_point > 0) {
@@ -56,7 +58,7 @@ static int calc_cur_time(dtplayer_context_t * dtp_ctx, host_state_t * host_state
             }
         } else if (video_discontinue_flag) { // only video discontinue occured
             if (avdiff < AVSYNC_THRESHOLD_MAX) {
-                dthost_clear_discontinue_flag(dtp_ctx->host_priv);
+                player_host_set_info(dtp_ctx, HOST_CMD_SET_DISCONTINUE_FLAG, (unsigned long)(&discontinue_flag));
             }
             sys_time = pts_audio_current;
             if (audio_discontinue_point > 0) {
@@ -106,8 +108,7 @@ void player_update_state(dtplayer_context_t * dtp_ctx)
     host_state_t host_state;
 
     /*update host state */
-    dthost_get_state(dtp_ctx->host_priv, &host_state);
-
+    player_host_get_info(dtp_ctx, HOST_CMD_GET_STATE, (unsigned long)(&host_state));
     /*calc cur time */
     calc_cur_time(dtp_ctx, &host_state);
 

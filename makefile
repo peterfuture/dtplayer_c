@@ -283,7 +283,7 @@ SRCS_COMMON-$(DT_HOST) += dthost/dthost.c
 #dtplayer
 SRCS_COMMON-$(DT_PLAYER) +=dtplayer/dtplayer_api.c
 SRCS_COMMON-$(DT_PLAYER) +=dtplayer/dtplayer.c
-SRCS_COMMON-$(DT_PLAYER) +=dtplayer/dtplayer_util.c
+SRCS_COMMON-$(DT_PLAYER) +=dtplayer/dtplayer_host.c
 SRCS_COMMON-$(DT_PLAYER) +=dtplayer/dtplayer_io.c
 SRCS_COMMON-$(DT_PLAYER) +=dtplayer/dtplayer_magic.c
 SRCS_COMMON-$(DT_PLAYER) +=dtplayer/dtplayer_update.c

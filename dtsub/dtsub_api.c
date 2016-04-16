@@ -4,7 +4,7 @@
 **  Summary: dtsub API
 **  Section: dtsub
 **  Author : peter
-**  Notes  : 
+**  Notes  :
 **           provide dtsub api
 **
 ***********************************************************************/
@@ -48,8 +48,7 @@ dt_av_frame_t *dtsub_output_read(void *priv)
 {
     dtsub_context_t *sctx = (dtsub_context_t *)priv;
     queue_t *sub_queue = sctx->so_queue;
-    if (sub_queue->length == 0)
-    {
+    if (sub_queue->length == 0) {
         return NULL;
     }
     return queue_pop_head(sub_queue);
@@ -67,8 +66,7 @@ dt_av_frame_t *dtsub_output_pre_read(void *priv)
 {
     dtsub_context_t *sctx = (dtsub_context_t *)priv;
     queue_t *sub_queue = sctx->so_queue;
-    if (sub_queue->length == 0)
-    {
+    if (sub_queue->length == 0) {
         return NULL;
     }
     return queue_pre_pop_head(sub_queue);
@@ -84,8 +82,7 @@ int dtsub_init(void **sub_priv, dtsub_para_t *para, void *parent)
 {
     int ret = 0;
     dtsub_context_t *sctx = (dtsub_context_t *)malloc(sizeof(dtsub_context_t));
-    if(!sctx)
-    {
+    if (!sctx) {
         dt_error(TAG, "[%s:%d]dtsub module init failed \n", __FUNCTION__, __LINE__);
         ret = -1;
         goto ERR0;
@@ -95,8 +92,7 @@ int dtsub_init(void **sub_priv, dtsub_para_t *para, void *parent)
     //we need to set parent early
     sctx->parent = parent;
     ret = sub_init(sctx);
-    if(ret < 0)
-    {
+    if (ret < 0) {
         dt_error(TAG, "[%s:%d] sub init failed \n", __FUNCTION__, __LINE__);
         ret = -1;
         goto ERR1;
@@ -153,15 +149,13 @@ int dtsub_stop(void *sub_priv)
 {
     int ret;
     dtsub_context_t *vctx = (dtsub_context_t *)sub_priv;
-    if(!vctx)
-    {
+    if (!vctx) {
         dt_error(TAG, "[%s:%d] dt sub context == NULL\n", __FUNCTION__, __LINE__);
         ret = -1;
         goto ERR0;
     }
     ret = sub_stop(vctx);
-    if(ret < 0)
-    {
+    if (ret < 0) {
         dt_error(TAG, "[%s:%d] DTVIDEO STOP FAILED\n", __FUNCTION__, __LINE__);
         ret = -1;
         goto ERR0;
@@ -169,7 +163,7 @@ int dtsub_stop(void *sub_priv)
     free(sub_priv);
     sub_priv = NULL;
     return ret;
-  ERR0:
+ERR0:
     return ret;
 
 }
@@ -179,12 +173,15 @@ int dtsub_stop(void *sub_priv)
 ** dtsub_get_systime
 **
 ***********************************************************************/
-int64_t dtsub_get_systime (void *priv)
+int64_t dtsub_get_systime(void *priv)
 {
     dtsub_context_t *sctx = (dtsub_context_t *)priv;
-    if (sctx->sub_status <= SUB_STATUS_INITED)
+    if (sctx->sub_status <= SUB_STATUS_INITED) {
         return -1;
-    return dthost_get_systime(sctx->parent);
+    }
+    int systime = 0;
+    dthost_set_info(sctx->parent, HOST_CMD_GET_SYSTIME, (unsigned long)(&systime));
+    return systime;
 }
 
 /***********************************************************************
@@ -195,9 +192,10 @@ int64_t dtsub_get_systime (void *priv)
 void dtsub_update_pts(void *priv)
 {
     dtsub_context_t *sctx = (dtsub_context_t *)priv;
-    if (sctx->sub_status < SUB_STATUS_INITED)
+    if (sctx->sub_status < SUB_STATUS_INITED) {
         return;
-    dthost_update_spts(sctx->parent, sctx->current_pts);
+    }
+    dthost_set_info(sctx->parent, HOST_CMD_SET_SPTS, (unsigned long)(&sctx->current_pts));
     return;
 }
 

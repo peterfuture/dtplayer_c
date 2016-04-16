@@ -115,7 +115,7 @@ int dthost_write_frame(void *host_priv, dt_av_pkt_t * frame, int type)
 
 //==Part3: PTS Relative
 
-int64_t dthost_get_apts(void *host_priv)
+static int64_t dthost_get_apts(void *host_priv)
 {
     if (!host_priv) {
         return -1;
@@ -124,7 +124,7 @@ int64_t dthost_get_apts(void *host_priv)
     return host_get_apts(hctx);
 }
 
-int64_t dthost_update_apts(void *host_priv, int64_t pts)
+static int64_t dthost_update_apts(void *host_priv, int64_t pts)
 {
     if (!host_priv) {
         return -1;
@@ -133,7 +133,7 @@ int64_t dthost_update_apts(void *host_priv, int64_t pts)
     return host_update_apts(hctx, pts);
 }
 
-int64_t dthost_get_vpts(void *host_priv)
+static int64_t dthost_get_vpts(void *host_priv)
 {
     if (!host_priv) {
         return -1;
@@ -142,7 +142,7 @@ int64_t dthost_get_vpts(void *host_priv)
     return host_get_vpts(hctx);
 }
 
-void dthost_update_vpts(void *host_priv, int64_t vpts)
+static void dthost_update_vpts(void *host_priv, int64_t vpts)
 {
     if (!host_priv) {
         return;
@@ -152,7 +152,7 @@ void dthost_update_vpts(void *host_priv, int64_t vpts)
     return;
 }
 
-int64_t dthost_get_spts(void *host_priv)
+static int64_t dthost_get_spts(void *host_priv)
 {
     if (!host_priv) {
         return -1;
@@ -161,7 +161,7 @@ int64_t dthost_get_spts(void *host_priv)
     return host_get_spts(hctx);
 }
 
-void dthost_update_spts(void *host_priv, int64_t spts)
+static void dthost_update_spts(void *host_priv, int64_t spts)
 {
     if (!host_priv) {
         return;
@@ -172,7 +172,7 @@ void dthost_update_spts(void *host_priv, int64_t spts)
 }
 
 
-int dthost_get_avdiff(void *host_priv)
+static int dthost_get_avdiff(void *host_priv)
 {
     if (!host_priv) {
         return 0;
@@ -181,7 +181,7 @@ int dthost_get_avdiff(void *host_priv)
     return host_get_avdiff(hctx);
 }
 
-int64_t dthost_get_current_time(void *host_priv)
+static int64_t dthost_get_current_time(void *host_priv)
 {
     if (!host_priv) {
         return -1;
@@ -190,7 +190,7 @@ int64_t dthost_get_current_time(void *host_priv)
     return host_get_current_time(hctx);
 }
 
-int64_t dthost_get_systime(void *host_priv)
+static int64_t dthost_get_systime(void *host_priv)
 {
     if (!host_priv) {
         return -1;
@@ -199,7 +199,7 @@ int64_t dthost_get_systime(void *host_priv)
     return host_get_systime(hctx);
 }
 
-void dthost_update_systime(void *host_priv, int64_t systime)
+static void dthost_update_systime(void *host_priv, int64_t systime)
 {
     if (!host_priv) {
         return;
@@ -209,7 +209,7 @@ void dthost_update_systime(void *host_priv, int64_t systime)
     return;
 }
 
-void dthost_clear_discontinue_flag(void *host_priv)
+static void dthost_clear_discontinue_flag(void *host_priv)
 {
     if (!host_priv) {
         return;
@@ -221,7 +221,7 @@ void dthost_clear_discontinue_flag(void *host_priv)
 
 //==Part4:Status Relative
 
-int dthost_get_state(void *host_priv, host_state_t * state)
+static int dthost_get_state(void *host_priv, host_state_t * state)
 {
     dthost_context_t *hctx = (dthost_context_t *)(host_priv);
     if (!host_priv) {
@@ -231,7 +231,7 @@ int dthost_get_state(void *host_priv, host_state_t * state)
     return 0;
 }
 
-int dthost_get_out_closed(void *host_priv)
+static int dthost_get_render_closed(void *host_priv)
 {
     int ret = 0;
     if (!host_priv) {
@@ -240,5 +240,87 @@ int dthost_get_out_closed(void *host_priv)
     }
     dthost_context_t *hctx = (dthost_context_t *) host_priv;
     ret = host_get_out_closed(hctx);
+    return ret;
+}
+
+int dthost_get_info(void *host_priv, enum HOST_CMD cmd, unsigned long arg)
+{
+    int ret = DTERROR_NONE;
+    if (!host_priv) {
+        dt_error(TAG, "host PRIV IS NULL \n");
+        return -1;
+    }
+
+    switch (cmd) {
+    case HOST_CMD_GET_APTS:
+        *((int64_t *)arg) = dthost_get_apts(host_priv);
+        break;
+    case HOST_CMD_GET_VPTS:
+        *((int64_t *)arg) = dthost_get_vpts(host_priv);
+        break;
+    case HOST_CMD_GET_SPTS:
+        *((int64_t *)arg) = dthost_get_spts(host_priv);
+        break;
+    case HOST_CMD_GET_SYSTIME:
+        *((int64_t *)arg) = dthost_get_systime(host_priv);
+        break;
+    case HOST_CMD_GET_AVDIFF:
+        *((int64_t *)arg) = dthost_get_avdiff(host_priv);
+        break;
+    case HOST_CMD_GET_CURRENT_TIME:
+        *((int64_t *)arg) = dthost_get_current_time(host_priv);
+        break;
+#if 0
+    case HOST_CMD_GET_DISCONTINUE_FLAG:
+        *((int *)arg) = dthost_get_discontinue_flag(host_priv);
+        break;
+#endif
+
+    case HOST_CMD_GET_RENDER_CLOSED:
+        *((int *)arg) = dthost_get_render_closed(host_priv);
+        break;
+
+    case HOST_CMD_GET_STATE:
+        ret = dthost_get_state(host_priv, (host_state_t *)arg);
+        break;
+    default:
+        ret = DTERROR_INVALID_CMD;
+        break;
+    }
+
+    return ret;
+}
+
+int dthost_set_info(void *host_priv, enum HOST_CMD cmd, unsigned long arg)
+{
+    int ret = 0;
+    if (!host_priv) {
+        dt_error(TAG, "host PRIV IS NULL \n");
+        return -1;
+    }
+
+    switch (cmd) {
+    case HOST_CMD_SET_APTS:
+        dthost_update_apts(host_priv, *((int64_t *)arg));
+        break;
+    case HOST_CMD_SET_VPTS:
+        dthost_update_vpts(host_priv, *((int64_t *)arg));
+        break;
+    case HOST_CMD_SET_SPTS:
+        dthost_update_spts(host_priv, *((int64_t *)arg));
+        break;
+    case HOST_CMD_SET_SYSTIME:
+        dthost_update_systime(host_priv, *((int64_t *)arg));
+        break;
+    case HOST_CMD_SET_DISCONTINUE_FLAG:
+        if ((*(int *)arg) == 0) {
+            dthost_clear_discontinue_flag(host_priv);
+        }
+        break;
+    default:
+        ret = DTERROR_INVALID_CMD;
+        break;
+    }
+
     return ret;
 }
