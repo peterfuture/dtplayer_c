@@ -12,8 +12,10 @@ typedef struct event {
     struct event *next;
 } event_t;
 
+#define MAX_EVENT_SERVER_NAME_LEN 1024
+
 typedef struct event_server {
-    char name[1024];
+    char name[MAX_EVENT_SERVER_NAME_LEN];
     int id;
     event_t *event;
     dt_lock_t event_lock;

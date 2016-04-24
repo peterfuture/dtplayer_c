@@ -40,7 +40,7 @@ int dt_event_server_init()
     server_mgt.exit_flag = 0;
     dt_lock_init(&server_mgt.server_lock, NULL);
 
-    main_server.id = EVENT_SERVER_MAIN;
+    main_server.id = EVENT_SERVER_ID_MAIN;
     strcpy(main_server.name, "SERVER-MAIN");
     main_server.event_count = 0;
     main_server.event = NULL;
@@ -91,13 +91,18 @@ int dt_event_server_release()
     return 0;
 }
 
-event_server_t *dt_alloc_server()
+event_server_t *dt_alloc_server(int id, char *name)
 {
     event_server_t *server = (event_server_t *) malloc(sizeof(event_server_t));
     if (server) {
         server->event = NULL;
         server->event_count = 0;
-        server->id = -1;
+        server->id = id;
+        if (strlen(name) < MAX_EVENT_SERVER_NAME_LEN) {
+            strcpy(server->name, name);
+        } else {
+            strcpy(server->name, "Unkown");
+        }
         server->next = NULL;
         dt_lock_init(&server->event_lock, NULL);
     } else {
@@ -171,7 +176,7 @@ int dt_remove_server(event_server_t * server)
     }
 
 REMOVE_SERVICE:
-    if (server->id == EVENT_SERVER_MAIN) {
+    if (server->id == EVENT_SERVER_ID_MAIN) {
         return 0;
     }
     event_server_t *entry = mgt->server;
@@ -186,7 +191,7 @@ REMOVE_SERVICE:
     if (server->event_count > 0) {
         dt_warning(TAG, "EVENT COUNT !=0 AFTER REMOVE \n");
     }
-    if (server->id != EVENT_SERVER_MAIN) {
+    if (server->id != EVENT_SERVER_ID_MAIN) {
         free(server);
     }
     return 0;

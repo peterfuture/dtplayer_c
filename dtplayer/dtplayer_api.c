@@ -92,7 +92,7 @@ int dtplayer_pause(void *player_priv)
 {
     event_t *event = dt_alloc_event();
     event->next = NULL;
-    event->server_id = EVENT_SERVER_PLAYER;
+    event->server_id = EVENT_SERVER_ID_PLAYER;
     event->type = PLAYER_EVENT_PAUSE;
 
     dt_send_event(event);
@@ -103,7 +103,7 @@ int dtplayer_resume(void *player_priv)
 {
     event_t *event = dt_alloc_event();
     event->next = NULL;
-    event->server_id = EVENT_SERVER_PLAYER;
+    event->server_id = EVENT_SERVER_ID_PLAYER;
     event->type = PLAYER_EVENT_RESUME;
 
     dt_send_event(event);
@@ -115,7 +115,7 @@ int dtplayer_stop(void *player_priv)
     dtplayer_context_t *dtp_ctx = (dtplayer_context_t *)player_priv;
     event_t *event = dt_alloc_event();
     event->next = NULL;
-    event->server_id = EVENT_SERVER_PLAYER;
+    event->server_id = EVENT_SERVER_ID_PLAYER;
     event->type = PLAYER_EVENT_STOP;
     dt_send_event(event);
 
@@ -148,7 +148,7 @@ int dtplayer_seek(void *player_priv, int s_time)
     }
     event_t *event = dt_alloc_event();
     event->next = NULL;
-    event->server_id = EVENT_SERVER_PLAYER;
+    event->server_id = EVENT_SERVER_ID_PLAYER;
     event->type = PLAYER_EVENT_SEEK;
     event->para.np = seek_time;
     dt_send_event(event);
@@ -173,7 +173,7 @@ int dtplayer_seekto(void *player_priv, int s_time)
     }
     event_t *event = dt_alloc_event();
     event->next = NULL;
-    event->server_id = EVENT_SERVER_PLAYER;
+    event->server_id = EVENT_SERVER_ID_PLAYER;
     event->type = PLAYER_EVENT_SEEK;
     event->para.np = seek_time;
     dt_send_event_sync(event);

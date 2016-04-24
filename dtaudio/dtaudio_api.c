@@ -5,14 +5,12 @@
 
 static int audio_server_init(dtaudio_context_t * actx)
 {
-    event_server_t *server = dt_alloc_server();
+    event_server_t *server = dt_alloc_server(EVENT_SERVER_ID_AUDIO, EVENT_SERVER_NAME_AUDIO);
     dt_info(TAG, "AUDIO SERVER INIT :%p \n", server);
     if (!server) {
         dt_error(TAG, "AUDIO SERVER ALLOC FAILED \n");
         return -1;
     }
-    server->id = EVENT_SERVER_AUDIO;
-    strcpy(server->name, "SERVER-AUDIO");
     dt_register_server(server);
     actx->audio_server = (void *) server;
     return 0;
@@ -61,7 +59,7 @@ int dtaudio_start(void *audio_priv)
 {
     event_t *event = dt_alloc_event();
     event->next = NULL;
-    event->server_id = EVENT_SERVER_AUDIO;
+    event->server_id = EVENT_SERVER_ID_AUDIO;
     event->type = AUDIO_EVENT_START;
     dt_send_event(event);
     return 0;
@@ -71,7 +69,7 @@ int dtaudio_pause(void *audio_priv)
 {
     event_t *event = dt_alloc_event();
     event->next = NULL;
-    event->server_id = EVENT_SERVER_AUDIO;
+    event->server_id = EVENT_SERVER_ID_AUDIO;
     event->type = AUDIO_EVENT_PAUSE;
     dt_send_event(event);
     return 0;
@@ -81,7 +79,7 @@ int dtaudio_resume(void *audio_priv)
 {
     event_t *event = dt_alloc_event();
     event->next = NULL;
-    event->server_id = EVENT_SERVER_AUDIO;
+    event->server_id = EVENT_SERVER_ID_AUDIO;
     event->type = AUDIO_EVENT_RESUME;
     dt_send_event(event);
     return 0;
@@ -97,7 +95,7 @@ int dtaudio_stop(void *audio_priv)
     }
     event_t *event = dt_alloc_event();
     event->next = NULL;
-    event->server_id = EVENT_SERVER_AUDIO;
+    event->server_id = EVENT_SERVER_ID_AUDIO;
     event->type = AUDIO_EVENT_STOP;
     dt_send_event(event);
 
@@ -118,7 +116,7 @@ int dtaudio_release(void *audio_priv)
 
     event_t *event = dt_alloc_event();
     event->next = NULL;
-    event->server_id = EVENT_SERVER_AUDIO;
+    event->server_id = EVENT_SERVER_ID_AUDIO;
     event->type = AUDIO_EVENT_RELEASE;
     dt_send_event(event);
 

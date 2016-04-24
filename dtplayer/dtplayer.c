@@ -53,9 +53,9 @@ static player_status_t get_player_status(dtplayer_context_t * dtp_ctx)
 
 static int player_server_init(dtplayer_context_t * dtp_ctx)
 {
-    event_server_t *server = dt_alloc_server();
+    event_server_t *server = dt_alloc_server(EVENT_SERVER_ID_PLAYER, EVENT_SERVER_NAME_PLAYER);
     dt_info(TAG, "PLAYER SERVER INIT:%p \n", server);
-    server->id = EVENT_SERVER_PLAYER;
+    server->id = EVENT_SERVER_ID_PLAYER;
     strcpy(server->name, "SERVER-PLAYER");
     dt_register_server(server);
     dtp_ctx->player_server = (void *)server;
