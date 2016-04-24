@@ -48,6 +48,7 @@ typedef struct dtaudio_decoder {
 
     int64_t pts_current;
     int64_t pts_first;
+    int first_frame_decoded;
     int64_t pts_last_valid;
     int pts_buffer_size;
     int pts_cache_size;

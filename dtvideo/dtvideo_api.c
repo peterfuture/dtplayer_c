@@ -87,10 +87,14 @@ int64_t dtvideo_external_get_pts(void *video_priv)
     return dtvideo_get_current_pts(vctx);
 }
 
-int64_t dtvideo_get_first_pts(void *video_priv)
+int dtvideo_get_first_pts(void *video_priv, int64_t *pts)
 {
     dtvideo_context_t *vctx = (dtvideo_context_t *) video_priv;
-    return video_get_first_pts(vctx);
+    if (video_first_frame_decoded(vctx) == 0) {
+        return -1;
+    }
+    *pts = video_get_first_pts(vctx);
+    return 0;
 }
 
 int dtvideo_drop(void *video_priv, int64_t target_pts)

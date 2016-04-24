@@ -440,7 +440,7 @@ static int demuxer_ffmpeg_setup_info(demuxer_wrapper_t * wrapper, dt_media_info_
     if (info->format == DT_MEDIA_FORMAT_INVALID) {
         dt_warning(TAG, "get wrong media format\n");
     }
-
+    info->start_time = ic->start_time*9/100; // Need to convert from us->pts
     //get stream info
     for (i = 0; i < ic->nb_streams; i++) {
         pStream = ic->streams[i];

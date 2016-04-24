@@ -49,6 +49,11 @@ int64_t audio_get_current_pts(dtaudio_context_t * actx)
     return pts;
 }
 
+int audio_first_frame_decoded(dtaudio_context_t * actx)
+{
+    return actx->audio_dec.first_frame_decoded;
+}
+
 int64_t audio_get_first_pts(dtaudio_context_t * actx)
 {
     if (actx->audio_state != AUDIO_STATUS_INITED) {

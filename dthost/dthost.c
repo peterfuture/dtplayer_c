@@ -162,7 +162,7 @@ int host_reset_systime(dthost_context_t * hctx, int64_t sys_time)
 
 int host_update_systime(dthost_context_t * hctx, int64_t sys_time)
 {
-    if (hctx->sys_time_current == DT_NOPTS_VALUE || hctx->sys_time_current == -1) {
+    if (PTS_INVALID(hctx->sys_time_current)) {
         // First assignment
         hctx->sys_time_current = hctx->sys_time_first = sys_time;
         hctx->sys_time_start = hctx->sys_time_last = sys_time;
@@ -222,12 +222,18 @@ int host_start(dthost_context_t * hctx)
         if (!has_audio) {
             audio_start_flag = 1;
         } else {
-            audio_start_flag = !((first_apts = dtaudio_get_first_pts(hctx->audio_priv)) == -1);
+            ret = dtaudio_get_first_pts(hctx->audio_priv, &first_apts);
+            if (ret >= 0) {
+                audio_start_flag = 1;
+            }
         }
         if (!has_video) {
             video_start_flag = 1;
         } else {
-            video_start_flag = !((first_vpts = dtvideo_get_first_pts(hctx->video_priv)) == DT_NOPTS_VALUE);
+            ret = dtvideo_get_first_pts(hctx->video_priv, &first_vpts);
+            if (ret >= 0) {
+                video_start_flag = 1;
+            }
         }
         if (audio_start_flag && video_start_flag) {
             break;
@@ -244,14 +250,13 @@ int host_start(dthost_context_t * hctx)
         return -1;
     }
 
-    dt_info(TAG, "first apts:%lld first vpts:%lld \n", first_apts, first_vpts);
+    dt_info(TAG, "first apts:0x%llx first vpts:0x%llx \n", first_apts, first_vpts);
     if (has_audio) {
         hctx->pts_audio_first = hctx->pts_audio_last = hctx->pts_audio_current = first_apts;
     }
     if (has_video) {
         hctx->pts_video_first = hctx->pts_video_last = hctx->pts_video_current = first_vpts;
     }
-
 
     if (host_sync_enable(hctx)) {
         int drop_flag = 0;
@@ -278,9 +283,9 @@ int host_start(dthost_context_t * hctx)
         }
     }
     hctx->sys_time_first = (has_video) ? hctx->pts_video_current : hctx->pts_audio_current;
-    dt_info(TAG, "first_apts:%llx cur_apts:%llx \n", hctx->pts_audio_first, hctx->pts_audio_current);
-    dt_info(TAG, "first_vpts:%llx cur_vpts:%llx \n", hctx->pts_video_first, hctx->pts_video_current);
-    dt_info(TAG, "first_sys_time:%llx avdiff: %lld ms\n", hctx->sys_time_first, host_get_avdiff(hctx));
+    dt_info(TAG, "first_apts:0x%llx cur_apts:0x%llx \n", hctx->pts_audio_first, hctx->pts_audio_current);
+    dt_info(TAG, "first_vpts:0x%llx cur_vpts:0x%llx \n", hctx->pts_video_first, hctx->pts_video_current);
+    dt_info(TAG, "first_sys_time:0x%llx avdiff: 0x%llx ms\n", hctx->sys_time_first, host_get_avdiff(hctx));
 
     if (has_audio) {
         ret = dtaudio_start(hctx->audio_priv);
@@ -627,9 +632,11 @@ int host_get_state(dthost_context_t * hctx, host_state_t * state)
     // Update pts
     state->sys_time_start = hctx->sys_time_start;
     state->sys_time_current = hctx->sys_time_current;
+    state->pts_audio_first = hctx->pts_audio_first;
     state->pts_audio_current = hctx->pts_audio_current;
     state->audio_discontinue_flag = hctx->audio_discontinue_flag;
     state->audio_discontinue_point = hctx->audio_discontinue_point;
+    state->pts_video_first = hctx->pts_video_first;
     state->pts_video_current = hctx->pts_video_current;
     state->video_discontinue_flag = hctx->video_discontinue_flag;
     state->video_discontinue_point = hctx->video_discontinue_point;

@@ -65,6 +65,7 @@ dt_av_frame_t *dtvideo_output_read(void *priv);
 dt_av_frame_t *dtvideo_output_pre_read(void *priv);
 int dtvideo_get_avdiff(void *priv);
 int64_t dtvideo_get_current_pts(dtvideo_context_t * vctx);
+int video_first_frame_decoded(dtvideo_context_t * vctx);
 int64_t video_get_first_pts(dtvideo_context_t * vctx);
 int video_drop(dtvideo_context_t * vctx, int64_t target_pts);
 int64_t dtvideo_get_systime(void *priv);

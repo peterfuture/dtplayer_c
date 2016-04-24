@@ -3,27 +3,51 @@
 
 #define TAG "PLAYER-UPDATE"
 
+#define FIRST_TIME_DIFF_MAX 2*90000 // 2s
+
 static int calc_cur_time(dtplayer_context_t * dtp_ctx, host_state_t * host_state)
 {
     player_ctrl_t *ctrl_info = &dtp_ctx->ctrl_info;
     player_state_t *play_stat = &dtp_ctx->state;
 
+    int has_audio = ctrl_info->has_audio;
+    int has_video = ctrl_info->has_video;
+    int64_t apts_first = host_state->pts_audio_first;
+    int64_t vpts_first = host_state->pts_video_first;
+
     if (ctrl_info->start_time > 0) {
         play_stat->start_time = ctrl_info->start_time;
-        dt_info(TAG, "START TIME:%lld \n", ctrl_info->start_time);
+        dt_info(TAG, "START TIME:0x%llx \n", ctrl_info->start_time);
     }
 
-    if (ctrl_info->first_time == -1 && host_state->sys_time_current != -1) {
-        ctrl_info->first_time = host_state->sys_time_current;
-        dt_info(TAG, "SET FIRST TIME:%lld \n", ctrl_info->first_time);
+    if (ctrl_info->first_time == -1) {
+        if (has_audio && has_video) {
+            if (PTS_VALID(apts_first) && PTS_VALID(vpts_first)) {
+                if (llabs(apts_first - vpts_first) < FIRST_TIME_DIFF_MAX) {
+                    ctrl_info->first_time = (apts_first > vpts_first) ? vpts_first : apts_first;
+                } else {
+                    if (llabs(vpts_first - play_stat->start_time) < FIRST_TIME_DIFF_MAX) {
+                        ctrl_info->first_time = vpts_first;
+                    } else if (llabs(apts_first - play_stat->start_time) < FIRST_TIME_DIFF_MAX) {
+                        ctrl_info->first_time = apts_first;
+                    }
+                }
+            } else if (PTS_VALID(apts_first)) {
+                ctrl_info->first_time = apts_first;
+            } else if (PTS_VALID(vpts_first)) {
+                ctrl_info->first_time = vpts_first;
+            }
+        } else {
+            ctrl_info->first_time = host_state->sys_time_current;
+        }
+
+        dt_info(TAG, "[apts_first:0x%llx] [vpts_first:0x%llx] [starttime:0x%llx] -> first_time:0x%llx \n", apts_first, vpts_first, play_stat->start_time, ctrl_info->first_time);
     }
 
     if (play_stat->full_time == 0) {
         play_stat->full_time = dtp_ctx->media_info->duration;
     }
 
-    int has_audio = ctrl_info->has_audio;
-    int has_video = ctrl_info->has_video;
     int64_t sys_time_start = host_state->sys_time_start;
     int64_t sys_time_current = host_state->sys_time_current;
     int64_t pts_audio_current = host_state->pts_audio_current;
@@ -65,7 +89,11 @@ static int calc_cur_time(dtplayer_context_t * dtp_ctx, host_state_t * host_state
                 start_time = audio_discontinue_point;
             }
         } else {
-            sys_time = pts_video_current;
+            if (PTS_VALID(vpts_first)) {
+                sys_time = pts_video_current;
+            } else {
+                sys_time = pts_audio_current;
+            }
             if (audio_discontinue_point > 0) {
                 start_time = audio_discontinue_point;
             }

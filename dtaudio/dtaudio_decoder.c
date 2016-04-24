@@ -157,6 +157,7 @@ static void *audio_decode_loop(void *arg)
             } else {
                 decoder->pts_first = decoder->pts_current = decoder->pts_last_valid = frame.pts;
             }
+            decoder->first_frame_decoded = 1;
             dt_info(TAG, "[%s:%d]Audio first frame decoded ok, pts:0x%llx dts:0x%llx\n", __FUNCTION__, __LINE__, frame.pts, frame.dts);
         } else {
             decoder->pts_last_valid = decoder->pts_current;

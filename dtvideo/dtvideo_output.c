@@ -199,15 +199,14 @@ static void *video_output_thread(void *args)
         }
 
         sys_clock = dtvideo_get_systime(vo->parent);
-        if (sys_clock == -1 || sys_clock == DT_NOPTS_VALUE) {
+
+        /* vpts invalid, if audio exists, Host will set clock using apts */
+        if (PTS_INVALID(sys_clock)) {
             dt_info(TAG, "SETTING FIRST SYSCLOK:%llx \n", picture_pre->pts);
             sys_clock = picture_pre->pts;
             dtvideo_update_systime(vo->parent, sys_clock);
         }
 
-        if (picture_pre->pts == -1) { //invalid pts, calc using last pts
-            picture_pre->pts = vctx->current_pts + 90000 / vo->para->fps;
-        }
         //update sys time
         dtvideo_update_systime(vo->parent, sys_clock);
 

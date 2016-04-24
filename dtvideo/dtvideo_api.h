@@ -13,7 +13,7 @@ int dtvideo_stop(void *video_priv);
 int dtvideo_resize(void *video_priv, int w, int h);
 
 int64_t dtvideo_external_get_pts(void *video_priv);
-int64_t dtvideo_get_first_pts(void *video_priv);
+int dtvideo_get_first_pts(void *video_priv, int64_t *pts);
 int dtvideo_drop(void *video_priv, int64_t target_pts);
 int dtvideo_get_state(void *video_priv, dec_state_t * dec_state);
 int dtvideo_get_out_closed(void *video_priv);

@@ -44,6 +44,7 @@ typedef struct dtvideo_decoder {
 
     int64_t pts_current;
     int64_t pts_first;
+    int first_frame_decoded;
     unsigned int pts_last_valid;
     unsigned int pts_buffer_size;
     unsigned int pts_cache_size;

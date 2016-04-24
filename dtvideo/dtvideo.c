@@ -53,6 +53,11 @@ int64_t dtvideo_get_current_pts(dtvideo_context_t * vctx)
     return pts;
 }
 
+int video_first_frame_decoded(dtvideo_context_t * vctx)
+{
+    return vctx->video_dec.first_frame_decoded;
+}
+
 int64_t video_get_first_pts(dtvideo_context_t * vctx)
 {
     if (vctx->video_status != VIDEO_STATUS_INITED) {

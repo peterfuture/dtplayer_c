@@ -197,20 +197,17 @@ static void *video_decode_loop(void *arg)
         if (PTS_VALID(picture->pts)) {
             picture->pts = pts_exchange(decoder, picture->pts);
         }
-        if (PTS_INVALID(decoder->pts_first)) {
-            if (PTS_INVALID(picture->pts)) {
-                decoder->pts_first = decoder->pts_current = 0;
-            } else {
-                decoder->pts_first = decoder->pts_current = picture->pts;
-            }
+        if (decoder->first_frame_decoded == 0 && PTS_INVALID(decoder->pts_first)) {
+            decoder->pts_first = decoder->pts_current = picture->pts;
+            decoder->first_frame_decoded = 1;
             dt_info(TAG, "[%s:%d]first frame decoded ok, pts:0x%llx dts:0x%llx\n", __FUNCTION__, __LINE__, picture->pts, picture->dts);
         } else {
             if (pts_mode || PTS_INVALID(picture->pts)) {
                 int fps = decoder->para.fps;
-                float dur_inc = 90000 / fps;
+                int dur_inc = (int)((double)90000 / fps);
                 picture->pts = decoder->pts_current + dur_inc;
                 decoder->pts_current = picture->pts;
-                dt_debug(TAG, "vpts inc itself. pts_mode:%d \n", pts_mode);
+                dt_debug(TAG, "vpts inc itself. pts_mode:%d pts:0x%x inc:%d\n", pts_mode, picture->pts, dur_inc);
             }
         }
 
