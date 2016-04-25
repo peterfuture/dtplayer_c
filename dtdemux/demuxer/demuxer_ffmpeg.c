@@ -440,7 +440,7 @@ static int demuxer_ffmpeg_setup_info(demuxer_wrapper_t * wrapper, dt_media_info_
     if (info->format == DT_MEDIA_FORMAT_INVALID) {
         dt_warning(TAG, "get wrong media format\n");
     }
-    info->start_time = ic->start_time*9/100; // Need to convert from us->pts
+    info->start_time = ic->start_time * 9 / 100; // Need to convert from us->pts
     //get stream info
     for (i = 0; i < ic->nb_streams; i++) {
         pStream = ic->streams[i];
@@ -585,7 +585,7 @@ static int demuxer_ffmpeg_seek_frame(demuxer_wrapper_t * wrapper, int64_t timest
 
     // when seek to 0 or end, set backward flag
     int64_t duration = ((double) ic->duration / AV_TIME_BASE);
-    int64_t s_time = timestamp / AV_TIME_BASE;
+    int64_t s_time = timestamp;
     if (duration > 0 && (s_time <= 1 || s_time >= duration - 10)) {
         seek_flags = AVSEEK_FLAG_BACKWARD;
         dt_info(TAG, "seek to head or tail, set backward flag\n");
@@ -603,6 +603,9 @@ static int demuxer_ffmpeg_seek_frame(demuxer_wrapper_t * wrapper, int64_t timest
         seek_flags = AVSEEK_FLAG_BYTE;
         timestamp = (int64_t)(media_info->file_size * (double)s_time / duration);
         dt_info(TAG, "Fixed seek by bytes. Duration(%lld s) invalid, seek by bytes\n", duration);
+    } else {
+        // seek by time
+        timestamp = timestamp * AV_TIME_BASE + ic->start_time;
     }
 
 #if 0

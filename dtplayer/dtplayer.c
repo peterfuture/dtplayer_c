@@ -369,10 +369,7 @@ int player_seekto(dtplayer_context_t * dtp_ctx, int seek_time)
     }
     player_host_pause(dtp_ctx);
 
-
-    int64_t start_time = (ctrl_info->first_time != -1) ? ctrl_info->first_time : ctrl_info->start_time;
-    int64_t target_time = (int64_t)seek_time * 1000000 + start_time;
-    int ret = dtdemuxer_seekto(dtp_ctx->demuxer_priv, target_time);
+    int ret = dtdemuxer_seekto(dtp_ctx->demuxer_priv, (int64_t)seek_time);
     if (ret == -1) {
         goto FAIL;
     }
