@@ -118,13 +118,13 @@ static gui_event_t sdl_get_event(gui_ctx_t *ctx , args_t *arg)
             arg->arg1 = 600;
             return EVENT_SEEK;
         case SDLK_LEFT:
-            arg->arg1 = 10;
+            arg->arg1 = -10;
             return EVENT_SEEK;
         case SDLK_RIGHT:
             arg->arg1 = 10;
             return EVENT_SEEK;
         case SDLK_UP:
-            arg->arg1 = 60;
+            arg->arg1 = -60;
             return EVENT_SEEK;
         case SDLK_DOWN:
             arg->arg1 = 60;

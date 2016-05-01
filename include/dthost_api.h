@@ -83,6 +83,8 @@ typedef struct {
     int sub_height;
     int sflag;                  //DISABLE_HW_SCODEC ETC.
     void *sctx_priv;
+
+    void *service_mgt;          //service manager context
 } dthost_para_t;
 
 typedef struct {

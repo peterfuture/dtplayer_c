@@ -591,18 +591,19 @@ static int demuxer_ffmpeg_seek_frame(demuxer_wrapper_t * wrapper, int64_t timest
         dt_info(TAG, "seek to head or tail, set backward flag\n");
     }
 #define MAX_DURATION_S 10*3600
-    // invalid duration seek check
-    if (duration >= MAX_DURATION_S) {
-        seek_flags = AVSEEK_FLAG_BYTE;
-        timestamp = (int64_t)(media_info->file_size * (double)s_time / duration);
-        dt_info(TAG, "Duration(%lld s) invalid, seek by bytes\n", duration);
-    }
+
+    int seek_mode = 0; // default by time
+
+    if (duration >= MAX_DURATION_S)
+        seek_mode = 1;
+    if (dtp_setting.player_seekmode == 1)
+        seek_mode = 1;
 
     // fix seek by bytes
-    if (dtp_setting.player_seekmode == 1) {
+    if (seek_mode == 1) {
         seek_flags = AVSEEK_FLAG_BYTE;
         timestamp = (int64_t)(media_info->file_size * (double)s_time / duration);
-        dt_info(TAG, "Fixed seek by bytes. Duration(%lld s) invalid, seek by bytes\n", duration);
+        dt_info(TAG, "Fixed seek by bytes. Duration(%lld s) seektopos:%lld\n", duration, timestamp);
     } else {
         // seek by time
         timestamp = timestamp * AV_TIME_BASE + ic->start_time;

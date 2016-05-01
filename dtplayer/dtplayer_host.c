@@ -12,6 +12,7 @@ int player_host_init(dtplayer_context_t * dtp_ctx)
     dt_media_info_t *media_info = dtp_ctx->media_info;
 
     /* init dthost param */
+    host_para->service_mgt = (void *)dtp_ctx->service_mgt;
     host_para->has_audio = pctrl->has_audio;
     host_para->has_video = pctrl->has_video;
     host_para->has_sub = pctrl->has_sub;

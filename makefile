@@ -213,6 +213,7 @@ SRCS_COMMON-$(DT_UTIL) += dtutils/dt_setting.c
 SRCS_COMMON-$(DT_UTIL) += dtutils/dt_ini.c
 SRCS_COMMON-$(DT_UTIL) += dtutils/dt_time.c
 SRCS_COMMON-$(DT_UTIL) += dtutils/dt_event.c
+SRCS_COMMON-$(DT_UTIL) += dtutils/dt_mem.c
 SRCS_COMMON-$(DT_UTIL) += dtutils/dt_buffer.c
 SRCS_COMMON-$(DT_UTIL) += dtutils/dt_queue.c
 SRCS_COMMON-$(DT_UTIL) += dtutils/commander.c

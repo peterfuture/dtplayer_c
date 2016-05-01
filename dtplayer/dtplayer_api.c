@@ -77,48 +77,38 @@ int dtplayer_set_video_size(void *player_priv, int width, int height)
 
 int dtplayer_start(void *player_priv)
 {
+    dtplayer_context_t *dtp_ctx = (dtplayer_context_t *)player_priv;
     //Comments:
-    //register evetn server and player service in player_start
+    //register evetn service and player service in player_start
     //Since some app just want to get mediaInfo in dtplayer_init
     //No need to create loop there
-    dt_event_server_init();
-
-    dtplayer_context_t *dtp_ctx = (dtplayer_context_t *)player_priv;
+    dtp_ctx->service_mgt = dt_service_create();
     int ret = player_start(dtp_ctx);
     return ret;
 }
 
 int dtplayer_pause(void *player_priv)
 {
-    event_t *event = dt_alloc_event();
-    event->next = NULL;
-    event->server_id = EVENT_SERVER_ID_PLAYER;
-    event->type = PLAYER_EVENT_PAUSE;
-
-    dt_send_event(event);
+    dtplayer_context_t *dtp_ctx = (dtplayer_context_t *)player_priv;
+    event_t *event = dt_alloc_event(EVENT_SERVER_ID_PLAYER, PLAYER_EVENT_PAUSE);
+    dt_send_event(dtp_ctx->service_mgt, event);
     return 0;
 }
 
 int dtplayer_resume(void *player_priv)
 {
-    event_t *event = dt_alloc_event();
-    event->next = NULL;
-    event->server_id = EVENT_SERVER_ID_PLAYER;
-    event->type = PLAYER_EVENT_RESUME;
-
-    dt_send_event(event);
+    dtplayer_context_t *dtp_ctx = (dtplayer_context_t *)player_priv;
+    event_t *event = dt_alloc_event(EVENT_SERVER_ID_PLAYER, PLAYER_EVENT_RESUME);
+    dt_send_event(dtp_ctx->service_mgt, event);
     return 0;
 }
 
 int dtplayer_stop(void *player_priv)
 {
     dtplayer_context_t *dtp_ctx = (dtplayer_context_t *)player_priv;
-    event_t *event = dt_alloc_event();
-    event->next = NULL;
-    event->server_id = EVENT_SERVER_ID_PLAYER;
-    event->type = PLAYER_EVENT_STOP;
-    dt_send_event(event);
-
+    event_t *event = dt_alloc_event(EVENT_SERVER_ID_PLAYER, PLAYER_EVENT_STOP);
+    dt_send_event(dtp_ctx->service_mgt, event);
+ 
     /*need to wait until player stop ok */
     dt_info(TAG, "EVENT_LOOP_ID:%lu \n", dtp_ctx->event_loop_id);
 
@@ -146,13 +136,10 @@ int dtplayer_seek(void *player_priv, int s_time)
     if (seek_time > full_time) {
         seek_time = full_time;
     }
-    event_t *event = dt_alloc_event();
-    event->next = NULL;
-    event->server_id = EVENT_SERVER_ID_PLAYER;
-    event->type = PLAYER_EVENT_SEEK;
-    event->para.np = seek_time;
-    dt_send_event(event);
 
+    event_t *event = dt_alloc_event(EVENT_SERVER_ID_PLAYER, PLAYER_EVENT_SEEK);
+    event->para.np = seek_time;
+    dt_send_event(dtp_ctx->service_mgt, event);
     return 0;
 }
 
@@ -171,12 +158,11 @@ int dtplayer_seekto(void *player_priv, int s_time)
     if (seek_time > (int)full_time) {
         seek_time = (int)full_time;
     }
-    event_t *event = dt_alloc_event();
-    event->next = NULL;
-    event->server_id = EVENT_SERVER_ID_PLAYER;
-    event->type = PLAYER_EVENT_SEEK;
+
+    event_t *event = dt_alloc_event(EVENT_SERVER_ID_PLAYER, PLAYER_EVENT_SEEK);
     event->para.np = seek_time;
-    dt_send_event_sync(event);
+    dt_send_event_sync(dtp_ctx->service_mgt, event);
+
     dt_info(TAG, "seek cmd send ok \n");
     return 0;
 }

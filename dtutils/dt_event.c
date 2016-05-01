@@ -1,132 +1,178 @@
+/*
+ * =====================================================================================
+ *
+ *    Filename   :  dt_event.c
+ *    Description:
+ *    Version    :  1.0
+ *    Created    :  2016年04月22日 11时13分05秒
+ *    Revision   :  none
+ *    Compiler   :  gcc
+ *    Author     :  peter-s
+ *    Email      :  peter_future@outlook.com
+ *    Company    :  dt
+ *
+ * =====================================================================================
+ */
+
 /* event-send-handle module */
 /*
  This is event transport module,
 
- server_mgt:
+ service_mgt:
  service manage structure
 
- main-server:
- first server, Receive and store all event
+ main-service:
+ first service, Receive and store all event
  can not be removed
 
  event_transport_loop
- get event form main-server, transport to dest service
+ get event form main-service, transport to dest service
 
 */
 
-#include "dt_event.h"
-#include "dt_event_def.h"
-#include "dt_log.h"
+/*
+ * User manual
+ *
+ * 1 create service manager context
+ * dt_service_mgt_t *mgt = dt_service_create();
+ *
+ * 2 alloc & register user service
+ * service_t *service = dt_alloc_service(EVENT_SERVER_ID_TEST, EVENT_SERVER_NAME_TEST);
+ * dt_register_service(mgt, service);
+ *
+ * 3 alloc & send event
+ * event_t *event = dt_alloc_event(EVENT_SERVER_ID_TEST, EVNET_TEST);
+ * dt_send_event_sync(mgt, event);
+ *
+ * 4 query or get event and handle
+ * event_t *event_tmp = dt_get_event(service);
+ *
+ * 5 remove user service
+ * dt_remove_service(mgt, service);
+ *
+ * 6 release service manager & main-service
+ * dt_service_release(mgt);
+ *
+ * Attention:
+ * 1 make sure remove all user defined service before release service manager
+ * 2 EVERN_SERVER_ID_MAIN 0X0 is reservice. User defined event service can not reuser 0x0
+ *
+ * */
 
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
 
-#define TAG "EVENT-TRANSPORT"
+#include "dt_event.h"
+#include "dt_mem.h"
+#include "dt_log.h"
 
-static dt_server_mgt_t server_mgt;
-static event_server_t main_server;
+#define TAG "SERVICE"
 
+/* private func */
 static void *event_transport_loop();
-static int dt_transport_event(event_t * event, dt_server_mgt_t * mgt);
+static int dt_transport_event(event_t * event, dt_service_mgt_t * mgt);
 
-int dt_event_server_init()
+dt_service_mgt_t *dt_service_create()
 {
     pthread_t tid;
     int ret = 0;
+    dt_service_mgt_t *mgt = (dt_service_mgt_t *)dt_mallocz(sizeof(dt_service_mgt_t));
+    mgt->service = NULL;
+    mgt->service_count = 0;
+    mgt->exit_flag = 0;
+    dt_lock_init(&mgt->service_lock, NULL);
 
-    server_mgt.server = NULL;
-    server_mgt.server_count = 0;
-    server_mgt.exit_flag = 0;
-    dt_lock_init(&server_mgt.server_lock, NULL);
+    service_t *service = dt_alloc_service(EVENT_SERVER_ID_MAIN, EVENT_SERVER_NAME_MAIN);
+    service->event_count = 0;
+    service->event = NULL;
+    service->next = NULL;
+    dt_lock_init(&service->event_lock, NULL);
 
-    main_server.id = EVENT_SERVER_ID_MAIN;
-    strcpy(main_server.name, "SERVER-MAIN");
-    main_server.event_count = 0;
-    main_server.event = NULL;
-    main_server.next = NULL;
-    dt_lock_init(&main_server.event_lock, NULL);
-
-    ret = dt_register_server(&main_server);
+    ret = dt_register_service(mgt , service);
     if (ret < 0) {
         dt_error(TAG, "SERVER REGISTER FAILED \n");
-        return -1;
+        ret = -1;
+        goto end;
     }
 
-    ret = pthread_create(&tid, NULL, (void *) &event_transport_loop, NULL);
+    ret = pthread_create(&tid, NULL, (void *) &event_transport_loop, mgt);
     if (ret != 0) {
         dt_error(TAG, "TRANSTROP LOOP CREATE FAILED \n");
-        return -1;
+        ret = -2;
+        goto end;
     }
-    server_mgt.transport_loop_id = tid;
+    mgt->transport_loop_id = tid;
     dt_info(TAG, "TRANSTROP LOOP CREATE OK, TID:%u \n", (unsigned)tid);
-    return 0;
+end:
+    if (ret < 0) {
+        free(service);
+        free(mgt);
+    }
+    return mgt;
 }
 
 /*
- * release server
+ * release service
  * free memory, stop event trans loop
  * */
-int dt_event_server_release()
+int dt_service_release(dt_service_mgt_t *mgt)
 {
-    dt_server_mgt_t *mgt = &server_mgt;
-    dt_lock(&mgt->server_lock);
-
+    dt_lock(&mgt->service_lock);
     /*stop loop */
     mgt->exit_flag = 1;
     pthread_join(mgt->transport_loop_id, NULL);
     /*
-     * for main server, we just remove event
-     * for normal server, need to remove event and server
+     * Remove service & event
      * */
-    event_server_t *entry = mgt->server;
-    event_server_t *entry_next = NULL;
+    service_t *entry = mgt->service;
+    service_t *entry_next = NULL;
     while (entry) {
         entry_next = entry->next;
-        dt_remove_server(entry);
+        dt_remove_service(mgt, entry);
         entry = entry_next;
     }
 
-    dt_unlock(&mgt->server_lock);
+    dt_unlock(&mgt->service_lock);
+    free(mgt);
     return 0;
 }
 
-event_server_t *dt_alloc_server(int id, char *name)
+service_t *dt_alloc_service(int id, char *name)
 {
-    event_server_t *server = (event_server_t *) malloc(sizeof(event_server_t));
-    if (server) {
-        server->event = NULL;
-        server->event_count = 0;
-        server->id = id;
+    service_t *service = (service_t *) malloc(sizeof(service_t));
+    if (service) {
+        service->event = NULL;
+        service->event_count = 0;
+        service->id = id;
         if (strlen(name) < MAX_EVENT_SERVER_NAME_LEN) {
-            strcpy(server->name, name);
+            strcpy(service->name, name);
         } else {
-            strcpy(server->name, "Unkown");
+            strcpy(service->name, "Unkown");
         }
-        server->next = NULL;
-        dt_lock_init(&server->event_lock, NULL);
+        service->next = NULL;
+        dt_lock_init(&service->event_lock, NULL);
     } else {
-        server = NULL;
+        service = NULL;
     }
-    dt_info(TAG, "ALLOC SERVER:%p \n", server);
-    return server;
+    dt_info(TAG, "ALLOC SERVER:%p \n", service);
+    return service;
 }
 
-int dt_register_server(event_server_t * server)
+int dt_register_service(dt_service_mgt_t *mgt, service_t * service)
 {
-    dt_server_mgt_t *mgt = &server_mgt;
     int ret = 0;
     if (!mgt) {
         dt_error(TAG, "SERVICE MGT IS NULL\n");
         return -1;
     }
-    dt_lock(&mgt->server_lock);
-    if (mgt->server_count == 0) {
-        mgt->server = server;
+    dt_lock(&mgt->service_lock);
+    if (mgt->service_count == 0) {
+        mgt->service = service;
     }
-    event_server_t *entry = mgt->server;
+    service_t *entry = mgt->service;
     while (entry->next != NULL) {
-        if (entry->id == server->id) {
+        if (entry->id == service->id) {
             dt_error(TAG, "SERVICE HAS BEEN REGISTERD BEFORE\n");
             ret = -1;
             goto FAIL;
@@ -134,41 +180,41 @@ int dt_register_server(event_server_t * server)
         entry = entry->next;
     }
     if (entry->next == NULL) {
-        entry->next = server;
-        server->next = NULL;
-        mgt->server_count++;
+        entry->next = service;
+        service->next = NULL;
+        mgt->service_count++;
     }
-    dt_unlock(&mgt->server_lock);
-    dt_info(TAG, "SERVICE:%s REGISTER OK,SERVERCOUNT:%d \n", server->name, mgt->server_count);
+    dt_unlock(&mgt->service_lock);
+    dt_info(TAG, "SERVICE:%s REGISTER OK,SERVERCOUNT:%d \n", service->name, mgt->service_count);
     return 0;
 
 FAIL:
-    dt_unlock(&mgt->server_lock);
+    dt_unlock(&mgt->service_lock);
     return ret;
 
 }
 
 /*
-    for main server, we just remove event
-    for normal server, need to remove event and server
+    for main service, we just remove event
+    for normal service, need to remove event and service
  */
 
-int dt_remove_server(event_server_t * server)
+int dt_remove_service(dt_service_mgt_t *mgt, service_t * service)
 {
-    dt_server_mgt_t *mgt = &server_mgt;
-    int count = server->event_count;
+    int count = service->event_count;
+    service_t *entry = mgt->service;
 
-    dt_info(TAG, "REMOVE %s \n", server->name);
+    dt_info(TAG, "REMOVE %s \n", service->name);
     /*remove all events */
     if (count == 0) {
         goto REMOVE_SERVICE;
     }
-    event_t *event = server->event;
+    event_t *event = service->event;
     event_t *event_next = event->next;
 
     while (event) {
         free(event);
-        server->event_count--;
+        service->event_count--;
         event = event_next;
         if (event) {
             event_next = event->next;
@@ -176,28 +222,23 @@ int dt_remove_server(event_server_t * server)
     }
 
 REMOVE_SERVICE:
-    if (server->id == EVENT_SERVER_ID_MAIN) {
-        return 0;
-    }
-    event_server_t *entry = mgt->server;
-    while (entry->next && entry->next->id != server->id) {
+    while (entry->next && entry->next->id != service->id) {
         entry = entry->next;
     }
 
-    if (entry->next && entry->next->id == server->id) {
+    if (entry->next && entry->next->id == service->id) {
         entry->next = entry->next->next;
-        mgt->server_count--;
+        mgt->service_count--;
     }
-    if (server->event_count > 0) {
+    if (service->event_count > 0) {
         dt_warning(TAG, "EVENT COUNT !=0 AFTER REMOVE \n");
     }
-    if (server->id != EVENT_SERVER_ID_MAIN) {
-        free(server);
-    }
+    dt_info(TAG, "Remove service:%s success \n", service->name);
+    free(service);
     return 0;
 }
 
-event_t *dt_alloc_event()
+event_t *dt_alloc_event(int service, int type)
 {
     event_t *event = (event_t *) malloc(sizeof(event_t));
     if (!event) {
@@ -205,16 +246,15 @@ event_t *dt_alloc_event()
         return NULL;
     }
     event->next = NULL;
-    event->server_id = -1;
-    event->type = -1;
+    event->service_id = service;
+    event->type = type;
     return event;
 }
 
-int dt_send_event_sync(event_t * event)
+int dt_send_event_sync(dt_service_mgt_t *mgt, event_t * event)
 {
-    dt_server_mgt_t *mgt = &server_mgt;
-    event_server_t *server_hub = mgt->server;
-    if (!server_hub) {
+    service_t *service_hub = mgt->service;
+    if (!service_hub) {
         dt_error(TAG, "EVENT SEND FAILED \n");
         return -1;
     }
@@ -223,92 +263,91 @@ int dt_send_event_sync(event_t * event)
     return 0;
 }
 
-int dt_send_event(event_t * event)
+int dt_send_event(dt_service_mgt_t *mgt, event_t * event)
 {
-    dt_server_mgt_t *mgt = &server_mgt;
-    event_server_t *server_hub = mgt->server;
-    if (!server_hub) {
+    service_t *service_hub = mgt->service;
+    if (!service_hub) {
         dt_error(TAG, "EVENT SEND FAILED \n");
         return -1;
     }
-    dt_lock(&server_hub->event_lock);
-    if (server_hub->event_count == 0) {
-        server_hub->event = event;
+    dt_lock(&service_hub->event_lock);
+    if (service_hub->event_count == 0) {
+        service_hub->event = event;
     } else {
-        event_t *entry = server_hub->event;
+        event_t *entry = service_hub->event;
         while (entry->next) {
             entry = entry->next;
         }
         entry->next = event;
 
     }
-    server_hub->event_count++;
-    dt_unlock(&server_hub->event_lock);
-    dt_debug(TAG, "EVENT:%d SEND OK, event count:%d \n", event->type, server_hub->event_count);
+    service_hub->event_count++;
+    dt_unlock(&service_hub->event_lock);
+    dt_debug(TAG, "EVENT:%d SEND OK, event count:%d \n", event->type, service_hub->event_count);
     return 0;
 }
 
-int dt_add_event(event_t * event, event_server_t * server)
+static int dt_add_event(event_t * event, service_t * service)
 {
-    event_server_t *server_hub = server;
-    if (!server_hub) {
+    service_t *service_hub = service;
+    if (!service_hub) {
         dt_error(TAG, "EVENT SEND FAILED \n");
         return -1;
     }
-    dt_lock(&server_hub->event_lock);
-    if (server_hub->event_count == 0) {
-        server_hub->event = event;
+    dt_lock(&service_hub->event_lock);
+    if (service_hub->event_count == 0) {
+        service_hub->event = event;
     } else {
-        event_t *entry = server_hub->event;
+        event_t *entry = service_hub->event;
         while (entry->next) {
             entry = entry->next;
         }
         entry->next = event;
 
     }
-    server_hub->event_count++;
-    dt_unlock(&server_hub->event_lock);
+    service_hub->event_count++;
+    dt_unlock(&service_hub->event_lock);
     return 0;
 }
 
-event_t *dt_peek_event(event_server_t * server)
+event_t *dt_peek_event(service_t * service)
 {
     event_t *entry = NULL;
-    dt_lock(&server->event_lock);
-    if (server->event_count > 0) {
-        entry = server->event;
+    dt_lock(&service->event_lock);
+    if (service->event_count > 0) {
+        entry = service->event;
     }
-    dt_unlock(&server->event_lock);
+    dt_unlock(&service->event_lock);
     if (entry != NULL) {
-        dt_info(TAG, "PEEK EVENT:%d From Server:%s \n", entry->type, server->name);
+        dt_info(TAG, "PEEK EVENT:%d From Server:%s \n", entry->type, service->name);
     }
     return entry;
 }
 
-event_t *dt_get_event(event_server_t * server)
+event_t *dt_get_event(service_t * service)
 {
     event_t *entry = NULL;
-    dt_lock(&server->event_lock);
-    if (server->event_count > 0) {
-        entry = server->event;
-        server->event = entry->next;
-        server->event_count--;
+    dt_lock(&service->event_lock);
+    if (service->event_count > 0) {
+        entry = service->event;
+        service->event = entry->next;
+        service->event_count--;
         entry->next = NULL;
     }
-    dt_unlock(&server->event_lock);
+    dt_unlock(&service->event_lock);
     if (entry != NULL) {
-        dt_info(TAG, "GET EVENT:%d From Server:%s \n", entry->type, server->name);
+        dt_info(TAG, "GET EVENT:%d From Server:%s \n", entry->type, service->name);
     }
     return entry;
 }
 
-static int dt_transport_event(event_t * event, dt_server_mgt_t * mgt)
+static int dt_transport_event(event_t * event, dt_service_mgt_t * mgt)
 {
-    dt_lock(&mgt->server_lock);
-    event_server_t *entry = mgt->server;
+    dt_lock(&mgt->service_lock);
+    service_t *entry = mgt->service;
 
     int ret = 0;
-    while (entry->id != event->server_id) {
+    while (entry->id != event->service_id) {
         entry = entry->next;
         if (!entry) {
             break;
@@ -316,35 +355,35 @@ static int dt_transport_event(event_t * event, dt_server_mgt_t * mgt)
     }
 
     if (!entry) {
-        dt_error(TAG, "Could not found server for:%d \n ", event->server_id);
+        dt_error(TAG, "Could not found service for:%d \n ", event->service_id);
         ret = -1;
         goto FAIL;
     }
 
     ret = dt_add_event(event, entry);
     if (ret < 0) {              //we need to free this event
-        dt_error(TAG, "we can not transport this event, id:%d type:%d\n ", event->server_id, event->type);
+        dt_error(TAG, "we can not transport this event, id:%d type:%d\n ", event->service_id, event->type);
         free(event);
         ret = -1;
         goto FAIL;
     }
-    dt_unlock(&mgt->server_lock);
+    dt_unlock(&mgt->service_lock);
     return ret;
 FAIL:
-    dt_unlock(&mgt->server_lock);
+    dt_unlock(&mgt->service_lock);
     return ret;
 }
 
-static void *event_transport_loop()
+static void *event_transport_loop(void *arg)
 {
-    dt_server_mgt_t *mgt = &server_mgt;
-    event_server_t *server_hub = mgt->server;
+    dt_service_mgt_t *mgt = (dt_service_mgt_t *)arg;
+    service_t *service_hub = mgt->service;
     event_t *event = NULL;
     do {
         if (mgt->exit_flag) {
             goto QUIT;
         }
-        event = dt_get_event(server_hub);
+        event = dt_get_event(service_hub);
         if (!event) {
             usleep(10 * 1000);
             continue;

@@ -1,19 +1,5 @@
+#include "dt_mem.h"
 #include "dt_av.h"
-
-void *dt_malloc(size_t size)
-{
-    void *ptr = malloc(size);
-    if (!ptr) {
-        return ptr;
-    }
-    memset(ptr, 0, size);
-    return ptr;
-}
-
-void dt_free(void *ptr)
-{
-    free(ptr);
-}
 
 // structure
 

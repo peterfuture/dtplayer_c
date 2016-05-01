@@ -3,8 +3,7 @@
 
 #include "dt_buffer.h"
 #include "dt_event.h"
-#include "dt_event_def.h"
-#include "dt_event_def.h"
+#include "dtp_event.h"
 #include "dt_lock.h"
 #include "dt_log.h"
 #include "dt_queue.h"

@@ -62,8 +62,9 @@ typedef struct dtplayer_context {
     io_loop_t io_loop;
     pthread_t event_loop_id;
 
-    void *player_server;
+    service_t *player_service;
     void *cookie;
+    dt_service_mgt_t *service_mgt;
 } dtplayer_context_t;
 
 void player_register_all();

@@ -1,15 +1,18 @@
+#include <pthread.h>
+
+#include "dt_ini.h"
+#include "dt_event.h"
+
 #include "dtplayer.h"
 #include "dtdemuxer_api.h"
 #include "dtplayer_io.h"
 #include "dtplayer_host.h"
 #include "dtplayer_update.h"
-#include "dt_ini.h"
 #include "dtstream.h"
 #include "dtdemuxer.h"
 #include "dtaudio.h"
 #include "dtvideo.h"
 #include "dtsub.h"
-#include "pthread.h"
 
 #define TAG "PLAYER"
 
@@ -51,22 +54,20 @@ static player_status_t get_player_status(dtplayer_context_t * dtp_ctx)
     return dtp_ctx->state.cur_status;
 }
 
-static int player_server_init(dtplayer_context_t * dtp_ctx)
+static int player_service_init(dtplayer_context_t * dtp_ctx)
 {
-    event_server_t *server = dt_alloc_server(EVENT_SERVER_ID_PLAYER, EVENT_SERVER_NAME_PLAYER);
-    dt_info(TAG, "PLAYER SERVER INIT:%p \n", server);
-    server->id = EVENT_SERVER_ID_PLAYER;
-    strcpy(server->name, "SERVER-PLAYER");
-    dt_register_server(server);
-    dtp_ctx->player_server = (void *)server;
+    service_t *service = dt_alloc_service(EVENT_SERVER_ID_PLAYER, EVENT_SERVER_NAME_PLAYER);
+    dt_info(TAG, "PLAYER SERVER INIT:%p \n", service);
+    dt_register_service(dtp_ctx->service_mgt, service);
+    dtp_ctx->player_service = service;
     return 0;
 }
 
-static int player_server_release(dtplayer_context_t * dtp_ctx)
+static int player_service_release(dtplayer_context_t * dtp_ctx)
 {
-    event_server_t *server = (event_server_t *)dtp_ctx->player_server;
-    dt_remove_server(server);
-    dtp_ctx->player_server = NULL;
+    service_t *service = (service_t *)dtp_ctx->player_service;
+    dt_remove_service(dtp_ctx->service_mgt, service);
+    dtp_ctx->player_service = NULL;
     return 0;
 }
 
@@ -255,12 +256,12 @@ int player_prepare(dtplayer_context_t *dtp_ctx)
 
     set_player_status(dtp_ctx, PLAYER_STATUS_PREPARE_START);
 
-    /* init & start player server first */
-    player_server_init(dtp_ctx);
+    /* init & start player service first */
+    player_service_init(dtp_ctx);
     ret = pthread_create(&tid, NULL, (void *)&event_handle_loop, (void *)dtp_ctx);
     if (ret == -1) {
         dt_error(TAG "file:%s [%s:%d] player io thread start failed \n", __FILE__, __FUNCTION__, __LINE__);
-        player_server_release(dtp_ctx);
+        player_service_release(dtp_ctx);
         goto ERR3;
     }
     dt_info(TAG, "[%s:%d] create event handle loop thread id = %lu\n", __FUNCTION__, __LINE__, tid);
@@ -367,16 +368,16 @@ int player_seekto(dtplayer_context_t * dtp_ctx, int seek_time)
     if (io_thread_running(dtp_ctx)) {
         pause_io_thread(dtp_ctx);
     }
-    player_host_pause(dtp_ctx);
+    //player_host_pause(dtp_ctx);
+    player_host_stop(dtp_ctx);
 
     int ret = dtdemuxer_seekto(dtp_ctx->demuxer_priv, (int64_t)seek_time);
     if (ret == -1) {
         goto FAIL;
     }
+    player_host_init(dtp_ctx);
     // key frame waiting
     ctrl_info->ctrl_wait_key_frame = 1;
-    player_host_stop(dtp_ctx);
-    player_host_init(dtp_ctx);
     if (io_thread_running(dtp_ctx)) { // maybe io thread already quit
         resume_io_thread(dtp_ctx);
     } else {
@@ -388,8 +389,8 @@ int player_seekto(dtplayer_context_t * dtp_ctx, int seek_time)
     player_handle_cb(dtp_ctx);
 
     //check if another seek event comming soom
-    event_server_t *server = (event_server_t *)dtp_ctx->player_server;
-    event_t *event = dt_peek_event(server);
+    service_t *service = (service_t *)dtp_ctx->player_service;
+    event_t *event = dt_peek_event(service);
     if (event != NULL && event->type == PLAYER_EVENT_SEEK) {
         dt_info(TAG, "execute queue seekto event \n");
         return 0;
@@ -451,8 +452,8 @@ static char * get_event_name(int cmd)
 
 static int player_handle_event(dtplayer_context_t * dtp_ctx)
 {
-    event_server_t *server = (event_server_t *)dtp_ctx->player_server;
-    event_t *event = dt_get_event(server);
+    service_t *service = (service_t *)dtp_ctx->player_service;
+    event_t *event = dt_get_event(service);
 START:
     if (!event) {
         dt_debug(TAG, "GET EVENT NULL \n");
@@ -484,9 +485,9 @@ START:
     }
 
     //check if still have event
-    event = dt_peek_event(server);
+    event = dt_peek_event(service);
     if (event) {
-        event = dt_get_event(server);
+        event = dt_get_event(service);
         goto START;
     }
     return 0;
@@ -521,8 +522,8 @@ QUIT:
     stop_io_thread(dtp_ctx);
     player_host_stop(dtp_ctx);
     dtdemuxer_close(dtp_ctx->demuxer_priv);
-    player_server_release(dtp_ctx);
-    dt_event_server_release();
+    player_service_release(dtp_ctx);
+    dt_service_release(dtp_ctx->service_mgt);
     dt_info(TAG, "EXIT PLAYER EVENT HANDLE LOOP\n");
     set_player_status(dtp_ctx, PLAYER_STATUS_EXIT);
     player_handle_cb(dtp_ctx);

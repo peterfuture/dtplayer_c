@@ -53,7 +53,7 @@ typedef struct {
     /*other */
     pthread_t event_loop_id;
     dtaudio_status_t audio_state;
-    void *audio_server;
+    void *audio_service;
     void *dtport_priv;          //data source
     void *parent;               //dtcodec
 } dtaudio_context_t;

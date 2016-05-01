@@ -1,13 +1,13 @@
 #ifndef DT_EVENT_DEF_H
 #define DT_EVENT_DEF_H
 
-enum dtp_event_server_id {
-    EVENT_SERVER_INVALID = -1,
-    EVENT_SERVER_ID_MAIN = 0,
-    EVENT_SERVER_ID_PLAYER,
-    EVENT_SERVER_ID_AUDIO,
-    EVENT_SERVER_ID_VIDEO,
-};
+/* Server-ID */
+
+#define EVENT_SERVER_ID_PLAYER 0x1
+#define EVENT_SERVER_ID_AUDIO  0x2
+#define EVENT_SERVER_ID_VIDEO  0x3
+
+/* Server-Name */
 
 #define EVENT_SERVER_NAME_MAIN "SERVER-MAIN"
 #define EVENT_SERVER_NAME_PLAYER "SERVER-PLAYER"
@@ -15,6 +15,7 @@ enum dtp_event_server_id {
 #define EVENT_SERVER_NAME_VIDEO "SERVER-VIDEO"
 #define EVENT_SERVER_NAME_SUB "SERVER-SUB"
 
+/* Event */
 enum dtp_event {
     /*player event */
     PLAYER_EVENT_INVALID = -1,

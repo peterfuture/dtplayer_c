@@ -493,6 +493,7 @@ int host_init(dthost_context_t * hctx)
     /*init audio */
     if (host_para->has_audio) {
         dtaudio_para_t audio_para;
+        audio_para.service_mgt = host_para->service_mgt;
         audio_para.afmt = host_para->audio_format;
         audio_para.bps = host_para->audio_sample_fmt;
         audio_para.channels = host_para->audio_channel;

@@ -241,7 +241,7 @@ static void *event_handle_loop(void *args)
     dtaudio_context_t *actx;
     actx = (dtaudio_context_t *) args;
     event_t *event = NULL;
-    event_server_t *server = (event_server_t *) actx->audio_server;
+    service_t *service = (service_t *) actx->audio_service;
 
     dt_info(TAG, "[%s:%d] dtaudio init ok, enter event handle loop\n", __FUNCTION__, __LINE__);
     do {
@@ -249,7 +249,7 @@ static void *event_handle_loop(void *args)
             break;
         }
 
-        event = dt_get_event(server);
+        event = dt_get_event(service);
         if (!event) {
             usleep(100);
             continue;
