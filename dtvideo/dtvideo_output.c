@@ -150,9 +150,28 @@ static void dump_frame(dt_av_frame_t * pFrame, int width, int height, int index)
     }
     fprintf(pFile, "P6\n%d %d\n255\n", width, height);  // write header
     // write pixel data
+#if 1
     for (y = 0; y < height; y++) {
         fwrite(pFrame->data[0] + y * pFrame->linesize[0], 1, width * 3, pFile);
     }
+#endif
+#if 0
+    int i, j, shift;
+    char *yuv = NULL;
+    for (i = 0; i < 3; i++) {
+        shift = (i == 0 ? 0 : 1);
+        yuv = pFrame->data[i];
+        for (j = 0; j < height >> shift; j++) {
+            fwrite(yuv, (width >> shift), 1, pFile);
+            yuv_factor += pFrame->linesize[i];
+        }
+    }
+#endif
+#if 0
+    fwrite(pFrame->data[0], 1, pFrame->linesize[0] * height, pFile);
+    fwrite(pFrame->data[1], 1, pFrame->linesize[1] * height / 2, pFile);
+    fwrite(pFrame->data[2], 1, pFrame->linesize[2] * height / 3, pFile);
+#endif
     fclose(pFile);  // close
 }
 
@@ -234,7 +253,6 @@ static void *video_output_thread(void *args)
             usleep(1000);
             continue;
         }
-
         pic = (dt_av_frame_t *) picture;
         //update pts
         if (vctx->last_valid_pts == -1) {
@@ -274,7 +292,7 @@ static void *video_output_thread(void *args)
         } else {
             // dump video check
             if (dump_mode == 5 && dump_index < 5) {
-                dump_frame(pic, filter->para.d_width, filter->para.d_height, dump_index++);
+                dump_frame(pic, filter->para.s_width, filter->para.s_height, dump_index++);
             }
         }
 
