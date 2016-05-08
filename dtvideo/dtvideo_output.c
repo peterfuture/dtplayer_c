@@ -190,6 +190,10 @@ static void *video_output_thread(void *args)
     dt_av_frame_t *picture;
     dt_av_frame_t *pic;
 
+    int64_t render_clock_start = -1;
+    int render_mode = dtp_setting.video_render_mode;
+    int render_ms = dtp_setting.video_render_duration;
+
     // sys_clock_*** use to calc system time
     int64_t sys_clock;
     int64_t video_discontinue = 0;
@@ -215,6 +219,20 @@ static void *video_output_thread(void *args)
             dt_debug(TAG, "[%s:%d]frame read failed ! \n", __FUNCTION__, __LINE__);
             usleep(100);
             continue;
+        }
+
+        /* render mode == VIDEO_RENDER_MODE_DURATION */
+        if (render_mode == VIDEO_RENDER_MODE_DURATION) {
+            if (render_clock_start == -1) {
+                render_clock_start = dt_gettime();
+            } else if ((llabs)(dt_gettime() - render_clock_start) / 1000 > render_ms) {
+                render_clock_start = dt_gettime();
+            } else {
+                continue;
+            }
+            picture = (dt_av_frame_t *) dtvideo_output_read(vo->parent);
+            pic = (dt_av_frame_t *) picture;
+            goto RENDER;
         }
 
         sys_clock = dtvideo_get_systime(vo->parent);
@@ -282,6 +300,7 @@ static void *video_output_thread(void *args)
                 }
             }
         }
+RENDER:
         /*display picture & update vpts */
         //before render, call vf
         video_filter_process(filter, picture);

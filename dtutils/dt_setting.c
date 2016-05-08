@@ -70,6 +70,14 @@ int dt_update_setting()
     if (GetEnv("VIDEO", "video.index", value) > 0) {
         dtp_setting.video_index = atoi(value);
     }
+    dtp_setting.video_render_mode = 0;
+    if (GetEnv("VIDEO", "video.render_mode", value) > 0) {
+        dtp_setting.video_render_mode = atoi(value);
+    }
+    dtp_setting.video_render_duration = 0;
+    if (GetEnv("VIDEO", "video.render_duration", value) > 0) {
+        dtp_setting.video_render_duration = atoi(value);
+    }
 
     // SUB
     dtp_setting.sub_index = -1;

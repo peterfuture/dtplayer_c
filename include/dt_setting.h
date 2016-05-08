@@ -19,6 +19,8 @@ typedef struct dt_setting {
     int video_pts_mode;
     int video_pixel_format;
     int video_index;
+    int video_render_mode;
+    int video_render_duration;
     // SUB
     int sub_index;
     // PLAYER

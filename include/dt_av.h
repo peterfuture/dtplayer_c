@@ -100,6 +100,11 @@ typedef enum {
     DTAV_FLAG_DISABLE_HW_CODEC = 0x1,
 } dtvideo_flag_t;
 
+enum video_render_mode {
+    VIDEO_RENDER_MODE_PTS = 0,
+    VIDEO_RENDER_MODE_DURATION,
+};
+
 //From ffmpeg
 typedef enum DT_AVPixelFormat {
     DTAV_PIX_FMT_NONE = -1,
