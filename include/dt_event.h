@@ -7,7 +7,7 @@ typedef struct event {
     int type;
     union {
         int np;
-    }para;
+    } para;
     int service_id;
     struct event *next;
 } event_t;

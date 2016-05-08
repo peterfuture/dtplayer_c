@@ -110,7 +110,7 @@ int64_t dtvideo_get_systime(void *priv)
     if (vctx->video_status <= VIDEO_STATUS_INITED) {
         return -1;
     }
-    int systime = 0;
+    int64_t systime = 0;
     dthost_get_info(vctx->parent, HOST_CMD_GET_SYSTIME, (unsigned long)(&systime));
     return systime;
 }
