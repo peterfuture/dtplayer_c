@@ -56,6 +56,7 @@ void *dtplayer_init(dtplayer_para_t * para)
         dt_error(TAG, "dtplayer context malloc failed \n");
         return NULL;
     }
+    memset(dtp_ctx, 0, sizeof(dtp_ctx));
     memcpy(&dtp_ctx->player_para, para, sizeof(dtplayer_para_t));
     dtp_ctx->cookie = para->cookie;
     dt_info(TAG, "start playing :%s \n", para->file_name);
@@ -108,7 +109,7 @@ int dtplayer_stop(void *player_priv)
     dtplayer_context_t *dtp_ctx = (dtplayer_context_t *)player_priv;
     event_t *event = dt_alloc_event(EVENT_SERVER_ID_PLAYER, PLAYER_EVENT_STOP);
     dt_send_event(dtp_ctx->service_mgt, event);
- 
+
     /*need to wait until player stop ok */
     dt_info(TAG, "EVENT_LOOP_ID:%lu \n", dtp_ctx->event_loop_id);
 

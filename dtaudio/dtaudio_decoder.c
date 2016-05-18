@@ -395,7 +395,7 @@ int64_t audio_decoder_get_pts(dtaudio_decoder_t * decoder)
     if (-1 == decoder->pts_first) {
         return -1;
     }
-    if (-1 == decoder->pts_current) { //case 1 current_pts invalid
+    if (PTS_INVALID(decoder->pts_current)) { //case 1 current_pts invalid
         if (decoder->pts_last_valid) {
             pts = decoder->pts_last_valid;
         }
