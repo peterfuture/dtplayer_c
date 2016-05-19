@@ -138,11 +138,13 @@ int video_output_get_level(dtvideo_output_t * ao)
     //return ao->state.aout_buf_level;
 }
 
-static void dump_frame(dt_av_frame_t * pFrame, int width, int height, int index)
+static void dump_frame(dt_av_frame_t * pFrame, int index)
 {
     FILE *pFile;
     char szFilename[32];
     int y;
+    int width = pFrame->width;
+    int height = pFrame->height;
     sprintf(szFilename, "frame%d.ppm", index); // setup filename
     pFile = fopen(szFilename, "wb");           // open file
     if (pFile == NULL) {
@@ -200,11 +202,6 @@ static void *video_output_thread(void *args)
 
     int dump_mode = dtp_setting.player_dump_mode; // 5 for video dump
     int dump_index = 0;
-    //Init filter first, Just do color space convert
-    //filter->para.d_width = filter->para.s_width;
-    //filter->para.d_height = filter->para.s_height;
-    video_filter_init(filter);
-
     for (;;) {
         if (vo->status == VO_STATUS_EXIT) {
             goto EXIT;
@@ -302,8 +299,6 @@ static void *video_output_thread(void *args)
         }
 RENDER:
         /*display picture & update vpts */
-        //before render, call vf
-        video_filter_process(filter, picture);
         ret = wrapper->vo_render(vo, pic);
         if (ret < 0) {
             dt_error(TAG, "frame toggle failed! \n");
@@ -311,7 +306,7 @@ RENDER:
         } else {
             // dump video check
             if (dump_mode == 5 && dump_index < 5) {
-                dump_frame(pic, filter->para.s_width, filter->para.s_height, dump_index++);
+                dump_frame(pic, dump_index++);
             }
         }
 
@@ -324,7 +319,6 @@ RENDER:
     }
 EXIT:
     dt_info(TAG, "[file:%s][%s:%d]ao playback thread exit\n", __FILE__, __FUNCTION__, __LINE__);
-    video_filter_stop(filter);
     pthread_exit(NULL);
     return NULL;
 }

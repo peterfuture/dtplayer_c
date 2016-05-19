@@ -212,9 +212,9 @@ static void *video_decode_loop(void *arg)
         }
 
         // setup some common info
-        picture->width = para->d_width;
-        picture->height = para->d_height;
-        picture->pixfmt = para->d_pixfmt;
+        picture->width = para->s_width;
+        picture->height = para->s_height;
+        picture->pixfmt = para->s_pixfmt;
 
         /*queue in */
         queue_push_tail(picture_queue, picture);
