@@ -15,15 +15,15 @@ User can also remove ffmpeg dependence through modifing makefile (set DT_FFMPEG 
 
 - install ffmpeg & libav
 
-- ./build.sh linux
+- make -j8
 
 ### Android
 
-- install ffmpeg for android (refer to [ffmpeg-android](https://github.com/peterfuture/ffmpeg_android))
+- [Install ToolChain](https://github.com/peterfuture/dttv-android/wiki/1-%E5%AE%89%E8%A3%85android-arm%E4%BA%A4%E5%8F%89%E7%BC%96%E8%AF%91%E9%93%BE)
 
-- export DT_FFMPEG_ANDROID_DIR=/PATH/TO/FFmpeg-Android/build/ffmpeg/armv7
+- Install [ffmpeg-android](https://github.com/peterfuture/ffmpeg_android)
 
-- ./build.sh android
+- make -f makefile-android -j8
 
 
 ## Usage
