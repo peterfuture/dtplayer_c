@@ -66,24 +66,21 @@ DT_FFMPEG = yes
 DT_SDL = yes
 DT_SDL2 = no
 DT_ALSA = yes
-DT_FAAD = no
-DT_TSDEMUX = no
 DTAP=no
 
 #module
-DT_STREAM=yes
-DT_STREAM_CURL=no
-DT_DEMUXER=yes
-DT_UTIL=yes
-DT_AUDIO=yes
-DT_VIDEO=yes
-DT_SUB=yes
-DT_PORT=yes
-DT_HOST=yes
-DT_PLAYER=yes
+DT_STREAM = yes
+DT_DEMUXER = yes
+DT_UTIL = yes
+DT_AUDIO = yes
+DT_VIDEO = yes
+DT_SUB = yes
+DT_PORT = yes
+DT_HOST = yes
+DT_PLAYER = yes
 
 #target
-DTM_PLAYER=yes
+DTM_PLAYER = yes
 DTM_INFO=
 DTM_CONVERT=
 DTM_SERVER=
@@ -92,10 +89,28 @@ DTM_SERVER=
 #                   MACRO                      
 #======================================================
 
+#plugin control
+ifeq ($(DT_FFMPEG),yes)
+	DT_FAAD=no
+	DT_TSDEMUX=no
+	DT_STREAM_CURL=no
+	DT_STREAM_FILE=no
+	DT_DEMUXER_AAC=no
+else
+	DT_FAAD=yes
+	DT_TSDEMUX=yes
+	DT_STREAM_CURL=yes
+	DT_STREAM_FILE=yes
+	DT_DEMUXER_AAC=yes
+endif
+
 DT_CFLAGS += -DENABLE_LINUX=1
 
 #stream
-#DT_CFLAGS += -DENABLE_STREAM_FILE=1
+ifeq ($(DT_STREAM_FILE),yes)
+DT_CFLAGS += -DENABLE_STREAM_FILE=1
+endif
+
 ifeq ($(DT_STREAM_CURL),yes)
 DT_CFLAGS += -DENABLE_STREAM_CURL=1
 endif
@@ -104,7 +119,9 @@ ifeq ($(DT_FFMPEG),yes)
 endif
 
 #demuxer
-#DT_CFLAGS += -DENABLE_DEMUXER_AAC=0
+ifeq ($(DT_DEMUXER_AAC),yes)
+DT_CFLAGS += -DENABLE_DEMUXER_AAC=0
+endif
 
 ifeq ($(DT_TSDEMUX),yes)
 	DT_CFLAGS += -DENABLE_DEMUXER_TS=1
@@ -261,7 +278,7 @@ SRCS_COMMON-$(DT_VIDEO) += dtvideo/dtvideo_filter.c
 SRCS_COMMON-$(DT_VIDEO) += dtvideo/dtvideo_output.c
 SRCS_COMMON-$(DT_FFMPEG) += dtvideo/video_decoder/vd_ffmpeg.c         #dec
 SRCS_COMMON-$(DT_FFMPEG) += dtvideo/video_filter/vf_ffmpeg.c          #filter
-SRCS_COMMON-$(DT_FFMPEG) += dtvideo/video_out/vo_null.c               #default-render
+SRCS_COMMON-$(DT_VIDEO) += dtvideo/video_out/vo_null.c               #default-render
 #dtsub
 SRCS_COMMON-$(DT_SUB)    += dtsub/dtsub_api.c
 SRCS_COMMON-$(DT_SUB)    += dtsub/dtsub.c

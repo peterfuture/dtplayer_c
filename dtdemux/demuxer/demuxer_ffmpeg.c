@@ -594,10 +594,12 @@ static int demuxer_ffmpeg_seek_frame(demuxer_wrapper_t * wrapper, int64_t timest
 
     int seek_mode = 0; // default by time
 
-    if (duration >= MAX_DURATION_S)
+    if (duration >= MAX_DURATION_S) {
         seek_mode = 1;
-    if (dtp_setting.player_seekmode == 1)
+    }
+    if (dtp_setting.player_seekmode == 1) {
         seek_mode = 1;
+    }
 
     // fix seek by bytes
     if (seek_mode == 1) {

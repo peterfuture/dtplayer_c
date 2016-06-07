@@ -265,12 +265,12 @@ static int ts_type_convert(int type)
     int ret = -1;
     switch (type) {
     case ES_TYPE_H264:
-        ret = VIDEO_FORMAT_H264;
+        ret = DT_VIDEO_FORMAT_H264;
         break;
     case ES_TYPE_AAC:
-        ret = AUDIO_FORMAT_AAC;
+        ret = DT_AUDIO_FORMAT_AAC;
     case ES_TYPE_AC3:
-        ret = AUDIO_FORMAT_AC3;
+        ret = DT_AUDIO_FORMAT_AC3;
 
         break;
     default:
@@ -405,7 +405,7 @@ static int ts_open(demuxer_wrapper_t *wrapper)
     if (ts_ctx->audio_num > 0) {
         pes_t *aes = &ts_ctx->es_audio;
         aes->state = TS_INVLAID;
-        buf_init(&aes->dbt, TS_CACHE_AUDIO);
+        buf_init(aes->dbt, TS_CACHE_AUDIO);
     }
     if (ts_ctx->video_num > 0) {
         pes_t *ves = &ts_ctx->es_video;
@@ -546,7 +546,7 @@ static int ts_setup_info(demuxer_wrapper_t * wrapper, dt_media_info_t * info)
     info->cur_sst_index = -1;
 
     /*get media info */
-    info->format = MEDIA_FORMAT_MPEGTS;
+    info->format = DT_MEDIA_FORMAT_MPEGTS;
     strcpy(info->file_name, ctx->file_name);
 
     info->bit_rate = ts_ctx->bitrate;
@@ -618,7 +618,7 @@ static int64_t parse_pes_pts(uint8_t *buf)
     return (int64_t)(*buf & 0x0e) << 29 | (DT_RB16(buf + 1) >> 1) << 15 | (DT_RB16(buf + 3) >> 1);
 }
 
-static int setup_frame(pes_t *es, dt_av_frame_t *frame, int type)
+static int setup_frame(pes_t *es, dt_av_pkt_t *frame, int type)
 {
     frame->type = type;
     frame->size = es->data_index;
@@ -634,7 +634,7 @@ static int setup_frame(pes_t *es, dt_av_frame_t *frame, int type)
 }
 
 // 0 noerr 1 get one frame <0 err
-static int handle_ts_pkt(ts_ctx_t *ts_ctx, ts_packet_t *packet, dt_av_frame_t *frame, int type)
+static int handle_ts_pkt(ts_ctx_t *ts_ctx, ts_packet_t *packet, dt_av_pkt_t *frame, int type)
 {
     int ret = 0;
     int is_start = packet->unitstart;
@@ -837,7 +837,7 @@ skip:
     return ret;
 }
 
-static int ts_read_frame(demuxer_wrapper_t *wrapper, dt_av_frame_t *frame)
+static int ts_read_frame(demuxer_wrapper_t *wrapper, dt_av_pkt_t *frame)
 {
     ts_packet_t packet;
 
@@ -846,9 +846,9 @@ static int ts_read_frame(demuxer_wrapper_t *wrapper, dt_av_frame_t *frame)
     dt_media_info_t *media_info = &ctx->media_info;
     ts_ctx_t *ts_ctx = (ts_ctx_t *)wrapper->demuxer_priv;
 
-    int has_audio = (media_info->no_audio) ? 0 : media_info->has_audio;
-    int has_video = (media_info->no_video) ? 0 : media_info->has_video;
-    int has_sub = (media_info->no_sub) ? 0 : media_info->has_sub;
+    int has_audio = (media_info->disable_audio) ? 0 : media_info->has_audio;
+    int has_video = (media_info->disable_video) ? 0 : media_info->has_video;
+    int has_sub = (media_info->disable_sub) ? 0 : media_info->has_sub;
 
     int apid = (has_audio) ? media_info->astreams[media_info->cur_ast_index]->id : -1;
     int vpid = (has_video) ? media_info->vstreams[media_info->cur_vst_index]->id : -1;

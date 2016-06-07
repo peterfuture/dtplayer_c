@@ -125,8 +125,10 @@ static int demuxer_aac_probe(demuxer_wrapper_t *wrapper, dt_buffer_t *probe_buf)
     const uint8_t *buf2;
     const uint8_t *buf;
     const uint8_t *end = buf0 + probe_buf->level - 7;
+    dt_info(TAG, "AAC Demuxer probe enter \n");
     buf = buf0;
     if (probe_buf->level < 10) {
+        dt_info(TAG, "AAC Demuxer. level:%d \n", probe_buf->level);
         return 0;
     }
 

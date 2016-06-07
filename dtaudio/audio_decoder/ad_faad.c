@@ -180,7 +180,7 @@ static int faad_release(ad_wrapper_t * wrapper)
 
 ad_wrapper_t ad_faad_ops = {
     .name = "faad audio decoder",
-    .afmt = AUDIO_FORMAT_AAC,
+    .afmt = DT_AUDIO_FORMAT_AAC,
     .type = DT_TYPE_AUDIO,
     .init = faad_init,
     .decode_frame = faad_decode,
