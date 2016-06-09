@@ -359,7 +359,7 @@ all: $(ALL_PRG)
 
 libdtp.so: $(OBJS_DTLIB_DEP_RELEASE) $(COMMON_LIBS) 
 	@$(CC) -shared -fPIC -o $@ $^ $(LDFLAGS)
-	@$(STRIP) $@
+	#@$(STRIP) $@
 	@echo =====================================================
 	@echo build $@ done
 	@echo =====================================================

@@ -103,7 +103,7 @@ int dt_update_setting()
     if (GetEnv("PLAYER", "player.sync.enable", value) > 0) {
         dtp_setting.player_sync_enable = atoi(value);
     }
-    dtp_setting.player_seekmode = 0;
+    dtp_setting.player_seekmode = -1;
     if (GetEnv("PLAYER", "player.seekmode", value) > 0) {
         dtp_setting.player_seekmode = atoi(value);
     }
