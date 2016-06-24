@@ -270,7 +270,7 @@ static int vo_sdl_init(dtvideo_output_t * vo)
 static int vo_sdl_render(dtvideo_output_t * vo, dt_av_frame_t * frame)
 {
     dt_lock(&window.mutex);
-    dt_info(TAG, "frame size [%d:%d] \n", frame->width, frame->height);
+    dt_debug(TAG, "frame size [%d:%d] \n", frame->width, frame->height);
     // reset sdl vf and window size
     dtvideo_filter_t *vf = &sdl_vf;
     if (vf->para.d_width != sdl_gui.window_w || vf->para.d_height != sdl_gui.window_h || vf->para.d_pixfmt != sdl_gui.pixfmt) {

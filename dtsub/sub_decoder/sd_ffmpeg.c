@@ -4,7 +4,7 @@
 **  Summary: sub decoder with ffmpeg
 **  Section: dtsub
 **  Author : peter
-**  Notes  : 
+**  Notes  :
 **
 ***********************************************************************/
 
@@ -69,10 +69,12 @@
  cm[(((y) - 128) * FIX(127.0/112.0) + (ONE_HALF + (128 << SCALEBITS))) >> SCALEBITS]
 
 /* NOTE: the clamp is really necessary! */
-static inline int C_JPEG_TO_CCIR(int y) {
-    y = (((y - 128) * FIX(112.0/127.0) + (ONE_HALF + (128 << SCALEBITS))) >> SCALEBITS);
-    if (y < 16)
+static inline int C_JPEG_TO_CCIR(int y)
+{
+    y = (((y - 128) * FIX(112.0 / 127.0) + (ONE_HALF + (128 << SCALEBITS))) >> SCALEBITS);
+    if (y < 16) {
         y = 16;
+    }
     return y;
 }
 
@@ -144,22 +146,23 @@ static inline int C_JPEG_TO_CCIR(int y) {
 **
 ***********************************************************************/
 #define TAG "SDEC-FFMPEG"
-typedef struct sd_ffmpeg_ctx{
+typedef struct sd_ffmpeg_ctx {
     AVCodecContext *avctxp;
     struct AVSubtitle sub;
-}sd_ffmpeg_ctx_t;
+} sd_ffmpeg_ctx_t;
 
 /***********************************************************************
 **
 ** ffmpeg_sdec_init
 **
 ***********************************************************************/
-int ffmpeg_sdec_init (dtsub_decoder_t *decoder)
+int ffmpeg_sdec_init(dtsub_decoder_t *decoder)
 {
     sd_wrapper_t *wrapper = decoder->wrapper;
     sd_ffmpeg_ctx_t *sd_ctx = (sd_ffmpeg_ctx_t *)malloc(sizeof(sd_ffmpeg_ctx_t));
-    if(!sd_ctx)
+    if (!sd_ctx) {
         return -1;
+    }
     memset(sd_ctx, 0, sizeof(sd_ffmpeg_ctx_t));
     //select video decoder and call init
     AVCodec *codec = NULL;
@@ -168,17 +171,15 @@ int ffmpeg_sdec_init (dtsub_decoder_t *decoder)
     avctxp->thread_count = 1;   //do not use multi thread,may crash
     enum AVCodecID id = avctxp->codec_id;
     codec = avcodec_find_decoder(id);
-    if (NULL == codec)
-    {
-        dt_error (TAG, "[%s:%d] video codec find failed \n", __FUNCTION__, __LINE__);
+    if (NULL == codec) {
+        dt_error(TAG, "[%s:%d] sub codec find failed. id:%d \n", __FUNCTION__, __LINE__, id);
         return -1;
     }
-    if (avcodec_open2(avctxp, codec, NULL) < 0)
-    {
-        dt_error (TAG, "[%s:%d] sub codec open failed \n", __FUNCTION__, __LINE__);
+    if (avcodec_open2(avctxp, codec, NULL) < 0) {
+        dt_error(TAG, "[%s:%d] sub codec open failed \n", __FUNCTION__, __LINE__);
         return -1;
     }
-    dt_info (TAG, " [%s:%d] ffmpeg sub decoder init ok, codectype:%d  \n", __FUNCTION__, __LINE__, avctxp->codec_type);
+    dt_info(TAG, " [%s:%d] ffmpeg sub decoder init ok, codectype:%d  \n", __FUNCTION__, __LINE__, avctxp->codec_type);
     wrapper->para = decoder->para;
     decoder->sd_priv = (void *)sd_ctx;
 
@@ -190,16 +191,16 @@ int ffmpeg_sdec_init (dtsub_decoder_t *decoder)
 ** ffmpeg_sdec_decode
 **
 ***********************************************************************/
-int ffmpeg_sdec_decode (dtsub_decoder_t *decoder, dt_av_pkt_t * dt_frame, dtav_sub_frame_t ** sub_frame)
+int ffmpeg_sdec_decode(dtsub_decoder_t *decoder, dt_av_pkt_t * dt_frame, dtav_sub_frame_t ** sub_frame)
 {
     int ret = 0;
     sd_ffmpeg_ctx_t *sd_ctx = (sd_ffmpeg_ctx_t *)decoder->sd_priv;
     AVCodecContext *avctxp = (AVCodecContext *)sd_ctx->avctxp;
-    dt_debug (TAG, "[%s:%d] param-- w:%d h:%d  \n", __FUNCTION__, __LINE__, avctxp->width, avctxp->height);
+    dt_debug(TAG, "[%s:%d] param-- w:%d h:%d  \n", __FUNCTION__, __LINE__, avctxp->width, avctxp->height);
     int got_sub = 0;
     AVPacket pkt;
-    int i,j;
-    int r,g,b,y,u,v,a;
+    int i, j;
+    int r, g, b, y, u, v, a;
 
     pkt.data = dt_frame->data;
     pkt.size = dt_frame->size;
@@ -209,19 +210,17 @@ int ffmpeg_sdec_decode (dtsub_decoder_t *decoder, dt_av_pkt_t * dt_frame, dtav_s
     pkt.buf = NULL;
     struct AVSubtitle *sub = &sd_ctx->sub;
     ret = avcodec_decode_subtitle2(avctxp, sub, &got_sub, &pkt);
-    if(ret < 0)
+    if (ret < 0) {
         return -1;
+    }
 
-    if (got_sub)
-    {
-        dt_info(TAG,"get sub, type:%d size:%d starttime:%u endtime:%u pts:%lld \n", (int)sub->format, pkt.size, sub->start_display_time, sub->end_display_time, sub->pts);
-        
+    if (got_sub) {
+        dt_info(TAG, "get sub, type:%d size:%d starttime:%u endtime:%u pts:%lld \n", (int)sub->format, pkt.size, sub->start_display_time, sub->end_display_time, sub->pts);
+
         dtav_sub_frame_t *sub_frame_tmp = (dtav_sub_frame_t *)malloc(sizeof(dtav_sub_frame_t));
         if (sub->format == 0) {  // graphics
-            for (i = 0; i < sub->num_rects; i++)
-            {
-                for (j = 0; j < sub->rects[i]->nb_colors; j++)
-                {
+            for (i = 0; i < sub->num_rects; i++) {
+                for (j = 0; j < sub->rects[i]->nb_colors; j++) {
                     RGBA_IN(r, g, b, a, (uint32_t*)sub->rects[i]->pict.data[1] + j);
                     y = RGB_TO_Y_CCIR(r, g, b);
                     u = RGB_TO_U_CCIR(r, g, b, 0);
@@ -229,13 +228,13 @@ int ffmpeg_sdec_decode (dtsub_decoder_t *decoder, dt_av_pkt_t * dt_frame, dtav_s
                     YUVA_OUT((uint32_t*)sub->rects[i]->pict.data[1] + j, y, u, v, a);
                 }
             }
-        } 
+        }
         memcpy(sub_frame_tmp, sub, sizeof(dtav_sub_frame_t));
         *sub_frame = sub_frame_tmp;
         memset(sub, 0, sizeof(AVSubtitle));
-        dt_info(TAG,"get sub, type:%d size:%d starttime:%u endtime:%u pts:%lld\n", (int)sub_frame_tmp->format, pkt.size, sub_frame_tmp->start_display_time, sub_frame_tmp->end_display_time, sub_frame_tmp->pts);
+        dt_info(TAG, "get sub, type:%d size:%d starttime:%u endtime:%u pts:%lld\n", (int)sub_frame_tmp->format, pkt.size, sub_frame_tmp->start_display_time, sub_frame_tmp->end_display_time, sub_frame_tmp->pts);
     }
-    
+
     return got_sub;
 }
 
@@ -244,11 +243,11 @@ int ffmpeg_sdec_decode (dtsub_decoder_t *decoder, dt_av_pkt_t * dt_frame, dtav_s
 ** ffmpeg_sdec_decode
 **
 ***********************************************************************/
-int ffmpeg_sdec_release (dtsub_decoder_t *decoder)
+int ffmpeg_sdec_release(dtsub_decoder_t *decoder)
 {
     sd_ffmpeg_ctx_t *sd_ctx = (sd_ffmpeg_ctx_t *)decoder->sd_priv;
     AVCodecContext *avctxp = (AVCodecContext *)sd_ctx->avctxp;
-    avcodec_close (avctxp);
+    avcodec_close(avctxp);
     free(sd_ctx);
 
     return 0;

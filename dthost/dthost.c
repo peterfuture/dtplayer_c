@@ -534,6 +534,9 @@ int host_init(dthost_context_t * hctx)
         ret = dtsub_init(&hctx->sub_priv, &sub_para, hctx);
         if (ret < 0) {
             dt_error(TAG, "ERR: dtsub init failed \n");
+            host_para->has_sub = 0;
+        } else {
+            dt_info(TAG, "[%s:%d]dtsub init success \n", __FUNCTION__, __LINE__);
         }
     }
     return 0;
@@ -574,6 +577,12 @@ int host_video_resize(dthost_context_t * hctx, int w, int h)
 
 int host_write_frame(dthost_context_t * hctx, dt_av_pkt_t * frame, int type)
 {
+
+    dthost_para_t *host_para = &hctx->para;
+    if (host_para->has_sub == 0 && type == DT_TYPE_SUBTITLE) {
+        return DTERROR_NONE;
+    }
+
     return dtport_write_frame(hctx->port_priv, frame, type);
 }
 
