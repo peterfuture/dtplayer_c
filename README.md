@@ -14,7 +14,7 @@ For more [details](http://blog.csdn.net/dtplayer).
 ## Installation
 ### Linux
 * install sdl1.0
-* install ffmpeg & libav
+* install [ffmpeg](https://github.com/FFmpeg/FFmpeg)
 * make -j8
 
 ### Android
