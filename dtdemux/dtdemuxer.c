@@ -52,6 +52,7 @@ static int demuxer_select(dtdemuxer_context_t * dem_ctx)
     int score = 0;
     demuxer_wrapper_t *entry = g_demuxer;
     while (entry != NULL) {
+        dt_info(TAG, "[%s:%d] demuxer:%s \n", __FUNCTION__, __LINE__, entry->name);
         score = (entry)->probe(entry, &(dem_ctx->probe_buf));
         if (score == 1) {
             break;

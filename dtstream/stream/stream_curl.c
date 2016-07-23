@@ -10,17 +10,17 @@
 
 #define TAG "STREAM-CURL"
 
-typedef struct{
+typedef struct {
     int fd;
     int64_t file_size;
-}curl_ctx_t;
+} curl_ctx_t;
 
-static int stream_curl_open(stream_wrapper_t * wrapper,char *stream_name)
+static int stream_curl_open(stream_wrapper_t * wrapper, char *stream_name)
 {
     return DTERROR_NONE;
 }
 
-static int stream_curl_read(stream_wrapper_t * wrapper,uint8_t *buf,int len)
+static int stream_curl_read(stream_wrapper_t * wrapper, uint8_t *buf, int len)
 {
     return 0;
 }

@@ -47,7 +47,7 @@ typedef struct SL_ConfigDescr {
 } SL_ConfigDescr;
 
 typedef struct {
-    dt_buffer_t *dbt;
+    dt_buffer_t dbt;
     int state;
     int data_index;
     int pkt_pos;
@@ -95,20 +95,24 @@ static int ts_probe(demuxer_wrapper_t *wrapper, dt_buffer_t *probe_buf)
     const uint8_t *end = buf + probe_buf->level - 7;
 
     if (probe_buf->level < 10) {
+        dt_info(TAG, "[%s:%d] buf level:%d too low\n", __FUNCTION__, __LINE__, probe_buf->level);
         return 0;
     }
 
+    dt_info(TAG, "[%s:%d] buf level:%d. %02x\n", __FUNCTION__, __LINE__, probe_buf->level, buf[0]);
     int retry_times = 100;
     for (; buf < end; buf++) {
         uint32_t header = DT_RB8(buf);
         if ((header & 0xFF) != 0x47) {
             if (retry_times-- == 0) {
+                dt_info(TAG, "[%s:%d] sync header not found\n", __FUNCTION__, __LINE__);
                 return 0;
             }
             continue;
         }
         //found 0x47
         if (buf + 188 > end) {
+            dt_info(TAG, "[%s:%d] buffer lev too low\n", __FUNCTION__, __LINE__);
             return 0;
         }
         header = DT_RB8(buf + 188);
@@ -116,6 +120,7 @@ static int ts_probe(demuxer_wrapper_t *wrapper, dt_buffer_t *probe_buf)
             dt_info(TAG, "ts detect \n");
             return 1;
         } else {
+            dt_info(TAG, "[%s:%d] not ts format\n", __FUNCTION__, __LINE__);
             return 0;
         }
     }
@@ -405,7 +410,7 @@ static int ts_open(demuxer_wrapper_t *wrapper)
     if (ts_ctx->audio_num > 0) {
         pes_t *aes = &ts_ctx->es_audio;
         aes->state = TS_INVLAID;
-        buf_init(aes->dbt, TS_CACHE_AUDIO);
+        buf_init(&aes->dbt, TS_CACHE_AUDIO);
     }
     if (ts_ctx->video_num > 0) {
         pes_t *ves = &ts_ctx->es_video;
@@ -477,30 +482,34 @@ NEXT_PKT:
         return 0;
     }
     //find last pts
-    if (ts_ctx->filesize < buf_size) {
+    int read_size = MIN(ts_ctx->filesize, probe_buf->size);
+    dt_info(TAG, "[%s:%d]:filesize :%lld probe size:%d readsize:%d\n", __FUNCTION__, __LINE__, ts_ctx->filesize, probe_buf->size, read_size);
+    if (read_size <=  188 * 10) {
+        dt_info(TAG, "[%s:%d]:readsize :%d less than 1880\n", __FUNCTION__, __LINE__, read_size);
         return -1;
     }
-    pos = ts_ctx->filesize - buf_size;
+    pos = ts_ctx->filesize - read_size;
     ret = dtstream_seek(ctx->stream_priv, pos, SEEK_SET);
     if (ret < 0) {
+        dt_info(TAG, "[%s:%d]:seek failed\n", __FUNCTION__, __LINE__);
         dtstream_seek(ctx->stream_priv, 0, SEEK_SET);
         return -1;
     }
-    ret = dtstream_read(ctx->stream_priv, probe_buf->data, buf_size);
+    ret = dtstream_read(ctx->stream_priv, probe_buf->data, read_size);
     if (ret <= 0) {
         return -1;
     }
     buf = probe_buf->data;
-    buf_size = ret;
+    read_size = ret;
     dtstream_seek(ctx->stream_priv, 0, SEEK_SET);
     pos = 0;
-    pos = find_syncword(buf, buf_size);
+    pos = find_syncword(buf, read_size);
     memset(&packet, 0, sizeof(packet));
     while (1) {
         if (buf[pos] != 0x47) {
-            pos += find_syncword(buf + pos, buf_size - pos);
+            pos += find_syncword(buf + pos, read_size - pos);
         }
-        if (pos >= buf_size - 188) {
+        if (pos >= read_size - 188) {
             break;
         }
 
