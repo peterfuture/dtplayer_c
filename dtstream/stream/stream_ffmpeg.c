@@ -72,24 +72,14 @@ static int stream_ffmpeg_seek(stream_wrapper_t * wrapper, int64_t pos, int whenc
         dt_debug(TAG, "REQUEST STREAM SIZE:%lld \n", info->stream_size);
         return avio_size(ctx);
     }
-
-    if (avio_seek(ctx, pos, whence) < 0) {
-        info->eof_flag = 1;
-        return -1;
-    }
-    if (whence == SEEK_SET) {
-        info->cur_pos = pos;
-    }
-    if (whence == SEEK_CUR) {
-        info->cur_pos += pos;
-    }
-    return DTERROR_NONE;
+    
+    return avio_seek(ctx, pos, whence);
 }
 
 static int stream_ffmpeg_close(stream_wrapper_t * wrapper)
 {
     if (wrapper->stream_priv) {
-        avio_close(wrapper->stream_priv);
+        avio_close((AVIOContext *)wrapper->stream_priv);
     }
     wrapper->stream_priv = NULL;
     return 0;

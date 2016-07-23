@@ -119,8 +119,7 @@ int64_t stream_get_size(dtstream_context_t *stm_ctx)
 {
     stream_wrapper_t *wrapper = stm_ctx->stream;
     stream_ctrl_t *info = &wrapper->info;
-    int64_t pos = 0;
-    return wrapper->seek(wrapper, pos, AVSEEK_SIZE);
+    return wrapper->seek(wrapper, 0, AVSEEK_SIZE);
 }
 
 int stream_local(dtstream_context_t *stm_ctx)
