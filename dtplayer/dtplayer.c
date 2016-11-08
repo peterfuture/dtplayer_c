@@ -303,7 +303,7 @@ int player_start(dtplayer_context_t * dtp_ctx)
     set_player_status(dtp_ctx, PLAYER_STATUS_START);
     ret = player_host_start(dtp_ctx);
     if (ret != 0) {
-        dt_error(TAG "file:%s [%s:%d] player host start failed \n", __FILE__, __FUNCTION__, __LINE__);
+        dt_error(TAG, "[%s:%d] player host start failed \n", __FILE__, __LINE__);
         set_player_status(dtp_ctx, PLAYER_STATUS_ERROR);
         goto ERR1;
     }

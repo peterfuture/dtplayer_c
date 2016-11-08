@@ -216,8 +216,8 @@ int host_start(dthost_context_t * hctx)
     int64_t first_apts = -1;
     int64_t first_vpts = -1;
     dt_info(TAG, "check start condition has_audio:%d has_video:%d has_sub:%d\n", has_audio, has_video, has_sub);
-    // max delay 3s
-    int print_cnt = 300;
+    // max delay 10s
+    int print_cnt = 1000;
     do {
         if (!has_audio) {
             audio_start_flag = 1;

@@ -247,10 +247,14 @@ static int demuxer_ffmpeg_read_frame(demuxer_wrapper_t * wrapper, dt_av_pkt_t * 
     }
     //read frame ok
     if (has_video && cur_vidx == avpkt.stream_index) {
+#if 0
 #ifdef ENABLE_ANDROID
-        dt_debug(TAG, "befor filter, %02x %02x %02x %02x \n", avpkt.data[0], avpkt.data[1], avpkt.data[2], avpkt.data[3]);
-        update_video_frame(wrapper, &avpkt); // update video frame, header etc...
-        dt_debug(TAG, "after filter, %02x %02x %02x %02x \n", avpkt.data[0], avpkt.data[1], avpkt.data[2], avpkt.data[3]);
+        if (media_info->format ==  DT_MEDIA_FORMAT_MP4) {
+            dt_debug(TAG, "befor filter, %02x %02x %02x %02x \n", avpkt.data[0], avpkt.data[1], avpkt.data[2], avpkt.data[3]);
+            update_video_frame(wrapper, &avpkt); // update video frame, header etc...
+            dt_debug(TAG, "after filter, %02x %02x %02x %02x \n", avpkt.data[0], avpkt.data[1], avpkt.data[2], avpkt.data[3]);
+        }
+#endif
 #endif
         frame->type = AVMEDIA_TYPE_VIDEO;
     } else if (has_audio && cur_aidx == avpkt.stream_index) {
@@ -503,6 +507,7 @@ static int demuxer_ffmpeg_setup_info(demuxer_wrapper_t * wrapper, dt_media_info_
                            );
             }
             dt_info(TAG, "End\n");
+#if 0
 #if ENABLE_ANDROID
             //if(info->format == DT_MEDIA_FORMAT_MPEGTS)
             // android no need extradata for H264
@@ -510,6 +515,7 @@ static int demuxer_ffmpeg_setup_info(demuxer_wrapper_t * wrapper, dt_media_info_
                 vst_info->extradata_size = 0;
                 dt_info(TAG, "TS no need extradata \n");
             }
+#endif
 #endif
         } else if (pCodec->codec_type == AVMEDIA_TYPE_AUDIO) {
             if (pCodec->channels <= 0 || pCodec->sample_rate <= 0) {

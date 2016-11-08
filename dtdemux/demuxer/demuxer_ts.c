@@ -724,7 +724,7 @@ skip:
                 }
             }
             break;
-            //#pes packing parsing
+        //#pes packing parsing
         case TS_PESHEADER:
             len = PES_HEADER_SIZE - es->data_index;
             if (len < 0) {
