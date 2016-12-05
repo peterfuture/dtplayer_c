@@ -117,6 +117,10 @@ int dt_update_setting()
     if (GetEnv("HOST", "host.drop.thres", value) > 0) {
         dtp_setting.host_drop_thres = atoi(value);
     }
+    dtp_setting.host_drop_timeout = 3000;
+    if (GetEnv("HOST", "host.drop.timeout", value) > 0) {
+        dtp_setting.host_drop_timeout = atoi(value);
+    }
     dtp_setting.host_sync_thres = 100;
     if (GetEnv("HOST", "host.sync.thres", value) > 0) {
         dtp_setting.host_sync_thres = atoi(value);

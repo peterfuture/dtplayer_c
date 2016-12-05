@@ -84,7 +84,13 @@ int audio_drop(dtaudio_context_t * actx, int64_t target_pts)
     int rlen = 0;
     int drop_count = 50;
     int64_t pts = -1;
+    int64_t drop_start = dt_gettime();
+    int64_t drop_timeout = dtp_setting.host_drop_timeout;
     while (size > 0) {
+        if ((dt_gettime() - drop_start) / 1000 >= drop_timeout) {
+            dt_info(TAG, "Audio drop timeout: %lld ms\n", drop_timeout);
+            break;
+        }
         rlen = audio_output_read((void *) actx, buf, (size > read_size_once) ? read_size_once : size);
         if (rlen == -1) {
             if (drop_count-- == 0) {

@@ -132,8 +132,9 @@ int dtaudio_drop(void *audio_priv, int64_t target_pts)
 int dtaudio_get_first_pts(void *audio_priv, int64_t *pts)
 {
     dtaudio_context_t *actx = (dtaudio_context_t *) audio_priv;
-    if(audio_first_frame_decoded(actx) == 0)
+    if (audio_first_frame_decoded(actx) == 0) {
         return -1;
+    }
     *pts = audio_get_first_pts(actx);
     return 0;
 }

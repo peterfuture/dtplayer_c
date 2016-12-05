@@ -79,7 +79,13 @@ int video_drop(dtvideo_context_t * vctx, int64_t target_pts)
     dt_av_frame_t *pic = NULL;
     int64_t cur_pts = video_get_first_pts(vctx);
     int drop_count = 300;
+    int64_t drop_start = dt_gettime();
+    int64_t drop_timeout = dtp_setting.host_drop_timeout;
     do {
+        if ((dt_gettime() - drop_start) / 1000 >= drop_timeout) {
+            dt_info(TAG, "video drop timeout: %lld\n", drop_timeout);
+            break;
+        }
         pic = dtvideo_output_read((void *) vctx);
         if (!pic) {
             if (drop_count-- == 0) {
