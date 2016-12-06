@@ -81,6 +81,7 @@ DT_PLAYER = yes
 
 #target
 DTM_PLAYER = yes
+DTM_PROBE = yes
 DTM_INFO=
 DTM_CONVERT=
 DTM_SERVER=
@@ -356,6 +357,11 @@ PRG-$(DTM_PLAYER)  += dtplayer$(EXESUF)
 PRG-$(DTM_PLAYER)  += dtplayer_g$(EXESUF)
 ALL_PRG += $(PRG-yes)
 
+PRG-$(DTM_PROBE)  += dtprobe$(EXESUF)
+PRG-$(DTM_PROBE)  += dtprobe_g$(EXESUF)
+ALL_PRG += $(PRG-yes)
+
+
 #libdtp.a
 DTLIB_DEBUG = libdtp.a
 DTLIB_RELEASE = libdtp.so
@@ -374,6 +380,14 @@ OBJS_DTPLAYER_RELEASE   += $(addsuffix .o, $(basename $(SRCS_DTPLAYER)))
 DTM_PLAYER_DEPS_RELEASE  = $(OBJS_DTPLAYER_RELEASE) $(DTLIB_RELEASE)
 OBJS_DTPLAYER_DEBUG   += $(addsuffix .debug.o, $(basename $(SRCS_DTPLAYER)))
 DTM_PLAYER_DEPS_DEBUG  = $(OBJS_DTPLAYER_DEBUG)  $(DTLIB_DEBUG) $(COMMON_LIBS)
+
+#dtm probe
+SRCS_DTPROBE     += tools/dt_probe.c tools/version.c
+
+OBJS_DTPROBE_RELEASE   += $(addsuffix .o, $(basename $(SRCS_DTPROBE)))
+DTM_PROBE_DEPS_RELEASE  = $(OBJS_DTPROBE_RELEASE) $(DTLIB_RELEASE)
+OBJS_DTPROBE_DEBUG   += $(addsuffix .debug.o, $(basename $(SRCS_DTPROBE)))
+DTM_PROBE_DEPS_DEBUG  = $(OBJS_DTPROBE_DEBUG)  $(DTLIB_DEBUG) $(COMMON_LIBS)
 
 
 all: $(ALL_PRG)
@@ -403,6 +417,20 @@ dtplayer$(EXESUF): $(DTM_PLAYER_DEPS_RELEASE)
 	@echo =====================================================
 
 dtplayer_g$(EXESUF): $(DTM_PLAYER_DEPS_DEBUG)
+	@$(CC) $(CFLAGS) -g -o $@ $^ $(LDFLAGS)
+	@echo =====================================================
+	@echo build $@ done
+	@echo =====================================================
+
+dtprobe$(EXESUF): $(DTM_PROBE_DEPS_RELEASE)
+	@$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+	@$(STRIP) $@	
+	@echo =====================================================
+	@echo build $@ done
+	@echo =====================================================
+
+
+dtprobe_g$(EXESUF): $(DTM_PROBE_DEPS_DEBUG)
 	@$(CC) $(CFLAGS) -g -o $@ $^ $(LDFLAGS)
 	@echo =====================================================
 	@echo build $@ done
