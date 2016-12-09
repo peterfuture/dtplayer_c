@@ -56,7 +56,7 @@ void *dtplayer_init(dtplayer_para_t * para)
         dt_error(TAG, "dtplayer context malloc failed \n");
         return NULL;
     }
-    memset(dtp_ctx, 0, sizeof(dtp_ctx));
+    memset(dtp_ctx, 0, sizeof(dtplayer_context_t));
     memcpy(&dtp_ctx->player_para, para, sizeof(dtplayer_para_t));
     dtp_ctx->cookie = para->cookie;
     dt_info(TAG, "start playing :%s \n", para->file_name);
