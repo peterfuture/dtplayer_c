@@ -105,7 +105,7 @@ static int select_vf(dtvideo_filter_t *filter, vf_cap_t cap)
     if (vf) {
         dt_info(TAG, "[%s:%d] %s video filter selected \n", __FUNCTION__, __LINE__, g_vf->name);
     } else {
-        dt_info(TAG, "[%s:%d] No video filter selected \n", __FUNCTION__, __LINE__, g_vf->name);
+        dt_info(TAG, "[%s:%d] No video filter selected \n", __FUNCTION__, __LINE__);
     }
     return ret;
 }

@@ -108,7 +108,7 @@ static int select_sf(dtsub_filter_t *filter, sf_cap_t cap)
     if (sf) {
         dt_info(TAG, "[%s:%d] %s sub filter selected \n", __FUNCTION__, __LINE__, g_sf->name);
     } else {
-        dt_info(TAG, "[%s:%d] No sub filter selected \n", __FUNCTION__, __LINE__, g_sf->name);
+        dt_info(TAG, "[%s:%d] No sub filter selected \n", __FUNCTION__, __LINE__);
     }
     return ret;
 }

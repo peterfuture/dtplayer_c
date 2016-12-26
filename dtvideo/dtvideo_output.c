@@ -239,7 +239,7 @@ static void *video_output_thread(void *args)
             int64_t step = llabs(picture_pre->pts - vctx->last_valid_pts);
             if (step >= DT_SYNC_DISCONTINUE_THRESHOLD) {
                 video_discontinue = 1;
-                dt_info(TAG, "video discontinue occured, step:%lld(%d ms) \n", step, step / DT_PTS_FREQ_MS);
+                dt_info(TAG, "video discontinue occured, step:%lld(%d ms) \n", step, (int)(step / DT_PTS_FREQ_MS));
             }
         }
 
@@ -274,7 +274,7 @@ static void *video_output_thread(void *args)
             picture_pre = (dt_av_frame_t *) dtvideo_output_pre_read(vo->parent);
             if (picture_pre) {
                 if (picture_pre->pts == -1) {
-                    dt_debug(TAG, "can not get vpts from frame,estimate using fps:%d  \n", vo->para->fps);
+                    dt_debug(TAG, "can not get vpts from frame,estimate using fps:%f  \n", vo->para->fps);
                     picture_pre->pts = vctx->current_pts + 90000 / vo->para->fps;
                 }
 

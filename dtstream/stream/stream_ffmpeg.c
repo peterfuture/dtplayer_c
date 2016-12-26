@@ -72,7 +72,7 @@ static int stream_ffmpeg_seek(stream_wrapper_t * wrapper, int64_t pos, int whenc
         dt_debug(TAG, "REQUEST STREAM SIZE:%lld \n", info->stream_size);
         return avio_size(ctx);
     }
-    
+
     return avio_seek(ctx, pos, whence);
 }
 

@@ -329,7 +329,7 @@ static int create_cache_thread(cache_ctx_t * ctx)
     ctx->cache_flag = ST_FLAG_NULL;
     int ret = pthread_create(&tid, NULL, (void *) &cache_thread, (void *)ctx);
     if (ret != 0) {
-        dt_error(TAG "file:%s [%s:%d] data fill thread crate failed \n", __FILE__, __FUNCTION__, __LINE__);
+        dt_error(TAG, "file:%s [%s:%d] data fill thread crate failed \n", __FILE__, __FUNCTION__, __LINE__);
         return -1;
     }
     ctx->cache_tid = tid;
@@ -471,7 +471,7 @@ static int stream_cache_open(stream_wrapper_t * wrapper, char *stream_name)
     //start read thread
     ret = create_cache_thread(ctx);
     if (ret == -1) {
-        dt_error(TAG "file:%s [%s:%d] data fill thread start failed \n", __FILE__, __FUNCTION__, __LINE__);
+        dt_error(TAG, "file:%s [%s:%d] data fill thread start failed \n", __FILE__, __FUNCTION__, __LINE__);
         goto ERR3;
     }
     return DTERROR_NONE;

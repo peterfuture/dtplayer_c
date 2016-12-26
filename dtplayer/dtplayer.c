@@ -260,7 +260,7 @@ int player_prepare(dtplayer_context_t *dtp_ctx)
     player_service_init(dtp_ctx);
     ret = pthread_create(&tid, NULL, (void *)&event_handle_loop, (void *)dtp_ctx);
     if (ret == -1) {
-        dt_error(TAG "file:%s [%s:%d] player io thread start failed \n", __FILE__, __FUNCTION__, __LINE__);
+        dt_error(TAG, "file:%s [%s:%d] player io thread start failed \n", __FILE__, __FUNCTION__, __LINE__);
         player_service_release(dtp_ctx);
         goto ERR3;
     }
@@ -274,7 +274,7 @@ int player_prepare(dtplayer_context_t *dtp_ctx)
     }
     ret = start_io_thread(dtp_ctx);
     if (ret == -1) {
-        dt_error(TAG "file:%s [%s:%d] player io thread start failed \n", __FILE__, __FUNCTION__, __LINE__);
+        dt_error(TAG, "file:%s [%s:%d] player io thread start failed \n", __FILE__, __FUNCTION__, __LINE__);
         goto ERR2;
     }
     set_player_status(dtp_ctx, PLAYER_STATUS_PREPARED);

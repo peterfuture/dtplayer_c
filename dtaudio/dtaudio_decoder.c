@@ -233,7 +233,7 @@ DECODE_LOOP:
             //maybe need more data
             rest_data = malloc(pinfo->inlen);
             if (rest_data == NULL) {
-                dt_error("[%s:%d] rest_data malloc failed\n", __FUNCTION__, __LINE__);
+                dt_error(TAG, "[%s:%d] rest_data malloc failed\n", __FUNCTION__, __LINE__);
                 rest_size = 0;  //skip this frame
                 continue;
             }

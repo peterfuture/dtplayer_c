@@ -197,7 +197,7 @@ int64_t host_get_current_time(dthost_context_t * hctx)
         vtime = host_get_vpts(hctx);
     }
     ctime = hctx->sys_time_current;
-    dt_debug(TAG, "ctime:%llx atime:%llx vtime:%llx sys_time:%llx av_diff:%x sync mode:%x\n", ctime, atime, vtime, hctx->sys_time_current, hctx->av_diff, hctx->av_sync);
+    dt_debug(TAG, "ctime:%llx atime:%llx vtime:%llx sys_time:%llx av_diff:%llx sync mode:%x\n", ctime, atime, vtime, hctx->sys_time_current, hctx->av_diff, hctx->av_sync);
     return ctime;
 }
 
@@ -387,7 +387,7 @@ int host_stop(dthost_context_t * hctx)
     if (has_video) {
         ret = dtvideo_stop(hctx->video_priv);
         if (ret < 0) {
-            dt_error(TAG "[%s:%d] dtvideo stop failed \n", __FUNCTION__, __LINE__);
+            dt_error(TAG, "[%s:%d] dtvideo stop failed \n", __FUNCTION__, __LINE__);
         }
     }
     if (has_sub)

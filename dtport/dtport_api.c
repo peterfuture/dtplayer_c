@@ -21,14 +21,14 @@ int dtport_init(void **port, dtport_para_t * para, void *parent)
     int ret;
     dtport_context_t *pctx = malloc(sizeof(dtport_context_t));
     if (!pctx) {
-        dt_error("[%s:%d] dtport_context_t malloc failed \n", __FUNCTION__, __LINE__);
+        dt_error(TAG, "[%s:%d] dtport_context_t malloc failed \n", __FUNCTION__, __LINE__);
         ret = -1;
         goto ERR0;
     }
     memset(pctx, 0, sizeof(dtport_context_t));
     ret = port_init(pctx, para);
     if (ret < 0) {
-        dt_error("[%s:%d] dtport_init failed \n", __FUNCTION__, __LINE__);
+        dt_error(TAG, "[%s:%d] dtport_init failed \n", __FUNCTION__, __LINE__);
         ret = -1;
         goto ERR1;
     }

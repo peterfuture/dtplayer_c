@@ -259,7 +259,6 @@ int dt_send_event_sync(dt_service_mgt_t *mgt, event_t * event)
         return -1;
     }
     dt_transport_event(event, mgt);
-    dt_debug(TAG, "EVENT:%d BYPASS SEND OK \n");
     return 0;
 }
 

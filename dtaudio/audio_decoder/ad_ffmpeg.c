@@ -15,16 +15,16 @@ static enum AVCodecID convert_to_id(int format)
 {
     switch (format) {
     case DT_AUDIO_FORMAT_AAC:
-            return AV_CODEC_ID_AAC;
-    case DT_AUDIO_FORMAT_AC3:
-        return AV_CODEC_ID_AC3;
+                return AV_CODEC_ID_AAC;
+        case DT_AUDIO_FORMAT_AC3:
+            return AV_CODEC_ID_AC3;
 
-    default:
-        return 0;
+        default:
+            return 0;
+        }
     }
-}
 
-static AVCodecContext * alloc_ffmpeg_ctx(dtaudio_decoder_t *decoder)
+    static AVCodecContext * alloc_ffmpeg_ctx(dtaudio_decoder_t *decoder)
 {
     //maybe ffmpeg not register
     av_register_all();
@@ -69,7 +69,7 @@ int ffmpeg_adec_init(ad_wrapper_t *wrapper, void *parent)
     dt_info(TAG, "[%s:%d] param-- dst channels:%d samplerate:%d \n", __FUNCTION__, __LINE__, decoder->para.dst_channels, decoder->para.dst_samplerate);
     codec = avcodec_find_decoder(id);
     if (NULL == codec) {
-        dt_error(TAG, "[%s:%d] video codec find failed \n", __FILE__, __FUNCTION__, __LINE__);
+        dt_error(TAG, "[%s:%d] video codec find failed \n", __FUNCTION__, __LINE__);
         return -1;
     }
 

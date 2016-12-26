@@ -207,7 +207,7 @@ static void *video_decode_loop(void *arg)
                 int dur_inc = (int)((double)90000 / fps);
                 picture->pts = decoder->pts_current + dur_inc;
                 decoder->pts_current = picture->pts;
-                dt_debug(TAG, "vpts inc itself. pts_mode:%d pts:0x%x inc:%d\n", pts_mode, picture->pts, dur_inc);
+                dt_debug(TAG, "vpts inc itself. pts_mode:%d pts:0x%llx inc:%d\n", pts_mode, picture->pts, dur_inc);
             }
         }
 
