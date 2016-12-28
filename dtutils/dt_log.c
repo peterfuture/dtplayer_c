@@ -8,14 +8,6 @@
 #include <stdarg.h>
 #include <time.h>
 
-#if ENABLE_ANDROID
-
-//android , done in log.h
-
-#endif
-
-#if ENABLE_LINUX
-
 #define LOG_INI_FILE "./sys_set.ini"
 
 #define KNRM  "\x1B[0m"
@@ -74,7 +66,12 @@ void dt_log(void *tag, int level, const char *fmt, ...)
     printf("[%s] ", (char *) tag);
     va_list vl;
     va_start(vl, fmt);
+#if ENABLE_LINUX
     vprintf(fmt, vl);
+#endif
+#if ENABLE_ANDROID
+    __android_log_vprint(ANDROID_LOG_INFO, tag, fmt, vl);
+#endif
     va_end(vl);
 }
 
@@ -91,7 +88,12 @@ void dt_error(void *tag, const char *fmt, ...)
     printf("[%s] ", (char *) tag);
     va_list vl;
     va_start(vl, fmt);
+#if ENABLE_LINUX
     vprintf(fmt, vl);
+#endif
+#if ENABLE_ANDROID
+    __android_log_vprint(ANDROID_LOG_ERROR, tag, fmt, vl);
+#endif
     va_end(vl);
 
 }
@@ -109,7 +111,13 @@ void dt_debug(void *tag, const char *fmt, ...)
     printf("[%s] ", (char *) tag);
     va_list vl;
     va_start(vl, fmt);
+#if ENABLE_LINUX
     vprintf(fmt, vl);
+#endif
+#if ENABLE_ANDROID
+    __android_log_vprint(ANDROID_LOG_DEBUG, tag, fmt, vl);
+    __android_log_vprint(ANDROID_LOG_INFO, tag, fmt, vl);
+#endif
     va_end(vl);
 }
 
@@ -126,7 +134,12 @@ void dt_warning(void *tag, const char *fmt, ...)
     printf("[%s] ", (char *) tag);
     va_list vl;
     va_start(vl, fmt);
+#if ENABLE_LINUX
     vprintf(fmt, vl);
+#endif
+#if ENABLE_ANDROID
+    __android_log_vprint(ANDROID_LOG_WARN, tag, fmt, vl);
+#endif
     va_end(vl);
 }
 
@@ -143,7 +156,12 @@ void dt_info(void *tag, const char *fmt, ...)
     printf("[%s] ", (char *) tag);
     va_list vl;
     va_start(vl, fmt);
+#if ENABLE_LINUX
     vprintf(fmt, vl);
+#endif
+#if ENABLE_ANDROID
+    __android_log_vprint(ANDROID_LOG_INFO, tag, fmt, vl);
+#endif
     va_end(vl);
 }
 
@@ -199,6 +217,4 @@ int main()
     dt_warning("TEST", "this is warning level test \n");
     return;
 }
-#endif
-
 #endif
