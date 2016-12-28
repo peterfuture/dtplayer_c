@@ -22,12 +22,13 @@ typedef struct vd_ffmpeg_ctx {
 static enum AVCodecID convert_to_id(int format)
 {
     switch (format) {
-    case DT_VIDEO_FORMAT_H264:
+        case DT_VIDEO_FORMAT_H264:
             return AV_CODEC_ID_H264;
-    default:
-        return -1;
+        default:
+            return -1;
     }
 }
+
 static AVCodecContext * alloc_ffmpeg_ctx(dtvideo_decoder_t *decoder)
 {
     AVCodecContext *ctx = avcodec_alloc_context3(NULL);
@@ -172,7 +173,7 @@ int ffmpeg_vdec_decode(dtvideo_decoder_t *decoder, dt_av_pkt_t * dt_frame, dt_av
     dt_debug(TAG, "[%s:%d] param-- w:%d h:%d  extr_si:%d \n", __FUNCTION__, __LINE__, avctxp->width, avctxp->height, avctxp->extradata_size);
     int got_picture = 0;
     AVPacket pkt;
-
+    memset(&pkt, 0, sizeof(AVPacket));
     pkt.data = dt_frame->data;
     pkt.size = dt_frame->size;
     pkt.pts = dt_frame->pts;
