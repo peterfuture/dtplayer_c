@@ -17,16 +17,18 @@ typedef struct vd_ffmpeg_ctx {
     AVCodecContext *avctxp;
     AVFrame *frame;
     struct SwsContext *pSwsCtx;
+    int use_hwaccel;
 } vd_ffmpeg_ctx_t;
 
 static enum AVCodecID convert_to_id(int format)
 {
     switch (format) {
-        case DT_VIDEO_FORMAT_H264:
-            return AV_CODEC_ID_H264;
-        default:
-            return -1;
+    case DT_VIDEO_FORMAT_H264:
+        return AV_CODEC_ID_H264;
+    default:
+        return -1;
     }
+    return -1;
 }
 
 static AVCodecContext * alloc_ffmpeg_ctx(dtvideo_decoder_t *decoder)
@@ -46,9 +48,47 @@ static AVCodecContext * alloc_ffmpeg_ctx(dtvideo_decoder_t *decoder)
     return ctx;
 }
 
+#if ENABLE_ANDROID
+
+#include <libavcodec/mediacodec.h>
+#include <libavutil/pixdesc.h>
+
+static enum AVPixelFormat mediacodec_hwaccel_get_format(AVCodecContext *avctx, const enum AVPixelFormat *pix_fmts)
+{
+    vd_ffmpeg_ctx_t *ctx = avctx->opaque;
+    const enum AVPixelFormat *p = NULL;
+
+    for (p = pix_fmts; *p != AV_PIX_FMT_NONE; p++) {
+        AVMediaCodecContext *mediacodec_ctx = NULL;
+        const AVPixFmtDescriptor *desc = av_pix_fmt_desc_get(*p);
+
+        if (!(desc->flags & AV_PIX_FMT_FLAG_HWACCEL)) {
+            break;
+        }
+
+        if (*p != AV_PIX_FMT_MEDIACODEC) {
+            continue;
+        }
+
+        mediacodec_ctx = av_mediacodec_alloc_context();
+        if (!mediacodec_ctx) {
+            fprintf(stderr, "Failed to allocate hwaccel ctx\n");
+            continue;
+        }
+        avctx->hwaccel_context = mediacodec_ctx;
+        ctx->use_hwaccel = 1;
+        break;
+    }
+
+    return *p;
+}
+
+#endif
+
 int ffmpeg_vdec_init(dtvideo_decoder_t *decoder)
 {
     vd_wrapper_t *wrapper = decoder->wrapper;
+    dtvideo_para_t *para = &decoder->para;
     vd_ffmpeg_ctx_t *vd_ctx = malloc(sizeof(vd_ffmpeg_ctx_t));
     if (!vd_ctx) {
         return -1;
@@ -68,18 +108,74 @@ int ffmpeg_vdec_init(dtvideo_decoder_t *decoder)
     vd_ctx->avctxp = avctxp;
     //select video decoder and call init
     AVCodec *codec = NULL;
-    avctxp->thread_count = 1;   //do not use multi thread,may crash
     enum AVCodecID id = avctxp->codec_id;
-    codec = avcodec_find_decoder(id);
-    if (NULL == codec) {
-        dt_error(TAG, "[%s:%d] video codec find failed \n", __FUNCTION__, __LINE__);
-        return -1;
+    avctxp->opaque = vd_ctx;
+    int hw_codec_opened = 0;
+    if (para->flag & DTAV_FLAG_DISABLE_HW_CODEC) {
+        dt_info(TAG, "disable hw codec, use sw codec.\n");
+        goto use_sw_decoder;
     }
-    if (avcodec_open2(avctxp, codec, NULL) < 0) {
-        dt_error(TAG, "[%s:%d] video codec open failed \n", __FUNCTION__, __LINE__);
-        return -1;
+
+#if ENABLE_ANDROID
+    dt_info(TAG, "Check Android HW Codec.\n");
+    //use hw decoder
+    if (avctxp->codec_id == AV_CODEC_ID_H264 ||
+        avctxp->codec_id == AV_CODEC_ID_HEVC ||
+        avctxp->codec_id == AV_CODEC_ID_MPEG4 ||
+        avctxp->codec_id == AV_CODEC_ID_VP8 ||
+        avctxp->codec_id == AV_CODEC_ID_VP9) {
+        const char *codec_name = NULL;
+        switch (avctxp->codec_id) {
+        case AV_CODEC_ID_H264:
+            codec_name = "h264_mediacodec";
+            break;
+        case AV_CODEC_ID_HEVC:
+            codec_name = "hevc_mediacodec";
+            break;
+        case AV_CODEC_ID_MPEG4:
+            codec_name = "mpeg4_mediacodec";
+            break;
+        case AV_CODEC_ID_VP8:
+            codec_name = "vp8_mediacodec";
+            break;
+        case AV_CODEC_ID_VP9:
+            codec_name = "vp9_mediacodec";
+            break;
+        default:
+            codec_name = "h264_mediacodec";
+            break;
+            //av_assert0(0);
+        }
+
+        int hw_codec_opened = 0;
+        codec = avcodec_find_decoder_by_name(codec_name);
+        if (NULL != codec) {
+            avctxp->get_format = mediacodec_hwaccel_get_format;
+            dt_info(TAG, "Android use hw decoder. name:%s \n", codec_name);
+            if (avcodec_open2(avctxp, codec, NULL) >= 0) {
+                hw_codec_opened = 1;
+            } else {
+                dt_info(TAG, "Android hw decoder open failed.\n");
+            }
+        } else {
+            dt_info(TAG, "Android find hw decoder failed.\n");
+        }
     }
-    dt_info(TAG, " [%s:%d] ffmpeg dec init ok \n", __FUNCTION__, __LINE__);
+#endif
+use_sw_decoder:
+    if (hw_codec_opened == 0) {
+        codec = avcodec_find_decoder(id);
+        if (NULL == codec) {
+            dt_error(TAG, "[%s:%d] video codec find failed \n", __FUNCTION__, __LINE__);
+            return -1;
+        }
+        if (avcodec_open2(avctxp, codec, NULL) < 0) {
+            dt_error(TAG, "[%s:%d] video codec open failed \n", __FUNCTION__, __LINE__);
+            return -1;
+        }
+    }
+    dt_info(TAG, " [%s:%d] Pixfmt:%d \n", __FUNCTION__, __LINE__, avctxp->pix_fmt);
+    dt_info(TAG, " [%s:%d] ffmpeg dec init ok. hw decoder enable:%d \n", __FUNCTION__, __LINE__, hw_codec_opened);
     //alloc one frame for decode
     vd_ctx->frame = av_frame_alloc();
     wrapper->para = &decoder->para;
