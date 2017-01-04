@@ -147,7 +147,6 @@ int ffmpeg_vdec_init(dtvideo_decoder_t *decoder)
             //av_assert0(0);
         }
 
-        int hw_codec_opened = 0;
         codec = avcodec_find_decoder_by_name(codec_name);
         if (NULL != codec) {
             avctxp->get_format = mediacodec_hwaccel_get_format;
