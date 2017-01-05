@@ -243,6 +243,16 @@ static void calculate_display_rect(SDL_Rect *rect,
     rect->h = height;
 }
 
+static int map_sdl_overlay(int pixfmt)
+{
+    return SDL_YV12_OVERLAY;
+}
+
+static int map_sdl_supported_pixfmt(int pixfmt)
+{
+    return DTAV_PIX_FMT_YUV420P;
+}
+
 static int vo_sdl_init(dtvideo_output_t * vo)
 {
     int width = sdl_gui.window_w;
@@ -251,7 +261,14 @@ static int vo_sdl_init(dtvideo_output_t * vo)
     //Init vf
     memset(&sdl_vf, 0, sizeof(dtvideo_filter_t));
     memcpy(&sdl_vf.para, vo->para, sizeof(dtvideo_para_t));
-    sdl_vf.para.s_pixfmt = sdl_vf.para.d_pixfmt;
+
+    if (sdl_vf.para.d_pixfmt != sdl_gui.pixfmt) {
+        dt_info(TAG, "dest pixfmt changed by setting.ini. update: %d->%d\n", sdl_gui.pixfmt, sdl_vf.para.d_pixfmt);
+        sdl_gui.pixfmt = sdl_vf.para.d_pixfmt;
+    }
+    // Check SDL Support PixFmt
+    sdl_gui.pixfmt = sdl_vf.para.d_pixfmt = map_sdl_supported_pixfmt(sdl_gui.pixfmt);
+
     sdl_vf.para.d_width = width;
     sdl_vf.para.d_height = height;
     video_filter_init(&sdl_vf);
@@ -277,6 +294,7 @@ static int vo_sdl_render(dtvideo_output_t * vo, dt_av_frame_t * frame)
         vf->para.d_width = sdl_gui.window_w;
         vf->para.d_height = sdl_gui.window_h;
         vf->para.d_pixfmt = sdl_gui.pixfmt;
+        dt_info(TAG, "Need to Update Video Filter Parameter. w:%d->%d h:%d->%d pixfmt:%d->%d \n", vf->para);
         video_filter_update(vf);
     }
 
@@ -294,17 +312,22 @@ static int vo_sdl_render(dtvideo_output_t * vo, dt_av_frame_t * frame)
         SDL_FreeYUVOverlay(window.overlay);
     }
     // Create overlay
-    if (sdl_gui.pixfmt == 0) {
-        window.overlay = SDL_CreateYUVOverlay(width, height, SDL_YV12_OVERLAY, window.screen);
-    } else if (sdl_gui.pixfmt == 1) {
-        window.overlay = SDL_CreateYUVOverlay(width, height, SDL_YV12_OVERLAY, window.screen);
-    }
+    window.overlay = SDL_CreateYUVOverlay(width, height, map_sdl_overlay(sdl_gui.pixfmt), window.screen);
 
     SDL_LockYUVOverlay(window.overlay);
+    switch (sdl_gui.pixfmt) {
+    case DTAV_PIX_FMT_YUV420P:
+        memcpy(window.overlay->pixels[0], frame->data[0], width * height);
+        memcpy(window.overlay->pixels[1], frame->data[2], width * height / 4);
+        memcpy(window.overlay->pixels[2], frame->data[1], width * height / 4);
+        break;
+    case DTAV_PIX_FMT_RGB565LE:
+        break;
+    case DTAV_PIX_FMT_NV12:
+    default:
+        break;
+    }
 
-    memcpy(window.overlay->pixels[0], frame->data[0], width * height);
-    memcpy(window.overlay->pixels[1], frame->data[2], width * height / 4);
-    memcpy(window.overlay->pixels[2], frame->data[1], width * height / 4);
     SDL_UnlockYUVOverlay(window.overlay);
 
     rect.x = x;

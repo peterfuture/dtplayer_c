@@ -9,7 +9,7 @@ typedef enum {
     GUI_CMD_GET_WINDOW_SIZE = 0,
     GUI_CMD_GET_MAX_SIZE,
     GUI_CMD_GET_MODE,
-    
+
     GUI_CMD_SET_SIZE = 0x100,
     GUI_CMD_SET_MODE,
 

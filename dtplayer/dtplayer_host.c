@@ -74,8 +74,9 @@ int player_host_init(dtplayer_context_t * dtp_ctx)
             dt_info(TAG, "[%s:%d] disable omx\n", __FUNCTION__, __LINE__);
         }
 
-        int vout_type = pctrl->video_pixel_format;
-        dt_info(TAG, "vout type:%d - 0 yuv420 1 rgb565 2 rgb24 3 rgba \n", vout_type);
+        //int vout_type = pctrl->video_pixel_format;
+        int vout_type = dtp_setting.video_pixel_format;
+        dt_info(TAG, "vout type:%d - 0 yuv420 1 rgb565 2 nv12 \n", vout_type);
 
         host_para->video_format = vstream->format;
         host_para->video_src_width = vstream->width;
@@ -102,10 +103,7 @@ int player_host_init(dtplayer_context_t * dtp_ctx)
             host_para->video_dest_pixfmt = DTAV_PIX_FMT_RGB565LE;
         }
         if (vout_type == 2) {
-            host_para->video_dest_pixfmt = DTAV_PIX_FMT_RGB24;
-        }
-        if (vout_type == 3) {
-            host_para->video_dest_pixfmt = DTAV_PIX_FMT_RGBA;
+            host_para->video_dest_pixfmt = DTAV_PIX_FMT_NV12;
         }
 
         host_para->vctx_priv = vstream->codec_priv;

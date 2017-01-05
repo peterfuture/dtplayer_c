@@ -124,17 +124,17 @@ int main(int argc, char **argv)
     command_init(&program, "dtplayer", VERSION);
     program.data = &para;
     program.usage = "[options] <url>";
-    command_option(&program, "-dw", "--width <n>", "specify destiny width", on_set_width);
-    command_option(&program, "-dh", "--height <n>", "specify destiny height", on_set_height);
-    command_option(&program, "-na", "--disable_audio", "disable audio", on_disable_audio);
-    command_option(&program, "-nv", "--disable_video", "disable video", on_disable_video);
-    command_option(&program, "-ns", "--disable_sub", "disable sub", on_disable_sub);
-    command_option(&program, "-ast", "--audio_index <n>", "specify audio index", on_select_audio);
-    command_option(&program, "-vst", "--video_index <n>", "specify video index", on_select_video);
-    command_option(&program, "-sst", "--sub_index <n>", "specify sub index", on_select_sub);
-    command_option(&program, "-l", "--loop <n>", "enable loop", on_loop);
-    command_option(&program, "-nsy", "--disable-sync", "disable avsync", on_disable_sync);
-    command_option(&program, "-vpf", "--video_pixel_format <n>", "video pixel format: 0-yuv420 1-rgb565 2-rgb24 3-rgba", on_select_vpf);
+    command_option(&program, "-dw",  "--width <n>",     "specify destiny width",  on_set_width);
+    command_option(&program, "-dh",  "--height <n>",    "specify destiny height", on_set_height);
+    command_option(&program, "-na",  "--disable_audio", "disable audio",          on_disable_audio);
+    command_option(&program, "-nv",  "--disable_video", "disable video",          on_disable_video);
+    command_option(&program, "-ns",  "--disable_sub",   "disable sub",            on_disable_sub);
+    command_option(&program, "-ast", "--audio_index",   "specify audio index",    on_select_audio);
+    command_option(&program, "-vst", "--video_index",   "specify video index",    on_select_video);
+    command_option(&program, "-sst", "--sub_index",     "specify sub index",      on_select_sub);
+    command_option(&program, "-l",   "--loop <n>",      "enable loop",            on_loop);
+    command_option(&program, "-nsy", "--disable-sync",  "disable avsync",         on_disable_sync);
+    //command_option(&program, "-pf",  "--pixel_format",  "video pixfmt specify(0 yuv420p 1 rgb565 2 nv12)", on_select_vpf);
 
     command_parse(&program, argc, argv);
 
@@ -193,7 +193,7 @@ int main(int argc, char **argv)
     gui_para_t gui_para;
     gui_para.width = width;
     gui_para.height = height;
-    gui_para.pixfmt = (para.video_pixel_format > 0) ? para.video_pixel_format : 0; // yuv420 default
+    gui_para.pixfmt = 0; // yuv420 default.
 
     ret = setup_gui(&player.gui, &gui_para);
     if (ret < 0) {

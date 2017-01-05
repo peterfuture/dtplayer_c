@@ -246,13 +246,7 @@ int video_init(dtvideo_context_t * vctx)
     vctx->current_pts = vctx->last_valid_pts = -1;
 
     dtvideo_decoder_t *video_dec = &vctx->video_dec;
-    dtvideo_filter_t *video_filt = &vctx->video_filt;
     dtvideo_output_t *video_out = &vctx->video_out;
-
-    //vf ctx init
-    memset(video_filt, 0, sizeof(dtvideo_filter_t));
-    memcpy(&video_filt->para, &vctx->video_para, sizeof(dtvideo_para_t));
-    video_filt->parent = vctx;
 
     //vd ctx init
     memset(video_dec, 0, sizeof(dtvideo_decoder_t));
