@@ -179,22 +179,25 @@ static int get_keyval(const char * section, const char *key, char *out, struct e
         if (e->type == tpSECTION) {
             return -1;
         }
-        if (e->type == tpKEYVALUE) {
-            strcpy(Text, e->text);
-            pText = strchr(Text, ';');
-            if (pText != NULL) {
-                *pText = 0;
-            }
-            pText = strchr(Text, '=');
-            if (pText != NULL) {
-                *pText = 0;
-                strcpy(KeyText, Text);
-                *pText = '=';
-                if (strcasecmp(KeyText, key) == 0) {
-                    strcpy(ValText, pText + 1);
-                    printf("%s,%s\n", KeyText, ValText);
-                    break;
-                }
+        if (e->type != tpKEYVALUE) {
+            e = e->next;
+            continue;
+        }
+
+        strcpy(Text, e->text);
+        pText = strchr(Text, ';');
+        if (pText != NULL) {
+            *pText = 0;
+        }
+        pText = strchr(Text, '=');
+        if (pText != NULL) {
+            *pText = 0;
+            strcpy(KeyText, Text);
+            *pText = '=';
+            if (strcasecmp(KeyText, key) == 0) {
+                strcpy(ValText, pText + 1);
+                printf("%s,%s\n", KeyText, ValText);
+                break;
             }
         }
         e = e->next;
@@ -203,6 +206,7 @@ static int get_keyval(const char * section, const char *key, char *out, struct e
     if (!e) {
         return -1;
     }
+
     strcpy(out, ValText);
     return 0;
 }
@@ -236,7 +240,7 @@ static void debug_list_entry(struct entry *list)
     }
 }
 
-#define INI_TEST 1
+//#define INI_TEST 1
 #ifdef INI_TEST
 int main(int argc, char **argv)
 {
