@@ -126,7 +126,6 @@ static void *video_decode_loop(void *arg)
     vd_wrapper_t *wrapper = decoder->wrapper;
     vd_statistics_info_t *p_vd_statistics_info = &decoder->statistics_info;
     dtvideo_context_t *vctx = (dtvideo_context_t *) decoder->parent;
-    dtvideo_filter_t *filter = (dtvideo_filter_t *) & (vctx->video_filt);
     queue_t *picture_queue = vctx->vo_queue;
     /*used for decode */
     dt_av_frame_t *picture = NULL;
@@ -185,12 +184,6 @@ static void *video_decode_loop(void *arg)
         {
             p_vd_statistics_info->decoded_frame_count++;
         }
-        //got one frame, filter reset check
-        if (wrapper->info_changed(decoder)) {
-            //memcpy(&decoder->para, wrapper->para, sizeof(dtvideo_para_t));// wrapper->para == decoder->para
-            memcpy(&filter->para, wrapper->para, sizeof(dtvideo_para_t));
-            video_filter_update(filter);
-        }
         decoder->frame_count++;
         //Got one frame
         //update current pts, clear the buffer size
@@ -210,11 +203,6 @@ static void *video_decode_loop(void *arg)
                 dt_debug(TAG, "vpts inc itself. pts_mode:%d pts:0x%llx inc:%d\n", pts_mode, picture->pts, dur_inc);
             }
         }
-
-        // setup some common info
-        picture->width = para->s_width;
-        picture->height = para->s_height;
-        picture->pixfmt = para->s_pixfmt;
 
         /*queue in */
         queue_push_tail(picture_queue, picture);

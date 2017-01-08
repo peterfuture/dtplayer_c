@@ -36,13 +36,7 @@ typedef struct vf_ffmpeg_ctx {
 ***********************************************************************/
 static int ffmpeg_vf_capable(vf_cap_t cap)
 {
-#ifdef ENABLE_LINUX
     int ffmpeg_cap = VF_CAP_COLORSPACE_CONVERT | VF_CAP_CLIP;
-#endif
-#ifdef ENABLE_ANDROID
-    int ffmpeg_cap = VF_CAP_COLORSPACE_CONVERT;
-#endif
-
     dt_info(TAG, "request cap: %x , %s support:%x \n", cap, "ffmpeg vf", ffmpeg_cap);
     return cap & ffmpeg_cap;
 }
@@ -70,10 +64,6 @@ static int ffmpeg_vf_init(dtvideo_filter_t *filter)
     int df = para->d_pixfmt;
     vf_ctx->need_process = !(sw == dw && sh == dh && sf == df);
     dt_info(TAG, "[%s:%d] sw:%d dw:%d sh:%d dh:%d sf:%d df:%d need_process:%d \n", __FUNCTION__, __LINE__, sw, dw, sh, dh, sf, df, vf_ctx->need_process);
-
-#ifdef ENABLE_ANDROID
-    vf_ctx->need_process = 1; // android need setup yuv data
-#endif
 
     filter->vf_priv = vf_ctx;
     if (vf_ctx->need_process) {
@@ -104,9 +94,6 @@ static int convert_picture(dtvideo_filter_t * filter, dt_av_frame_t * src)
     int sf = para->s_pixfmt;
     int df = para->d_pixfmt;
 
-#ifdef ENABLE_ANDROID
-    const AVPixFmtDescriptor *pix_desc = av_pix_fmt_desc_get(sf);
-#endif
     if (!vf_ctx->swap_frame) {
         vf_ctx->swap_frame = dtav_new_frame();
     }
@@ -130,21 +117,13 @@ static int convert_picture(dtvideo_filter_t * filter, dt_av_frame_t * src)
     buffer = vf_ctx->swapbuf;
     avpicture_fill((AVPicture *) dst, buffer, df, dw, dh);
 
-#ifdef ENABLE_ANDROID
-    //re setup linesize
-    src->linesize[0] = av_image_get_linesize(sf, sw, 0);
-    src->linesize[1] = av_image_get_linesize(sf, sw, 1);
-    src->linesize[2] = av_image_get_linesize(sf, sw, 2);
-
-    src->data[0] = src->data[0];
-    src->data[1] = src->data[0] + src->linesize[0] * sh;
-    src->data[2] = src->data[1] + src->linesize[1] * -(-sh >> pix_desc->log2_chroma_h);
-#endif
-
     vf_ctx->pSwsCtx = sws_getCachedContext(vf_ctx->pSwsCtx, sw, sh, sf, dw, dh, df, SWS_BICUBIC, NULL, NULL, NULL);
     sws_scale(vf_ctx->pSwsCtx, src->data, src->linesize, 0, sh, dst->data, dst->linesize);
 
     pict->pts = src->pts;
+    pict->width = dw;
+    pict->height = dh;
+    pict->pixfmt = df;
     dtav_unref_frame(src);
     memcpy(src, pict, sizeof(dt_av_frame_t));
 

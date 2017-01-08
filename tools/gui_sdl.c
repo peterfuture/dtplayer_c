@@ -290,9 +290,10 @@ static int vo_sdl_render(dtvideo_output_t * vo, dt_av_frame_t * frame)
     dt_debug(TAG, "frame size [%d:%d] \n", frame->width, frame->height);
     // reset sdl vf and window size
     dtvideo_filter_t *vf = &sdl_vf;
-    if (vf->para.d_width != sdl_gui.window_w || vf->para.d_height != sdl_gui.window_h || vf->para.d_pixfmt != sdl_gui.pixfmt) {
+    if (vf->para.d_width != sdl_gui.window_w || vf->para.d_height != sdl_gui.window_h || frame->pixfmt != sdl_gui.pixfmt) {
         vf->para.d_width = sdl_gui.window_w;
         vf->para.d_height = sdl_gui.window_h;
+        vf->para.s_pixfmt = frame->pixfmt;
         vf->para.d_pixfmt = sdl_gui.pixfmt;
         dt_info(TAG, "Need to Update Video Filter Parameter. w:%d->%d h:%d->%d pixfmt:%d->%d \n", vf->para);
         video_filter_update(vf);

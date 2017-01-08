@@ -28,7 +28,6 @@ static enum AVCodecID convert_to_id(int format)
     default:
         return -1;
     }
-    return -1;
 }
 
 static AVCodecContext * alloc_ffmpeg_ctx(dtvideo_decoder_t *decoder)
@@ -219,14 +218,17 @@ static int convert_frame(dtvideo_decoder_t * decoder, AVFrame * src, int64_t pts
 static int copy_frame(dtvideo_decoder_t * decoder, AVFrame * src, int64_t pts, dt_av_frame_t ** p_pict)
 {
     dtvideo_para_t *para = &decoder->para;
+    vd_ffmpeg_ctx_t *vd_ctx = (vd_ffmpeg_ctx_t *)decoder->vd_priv;
+    AVCodecContext *avctxp = (AVCodecContext *) vd_ctx->avctxp;
     uint8_t *buffer;
     int buffer_size;
+    int pixfmt = avctxp->pix_fmt;
     int sw = para->s_width;
     int dw = sw;
     int sh = para->s_height;
     int dh = sh;
-    int sf = para->s_pixfmt;
-    int df = sf;
+    int sf = pixfmt;
+    int df = pixfmt;
     //step1: malloc dt_av_frame_t
     dt_av_frame_t *pict = dtav_new_frame();
     memset(pict, 0, sizeof(dt_av_frame_t));
@@ -237,7 +239,6 @@ static int copy_frame(dtvideo_decoder_t * decoder, AVFrame * src, int64_t pts, d
     buffer = (uint8_t *) malloc(buffer_size * sizeof(uint8_t));
     avpicture_fill((AVPicture *) dst, buffer, df, dw, dh);
 
-
 #if 1
     av_picture_copy(dst, (AVPicture *)src, sf, sw, sh);
 #else
@@ -245,8 +246,10 @@ static int copy_frame(dtvideo_decoder_t * decoder, AVFrame * src, int64_t pts, d
     sws_scale(pSwsCtx, src->data, src->linesize, 0, sh, dst->data, dst->linesize);
 #endif
     pict->pts = pts;
+    pict->width = sw;
+    pict->height = sh;
+    pict->pixfmt = pixfmt;
     *p_pict = pict;
-
     return 0;
 }
 

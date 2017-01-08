@@ -130,11 +130,6 @@ int video_filter_init(dtvideo_filter_t *filter)
         cap |= VF_CAP_CLIP;
     }
 
-    // For Android, force filter, only colorspace convert
-#ifdef ENABLE_ANDROID
-    cap |= VF_CAP_COLORSPACE_CONVERT;
-#endif
-
     int ret = select_vf(filter, cap);
     if (ret < 0) {
         goto EXIT;

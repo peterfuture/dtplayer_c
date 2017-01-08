@@ -174,7 +174,6 @@ static void *video_output_thread(void *args)
 {
     dtvideo_output_t *vo = (dtvideo_output_t *) args;
     dtvideo_context_t *vctx = (dtvideo_context_t *) vo->parent;
-    dtvideo_filter_t *filter = (dtvideo_filter_t *) & (vctx->video_filt);
     vo_wrapper_t *wrapper = vo->wrapper;
     int ret, wlen;
     ret = wlen = 0;
@@ -251,7 +250,7 @@ static void *video_output_thread(void *args)
                 continue;
             }
         }
-        /*read data from filter or decode buffer */
+        /*read data from decode buffer */
         picture = (dt_av_frame_t *) dtvideo_output_read(vo->parent);
         if (!picture) {
             dt_error(TAG, "[%s:%d]frame read failed ! \n", __FUNCTION__, __LINE__);
