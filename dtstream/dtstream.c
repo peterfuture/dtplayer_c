@@ -1,6 +1,7 @@
-#include "dtstream.h"
-
 #include <unistd.h>
+
+#include "dt_setting.h"
+#include "dtstream.h"
 
 #define TAG "STREAM"
 
@@ -10,6 +11,7 @@
         register_stream(&stream_##x);     \
     }
 static stream_wrapper_t *g_stream = NULL;
+dt_setting_t dtp_setting;
 
 static void register_stream(stream_wrapper_t * wrapper)
 {
@@ -19,7 +21,8 @@ static void register_stream(stream_wrapper_t * wrapper)
         p = &((*p)->next);
     }
     *p = wrapper;
-    dt_info(TAG, "[%s:%d] register stream, name:%s fmt:%d \n", __FUNCTION__, __LINE__, (*p)->name, (*p)->id);
+    dt_info(TAG, "[%s:%d] register stream, name:%s fmt:%d \n", __FUNCTION__,
+            __LINE__, (*p)->name, (*p)->id);
     wrapper->next = NULL;
 }
 
@@ -68,7 +71,8 @@ static int stream_select(dtstream_context_t * stm_ctx)
         return -1;
     }
     stm_ctx->stream = entry;
-    dt_info(TAG, "[%s:%d] select stream, name:%s id:%d \n", __FUNCTION__, __LINE__, entry->name, entry->id);
+    dt_info(TAG, "[%s:%d] select stream, name:%s id:%d \n", __FUNCTION__, __LINE__,
+            entry->name, entry->id);
     return 0;
 }
 
@@ -118,7 +122,6 @@ int64_t stream_tell(dtstream_context_t *stm_ctx)
 int64_t stream_get_size(dtstream_context_t *stm_ctx)
 {
     stream_wrapper_t *wrapper = stm_ctx->stream;
-    stream_ctrl_t *info = &wrapper->info;
     return wrapper->seek(wrapper, 0, AVSEEK_SIZE);
 }
 

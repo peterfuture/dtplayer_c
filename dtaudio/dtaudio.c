@@ -7,7 +7,7 @@
 /*read frame from dtport*/
 int audio_read_frame(void *priv, dt_av_pkt_t * frame)
 {
-    int type = DT_TYPE_AUDIO;
+    int type = DTP_MEDIA_TYPE_AUDIO;
     int ret = 0;
     dtaudio_context_t *actx = (dtaudio_context_t *) priv;
     ret = dthost_read_frame(actx->parent, frame, type);

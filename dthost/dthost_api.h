@@ -1,9 +1,10 @@
 #ifndef DTHOST_API_H
 #define DTHOST_API_H
 
-#include "dt_av.h"
-
 #include <stdint.h>
+
+#include "dtp_av.h"
+#include "dtp_state.h"
 
 #define AUDIO_EXTR_DATA_SIZE 4096
 #define VIDEO_EXTR_DATA_SIZE 4096

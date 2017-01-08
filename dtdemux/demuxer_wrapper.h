@@ -1,12 +1,16 @@
 #ifndef DEMUXER_WRAPPER_H
 #define DEMUXER_WRAPPER_H
 
-#include "dt_media_info.h"
-#include "dt_av.h"
-
 #include <stdio.h>
 #include <stddef.h>
 #include <stdint.h>
+
+#include "dt_buffer.h"
+
+#include "dtp_av.h"
+#include "dtp.h"
+
+struct dtp_media_info;
 
 typedef enum {
     DEMUXER_INVALID = -1,
@@ -16,6 +20,10 @@ typedef enum {
     DEMUXER_UNSUPPORT,
 } demuxer_format_t;
 
+typedef struct {
+    char *file_name;
+} dtdemuxer_para_t;
+
 typedef struct demuxer_wrapper {
     char *name;
     int id;
@@ -23,7 +31,7 @@ typedef struct demuxer_wrapper {
     int (*probe)(struct demuxer_wrapper *wrapper, dt_buffer_t *buf);
     int (*open)(struct demuxer_wrapper * wrapper);
     int (*read_frame)(struct demuxer_wrapper * wrapper, dt_av_pkt_t * frame);
-    int (*setup_info)(struct demuxer_wrapper * wrapper, dt_media_info_t * info);
+    int (*setup_info)(struct demuxer_wrapper * wrapper, dtp_media_info_t * info);
     int (*seek_frame)(struct demuxer_wrapper * wrapper, int64_t timestamp);  // us
     int (*close)(struct demuxer_wrapper * wrapper);
     void *demuxer_priv;         // point to priv context
@@ -43,7 +51,7 @@ typedef struct {
 
 typedef struct {
     char *file_name;
-    dt_media_info_t media_info;
+    dtp_media_info_t media_info;
     demuxer_wrapper_t *demuxer;
     dt_buffer_t probe_buf;
     demuxer_statistics_info_t statistics_info;

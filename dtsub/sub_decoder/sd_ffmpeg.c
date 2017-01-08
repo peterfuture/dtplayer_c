@@ -8,12 +8,11 @@
 **
 ***********************************************************************/
 
-#include "dt_av.h"
-
-#include "dtsub_decoder.h"
-
 #include "libavcodec/avcodec.h"
 #include "libswscale/swscale.h"
+
+#include "dt_utils.h"
+#include "dtsub_decoder.h"
 
 /***********************************************************************
 **
@@ -71,7 +70,8 @@
 /* NOTE: the clamp is really necessary! */
 static inline int C_JPEG_TO_CCIR(int y)
 {
-    y = (((y - 128) * FIX(112.0 / 127.0) + (ONE_HALF + (128 << SCALEBITS))) >> SCALEBITS);
+    y = (((y - 128) * FIX(112.0 / 127.0) + (ONE_HALF + (128 << SCALEBITS))) >>
+         SCALEBITS);
     if (y < 16) {
         y = 16;
     }
@@ -172,14 +172,16 @@ int ffmpeg_sdec_init(dtsub_decoder_t *decoder)
     enum AVCodecID id = avctxp->codec_id;
     codec = avcodec_find_decoder(id);
     if (NULL == codec) {
-        dt_error(TAG, "[%s:%d] sub codec find failed. id:%d \n", __FUNCTION__, __LINE__, id);
+        dt_error(TAG, "[%s:%d] sub codec find failed. id:%d \n", __FUNCTION__, __LINE__,
+                 id);
         return -1;
     }
     if (avcodec_open2(avctxp, codec, NULL) < 0) {
         dt_error(TAG, "[%s:%d] sub codec open failed \n", __FUNCTION__, __LINE__);
         return -1;
     }
-    dt_info(TAG, " [%s:%d] ffmpeg sub decoder init ok, codectype:%d  \n", __FUNCTION__, __LINE__, avctxp->codec_type);
+    dt_info(TAG, " [%s:%d] ffmpeg sub decoder init ok, codectype:%d  \n",
+            __FUNCTION__, __LINE__, avctxp->codec_type);
     wrapper->para = decoder->para;
     decoder->sd_priv = (void *)sd_ctx;
 
@@ -191,12 +193,14 @@ int ffmpeg_sdec_init(dtsub_decoder_t *decoder)
 ** ffmpeg_sdec_decode
 **
 ***********************************************************************/
-int ffmpeg_sdec_decode(dtsub_decoder_t *decoder, dt_av_pkt_t * dt_frame, dtav_sub_frame_t ** sub_frame)
+int ffmpeg_sdec_decode(dtsub_decoder_t *decoder, dt_av_pkt_t * dt_frame,
+                       dtav_sub_frame_t ** sub_frame)
 {
     int ret = 0;
     sd_ffmpeg_ctx_t *sd_ctx = (sd_ffmpeg_ctx_t *)decoder->sd_priv;
     AVCodecContext *avctxp = (AVCodecContext *)sd_ctx->avctxp;
-    dt_debug(TAG, "[%s:%d] param-- w:%d h:%d  \n", __FUNCTION__, __LINE__, avctxp->width, avctxp->height);
+    dt_debug(TAG, "[%s:%d] param-- w:%d h:%d  \n", __FUNCTION__, __LINE__,
+             avctxp->width, avctxp->height);
     int got_sub = 0;
     AVPacket pkt;
     int i, j;
@@ -215,9 +219,12 @@ int ffmpeg_sdec_decode(dtsub_decoder_t *decoder, dt_av_pkt_t * dt_frame, dtav_su
     }
 
     if (got_sub) {
-        dt_info(TAG, "get sub, type:%d size:%d starttime:%u endtime:%u pts:%lld \n", (int)sub->format, pkt.size, sub->start_display_time, sub->end_display_time, sub->pts);
+        dt_info(TAG, "get sub, type:%d size:%d starttime:%u endtime:%u pts:%lld \n",
+                (int)sub->format, pkt.size, sub->start_display_time, sub->end_display_time,
+                sub->pts);
 
-        dtav_sub_frame_t *sub_frame_tmp = (dtav_sub_frame_t *)malloc(sizeof(dtav_sub_frame_t));
+        dtav_sub_frame_t *sub_frame_tmp = (dtav_sub_frame_t *)malloc(sizeof(
+                                              dtav_sub_frame_t));
         if (sub->format == 0) {  // graphics
             for (i = 0; i < sub->num_rects; i++) {
                 for (j = 0; j < sub->rects[i]->nb_colors; j++) {
@@ -232,7 +239,9 @@ int ffmpeg_sdec_decode(dtsub_decoder_t *decoder, dt_av_pkt_t * dt_frame, dtav_su
         memcpy(sub_frame_tmp, sub, sizeof(dtav_sub_frame_t));
         *sub_frame = sub_frame_tmp;
         memset(sub, 0, sizeof(AVSubtitle));
-        dt_info(TAG, "get sub, type:%d size:%d starttime:%u endtime:%u pts:%lld\n", (int)sub_frame_tmp->format, pkt.size, sub_frame_tmp->start_display_time, sub_frame_tmp->end_display_time, sub_frame_tmp->pts);
+        dt_info(TAG, "get sub, type:%d size:%d starttime:%u endtime:%u pts:%lld\n",
+                (int)sub_frame_tmp->format, pkt.size, sub_frame_tmp->start_display_time,
+                sub_frame_tmp->end_display_time, sub_frame_tmp->pts);
     }
 
     return got_sub;
@@ -256,7 +265,7 @@ int ffmpeg_sdec_release(dtsub_decoder_t *decoder)
 sd_wrapper_t sd_ffmpeg_ops = {
     .name = "ffmpeg sub decoder",
     .sfmt = DT_SUB_FORMAT_UNKOWN, //support all vfmt
-    .type = DT_TYPE_SUBTITLE,
+    .type = DTP_MEDIA_TYPE_SUBTITLE,
     .init = ffmpeg_sdec_init,
     .decode_frame = ffmpeg_sdec_decode,
     .release = ffmpeg_sdec_release,

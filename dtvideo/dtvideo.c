@@ -1,3 +1,5 @@
+#include "dt_setting.h"
+
 #include "dtvideo.h"
 #include "dthost_api.h"
 
@@ -6,7 +8,7 @@
 /*read frame from dtport*/
 int dtvideo_read_frame(void *priv, dt_av_pkt_t * frame)
 {
-    int type = DT_TYPE_VIDEO;
+    int type = DTP_MEDIA_TYPE_VIDEO;
     int ret = 0;
     dtvideo_context_t *vctx = (dtvideo_context_t *) priv;
     ret = dthost_read_frame(vctx->parent, frame, type);
@@ -137,7 +139,8 @@ void dtvideo_update_pts(void *priv)
     if (vctx->video_status < VIDEO_STATUS_INITED) {
         return;
     }
-    dthost_set_info(vctx->parent, HOST_CMD_SET_VPTS, (unsigned long)(&vctx->current_pts));
+    dthost_set_info(vctx->parent, HOST_CMD_SET_VPTS,
+                    (unsigned long)(&vctx->current_pts));
     return;
 }
 
@@ -185,11 +188,6 @@ void register_ext_vd(vd_wrapper_t *vd)
 void register_ext_vo(vo_wrapper_t *vo)
 {
     vout_register_ext(vo);
-}
-
-void register_ext_vf(vf_wrapper_t *vf)
-{
-    vf_register_ext(vf);
 }
 
 int video_start(dtvideo_context_t * vctx)
@@ -260,7 +258,7 @@ int video_init(dtvideo_context_t * vctx)
 
     //vo ctx init
     memset(video_out, 0, sizeof(dtvideo_output_t));
-    video_out->para = &vctx->video_para;
+    memcpy(&video_out->para, &vctx->video_para, sizeof(dtvideo_para_t));
     video_out->parent = vctx;
     ret = video_output_init(video_out, vctx->video_para.video_output);
     if (ret < 0) {

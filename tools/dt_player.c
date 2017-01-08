@@ -1,18 +1,16 @@
-#include "dt_player.h"
+#include "dtp.h"
 #include "version.h"
+
 #include "stream_wrapper.h"
 #include "demuxer_wrapper.h"
-#include "ao_wrapper.h"
-#include "ad_wrapper.h"
-#include "vo_wrapper.h"
-#include "vd_wrapper.h"
+#include "dtp_plugin.h"
 
-#include "dtplayer_api.h"
-#include "dtplayer.h"
 #include "commander.h"
 
 #include <stdio.h>
 #include <string.h>
+
+#include "dt_player.h"
 
 #define TAG "DT-PLAYER"
 
@@ -22,7 +20,7 @@ static player_t player;
 int dtap_change_effect(ao_wrapper_t *wrapper);
 #endif
 
-static int update_cb(void *cookie, player_state_t * state)
+static int update_cb(void *cookie, dtp_state_t * state)
 {
     if (state->cur_status == PLAYER_STATUS_EXIT) {
         dt_info(TAG, "RECEIVE EXIT CMD\n");
@@ -34,17 +32,9 @@ static int update_cb(void *cookie, player_state_t * state)
     pinfo->duration = state->full_time;
 
     dt_debug(TAG, "UPDATECB CURSTATUS:%x \n", state->cur_status);
-    dt_info(TAG, "CUR TIME %lld S  FULL TIME:%lld  \n", state->cur_time, state->full_time);
+    dt_info(TAG, "CUR TIME %lld S  FULL TIME:%lld  \n", state->cur_time,
+            state->full_time);
     return 0;
-}
-
-static void register_ex_all()
-{
-    //player_register_ex_stream();
-    //player_register_ex_demuxer();
-    //player_register_ex_ao();
-    //player_register_ex_ad();
-    //player_register_ex_vo();
 }
 
 static void on_loop(command_t *self)
@@ -124,16 +114,26 @@ int main(int argc, char **argv)
     command_init(&program, "dtplayer", VERSION);
     program.data = &para;
     program.usage = "[options] <url>";
-    command_option(&program, "-dw",  "--width <n>",     "specify destiny width",  on_set_width);
-    command_option(&program, "-dh",  "--height <n>",    "specify destiny height", on_set_height);
-    command_option(&program, "-na",  "--disable_audio", "disable audio",          on_disable_audio);
-    command_option(&program, "-nv",  "--disable_video", "disable video",          on_disable_video);
-    command_option(&program, "-ns",  "--disable_sub",   "disable sub",            on_disable_sub);
-    command_option(&program, "-ast", "--audio_index",   "specify audio index",    on_select_audio);
-    command_option(&program, "-vst", "--video_index",   "specify video index",    on_select_video);
-    command_option(&program, "-sst", "--sub_index",     "specify sub index",      on_select_sub);
-    command_option(&program, "-l",   "--loop <n>",      "enable loop",            on_loop);
-    command_option(&program, "-nsy", "--disable-sync",  "disable avsync",         on_disable_sync);
+    command_option(&program, "-dw",  "--width <n>",     "specify destiny width",
+                   on_set_width);
+    command_option(&program, "-dh",  "--height <n>",    "specify destiny height",
+                   on_set_height);
+    command_option(&program, "-na",  "--disable_audio", "disable audio",
+                   on_disable_audio);
+    command_option(&program, "-nv",  "--disable_video", "disable video",
+                   on_disable_video);
+    command_option(&program, "-ns",  "--disable_sub",   "disable sub",
+                   on_disable_sub);
+    command_option(&program, "-ast", "--audio_index",   "specify audio index",
+                   on_select_audio);
+    command_option(&program, "-vst", "--video_index",   "specify video index",
+                   on_select_video);
+    command_option(&program, "-sst", "--sub_index",     "specify sub index",
+                   on_select_sub);
+    command_option(&program, "-l",   "--loop <n>",      "enable loop",
+                   on_loop);
+    command_option(&program, "-nsy", "--disable-sync",  "disable avsync",
+                   on_disable_sync);
     //command_option(&program, "-pf",  "--pixel_format",  "video pixfmt specify(0 yuv420p 1 rgb565 2 nv12)", on_select_vpf);
 
     command_parse(&program, argc, argv);
@@ -149,11 +149,8 @@ int main(int argc, char **argv)
     para.file_name = argv[argc - 1];
     player.file_name = para.file_name;
 
-    player_register_all();
-    register_ex_all();
-
     void *player_priv = NULL;
-    dt_media_info_t info;
+    dtp_media_info_t info;
     player_priv = dtplayer_init(&para);
     if (!player_priv) {
         return -1;
@@ -164,12 +161,13 @@ int main(int argc, char **argv)
         dt_info(TAG, "get mediainfo failed, quit \n");
         return -1;
     }
-    dt_info(TAG, "get mediainfo ok, filesize:%lld fulltime:%lld S \n", info.file_size, info.duration);
+    dt_info(TAG, "get mediainfo ok, filesize:%lld fulltime:%lld S \n",
+            info.file_size, info.duration);
 
     //set default window size
     int width = 720;
     int height = 480;
-    vstream_info_t *vstream = info.vstreams[0];
+    vstream_info_t *vstream = info.tracks.vstreams[0];
     if (info.has_video) {
         width = (para.width > 0) ? para.width : vstream->width;
         height = (para.height > 0) ? para.height : vstream->height;
@@ -182,7 +180,8 @@ int main(int argc, char **argv)
     }
 
     if (info.has_video) {
-        dt_info(TAG, "src-width: %d src-height: %d \n", vstream->width, vstream->height);
+        dt_info(TAG, "src-width: %d src-height: %d \n", vstream->width,
+                vstream->height);
     }
     dt_info(TAG, "dst-width: %d dst-height: %d \n", width, height);
 
@@ -199,13 +198,14 @@ int main(int argc, char **argv)
     if (ret < 0) {
         return -1;
     }
+
     if (info.has_video) {
         setup_vo(&player.vo);
-        dtplayer_register_ext_vo(&player.vo);
+        dtplayer_register_plugin(DTP_PLUGIN_TYPE_VO, &player.vo);
     }
     if (info.has_audio) {
         setup_ao(&player.ao);
-        dtplayer_register_ext_ao(&player.ao);
+        dtplayer_register_plugin(DTP_PLUGIN_TYPE_AO, &player.ao);
     }
     dtplayer_start(player_priv);
 
@@ -232,10 +232,10 @@ int main(int argc, char **argv)
             dtplayer_seekto(player_priv, player.info.cur_time + arg.arg1);
             break;
         case EVENT_SEEK_RATIO: {
-            int target_ts = player.info.duration * arg.arg1 / arg.arg2;
-            dtplayer_seekto(player_priv, target_ts);
-            break;
-        }
+                int target_ts = player.info.duration * arg.arg1 / arg.arg2;
+                dtplayer_seekto(player_priv, target_ts);
+                break;
+            }
         case EVENT_STOP:
             dtplayer_stop(player_priv);
             goto QUIT_CHECK;
@@ -244,14 +244,10 @@ int main(int argc, char **argv)
             dt_info(TAG, "resize, w:%d h:%d \n", arg.arg1, arg.arg2);
             player.disp_width = arg.arg1;
             player.disp_height = arg.arg2;
-            //dtplayer_set_video_size(player_priv, arg.arg1, arg.arg2);
             player.gui->set_info(player.gui, GUI_CMD_SET_SIZE, arg);
             break;
         case EVENT_VOLUME_ADD:
             dt_info(TAG, " volume add \n");
-            //player.volume++;
-            //player.volume = ply_ctx.volume % 10;
-            //player.ao.ao_set_volume(&ply_ctx.ao, ply_ctx.volume);
             break;
 #ifdef ENABLE_DTAP
         case EVENT_AE:

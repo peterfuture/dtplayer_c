@@ -1,3 +1,5 @@
+#include "dt_setting.h"
+
 #include "dtvideo.h"
 #include "dtvideo_decoder.h"
 
@@ -26,7 +28,8 @@ static void register_vdec(vd_wrapper_t * vd)
         p = &(*p)->next;
     }
     *p = vd;
-    dt_info(TAG, "[%s:%d] register vdec, name:%s fmt:%d \n", __FUNCTION__, __LINE__, (*p)->name, (*p)->vfmt);
+    dt_info(TAG, "[%s:%d] register vdec, name:%s fmt:%d \n", __FUNCTION__, __LINE__,
+            (*p)->name, (*p)->vfmt);
     vd->next = NULL;
 }
 
@@ -40,9 +43,11 @@ void register_vdec_ext(vd_wrapper_t *vd)
             break;
         }
 
-        dt_info(TAG, "[%s:%d] register vdec: %s comp:%s \n", __FUNCTION__, __LINE__, (*p)->name, vd->name);
+        dt_info(TAG, "[%s:%d] register vdec: %s comp:%s \n", __FUNCTION__, __LINE__,
+                (*p)->name, vd->name);
         if (strstr((*p)->name, vd->name) != NULL) {
-            dt_info(TAG, "[%s:%d] vdec already registerd, name:%s fmt:%d \n", __FUNCTION__, __LINE__, (*p)->name, (*p)->vfmt);
+            dt_info(TAG, "[%s:%d] vdec already registerd, name:%s fmt:%d \n", __FUNCTION__,
+                    __LINE__, (*p)->name, (*p)->vfmt);
             return;
         }
         p = &(*p)->next;
@@ -57,7 +62,8 @@ void register_vdec_ext(vd_wrapper_t *vd)
         *p = vd;
     }
 
-    dt_info(TAG, "[%s:%d]register ext vd. vfmt:%d name:%s \n", __FUNCTION__, __LINE__, vd->vfmt, vd->name);
+    dt_info(TAG, "[%s:%d]register ext vd. vfmt:%d name:%s \n", __FUNCTION__,
+            __LINE__, vd->vfmt, vd->name);
 
 }
 
@@ -87,7 +93,8 @@ static int select_video_decoder(dtvideo_decoder_t * decoder)
         }
         if ((*p)->vfmt == para->vfmt) {
             if ((*p)->is_hw == 1 && (para->flag & DTAV_FLAG_DISABLE_HW_CODEC) > 0) {
-                dt_info(TAG, "[%s:%d]disable-  hw name:%s flag:%d \n", __FUNCTION__, __LINE__, (*p)->name, para->flag);
+                dt_info(TAG, "[%s:%d]disable-  hw name:%s flag:%d \n", __FUNCTION__, __LINE__,
+                        (*p)->name, para->flag);
                 p = &(*p)->next;
                 continue;
             }
@@ -96,11 +103,13 @@ static int select_video_decoder(dtvideo_decoder_t * decoder)
         p = &(*p)->next;
     }
     if (*p == NULL) {
-        dt_info(TAG, "[%s:%d]no valid video decoder found vfmt:%d\n", __FUNCTION__, __LINE__, para->vfmt);
+        dt_info(TAG, "[%s:%d]no valid video decoder found vfmt:%d\n", __FUNCTION__,
+                __LINE__, para->vfmt);
         return -1;
     }
     decoder->wrapper = *p;
-    dt_info(TAG, "[%s:%d] select--%s video decoder \n", __FUNCTION__, __LINE__, (*p)->name);
+    dt_info(TAG, "[%s:%d] select--%s video decoder \n", __FUNCTION__, __LINE__,
+            (*p)->name);
     return 0;
 }
 
@@ -122,7 +131,6 @@ static void *video_decode_loop(void *arg)
 {
     dt_av_pkt_t frame;
     dtvideo_decoder_t *decoder = (dtvideo_decoder_t *) arg;
-    dtvideo_para_t *para = &decoder->para;
     vd_wrapper_t *wrapper = decoder->wrapper;
     vd_statistics_info_t *p_vd_statistics_info = &decoder->statistics_info;
     dtvideo_context_t *vctx = (dtvideo_context_t *) decoder->parent;
@@ -164,7 +172,8 @@ static void *video_decode_loop(void *arg)
             }
             //no data left, maybe eof, need to flush left data
             memset(&frame, 0, sizeof(dt_av_pkt_t));
-            dt_debug(TAG, "[%s:%d] no video frame left, flush left frames \n", __FUNCTION__, __LINE__);
+            dt_debug(TAG, "[%s:%d] no video frame left, flush left frames \n", __FUNCTION__,
+                     __LINE__);
         }
         /*read one frame,enter decode frame module */
         //will exec once for one time
@@ -193,14 +202,16 @@ static void *video_decode_loop(void *arg)
         if (decoder->first_frame_decoded == 0 && PTS_INVALID(decoder->pts_first)) {
             decoder->pts_first = decoder->pts_current = picture->pts;
             decoder->first_frame_decoded = 1;
-            dt_info(TAG, "[%s:%d]first frame decoded ok, pts:0x%llx dts:0x%llx\n", __FUNCTION__, __LINE__, picture->pts, picture->dts);
+            dt_info(TAG, "[%s:%d]first frame decoded ok, pts:0x%llx dts:0x%llx\n",
+                    __FUNCTION__, __LINE__, picture->pts, picture->dts);
         } else {
             if (pts_mode || PTS_INVALID(picture->pts)) {
                 int fps = decoder->para.fps;
                 int dur_inc = (int)((double)90000 / fps);
                 picture->pts = decoder->pts_current + dur_inc;
                 decoder->pts_current = picture->pts;
-                dt_debug(TAG, "vpts inc itself. pts_mode:%d pts:0x%llx inc:%d\n", pts_mode, picture->pts, dur_inc);
+                dt_debug(TAG, "vpts inc itself. pts_mode:%d pts:0x%llx inc:%d\n", pts_mode,
+                         picture->pts, dur_inc);
             }
         }
 
@@ -218,7 +229,8 @@ DECODE_END:
             frame.pts = -1;
         }
     } while (1);
-    dt_info(TAG, "[file:%s][%s:%d]decoder loop thread exit ok\n", __FILE__, __FUNCTION__, __LINE__);
+    dt_info(TAG, "[file:%s][%s:%d]decoder loop thread exit ok\n", __FILE__,
+            __FUNCTION__, __LINE__);
 
     pthread_exit(NULL);
     return NULL;
@@ -278,6 +290,15 @@ static void dump_vd_statistics_info(dtvideo_decoder_t * decoder)
     dt_info(TAG, "==============vd statistics info============== \n");
     dt_info(TAG, "DecodedVideoFrameCount: %d\n", p_info->decoded_frame_count);
     dt_info(TAG, "=================================================== \n");
+}
+
+static void dtav_clear_frame(void *pic)
+{
+    dt_av_frame_t *picture = (dt_av_frame_t *)(pic);
+    if (picture->data) {
+        free(picture->data[0]);
+    }
+    return;
 }
 
 int video_decoder_stop(dtvideo_decoder_t * decoder)

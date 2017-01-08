@@ -71,7 +71,8 @@ command_init(command_t *self, const char *name, const char *version)
     self->option_count = self->argc = 0;
     self->usage = "[options]";
     self->nargv = NULL;
-    command_option(self, "-V", "--version", "output program version", command_version);
+    command_option(self, "-V", "--version", "output program version",
+                   command_version);
     command_option(self, "-h", "--help", "output help information", command_help);
 }
 
@@ -175,7 +176,8 @@ normalize_args(int *argc, char **argv)
  */
 
 void
-command_option(command_t *self, const char *small, const char *large, const char *desc, command_callback_t cb)
+command_option(command_t *self, const char *small, const char *large,
+               const char *desc, command_callback_t cb)
 {
     int n = self->option_count++;
     if (n == COMMANDER_MAX_OPTIONS) {

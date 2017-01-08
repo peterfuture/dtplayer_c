@@ -1,9 +1,11 @@
 #ifndef DT_PLAYER_H
 #define DT_PLAYER_H
 
-#include "stdint.h"
-#include "ao_wrapper.h"
-#include "vo_wrapper.h"
+#include <stdint.h>
+
+#include "dt_utils.h"
+
+#include "dtp_plugin.h"
 
 #include "gui.h"
 

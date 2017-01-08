@@ -1,3 +1,5 @@
+#include "dt_error.h"
+
 #include "dtdemuxer.h"
 #include "dtstream_api.h"
 #include "dt_setting.h"
@@ -67,32 +69,35 @@ static int demuxer_select(dtdemuxer_context_t * dem_ctx)
     return 0;
 }
 
-static void dump_media_info(dt_media_info_t * info)
+static void dump_media_info(dtp_media_info_t * media)
 {
+    int i = 0;
+    track_info_t *info = &media->tracks;
+    
     dt_info(TAG, "|====================MEDIA INFO====================| \n");
-    dt_info(TAG, "|file_name:%s\n", info->file_name);
-    dt_info(TAG, "|file_size:%lld \n", info->file_size);
-    dt_info(TAG, "|file_format:%s \n", dt_mediafmt2str(info->format));
-    dt_info(TAG, "|duration:%lld bitrate:%d\n", info->duration, info->bit_rate);
-    dt_info(TAG, "|has video:%d has audio:%d has sub:%d\n", info->has_video, info->has_audio, info->has_sub);
+    dt_info(TAG, "|file_name:%s\n", media->file);
+    dt_info(TAG, "|file_size:%lld \n", media->file_size);
+    dt_info(TAG, "|file_format:%d \n", media->format);
+    dt_info(TAG, "|duration:%lld bitrate:%d\n", media->duration, media->bit_rate);
+    dt_info(TAG, "|has video:%d has audio:%d has sub:%d\n", media->has_video, media->has_audio, media->has_sub);
     dt_info(TAG, "|====================VIDEO INFO====================| \n");
     dt_info(TAG, "|video stream info,num:%d\n", info->vst_num);
-    int i = 0;
+
     for (i = 0; i < info->vst_num; i++) {
-        dt_info(TAG, "|--video stream:%d index:%d id:%d fmt:%s lang:%s \n", i, info->vstreams[i]->index, info->vstreams[i]->id, dt_vfmt2str(info->vstreams[i]->format), info->vstreams[i]->language);
+        dt_info(TAG, "|--video stream:%d index:%d id:%d fmt:%d lang:%s \n", i, info->vstreams[i]->index, info->vstreams[i]->id, info->vstreams[i]->format, info->vstreams[i]->language);
         dt_info(TAG, "|--bitrate:%d width:%d height:%d duration:%lld \n", info->vstreams[i]->bit_rate, info->vstreams[i]->width, info->vstreams[i]->height, info->vstreams[i]->duration);
     }
     dt_info(TAG, "|====================AUDIO INFO====================| \n");
     dt_info(TAG, "|audio stream info,num:%d\n", info->ast_num);
     for (i = 0; i < info->ast_num; i++) {
-        dt_info(TAG, "|--audio stream:%d index:%d id:%d fmt:%s lang:%s \n", i, info->astreams[i]->index, info->astreams[i]->id, dt_afmt2str(info->astreams[i]->format), info->astreams[i]->language);
+        dt_info(TAG, "|--audio stream:%d index:%d id:%d fmt:%d lang:%s \n", i, info->astreams[i]->index, info->astreams[i]->id, info->astreams[i]->format, info->astreams[i]->language);
         dt_info(TAG, "|--bitrate:%d sample_rate:%d channels:%d bps:%d duration:%lld \n", info->astreams[i]->bit_rate, info->astreams[i]->sample_rate, info->astreams[i]->channels, info->astreams[i]->bps, info->astreams[i]->duration);
     }
 
     dt_info(TAG, "|====================SUB INFO======================| \n");
     dt_info(TAG, "|subtitle stream num:%d\n", info->sst_num);
     for (i = 0; i < info->sst_num; i++) {
-        dt_info(TAG, "|--sub stream:%d index:%d id:%d fmt:%s lang:%s \n", i, info->sstreams[i]->index, info->sstreams[i]->id, dt_sfmt2str(info->sstreams[i]->format), info->sstreams[i]->language);
+        dt_info(TAG, "|--sub stream:%d index:%d id:%d fmt:%d lang:%s \n", i, info->sstreams[i]->index, info->sstreams[i]->id, info->sstreams[i]->format, info->sstreams[i]->language);
         dt_info(TAG, "|--width:%d height:%d \n", info->sstreams[i]->width, info->sstreams[i]->height);
     }
     dt_info(TAG, "|==================================================|\n");
@@ -186,7 +191,7 @@ DEMUXER_SELECT:
         return -1;
     }
     dt_info(TAG, "demuxer open ok\n");
-    dt_media_info_t *info = &(dem_ctx->media_info);
+    dtp_media_info_t *info = &(dem_ctx->media_info);
     wrapper->setup_info(wrapper, info);
     dump_media_info(info);
     dt_info(TAG, "demuxer setup info ok\n");
@@ -212,36 +217,37 @@ int demuxer_close(dtdemuxer_context_t * dem_ctx)
     demuxer_wrapper_t *wrapper = dem_ctx->demuxer;
     wrapper->close(wrapper);
     /*free media info */
-    dt_media_info_t *info = &(dem_ctx->media_info);
+    dtp_media_info_t *info = &(dem_ctx->media_info);
+    track_info_t *tracks = &(info->tracks);
     if (info->has_audio)
-        for (i = 0; i < info->ast_num; i++) {
-            if (info->astreams[i] == NULL) {
+        for (i = 0; i < tracks->ast_num; i++) {
+            if (tracks->astreams[i] == NULL) {
                 continue;
             }
-            if (info->astreams[i]->extradata_size) {
-                free(info->astreams[i]->extradata);
+            if (tracks->astreams[i]->extradata_size) {
+                free(tracks->astreams[i]->extradata);
             }
-            free(info->astreams[i]);
-            info->astreams[i] = NULL;
+            free(tracks->astreams[i]);
+            tracks->astreams[i] = NULL;
         }
     if (info->has_video)
-        for (i = 0; i < info->vst_num; i++) {
-            if (info->vstreams[i] == NULL) {
+        for (i = 0; i < tracks->vst_num; i++) {
+            if (tracks->vstreams[i] == NULL) {
                 continue;
             }
-            free(info->vstreams[i]);
-            info->vstreams[i] = NULL;
+            free(tracks->vstreams[i]);
+            tracks->vstreams[i] = NULL;
         }
     if (info->has_sub)
-        for (i = 0; i < info->sst_num; i++) {
-            if (info->sstreams[i] == NULL) {
+        for (i = 0; i < tracks->sst_num; i++) {
+            if (tracks->sstreams[i] == NULL) {
                 continue;
             }
-            if (info->sstreams[i]->extradata_size) {
-                free(info->sstreams[i]->extradata);
+            if (tracks->sstreams[i]->extradata_size) {
+                free(tracks->sstreams[i]->extradata);
             }
-            free(info->sstreams[i]);
-            info->sstreams[i] = NULL;
+            free(tracks->sstreams[i]);
+            tracks->sstreams[i] = NULL;
         }
     /* release probe buf */
     buf_release(&dem_ctx->probe_buf);

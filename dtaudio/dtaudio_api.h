@@ -1,10 +1,10 @@
 #ifndef DTAUDIO_API_H
 #define DTAUDIO_API_H
 
-#include "dt_state.h"
 #include <stdint.h>
 
-#include "dtaudio_para.h"
+#include "dtp_state.h"
+#include "dtp_audio_plugin.h"
 
 int dtaudio_init(void **audio_priv, dtaudio_para_t * para, void *parent);
 int dtaudio_start(void *audio_priv);

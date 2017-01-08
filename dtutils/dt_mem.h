@@ -45,7 +45,8 @@ void *dt_malloc(size_t size);
  * be allocated.
  * @see dt_malloc()
  */
-dt_alloc_size(1, 2) static inline void *dt_malloc_array(size_t nmemb, size_t size)
+dt_alloc_size(1, 2) static inline void *dt_malloc_array(size_t nmemb,
+        size_t size)
 {
     if (!size || nmemb >= INT_MAX / size) {
         return NULL;

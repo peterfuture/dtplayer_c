@@ -1,8 +1,7 @@
 #ifndef UI_H
 #define UI_H
 
-#include "ao_wrapper.h"
-#include "vo_wrapper.h"
+#include "dtp_plugin.h"
 
 typedef enum {
     GUI_CMD_UNKOWN = -1,

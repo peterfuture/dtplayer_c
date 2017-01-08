@@ -5,7 +5,8 @@
 
 int dtstream_open(void **priv, dtstream_para_t * para, void *parent)
 {
-    dtstream_context_t *ctx = (dtstream_context_t *)malloc(sizeof(dtstream_context_t));
+    dtstream_context_t *ctx = (dtstream_context_t *)malloc(sizeof(
+                                  dtstream_context_t));
     if (!ctx) {
         dt_error(TAG, "STREAM CTX MALLOC FAILED \n");
         return -1;

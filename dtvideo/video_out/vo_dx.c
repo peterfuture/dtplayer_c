@@ -154,7 +154,8 @@ static directx_fourcc_caps g_ddpf[] = {
 static void vo_dx_zoom_size(int rate);
 static int DxManageOverlay(void);
 
-static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
+                                LPARAM lParam)
 {
     switch (message) {
     case WM_CLOSE:
@@ -248,9 +249,11 @@ static int DxCreateWindow(void)
     }
 
     if (g_vidmode) {
-        g_hwnd = CreateWindowEx(WS_EX_TOPMOST, WND_CLASSNAME, "", WS_POPUP, CW_USEDEFAULT, CW_USEDEFAULT, 100, 100, NULL, NULL, hInstance, NULL);
+        g_hwnd = CreateWindowEx(WS_EX_TOPMOST, WND_CLASSNAME, "", WS_POPUP,
+                                CW_USEDEFAULT, CW_USEDEFAULT, 100, 100, NULL, NULL, hInstance, NULL);
     } else {
-        g_hwnd = CreateWindowEx(0, WND_CLASSNAME, "", WS_OVERLAPPEDWINDOW | WS_SIZEBOX, CW_USEDEFAULT, CW_USEDEFAULT, 100, 100, NULL, NULL, hInstance, NULL);
+        g_hwnd = CreateWindowEx(0, WND_CLASSNAME, "", WS_OVERLAPPEDWINDOW | WS_SIZEBOX,
+                                CW_USEDEFAULT, CW_USEDEFAULT, 100, 100, NULL, NULL, hInstance, NULL);
     }
 
     SetWindowText(g_hwnd, DLP_TITLE);
@@ -268,7 +271,8 @@ static int DxCreateWindow(void)
         return FALSE;
     }
 
-    g_fs_hwnd = CreateWindow(FS_CLASSNAME, "", WS_POPUP, 0, 0, g_screen_width, g_screen_height, g_hwnd, NULL, hInstance, NULL);
+    g_fs_hwnd = CreateWindow(FS_CLASSNAME, "", WS_POPUP, 0, 0, g_screen_width,
+                             g_screen_height, g_hwnd, NULL, hInstance, NULL);
     if (NULL == g_fs_hwnd) {
         av_log(NULL, AV_LOG_ERROR, "vo_dx: create fs window: %ld\n", GetLastError());
     }
@@ -278,7 +282,8 @@ static int DxCreateWindow(void)
 
 static int DxInitDirectDraw(void)
 {
-    HRESULT(WINAPI * OurDirectDrawCreateEx)(GUID *, LPVOID *, REFIID, IUnknown FAR *);
+    HRESULT(WINAPI * OurDirectDrawCreateEx)(GUID *, LPVOID *, REFIID,
+                                            IUnknown FAR *);
 
     hddraw_dll = LoadLibrary("DDRAW.DLL");
     if (hddraw_dll == NULL) {
@@ -286,21 +291,25 @@ static int DxInitDirectDraw(void)
         return FALSE;
     }
 
-    OurDirectDrawCreateEx = (void *) GetProcAddress(hddraw_dll, "DirectDrawCreateEx");
+    OurDirectDrawCreateEx = (void *) GetProcAddress(hddraw_dll,
+                            "DirectDrawCreateEx");
     if (OurDirectDrawCreateEx == NULL) {
         FreeLibrary(hddraw_dll);
         hddraw_dll = NULL;
-        av_log(NULL, AV_LOG_ERROR, "vo_directx: ddraw.dll DirectDrawCreateEx not found\n");
+        av_log(NULL, AV_LOG_ERROR,
+               "vo_directx: ddraw.dll DirectDrawCreateEx not found\n");
         return FALSE;
     }
 
-    if (OurDirectDrawCreateEx(NULL, (VOID **) & g_lpdd, &IID_IDirectDraw7, NULL) != DD_OK) {
+    if (OurDirectDrawCreateEx(NULL, (VOID **) & g_lpdd, &IID_IDirectDraw7,
+                              NULL) != DD_OK) {
         av_log(NULL, AV_LOG_ERROR, "vo_dx: can't create draw object\n");
         return FALSE;
     }
 
     if (g_vidmode) {
-        if (IDirectDraw_SetCooperativeLevel(g_lpdd, g_hwnd, DDSCL_EXCLUSIVE | DDSCL_FULLSCREEN) != DD_OK) {
+        if (IDirectDraw_SetCooperativeLevel(g_lpdd, g_hwnd,
+                                            DDSCL_EXCLUSIVE | DDSCL_FULLSCREEN) != DD_OK) {
             av_log(NULL, AV_LOG_ERROR, "vo_dx: can't set cooperative\n");
             return FALSE;
         }
@@ -356,8 +365,10 @@ static int DxCreateOverlay(void)
     /* create double buffer overlay */
     ZeroMemory(&ddsdOverlay, sizeof(ddsdOverlay));
     ddsdOverlay.dwSize = sizeof(ddsdOverlay);
-    ddsdOverlay.ddsCaps.dwCaps = DDSCAPS_OVERLAY | DDSCAPS_FLIP | DDSCAPS_COMPLEX | DDSCAPS_VIDEOMEMORY;
-    ddsdOverlay.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH | DDSD_BACKBUFFERCOUNT | DDSD_PIXELFORMAT;
+    ddsdOverlay.ddsCaps.dwCaps = DDSCAPS_OVERLAY | DDSCAPS_FLIP | DDSCAPS_COMPLEX |
+                                 DDSCAPS_VIDEOMEMORY;
+    ddsdOverlay.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH |
+                          DDSD_BACKBUFFERCOUNT | DDSD_PIXELFORMAT;
     ddsdOverlay.dwWidth = g_image_width;
     ddsdOverlay.dwHeight = g_image_height;
     ddsdOverlay.dwBackBufferCount = 1;
@@ -365,13 +376,16 @@ static int DxCreateOverlay(void)
     /* try every pixfmt */
     for (i = 0; i < NUM_FORMATS; i++) {
         ddsdOverlay.ddpfPixelFormat = g_ddpf[i].g_ddpfOverlay;
-        if (IDirectDraw_CreateSurface(g_lpdd, &ddsdOverlay, &g_lpddsOverlay, NULL) == DD_OK) {
+        if (IDirectDraw_CreateSurface(g_lpdd, &ddsdOverlay, &g_lpddsOverlay,
+                                      NULL) == DD_OK) {
             g_image_format = g_ddpf[i].img_format;
-            av_log(NULL, AV_LOG_INFO, "vo_dx: overlay with format %s created\n", g_ddpf[i].img_format_name);
+            av_log(NULL, AV_LOG_INFO, "vo_dx: overlay with format %s created\n",
+                   g_ddpf[i].img_format_name);
 
             /* get the surface directly attached to the primary (the back buffer) */
             ddsdOverlay.ddsCaps.dwCaps = DDSCAPS_BACKBUFFER;
-            if (IDirectDrawSurface_GetAttachedSurface(g_lpddsOverlay, &ddsdOverlay.ddsCaps, &g_lpddsBack) != DD_OK) {
+            if (IDirectDrawSurface_GetAttachedSurface(g_lpddsOverlay, &ddsdOverlay.ddsCaps,
+                    &g_lpddsBack) != DD_OK) {
                 av_log(NULL, AV_LOG_ERROR, "vo_dx: can't get back surface from overlay\n");
                 return FALSE;
             }
@@ -390,9 +404,11 @@ static int DxCreateOverlay(void)
     /* try every pixfmt */
     for (i = 0; i < NUM_FORMATS; i++) {
         ddsdOverlay.ddpfPixelFormat = g_ddpf[i].g_ddpfOverlay;
-        if (DD_OK == g_lpdd->lpVtbl->CreateSurface(g_lpdd, &ddsdOverlay, &g_lpddsOverlay, NULL)) {
+        if (DD_OK == g_lpdd->lpVtbl->CreateSurface(g_lpdd, &ddsdOverlay,
+                &g_lpddsOverlay, NULL)) {
             g_image_format = g_ddpf[i].img_format;
-            av_log(NULL, AV_LOG_INFO, "vo_dx: overlay with format %s created\n", g_ddpf[i].img_format_name);
+            av_log(NULL, AV_LOG_INFO, "vo_dx: overlay with format %s created\n",
+                   g_ddpf[i].img_format_name);
             break;
         }
     }
@@ -437,19 +453,26 @@ static int DxGetCaps(void)
     }
 
     if (capsDrv.dwCaps & DDCAPS_OVERLAYSTRETCH) {
-        g_StretchFactor1000 = capsDrv.dwMinOverlayStretch > 1000 ? capsDrv.dwMinOverlayStretch : 1000;
+        g_StretchFactor1000 = capsDrv.dwMinOverlayStretch > 1000 ?
+                              capsDrv.dwMinOverlayStretch : 1000;
     } else {
         g_StretchFactor1000 = 1000;
     }
 
     av_log(NULL, AV_LOG_INFO, "StretchFactor1000: %u\n", g_StretchFactor1000);
 
-    g_align_src = (capsDrv.dwCaps & DDCAPS_ALIGNSIZESRC) ? capsDrv.dwAlignSizeSrc : 0;
-    g_align_dst = (capsDrv.dwCaps & DDCAPS_ALIGNSIZEDEST) ? capsDrv.dwAlignSizeDest : 0;
-    g_boundary_src = (capsDrv.dwCaps & DDCAPS_ALIGNBOUNDARYSRC) ? capsDrv.dwAlignBoundarySrc : 0;
-    g_boundary_dst = (capsDrv.dwCaps & DDCAPS_ALIGNBOUNDARYDEST) ? capsDrv.dwAlignBoundaryDest : 0;
+    g_align_src = (capsDrv.dwCaps & DDCAPS_ALIGNSIZESRC) ? capsDrv.dwAlignSizeSrc :
+                  0;
+    g_align_dst = (capsDrv.dwCaps & DDCAPS_ALIGNSIZEDEST) ?
+                  capsDrv.dwAlignSizeDest : 0;
+    g_boundary_src = (capsDrv.dwCaps & DDCAPS_ALIGNBOUNDARYSRC) ?
+                     capsDrv.dwAlignBoundarySrc : 0;
+    g_boundary_dst = (capsDrv.dwCaps & DDCAPS_ALIGNBOUNDARYDEST) ?
+                     capsDrv.dwAlignBoundaryDest : 0;
 
-    av_log(NULL, AV_LOG_INFO, "align_src: %u, align_dst: %u, bd_src: %u, db_dst: %u\n", g_align_src, g_align_dst, g_boundary_src, g_boundary_dst);
+    av_log(NULL, AV_LOG_INFO,
+           "align_src: %u, align_dst: %u, bd_src: %u, db_dst: %u\n", g_align_src,
+           g_align_dst, g_boundary_src, g_boundary_dst);
 
     g_allow_shrink_x = capsDrv.dwFXCaps & DDFXCAPS_OVERLAYSHRINKX;
     g_allow_shrink_y = capsDrv.dwFXCaps & DDFXCAPS_OVERLAYSHRINKY;
@@ -463,7 +486,8 @@ static int DxGetCaps(void)
 
 static void vo_dx_zoom_size(int rate)
 {
-    if (g_image_width * rate > g_screen_width || g_image_height * rate > g_screen_height) {
+    if (g_image_width * rate > g_screen_width
+        || g_image_height * rate > g_screen_height) {
         av_log(NULL, AV_LOG_INFO, "vo dx: zoom %d will > fullscrren\n", rate);
         return;
     }
@@ -536,7 +560,8 @@ static int DxManageOverlay(void)
         rd.bottom = rd.top + g_image_height;
     }
 
-    SetWindowPos(g_hwnd, HWND_TOPMOST, rd.left, rd.top, rd.right - rd.left, rd.bottom - rd.top, SWP_NOOWNERZORDER);
+    SetWindowPos(g_hwnd, HWND_TOPMOST, rd.left, rd.top, rd.right - rd.left,
+                 rd.bottom - rd.top, SWP_NOOWNERZORDER);
     ShowWindow(g_hwnd, SW_SHOW);
 
     /* --------- setup update flags --------- */
@@ -550,11 +575,13 @@ static int DxManageOverlay(void)
         dwUpdateFlags |= DDOVER_KEYDESTOVERRIDE;
     }
 
-    ddrval = IDirectDrawSurface_UpdateOverlay(g_lpddsOverlay, &rs, g_lpddsPrimary, &rd, dwUpdateFlags, &ovfx);
+    ddrval = IDirectDrawSurface_UpdateOverlay(g_lpddsOverlay, &rs, g_lpddsPrimary,
+             &rd, dwUpdateFlags, &ovfx);
     /*ok we can't do anything about it -> hide overlay */
     if (ddrval != DD_OK) {
         av_log(NULL, AV_LOG_ERROR, "update overlay faild , hide overlay\n");
-        IDirectDrawSurface_UpdateOverlay(g_lpddsOverlay, NULL, g_lpddsPrimary, NULL, DDOVER_HIDE, NULL);
+        IDirectDrawSurface_UpdateOverlay(g_lpddsOverlay, NULL, g_lpddsPrimary, NULL,
+                                         DDOVER_HIDE, NULL);
         return FALSE;
     }
     return TRUE;
@@ -584,12 +611,14 @@ static void flip_page(void)
         memset(&ddbltfx, 0, sizeof(DDBLTFX));
         ddbltfx.dwSize = sizeof(DDBLTFX);
         ddbltfx.dwDDFX = DDBLTFX_NOTEARING;
-        IDirectDrawSurface_Blt(g_lpddsPrimary, &rd, g_lpddsBack, NULL, DDBLT_WAIT, &ddbltfx);
+        IDirectDrawSurface_Blt(g_lpddsPrimary, &rd, g_lpddsBack, NULL, DDBLT_WAIT,
+                               &ddbltfx);
     }
 
     memset(&ddsd, 0, sizeof(DDSURFACEDESC2));
     ddsd.dwSize = sizeof(DDSURFACEDESC2);
-    if (IDirectDrawSurface_Lock(g_lpddsBack, NULL, &ddsd, DDLOCK_NOSYSLOCK | DDLOCK_WAIT, NULL) == DD_OK) {
+    if (IDirectDrawSurface_Lock(g_lpddsBack, NULL, &ddsd,
+                                DDLOCK_NOSYSLOCK | DDLOCK_WAIT, NULL) == DD_OK) {
         if (tmp_image) {
             free(tmp_image);
             tmp_image = NULL;
@@ -598,7 +627,8 @@ static void flip_page(void)
         g_image = ddsd.lpSurface;
     } else {
         if (!tmp_image) {
-            av_log(NULL, AV_LOG_INFO, "Locking the surface failed, rendering to a hidden surface!\n");
+            av_log(NULL, AV_LOG_INFO,
+                   "Locking the surface failed, rendering to a hidden surface!\n");
             tmp_image = g_image = calloc(1, g_image_height * g_dstride * 2);
         }
     }
@@ -702,7 +732,8 @@ static int vo_dx_init(void)
 
     memset(&ddsd, 0, sizeof(DDSURFACEDESC2));
     ddsd.dwSize = sizeof(DDSURFACEDESC2);
-    if (IDirectDrawSurface_Lock(g_lpddsBack, NULL, &ddsd, DDLOCK_NOSYSLOCK | DDLOCK_WAIT, NULL) != DD_OK) {
+    if (IDirectDrawSurface_Lock(g_lpddsBack, NULL, &ddsd,
+                                DDLOCK_NOSYSLOCK | DDLOCK_WAIT, NULL) != DD_OK) {
         av_log(NULL, AV_LOG_ERROR, "Lock Back Buffer step\n");
         return -1;
     }
@@ -712,7 +743,8 @@ static int vo_dx_init(void)
 
     /* -------- create picture ----------------- */
     my_pic = av_mallocz(sizeof(AVPicture));
-    if (-1 == avpicture_alloc(my_pic, g_image_format, g_image_width, g_image_height)) {
+    if (-1 == avpicture_alloc(my_pic, g_image_format, g_image_width,
+                              g_image_height)) {
         av_log(NULL, AV_LOG_ERROR, "avpicture alloc error\n");
         return -1;
     }
@@ -725,9 +757,12 @@ static int vo_dx_vfmt2rgb(AVPicture * dst, AVPicture * src)
 {
     static struct SwsContext *img_convert_ctx;
 
-    img_convert_ctx = sws_getCachedContext(img_convert_ctx, dlpctxp->pwidth, dlpctxp->pheight, dlpctxp->pixfmt, dlpctxp->pwidth, dlpctxp->pheight, g_image_format, 0, NULL, NULL, NULL);
+    img_convert_ctx = sws_getCachedContext(img_convert_ctx, dlpctxp->pwidth,
+                                           dlpctxp->pheight, dlpctxp->pixfmt, dlpctxp->pwidth, dlpctxp->pheight,
+                                           g_image_format, 0, NULL, NULL, NULL);
 
-    sws_scale(img_convert_ctx, src->data, src->linesize, 0, dlpctxp->pheight, dst->data, dst->linesize);
+    sws_scale(img_convert_ctx, src->data, src->linesize, 0, dlpctxp->pheight,
+              dst->data, dst->linesize);
 
     return 0;
 }

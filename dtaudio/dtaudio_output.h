@@ -1,10 +1,45 @@
 #ifndef DTAUDIO_OUTPUT_H
 #define DTAUDIO_OUTPUT_H
 
-#include "ao_wrapper.h"
+#include "dtp_plugin.h"
 
 #define LOG_TAG "DTAUDIO-OUTPUT"
 #define PCM_WRITE_SIZE 10 // ms
+
+#define dtao_format_t ao_id_t
+
+typedef enum {
+    AO_STATUS_IDLE,
+    AO_STATUS_PAUSE,
+    AO_STATUS_RUNNING,
+    AO_STATUS_EXIT,
+} ao_status_t;
+
+typedef enum _AO_CTL_ID_ {
+    AO_GET_VOLUME,
+    AO_ADD_VOLUME,
+    AO_SUB_VOLUME,
+    AO_CMD_PAUSE,
+    AO_CMD_RESUME,
+} ao_cmd_t;
+
+typedef struct {
+    int aout_buf_size;
+    int aout_buf_level;
+} ao_state_t;
+
+typedef struct dtaudio_output {
+    /*para */
+    dtaudio_para_t para;
+    ao_wrapper_t *wrapper;
+    ao_status_t status;
+    pthread_t output_thread_pid;
+    ao_state_t state;
+
+    int64_t last_valid_latency;
+    void *parent;               //point to dtaudio_t, can used for param of pcm get interface
+    void *ao_priv;
+} dtaudio_output_t;
 
 void aout_register_all();
 void aout_remove_all();

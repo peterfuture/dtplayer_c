@@ -42,7 +42,8 @@ int sdl2_init(int w, int h)
     ctx->dh = h;
 
     //sdl create win here, For audio only file need a sdl window to contrl too
-    ctx->win = SDL_CreateWindow("dtplayer", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, ctx->dw, ctx->dh, flags);
+    ctx->win = SDL_CreateWindow("dtplayer", SDL_WINDOWPOS_UNDEFINED,
+                                SDL_WINDOWPOS_UNDEFINED, ctx->dw, ctx->dh, flags);
     if (ctx->win == NULL) {
         dt_error(TAG, "SDL_CreateWindow Error:%s \n", SDL_GetError());
         return 1;
@@ -156,7 +157,8 @@ static int vo_sdl2_render(dtvideo_output_t *vout, dt_av_frame_t * pict)
         ctx->ren = SDL_CreateRenderer(ctx->win, -1, 0);
     }
     if (!ctx->tex) {
-        ctx->tex = SDL_CreateTexture(ctx->ren, SDL_PIXELFORMAT_RGB565, SDL_TEXTUREACCESS_STATIC, ctx->dw, ctx->dh);
+        ctx->tex = SDL_CreateTexture(ctx->ren, SDL_PIXELFORMAT_RGB565,
+                                     SDL_TEXTUREACCESS_STATIC, ctx->dw, ctx->dh);
     }
     //ctx->tex = SDL_CreateTexture(ctx->ren,SDL_PIXELFORMAT_RGB24,SDL_TEXTUREACCESS_STATIC,ctx->dw,ctx->dh);
     //ctx->tex = SDL_CreateTexture(ctx->ren,SDL_PIXELFORMAT_YV12,SDL_TEXTUREACCESS_STREAMING,ctx->dw,ctx->dh);

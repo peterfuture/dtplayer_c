@@ -31,18 +31,22 @@ int port_init(dtport_context_t * pctx, dtport_para_t * para)
     if (para->has_audio) {
         ret = packet_queue_init(&(pctx->queue_audio));
         if (ret < 0) {
-            dt_info(TAG, "[%s:%d] port  init audio queeu failed has_audio:%d\n", __FUNCTION__, __LINE__, pctx->param.has_audio);
+            dt_info(TAG, "[%s:%d] port  init audio queeu failed has_audio:%d\n",
+                    __FUNCTION__, __LINE__, pctx->param.has_audio);
             goto ERR0;
         }
-        dt_info(TAG, "[%s:%d] port start init audio queeu has_audio:%d\n", __FUNCTION__, __LINE__, pctx->param.has_audio);
+        dt_info(TAG, "[%s:%d] port start init audio queeu has_audio:%d\n", __FUNCTION__,
+                __LINE__, pctx->param.has_audio);
 
     }
     if (para->has_video) {
-        dt_info(TAG, "[%s:%d] port start init video queeu has_video:%d\n", __FUNCTION__, __LINE__, pctx->param.has_video);
+        dt_info(TAG, "[%s:%d] port start init video queeu has_video:%d\n", __FUNCTION__,
+                __LINE__, pctx->param.has_video);
         packet_queue_init(&(pctx->queue_video));
     }
     if (para->has_subtitle) {
-        dt_info(TAG, "[%s:%d] port start init sub queeu has_sub:%d\n", __FUNCTION__, __LINE__, pctx->param.has_subtitle);
+        dt_info(TAG, "[%s:%d] port start init sub queeu has_sub:%d\n", __FUNCTION__,
+                __LINE__, pctx->param.has_subtitle);
         packet_queue_init(&(pctx->queue_subtitle));
     }
     return ret;
@@ -74,13 +78,13 @@ int port_write_frame(dtport_context_t * pctx, dt_av_pkt_t * frame, int type)
 
     dt_packet_queue_t *queue;
     switch (type) {
-    case DT_TYPE_AUDIO:
+    case DTP_MEDIA_TYPE_AUDIO:
         queue = &pctx->queue_audio;
         break;
-    case DT_TYPE_VIDEO:
+    case DTP_MEDIA_TYPE_VIDEO:
         queue = &pctx->queue_video;
         break;
-    case DT_TYPE_SUBTITLE:
+    case DTP_MEDIA_TYPE_SUBTITLE:
         queue = &pctx->queue_subtitle;
         break;
     default:
@@ -88,7 +92,8 @@ int port_write_frame(dtport_context_t * pctx, dt_av_pkt_t * frame, int type)
         return -1;
     }
 
-    dt_debug(TAG, "[%s:%d] start write frame type:%d NB_packet:%d queue->size:%d\n", __FUNCTION__, __LINE__, type, queue->nb_packets, queue->size);
+    dt_debug(TAG, "[%s:%d] start write frame type:%d NB_packet:%d queue->size:%d\n",
+             __FUNCTION__, __LINE__, type, queue->nb_packets, queue->size);
 
     return packet_queue_put(queue, frame);
 }
@@ -97,20 +102,21 @@ int port_read_frame(dtport_context_t * pctx, dt_av_pkt_t * frame, int type)
 {
     dt_packet_queue_t *queue;
     switch (type) {
-    case DT_TYPE_AUDIO:
+    case DTP_MEDIA_TYPE_AUDIO:
         queue = &pctx->queue_audio;
         break;
-    case DT_TYPE_VIDEO:
+    case DTP_MEDIA_TYPE_VIDEO:
         queue = &pctx->queue_video;
         break;
-    case DT_TYPE_SUBTITLE:
+    case DTP_MEDIA_TYPE_SUBTITLE:
         queue = &pctx->queue_subtitle;
         break;
     default:
         dt_warning(TAG, "[%s] unkown frame type audio or video \n", __FUNCTION__);
         return -1;
     }
-    dt_debug(TAG, "[%s:%d]READ FRAME START, start read frame type:%d nb:%d\n", __FUNCTION__, __LINE__, type, queue->nb_packets);
+    dt_debug(TAG, "[%s:%d]READ FRAME START, start read frame type:%d nb:%d\n",
+             __FUNCTION__, __LINE__, type, queue->nb_packets);
     int ret = packet_queue_get(queue, frame);
     dt_debug(TAG, "[%s:%d]READ FRAME END \n", __FUNCTION__, __LINE__);
     return ret;
@@ -121,20 +127,21 @@ int port_get_state(dtport_context_t * pctx, buf_state_t * buf_state, int type)
 {
     dt_packet_queue_t *queue;
     switch (type) {
-    case DT_TYPE_AUDIO:
+    case DTP_MEDIA_TYPE_AUDIO:
         queue = &pctx->queue_audio;
         break;
-    case DT_TYPE_VIDEO:
+    case DTP_MEDIA_TYPE_VIDEO:
         queue = &pctx->queue_video;
         break;
-    case DT_TYPE_SUBTITLE:
+    case DTP_MEDIA_TYPE_SUBTITLE:
         queue = &pctx->queue_subtitle;
         break;
     default:
         dt_warning(TAG, "[%s] unkown frame type audio or video \n", __FUNCTION__);
         return -1;
     }
-    dt_debug(TAG, "[%s:%d] start read status type:%d nb packets:%d\n", __FUNCTION__, __LINE__, type, queue->nb_packets);
+    dt_debug(TAG, "[%s:%d] start read status type:%d nb packets:%d\n", __FUNCTION__,
+             __LINE__, type, queue->nb_packets);
     buf_state->data_len = queue->size;
     buf_state->size = queue->nb_packets;
     return 0;

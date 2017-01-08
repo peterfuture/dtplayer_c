@@ -35,7 +35,8 @@ static void register_sf(sf_wrapper_t * sf)
         p = &(*p)->next;
     }
     *p = sf;
-    dt_info(TAG, "[%s:%d] register internal sf, name:%s \n", __FUNCTION__, __LINE__, (*p)->name);
+    dt_info(TAG, "[%s:%d] register internal sf, name:%s \n", __FUNCTION__, __LINE__,
+            (*p)->name);
     sf->next = NULL;
     return;
 }
@@ -56,7 +57,8 @@ void sf_register_ext(sf_wrapper_t *sf)
         sf->next = *p;
         *p = sf;
     }
-    dt_info(TAG, "[%s:%d]register external sf. name:%s \n", __FUNCTION__, __LINE__, sf->name);
+    dt_info(TAG, "[%s:%d]register external sf. name:%s \n", __FUNCTION__, __LINE__,
+            sf->name);
     return;
 }
 
@@ -106,7 +108,8 @@ static int select_sf(dtsub_filter_t *filter, sf_cap_t cap)
 
     filter->wrapper = sf;
     if (sf) {
-        dt_info(TAG, "[%s:%d] %s sub filter selected \n", __FUNCTION__, __LINE__, g_sf->name);
+        dt_info(TAG, "[%s:%d] %s sub filter selected \n", __FUNCTION__, __LINE__,
+                g_sf->name);
     } else {
         dt_info(TAG, "[%s:%d] No sub filter selected \n", __FUNCTION__, __LINE__);
     }

@@ -102,7 +102,7 @@ int video_output_stop(dtvideo_output_t * vo)
     vo_wrapper_t *wrapper = vo->wrapper;
     vo->status = VO_STATUS_EXIT;
     pthread_join(vo->output_thread_pid, NULL);
-    wrapper->vo_stop(vo);
+    wrapper->stop(wrapper);
     dt_info(TAG, "[%s:%d] vout stop ok \n", __FUNCTION__, __LINE__);
     return 0;
 }
@@ -165,6 +165,15 @@ static void dump_frame(dt_av_frame_t * pFrame, int index)
     fwrite(pFrame->data[2], 1, pFrame->linesize[2] * height / 3, pFile);
 #endif
     fclose(pFile);  // close
+}
+
+static void dtav_clear_frame(void *pic)
+{
+    dt_av_frame_t *picture = (dt_av_frame_t *)(pic);
+    if (picture->data) {
+        free(picture->data[0]);
+    }
+    return;
 }
 
 //output one frame to output gragh
@@ -238,14 +247,16 @@ static void *video_output_thread(void *args)
             int64_t step = llabs(picture_pre->pts - vctx->last_valid_pts);
             if (step >= DT_SYNC_DISCONTINUE_THRESHOLD) {
                 video_discontinue = 1;
-                dt_info(TAG, "video discontinue occured, step:%lld(%d ms) \n", step, (int)(step / DT_PTS_FREQ_MS));
+                dt_info(TAG, "video discontinue occured, step:%lld(%d ms) \n", step,
+                        (int)(step / DT_PTS_FREQ_MS));
             }
         }
 
         if (video_discontinue == 0) { // if discontinue, display directly
             //maybe need to block
             if (sys_clock < picture_pre->pts) {
-                dt_debug(TAG, "[%s:%d] not to show ! pts:%lld systime:%lld  \n", __FUNCTION__, __LINE__, picture_pre->pts, sys_clock);
+                dt_debug(TAG, "[%s:%d] not to show ! pts:%lld systime:%lld  \n", __FUNCTION__,
+                         __LINE__, picture_pre->pts, sys_clock);
                 dt_usleep(REFRESH_DURATION);
                 continue;
             }
@@ -273,12 +284,14 @@ static void *video_output_thread(void *args)
             picture_pre = (dt_av_frame_t *) dtvideo_output_pre_read(vo->parent);
             if (picture_pre) {
                 if (picture_pre->pts == -1) {
-                    dt_debug(TAG, "can not get vpts from frame,estimate using fps:%f  \n", vo->para->fps);
-                    picture_pre->pts = vctx->current_pts + 90000 / vo->para->fps;
+                    dt_debug(TAG, "can not get vpts from frame,estimate using fps:%f  \n",
+                             vo->para.fps);
+                    picture_pre->pts = vctx->current_pts + 90000 / vo->para.fps;
                 }
 
                 if (sys_clock >= picture_pre->pts) {
-                    dt_info(TAG, "drop frame,sys clock:%lld thispts:%lld next->pts:%lld \n", sys_clock, picture->pts, picture_pre->pts);
+                    dt_info(TAG, "drop frame,sys clock:%lld thispts:%lld next->pts:%lld \n",
+                            sys_clock, picture->pts, picture_pre->pts);
                     dtvideo_update_pts(vo->parent);  // drop means not render, but need update vpts
                     dtav_clear_frame(pic);
                     free(picture);
@@ -288,7 +301,7 @@ static void *video_output_thread(void *args)
         }
 RENDER:
         /*display picture & update vpts */
-        ret = wrapper->vo_render(vo, pic);
+        ret = wrapper->render(wrapper, pic);
         if (ret < 0) {
             dt_error(TAG, "frame toggle failed! \n");
             usleep(1000);
@@ -307,7 +320,8 @@ RENDER:
         //dt_usleep (REFRESH_DURATION);
     }
 EXIT:
-    dt_info(TAG, "[file:%s][%s:%d]ao playback thread exit\n", __FILE__, __FUNCTION__, __LINE__);
+    dt_info(TAG, "[file:%s][%s:%d]ao playback thread exit\n", __FILE__,
+            __FUNCTION__, __LINE__);
     pthread_exit(NULL);
     return NULL;
 }
@@ -323,17 +337,20 @@ int video_output_init(dtvideo_output_t * vo, int vo_id)
         return -1;
     }
     vo_wrapper_t *wrapper = vo->wrapper;
-    wrapper->vo_init(vo);
+    memcpy(&wrapper->para, &vo->para, sizeof(dtvideo_para_t));
+    wrapper->init(wrapper);
     dt_info(TAG, "[%s:%d] video output init success\n", __FUNCTION__, __LINE__);
 
     /*start aout pthread */
     ret = pthread_create(&tid, NULL, video_output_thread, (void *) vo);
     if (ret != 0) {
-        dt_error(TAG, "[%s:%d] create video output thread failed\n", __FUNCTION__, __LINE__);
+        dt_error(TAG, "[%s:%d] create video output thread failed\n", __FUNCTION__,
+                 __LINE__);
         return ret;
     }
     vo->output_thread_pid = tid;
-    dt_info(TAG, "[%s:%d] create video output thread success\n", __FUNCTION__, __LINE__);
+    dt_info(TAG, "[%s:%d] create video output thread success\n", __FUNCTION__,
+            __LINE__);
     return 0;
 }
 

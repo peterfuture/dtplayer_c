@@ -4,7 +4,7 @@
 **  Summary: sub parser with ffmpeg
 **  Section: dtsub
 **  Author : peter
-**  Notes  : 
+**  Notes  :
 **
 ***********************************************************************/
 

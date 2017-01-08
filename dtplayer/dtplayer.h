@@ -1,17 +1,17 @@
 #ifndef DTPLAYER_H
 #define DTPLAYER_H
 
-#include "dtplayer_api.h"
-#include "dt_media_info.h"
-#include "dthost_api.h"
-#include "dt_av.h"
-#include "dt_event.h"
-
 #include <pthread.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+
+
+#include "dt_utils.h"
+
+#include "dtp.h"
+#include "dthost_api.h"
 
 typedef struct {
     int status;                 // 0 start 1 pause 2 quit
@@ -50,14 +50,15 @@ typedef struct dtplayer_context {
     dtplayer_para_t player_para;
 
     void *demuxer_priv;
-    dt_media_info_t *media_info;
+    dtp_media_info_t *media_info;
 
     player_ctrl_t ctrl_info;
     dthost_para_t host_para;
     void *host_priv;
 
-    player_state_t state;
-    int (*update_cb)(void *cookie, player_state_t * state);  // update player info to uplevel
+    dtp_state_t state;
+    int (*update_cb)(void *cookie,
+                     dtp_state_t * state);  // update player info to uplevel
 
     io_loop_t io_loop;
     pthread_t event_loop_id;
@@ -76,7 +77,8 @@ int player_start(dtplayer_context_t * dtp_ctx);
 int player_pause(dtplayer_context_t * dtp_ctx);
 int player_resume(dtplayer_context_t * dtp_ctx);
 int player_seekto(dtplayer_context_t * dtp_ctx, int seek_time); //s
-int player_get_mediainfo(dtplayer_context_t * dtp_ctx, dt_media_info_t *info); //s
+int player_get_mediainfo(dtplayer_context_t * dtp_ctx,
+                         dtp_media_info_t *info); //s
 int player_stop(dtplayer_context_t * dtp_ctx);
 int player_video_resize(dtplayer_context_t * dtp_ctx, int w, int h);
 

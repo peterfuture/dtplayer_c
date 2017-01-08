@@ -1,11 +1,14 @@
-#include "dtstream.h"
-#include "dt_lock.h"
-#include "dt_error.h"
-
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+
+#include "dt_utils.h"
+#include "dt_macro.h"
+#include "dt_error.h"
+#include "dt_setting.h"
+
+#include "dtstream.h"
 
 #define TAG "STREAM-CACHE"
 
@@ -76,7 +79,8 @@ static stream_cache_t * create_cache(int size, float pre)
     //cache->post_size = size * post;
 
     dt_lock_init(&cache->mutex, NULL);
-    dt_info(TAG, "Create cache ok, total:%d fixpresize:%d pre:%f \n", cache->total_size, cache->fix_pre_size, pre);
+    dt_info(TAG, "Create cache ok, total:%d fixpresize:%d pre:%f \n",
+            cache->total_size, cache->fix_pre_size, pre);
     return cache;
 ERR1:
     free(cache);
@@ -135,7 +139,8 @@ static int cache_write(stream_cache_t *cache, uint8_t *in, int size)
 
     if (cache->wp < cache->rp) {
         if (cache->wp + len >= cache->pre_rp) {
-            dt_info(TAG, "[%s:%d]need to move pre from %d to %d \n", __FUNCTION__, __LINE__, cache->pre_rp, cache->wp + len);
+            dt_info(TAG, "[%s:%d]need to move pre from %d to %d \n", __FUNCTION__, __LINE__,
+                    cache->pre_rp, cache->wp + len);
             cache->pre_rp = cache->wp + len;
             cache->pre_size = cache->rp - cache->pre_rp;
         }
@@ -145,7 +150,8 @@ static int cache_write(stream_cache_t *cache, uint8_t *in, int size)
     } else if (len <= (int)(cache->total_size - cache->wp)) {
         if (cache->pre_rp > cache->rp) {
             if ((cache->wp + len) > cache->pre_rp) {
-                dt_info(TAG, "[%s:%d]need to move pre from %d to %d \n", __FUNCTION__, __LINE__, cache->pre_rp, cache->wp + len);
+                dt_info(TAG, "[%s:%d]need to move pre from %d to %d \n", __FUNCTION__, __LINE__,
+                        cache->pre_rp, cache->wp + len);
                 cache->pre_rp = cache->wp + len;
                 cache->pre_size = cache->rp + cache->total_size - cache->pre_size;
             }
@@ -164,11 +170,13 @@ static int cache_write(stream_cache_t *cache, uint8_t *in, int size)
         int tail_len = (int)(cache->total_size - cache->wp);
         memcpy(cache->data + cache->wp, in, tail_len);
         if (cache->pre_rp > cache->rp) {
-            dt_info(TAG, "[%s:%d]need to move pre from %d to %d \n", __FUNCTION__, __LINE__, cache->pre_rp, cache->wp + len);
+            dt_info(TAG, "[%s:%d]need to move pre from %d to %d \n", __FUNCTION__, __LINE__,
+                    cache->pre_rp, cache->wp + len);
             cache->pre_rp = len - tail_len;
             cache->pre_size = cache->rp - cache->pre_rp;
         } else if (cache->pre_rp < (len - tail_len)) {
-            dt_info(TAG, "[%s:%d]need to move pre from %d to %d \n", __FUNCTION__, __LINE__, cache->pre_rp, cache->wp + len);
+            dt_info(TAG, "[%s:%d]need to move pre from %d to %d \n", __FUNCTION__, __LINE__,
+                    cache->pre_rp, cache->wp + len);
             cache->pre_rp = len - tail_len;
             cache->pre_size = cache->rp - cache->pre_rp;
         }
@@ -200,13 +208,17 @@ static int cache_seek(stream_cache_t *cache, int step, int orig)
 
     if (!orig) { // seek backward
         if (cache->pre_size < step) { // seek out of bound, failed
-            dt_info(TAG, "[%s:%d]rp:%d wp:%d pre_rp:%d level:%d pre_size:%d \n", __FUNCTION__, __LINE__, cache->rp, cache->wp, cache->pre_rp, cache->level, cache->pre_size);
+            dt_info(TAG, "[%s:%d]rp:%d wp:%d pre_rp:%d level:%d pre_size:%d \n",
+                    __FUNCTION__, __LINE__, cache->rp, cache->wp, cache->pre_rp, cache->level,
+                    cache->pre_size);
             ret = -1;
             goto QUIT;
         }
 
         if (cache->pre_rp < cache->rp) {
-            dt_info(TAG, "[%s:%d]rp:%d wp:%d pre_rp:%d level:%d pre_size:%d \n", __FUNCTION__, __LINE__, cache->rp, cache->wp, cache->pre_rp, cache->level, cache->pre_size);
+            dt_info(TAG, "[%s:%d]rp:%d wp:%d pre_rp:%d level:%d pre_size:%d \n",
+                    __FUNCTION__, __LINE__, cache->rp, cache->wp, cache->pre_rp, cache->level,
+                    cache->pre_size);
             cache->rp -= step;
             cache->pre_size -= step;
             cache->level += step;
@@ -215,13 +227,17 @@ static int cache_seek(stream_cache_t *cache, int step, int orig)
 
         if (cache->pre_rp > cache->rp) {
             if (cache->rp > step) {
-                dt_info(TAG, "[%s:%d]rp:%d wp:%d pre_rp:%d level:%d pre_size:%d \n", __FUNCTION__, __LINE__, cache->rp, cache->wp, cache->pre_rp, cache->level, cache->pre_size);
+                dt_info(TAG, "[%s:%d]rp:%d wp:%d pre_rp:%d level:%d pre_size:%d \n",
+                        __FUNCTION__, __LINE__, cache->rp, cache->wp, cache->pre_rp, cache->level,
+                        cache->pre_size);
                 cache->rp -= step;
                 cache->pre_size -= step;
                 cache->level += step;
                 goto QUIT;
             } else {
-                dt_info(TAG, "[%s:%d]rp:%d wp:%d pre_rp:%d level:%d pre_size:%d \n", __FUNCTION__, __LINE__, cache->rp, cache->wp, cache->pre_rp, cache->level, cache->pre_size);
+                dt_info(TAG, "[%s:%d]rp:%d wp:%d pre_rp:%d level:%d pre_size:%d \n",
+                        __FUNCTION__, __LINE__, cache->rp, cache->wp, cache->pre_rp, cache->level,
+                        cache->pre_size);
                 int left = step - cache->rp;
                 cache->rp = cache->total_size - left;
                 cache->pre_size -= step;
@@ -236,13 +252,17 @@ static int cache_seek(stream_cache_t *cache, int step, int orig)
 
     if (orig) {
         if (cache->level < step) { // seek out of bound, failed
-            dt_info(TAG, "[%s:%d]rp:%d wp:%d pre_rp:%d level:%d pre_size:%d \n", __FUNCTION__, __LINE__, cache->rp, cache->wp, cache->pre_rp, cache->level, cache->pre_size);
+            dt_info(TAG, "[%s:%d]rp:%d wp:%d pre_rp:%d level:%d pre_size:%d \n",
+                    __FUNCTION__, __LINE__, cache->rp, cache->wp, cache->pre_rp, cache->level,
+                    cache->pre_size);
             ret = -1;
             goto QUIT;
         }
 
         if (cache->rp < cache->wp) {
-            dt_info(TAG, "[%s:%d]rp:%d wp:%d pre_rp:%d level:%d pre_size:%d \n", __FUNCTION__, __LINE__, cache->rp, cache->wp, cache->pre_rp, cache->level, cache->pre_size);
+            dt_info(TAG, "[%s:%d]rp:%d wp:%d pre_rp:%d level:%d pre_size:%d \n",
+                    __FUNCTION__, __LINE__, cache->rp, cache->wp, cache->pre_rp, cache->level,
+                    cache->pre_size);
             cache->rp += step;
             cache->pre_size += step;
             cache->level -= step;
@@ -251,13 +271,17 @@ static int cache_seek(stream_cache_t *cache, int step, int orig)
 
         if (cache->rp > cache->wp) {
             if ((cache->total_size - cache->rp) > step) {
-                dt_info(TAG, "[%s:%d]rp:%d wp:%d pre_rp:%d level:%d pre_size:%d \n", __FUNCTION__, __LINE__, cache->rp, cache->wp, cache->pre_rp, cache->level, cache->pre_size);
+                dt_info(TAG, "[%s:%d]rp:%d wp:%d pre_rp:%d level:%d pre_size:%d \n",
+                        __FUNCTION__, __LINE__, cache->rp, cache->wp, cache->pre_rp, cache->level,
+                        cache->pre_size);
                 cache->rp += step;
                 cache->pre_size += step;
                 cache->level -= step;
                 goto QUIT;
             } else {
-                dt_info(TAG, "[%s:%d]rp:%d wp:%d pre_rp:%d level:%d pre_size:%d \n", __FUNCTION__, __LINE__, cache->rp, cache->wp, cache->pre_rp, cache->level, cache->pre_size);
+                dt_info(TAG, "[%s:%d]rp:%d wp:%d pre_rp:%d level:%d pre_size:%d \n",
+                        __FUNCTION__, __LINE__, cache->rp, cache->wp, cache->pre_rp, cache->level,
+                        cache->pre_size);
                 int left = step - (cache->total_size - cache->rp);
                 cache->rp = left;
                 cache->pre_size += step;
@@ -329,7 +353,8 @@ static int create_cache_thread(cache_ctx_t * ctx)
     ctx->cache_flag = ST_FLAG_NULL;
     int ret = pthread_create(&tid, NULL, (void *) &cache_thread, (void *)ctx);
     if (ret != 0) {
-        dt_error(TAG, "file:%s [%s:%d] data fill thread crate failed \n", __FILE__, __FUNCTION__, __LINE__);
+        dt_error(TAG, "file:%s [%s:%d] data fill thread crate failed \n", __FILE__,
+                 __FUNCTION__, __LINE__);
         return -1;
     }
     ctx->cache_tid = tid;
@@ -471,7 +496,8 @@ static int stream_cache_open(stream_wrapper_t * wrapper, char *stream_name)
     //start read thread
     ret = create_cache_thread(ctx);
     if (ret == -1) {
-        dt_error(TAG, "file:%s [%s:%d] data fill thread start failed \n", __FILE__, __FUNCTION__, __LINE__);
+        dt_error(TAG, "file:%s [%s:%d] data fill thread start failed \n", __FILE__,
+                 __FUNCTION__, __LINE__);
         goto ERR3;
     }
     return DTERROR_NONE;
@@ -510,7 +536,8 @@ static int stream_cache_read(stream_wrapper_t * wrapper, uint8_t *buf, int len)
     return r;
 }
 
-static int stream_cache_seek(stream_wrapper_t * wrapper, int64_t pos, int whence)
+static int stream_cache_seek(stream_wrapper_t * wrapper, int64_t pos,
+                             int whence)
 {
     int ret = 0;
     cache_ctx_t *ctx = (cache_ctx_t *)wrapper->stream_priv;
@@ -539,7 +566,8 @@ static int stream_cache_seek(stream_wrapper_t * wrapper, int64_t pos, int whence
         dt_info(TAG, "cache seek success \n");
     } else { // seek through real stream ops
         pause_cache_thread(ctx);
-        ret = real_st->seek(real_st, pos, whence); // fixme: seek maybe failed for online video
+        ret = real_st->seek(real_st, pos,
+                            whence); // fixme: seek maybe failed for online video
         if (ret != DTERROR_NONE) {
             dt_error(TAG, "SEEK FAILED \n");
         }

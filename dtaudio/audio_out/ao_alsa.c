@@ -1,5 +1,8 @@
-#include "../dtaudio_output.h"
 #include <alsa/asoundlib.h>
+
+#include "dt_utils.h"
+
+#include "dtaudio_output.h"
 
 #define TAG "AUDIO-OUT-ALSA"
 
@@ -75,7 +78,8 @@ static int ao_alsa_init(dtaudio_output_t *aout, dtaudio_para_t *para)
         return -1;
     }
 
-    err = snd_pcm_hw_params_set_access(alsa_handle, alsa_hwparams, SND_PCM_ACCESS_RW_INTERLEAVED);
+    err = snd_pcm_hw_params_set_access(alsa_handle, alsa_hwparams,
+                                       SND_PCM_ACCESS_RW_INTERLEAVED);
     if (err < 0) {
         dt_error(TAG, "%s,%d: %s\n", __func__, __LINE__, snd_strerror(err));
         return -1;
@@ -87,7 +91,8 @@ static int ao_alsa_init(dtaudio_output_t *aout, dtaudio_para_t *para)
         return -1;
     }
 
-    err = snd_pcm_hw_params_set_channels_near(alsa_handle, alsa_hwparams, &channels);
+    err = snd_pcm_hw_params_set_channels_near(alsa_handle, alsa_hwparams,
+            &channels);
     if (err < 0) {
         dt_error(TAG, "%s,%d: %s\n", __func__, __LINE__, snd_strerror(err));
         return -1;
@@ -125,7 +130,8 @@ static int ao_alsa_init(dtaudio_output_t *aout, dtaudio_para_t *para)
     }
     ctx->trunk_size = size * bytes_per_sample;
 
-    dt_info(TAG, "outburst: %d, bytes_per_sample: %d, buffersize: %d\n", ctx->trunk_size, bytes_per_sample, ctx->buf_size);
+    dt_info(TAG, "outburst: %d, bytes_per_sample: %d, buffersize: %d\n",
+            ctx->trunk_size, bytes_per_sample, ctx->buf_size);
 
     /******************************************************************
     * set sw params
@@ -145,7 +151,8 @@ static int ao_alsa_init(dtaudio_output_t *aout, dtaudio_para_t *para)
         dt_error(TAG, "%s,%d: %s\n", __func__, __LINE__, snd_strerror(err));
         return -1;
     }
-    err = snd_pcm_sw_params_set_stop_threshold(alsa_handle, alsa_swparams, boundary);
+    err = snd_pcm_sw_params_set_stop_threshold(alsa_handle, alsa_swparams,
+            boundary);
     if (err < 0) {
         dt_error(TAG, "%s,%d: %s\n", __func__, __LINE__, snd_strerror(err));
         return -1;
@@ -168,7 +175,8 @@ static int ao_alsa_init(dtaudio_output_t *aout, dtaudio_para_t *para)
 
     //buf size limit
     ctx->buf_threshold = bytes_per_sample * sr * DEFAULT_TIME_SIZE / 1000;
-    dt_info(TAG, "alsa audio init ok! outburst:%d thres:%d \n", ctx->trunk_size, ctx->buf_threshold);
+    dt_info(TAG, "alsa audio init ok! outburst:%d thres:%d \n", ctx->trunk_size,
+            ctx->buf_threshold);
     ctx->handle = alsa_handle;
     ctx->channels = wrapper->para.dst_channels;
     ctx->bps = wrapper->para.bps;
@@ -202,7 +210,8 @@ static int ao_alsa_play(dtaudio_output_t *aout, uint8_t * buf, int size)
     }
 
     if (ao_alsa_level(aout) >= ctx->buf_threshold) {
-        dt_debug(TAG, "ALSA EXCEED THRESHOLD,size:%d  thres:%d \n", ao_alsa_level(aout), ctx->buf_threshold);
+        dt_debug(TAG, "ALSA EXCEED THRESHOLD,size:%d  thres:%d \n", ao_alsa_level(aout),
+                 ctx->buf_threshold);
         return 0;
     }
 
@@ -262,7 +271,8 @@ static int ao_alsa_pause(dtaudio_output_t *aout)
     int ret = 0;
     if (ctx->pause_support == 1) {
         ret = snd_pcm_pause(handle, 1);
-        dt_info(TAG, "ALSA PAUSED SUPPORT PAUSE DIRECTLY  ret:%d status:%d\n", ret, snd_pcm_state(handle));
+        dt_info(TAG, "ALSA PAUSED SUPPORT PAUSE DIRECTLY  ret:%d status:%d\n", ret,
+                snd_pcm_state(handle));
     } else {
         snd_pcm_drop(handle);
     }
@@ -278,7 +288,8 @@ static int ao_alsa_resume(dtaudio_output_t *aout)
     int ret = 0;
     if (ctx->pause_support == 1) {
         ret = snd_pcm_pause(handle, 0);
-        dt_info(TAG, "ALSA PAUSED SUPPORT RESUME DIRECTLY  ret:%d status:%d \n", ret, snd_pcm_state(handle));
+        dt_info(TAG, "ALSA PAUSED SUPPORT RESUME DIRECTLY  ret:%d status:%d \n", ret,
+                snd_pcm_state(handle));
     } else {
         snd_pcm_prepare(handle);
     }
@@ -294,13 +305,17 @@ static int64_t ao_alsa_get_latency(dtaudio_output_t *aout)
     uint64_t latency, latency_s;
 
     ctx->buf_level = ctx->buf_size - ao_alsa_space(ctx);
-    sample_num = ctx->buf_level / (wrapper->para.dst_channels * wrapper->para.bps / 8);
+    sample_num = ctx->buf_level / (wrapper->para.dst_channels * wrapper->para.bps /
+                                   8);
 
     float pts_ratio = (double) 90000 / wrapper->para.samplerate;
     latency = (sample_num * pts_ratio);
     latency_s = latency / 90000;
 
-    dt_debug(TAG, "[%s:%d]==alsa_level:%d thres:%d sample_num:%d buffersize:%d latency:%llu latency_s:%llu \n", __FUNCTION__, __LINE__, ctx->buf_level, ctx->buf_threshold, sample_num, ctx->buf_size, latency, latency_s);
+    dt_debug(TAG,
+             "[%s:%d]==alsa_level:%d thres:%d sample_num:%d buffersize:%d latency:%llu latency_s:%llu \n",
+             __FUNCTION__, __LINE__, ctx->buf_level, ctx->buf_threshold, sample_num,
+             ctx->buf_size, latency, latency_s);
     return latency;
 }
 static int ao_alsa_stop(dtaudio_output_t *aout)

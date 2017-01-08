@@ -1,9 +1,10 @@
 #ifndef DTVIDEO_API_H
 #define DTVIDEO_API_H
 
-#include "dt_state.h"
 #include <stdint.h>
-#include "dtvideo_para.h"
+
+#include "dtp_state.h"
+#include "dtp_video_plugin.h"
 
 int dtvideo_init(void **video_priv, dtvideo_para_t * para, void *parent);
 int dtvideo_start(void *video_priv);

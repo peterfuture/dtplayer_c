@@ -10,13 +10,14 @@
 **
 ***********************************************************************/
 
-#include "vf_wrapper.h"
-
 #include "libavcodec/avcodec.h"
 #include "libavcodec/avcodec.h"
 #include "libswscale/swscale.h"
 #include "libavutil/imgutils.h"
 
+#include "dt_utils.h"
+#include "dtp_av.h"
+#include "dtp_vf.h"
 
 #define TAG "VF-FFMPEG"
 
@@ -37,7 +38,8 @@ typedef struct vf_ffmpeg_ctx {
 static int ffmpeg_vf_capable(vf_cap_t cap)
 {
     int ffmpeg_cap = VF_CAP_COLORSPACE_CONVERT | VF_CAP_CLIP;
-    dt_info(TAG, "request cap: %x , %s support:%x \n", cap, "ffmpeg vf", ffmpeg_cap);
+    dt_info(TAG, "request cap: %x , %s support:%x \n", cap, "ffmpeg vf",
+            ffmpeg_cap);
     return cap & ffmpeg_cap;
 }
 
@@ -46,7 +48,7 @@ static int ffmpeg_vf_capable(vf_cap_t cap)
 ** Init ffmpeg filter
 **
 ***********************************************************************/
-static int ffmpeg_vf_init(dtvideo_filter_t *filter)
+static int ffmpeg_vf_init(vf_wrapper_t *wrapper)
 {
     int ret = -1; // -1 means not support or no need to process
     vf_ffmpeg_ctx_t *vf_ctx = (vf_ffmpeg_ctx_t *)malloc(sizeof(vf_ffmpeg_ctx_t));
@@ -55,7 +57,7 @@ static int ffmpeg_vf_init(dtvideo_filter_t *filter)
     }
     memset(vf_ctx, 0, sizeof(*vf_ctx));
 
-    dtvideo_para_t *para = &filter->para;
+    dtvideo_para_t *para = &wrapper->para;
     int sw = para->s_width;
     int sh = para->s_height;
     int dw = para->d_width;
@@ -63,11 +65,12 @@ static int ffmpeg_vf_init(dtvideo_filter_t *filter)
     int sf = para->s_pixfmt;
     int df = para->d_pixfmt;
     vf_ctx->need_process = !(sw == dw && sh == dh && sf == df);
-    dt_info(TAG, "[%s:%d] sw:%d dw:%d sh:%d dh:%d sf:%d df:%d need_process:%d \n", __FUNCTION__, __LINE__, sw, dw, sh, dh, sf, df, vf_ctx->need_process);
+    dt_info(TAG, "[%s:%d] sw:%d dw:%d sh:%d dh:%d sf:%d df:%d need_process:%d \n",
+            __FUNCTION__, __LINE__, sw, dw, sh, dh, sf, df, vf_ctx->need_process);
 
-    filter->vf_priv = vf_ctx;
+    wrapper->vf_priv = vf_ctx;
     if (vf_ctx->need_process) {
-        vf_ctx->swap_frame = dtav_new_frame();
+        vf_ctx->swap_frame = (dt_av_frame_t *)malloc(sizeof(dt_av_frame_t));
         ret = 0;
     }
 
@@ -80,13 +83,13 @@ static int ffmpeg_vf_init(dtvideo_filter_t *filter)
 ** Process one frame with ffmpeg-libavfilter
 **
 ***********************************************************************/
-static int convert_picture(dtvideo_filter_t * filter, dt_av_frame_t * src)
+static int convert_picture(vf_wrapper_t * wrapper, dt_av_frame_t * src)
 {
     uint8_t *buffer;
     int buffer_size;
 
-    vf_ffmpeg_ctx_t *vf_ctx = (vf_ffmpeg_ctx_t *)(filter->vf_priv);
-    dtvideo_para_t *para = &filter->para;
+    vf_ffmpeg_ctx_t *vf_ctx = (vf_ffmpeg_ctx_t *)(wrapper->vf_priv);
+    dtvideo_para_t *para = &wrapper->para;
     int sw = para->s_width;
     int dw = para->d_width;
     int sh = para->s_height;
@@ -95,12 +98,13 @@ static int convert_picture(dtvideo_filter_t * filter, dt_av_frame_t * src)
     int df = para->d_pixfmt;
 
     if (!vf_ctx->swap_frame) {
-        vf_ctx->swap_frame = dtav_new_frame();
+        vf_ctx->swap_frame = (dt_av_frame_t *)malloc(sizeof(dt_av_frame_t));
     }
 
     dt_av_frame_t *pict = vf_ctx->swap_frame;
     if (!pict) {
-        dt_error(TAG, "[%s:%d] err: swap frame malloc failed \n", __FUNCTION__, __LINE__);
+        dt_error(TAG, "[%s:%d] err: swap frame malloc failed \n", __FUNCTION__,
+                 __LINE__);
         return -1;
     }
     memset(pict, 0, sizeof(dt_av_frame_t));
@@ -117,14 +121,18 @@ static int convert_picture(dtvideo_filter_t * filter, dt_av_frame_t * src)
     buffer = vf_ctx->swapbuf;
     avpicture_fill((AVPicture *) dst, buffer, df, dw, dh);
 
-    vf_ctx->pSwsCtx = sws_getCachedContext(vf_ctx->pSwsCtx, sw, sh, sf, dw, dh, df, SWS_BICUBIC, NULL, NULL, NULL);
-    sws_scale(vf_ctx->pSwsCtx, src->data, src->linesize, 0, sh, dst->data, dst->linesize);
+    vf_ctx->pSwsCtx = sws_getCachedContext(vf_ctx->pSwsCtx, sw, sh, sf, dw, dh, df,
+                                           SWS_BICUBIC, NULL, NULL, NULL);
+    sws_scale(vf_ctx->pSwsCtx, src->data, src->linesize, 0, sh, dst->data,
+              dst->linesize);
 
     pict->pts = src->pts;
     pict->width = dw;
     pict->height = dh;
     pict->pixfmt = df;
-    dtav_unref_frame(src);
+    if (src->data) {
+        free(src->data[0]);
+    }
     memcpy(src, pict, sizeof(dt_av_frame_t));
 
     vf_ctx->swapbuf = NULL;
@@ -137,15 +145,16 @@ static int convert_picture(dtvideo_filter_t * filter, dt_av_frame_t * src)
 ** Process one frame
 **
 ***********************************************************************/
-static int ffmpeg_vf_process(dtvideo_filter_t *filter, dt_av_frame_t *frame)
+static int ffmpeg_vf_process(vf_wrapper_t *wrapper, dt_av_frame_t *frame)
 {
-    vf_ffmpeg_ctx_t *vf_ctx = (vf_ffmpeg_ctx_t *)(filter->vf_priv);
+    vf_ffmpeg_ctx_t *vf_ctx = (vf_ffmpeg_ctx_t *)(wrapper->vf_priv);
     if (vf_ctx->need_process == 0) {
-        dt_info(TAG, "[%s:%d] no need to process but called \n", __FUNCTION__, __LINE__);
+        dt_info(TAG, "[%s:%d] no need to process but called \n", __FUNCTION__,
+                __LINE__);
         return 0;
     }
 
-    int ret = convert_picture(filter, frame);
+    int ret = convert_picture(wrapper, frame);
     if (ret < 0) {
         dt_info(TAG, "[%s:%d] vf process failed \n", __FUNCTION__, __LINE__);
     }
@@ -158,9 +167,9 @@ static int ffmpeg_vf_process(dtvideo_filter_t *filter, dt_av_frame_t *frame)
 ** Release ffmpeg filter
 **
 ***********************************************************************/
-static int ffmpeg_vf_release(dtvideo_filter_t *filter)
+static int ffmpeg_vf_release(vf_wrapper_t *wrapper)
 {
-    vf_ffmpeg_ctx_t *vf_ctx = (vf_ffmpeg_ctx_t *)(filter->vf_priv);
+    vf_ffmpeg_ctx_t *vf_ctx = (vf_ffmpeg_ctx_t *)(wrapper->vf_priv);
     if (!vf_ctx) {
         return 0;
     }
@@ -178,7 +187,7 @@ static int ffmpeg_vf_release(dtvideo_filter_t *filter)
 
 vf_wrapper_t vf_ffmpeg_ops = {
     .name       = "ffmpeg video filter",
-    .type       = DT_TYPE_VIDEO,
+    .type       = DTP_MEDIA_TYPE_VIDEO,
     .capable    = ffmpeg_vf_capable,
     .init       = ffmpeg_vf_init,
     .process    = ffmpeg_vf_process,

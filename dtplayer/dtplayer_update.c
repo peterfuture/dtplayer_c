@@ -5,10 +5,11 @@
 
 #define FIRST_TIME_DIFF_MAX 2*90000 // 2s
 
-static int calc_cur_time(dtplayer_context_t * dtp_ctx, host_state_t * host_state)
+static int calc_cur_time(dtplayer_context_t * dtp_ctx,
+                         host_state_t * host_state)
 {
     player_ctrl_t *ctrl_info = &dtp_ctx->ctrl_info;
-    player_state_t *play_stat = &dtp_ctx->state;
+    dtp_state_t *play_stat = &dtp_ctx->state;
 
     int has_audio = ctrl_info->has_audio;
     int has_video = ctrl_info->has_video;
@@ -41,7 +42,9 @@ static int calc_cur_time(dtplayer_context_t * dtp_ctx, host_state_t * host_state
             ctrl_info->first_time = host_state->sys_time_current;
         }
 
-        dt_info(TAG, "[apts_first:0x%llx] [vpts_first:0x%llx] [starttime:0x%llx] -> first_time:0x%llx \n", apts_first, vpts_first, play_stat->start_time, ctrl_info->first_time);
+        dt_info(TAG,
+                "[apts_first:0x%llx] [vpts_first:0x%llx] [starttime:0x%llx] -> first_time:0x%llx \n",
+                apts_first, vpts_first, play_stat->start_time, ctrl_info->first_time);
     }
 
     if (play_stat->full_time == 0) {
@@ -63,10 +66,12 @@ static int calc_cur_time(dtplayer_context_t * dtp_ctx, host_state_t * host_state
     int discontinue_flag = 0;
 
     if (has_audio && has_video) {
-        if (audio_discontinue_flag && video_discontinue_flag) { // both discontinue occured
+        if (audio_discontinue_flag
+            && video_discontinue_flag) { // both discontinue occured
             play_stat->discontinue_point_ms = play_stat->cur_time_ms;
             if (avdiff < AVSYNC_THRESHOLD_MAX) {
-                player_host_set_info(dtp_ctx, HOST_CMD_SET_DISCONTINUE_FLAG, (unsigned long)(&discontinue_flag));
+                player_host_set_info(dtp_ctx, HOST_CMD_SET_DISCONTINUE_FLAG,
+                                     (unsigned long)(&discontinue_flag));
             }
             sys_time = pts_video_current;
             if (audio_discontinue_point > 0) {
@@ -74,7 +79,8 @@ static int calc_cur_time(dtplayer_context_t * dtp_ctx, host_state_t * host_state
             }
         } else if (audio_discontinue_flag) { // only audio discontinue occured
             if (avdiff < AVSYNC_THRESHOLD_MAX) {
-                player_host_set_info(dtp_ctx, HOST_CMD_SET_DISCONTINUE_FLAG, (unsigned long)(&discontinue_flag));
+                player_host_set_info(dtp_ctx, HOST_CMD_SET_DISCONTINUE_FLAG,
+                                     (unsigned long)(&discontinue_flag));
             }
             sys_time = pts_video_current;
             if (video_discontinue_point > 0) {
@@ -82,7 +88,8 @@ static int calc_cur_time(dtplayer_context_t * dtp_ctx, host_state_t * host_state
             }
         } else if (video_discontinue_flag) { // only video discontinue occured
             if (avdiff < AVSYNC_THRESHOLD_MAX) {
-                player_host_set_info(dtp_ctx, HOST_CMD_SET_DISCONTINUE_FLAG, (unsigned long)(&discontinue_flag));
+                player_host_set_info(dtp_ctx, HOST_CMD_SET_DISCONTINUE_FLAG,
+                                     (unsigned long)(&discontinue_flag));
             }
             sys_time = pts_audio_current;
             if (audio_discontinue_point > 0) {
@@ -109,9 +116,14 @@ static int calc_cur_time(dtplayer_context_t * dtp_ctx, host_state_t * host_state
     play_stat->cur_time_ms = sys_time / DT_PTS_FREQ_MS;
 
     dt_debug(TAG, "---------------------------------------------\n");
-    dt_debug(TAG, "apts:%llx audio_discontinue_flag:%d audio_discontinue_point:%llx\n", pts_audio_current, audio_discontinue_flag, audio_discontinue_point);
-    dt_debug(TAG, "vpts:%llx video_discontinue_flag:%d video_discontinue_point:%llx\n", pts_video_current, video_discontinue_flag, video_discontinue_point);
-    dt_debug(TAG, "sys_time:%llx start_time:%llx\n", (sys_time - play_stat->discontinue_point_ms * DT_PTS_FREQ_MS), start_time);
+    dt_debug(TAG,
+             "apts:%llx audio_discontinue_flag:%d audio_discontinue_point:%llx\n",
+             pts_audio_current, audio_discontinue_flag, audio_discontinue_point);
+    dt_debug(TAG,
+             "vpts:%llx video_discontinue_flag:%d video_discontinue_point:%llx\n",
+             pts_video_current, video_discontinue_flag, video_discontinue_point);
+    dt_debug(TAG, "sys_time:%llx start_time:%llx\n",
+             (sys_time - play_stat->discontinue_point_ms * DT_PTS_FREQ_MS), start_time);
     dt_debug(TAG, "---------------------------------------------\n");
 
     return 0;
@@ -122,7 +134,7 @@ static int calc_cur_time(dtplayer_context_t * dtp_ctx, host_state_t * host_state
  * */
 int player_handle_cb(dtplayer_context_t * dtp_ctx)
 {
-    player_state_t *state = &dtp_ctx->state;
+    dtp_state_t *state = &dtp_ctx->state;
     if (dtp_ctx->update_cb) {
         dtp_ctx->update_cb(dtp_ctx->cookie, state);
     }
@@ -132,7 +144,7 @@ int player_handle_cb(dtplayer_context_t * dtp_ctx)
 
 void player_update_state(dtplayer_context_t * dtp_ctx)
 {
-    player_state_t *play_stat = &dtp_ctx->state;
+    dtp_state_t *play_stat = &dtp_ctx->state;
     host_state_t host_state;
 
     /*update host state */
@@ -141,5 +153,9 @@ void player_update_state(dtplayer_context_t * dtp_ctx)
     calc_cur_time(dtp_ctx, &host_state);
 
     /*show info */
-    dt_info(TAG, "[%s:%d]alevel:%d vlevel:%d slevel:%d cur_time:%lld(s) %lld(ms) duration:%lld(s) \n", __FUNCTION__, __LINE__, host_state.abuf_level, host_state.vbuf_level, host_state.sbuf_level, play_stat->cur_time, play_stat->cur_time_ms, dtp_ctx->media_info->duration);
+    dt_info(TAG,
+            "[%s:%d]alevel:%d vlevel:%d slevel:%d cur_time:%lld(s) %lld(ms) duration:%lld(s) \n",
+            __FUNCTION__, __LINE__, host_state.abuf_level, host_state.vbuf_level,
+            host_state.sbuf_level, play_stat->cur_time, play_stat->cur_time_ms,
+            dtp_ctx->media_info->duration);
 }

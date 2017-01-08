@@ -2,8 +2,8 @@
 #define VD_WRAPPER_H
 
 #include "dt_buffer.h"
-#include "dt_av.h"
-#include "dtvideo_para.h"
+#include "dtp_av.h"
+#include "dtp_video_plugin.h"
 
 struct dtvideo_decoder;
 
@@ -22,7 +22,8 @@ typedef struct vd_wrapper {
     int is_hw;
 
     int (*init)(struct dtvideo_decoder *decoder);
-    int (*decode_frame)(struct dtvideo_decoder *decoder, dt_av_pkt_t * frame, dt_av_frame_t ** pic);
+    int (*decode_frame)(struct dtvideo_decoder *decoder, dt_av_pkt_t * frame,
+                        dt_av_frame_t ** pic);
     int (*info_changed)(struct dtvideo_decoder *decoder);
     int (*release)(struct dtvideo_decoder *decoder);
 

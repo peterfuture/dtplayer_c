@@ -21,7 +21,8 @@ int dtport_init(void **port, dtport_para_t * para, void *parent)
     int ret;
     dtport_context_t *pctx = malloc(sizeof(dtport_context_t));
     if (!pctx) {
-        dt_error(TAG, "[%s:%d] dtport_context_t malloc failed \n", __FUNCTION__, __LINE__);
+        dt_error(TAG, "[%s:%d] dtport_context_t malloc failed \n", __FUNCTION__,
+                 __LINE__);
         ret = -1;
         goto ERR0;
     }

@@ -145,7 +145,8 @@ int dt_ini_open(char *file)
     return ret;
 }
 
-static int get_keyval(const char * section, const char *key, char *out, struct entry *list)
+static int get_keyval(const char * section, const char *key, char *out,
+                      struct entry *list)
 {
     struct entry *e = NULL;
     char Text[255];
@@ -214,7 +215,6 @@ static int get_keyval(const char * section, const char *key, char *out, struct e
 int dt_ini_get_entry(char *section, char *key, char *val)
 {
     struct ini_context *ctx = I;
-    int ret = 0;
     if (!ctx) {
         return -1;
     }
@@ -229,6 +229,7 @@ int dt_ini_release()
     entry_free(I->list);
     free(I);
     I = NULL;
+    return 0;
 }
 
 static void debug_list_entry(struct entry *list)

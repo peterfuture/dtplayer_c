@@ -1,11 +1,12 @@
-#include "../dtaudio_decoder.h"
-
 //include ffmpeg header
 #include "libavformat/avformat.h"
 #include "libavcodec/avcodec.h"
 //#include "libavresample/avresample.h"
 #include "libswscale/swscale.h"
 #include "libswresample/swresample.h"
+
+#include "dtaudio.h"
+#include "dtaudio_decoder.h"
 
 #define TAG "AUDIO-DECODER-FFMPEG"
 static AVFrame *frame;
@@ -65,8 +66,11 @@ int ffmpeg_adec_init(ad_wrapper_t *wrapper, void *parent)
         return -1;
     }
     enum AVCodecID id = avctxp->codec_id;
-    dt_info(TAG, "[%s:%d] param-- src channel:%d sample:%d id:%d format:%d \n", __FUNCTION__, __LINE__, avctxp->channels, avctxp->sample_rate, id, decoder->para.afmt);
-    dt_info(TAG, "[%s:%d] param-- dst channels:%d samplerate:%d \n", __FUNCTION__, __LINE__, decoder->para.dst_channels, decoder->para.dst_samplerate);
+    dt_info(TAG, "[%s:%d] param-- src channel:%d sample:%d id:%d format:%d \n",
+            __FUNCTION__, __LINE__, avctxp->channels, avctxp->sample_rate, id,
+            decoder->para.afmt);
+    dt_info(TAG, "[%s:%d] param-- dst channels:%d samplerate:%d \n", __FUNCTION__,
+            __LINE__, decoder->para.dst_channels, decoder->para.dst_samplerate);
     codec = avcodec_find_decoder(id);
     if (NULL == codec) {
         dt_error(TAG, "[%s:%d] video codec find failed \n", __FUNCTION__, __LINE__);
@@ -83,7 +87,8 @@ int ffmpeg_adec_init(ad_wrapper_t *wrapper, void *parent)
     return 0;
 }
 
-static void audio_convert(dtaudio_decoder_t *decoder, AVFrame * dst, AVFrame * src)
+static void audio_convert(dtaudio_decoder_t *decoder, AVFrame * dst,
+                          AVFrame * src)
 {
     int nb_sample;
     int dst_buf_size;
@@ -104,14 +109,16 @@ static void audio_convert(dtaudio_decoder_t *decoder, AVFrame * dst, AVFrame * s
     dst_buf_size = nb_sample * av_get_bytes_per_sample(dst_fmt) * out_channels;
     dst->data[0] = (uint8_t *) av_malloc(dst_buf_size);
 
-    avcodec_fill_audio_frame(dst, out_channels, dst_fmt, dst->data[0], dst_buf_size, 0);
+    avcodec_fill_audio_frame(dst, out_channels, dst_fmt, dst->data[0], dst_buf_size,
+                             0);
     dt_debug(TAG, "SRCFMT:%d dst_fmt:%d \n", src_fmt, dst_fmt);
     /* resample toAV_SAMPLE_FMT_S16 */
     if (src_fmt != dst_fmt || out_channels != decoder->para.channels) {
         if (!m_swr_ctx) {
             uint64_t in_channel_layout = av_get_default_channel_layout(avctxp->channels);
             uint64_t out_channel_layout = av_get_default_channel_layout(out_channels);
-            m_swr_ctx = swr_alloc_set_opts(NULL, out_channel_layout, dst_fmt, avctxp->sample_rate, in_channel_layout, src_fmt, avctxp->sample_rate, 0, NULL);
+            m_swr_ctx = swr_alloc_set_opts(NULL, out_channel_layout, dst_fmt,
+                                           avctxp->sample_rate, in_channel_layout, src_fmt, avctxp->sample_rate, 0, NULL);
             swr_init(m_swr_ctx);
         }
         uint8_t **out = (uint8_t **) & dst->data;
@@ -152,9 +159,11 @@ int ffmpeg_adec_decode(ad_wrapper_t *wrapper, adec_ctrl_t *pinfo)
 
     dtaudio_decoder_t *decoder = (dtaudio_decoder_t *)wrapper->parent;
     memset(&frame_tmp, 0, sizeof(frame_tmp));
-    dt_debug(TAG, "start decode size:%d %02x %02x \n", pkt.size, pkt.data[0], pkt.data[1]);
+    dt_debug(TAG, "start decode size:%d %02x %02x \n", pkt.size, pkt.data[0],
+             pkt.data[1]);
     ret = avcodec_decode_audio4(avctxp, frame, &got_samples, &pkt);
-    dt_debug(TAG, "start decode size:%d %02x %02x %02x %02x \n", pkt.size, pkt.data[0], pkt.data[1], pkt.data[2], pkt.data[3]);
+    dt_debug(TAG, "start decode size:%d %02x %02x %02x %02x \n", pkt.size,
+             pkt.data[0], pkt.data[1], pkt.data[2], pkt.data[3]);
     if (ret < 0) {
         dt_error(TAG, "decode failed ret:%d \n", ret);
         goto EXIT;
@@ -165,7 +174,8 @@ int ffmpeg_adec_decode(ad_wrapper_t *wrapper, adec_ctrl_t *pinfo)
         pinfo->outlen = 0;
         goto EXIT;
     }
-    data_size = av_samples_get_buffer_size(frame->linesize, avctxp->channels, frame->nb_samples, avctxp->sample_fmt, 1);
+    data_size = av_samples_get_buffer_size(frame->linesize, avctxp->channels,
+                                           frame->nb_samples, avctxp->sample_fmt, 1);
     if (data_size > 0) {
         audio_convert(decoder, &frame_tmp, frame);
         //out frame too large, realloc out buf
@@ -177,7 +187,8 @@ int ffmpeg_adec_decode(ad_wrapper_t *wrapper, adec_ctrl_t *pinfo)
         memcpy(pinfo->outptr, frame_tmp.data[0], frame_tmp.linesize[0]);
         pinfo->outlen = frame_tmp.linesize[0];
     } else {
-        dt_error(TAG, "data_size invalid: size:%d outlen:%d \n", data_size, pinfo->outlen);
+        dt_error(TAG, "data_size invalid: size:%d outlen:%d \n", data_size,
+                 pinfo->outlen);
         pinfo->outlen = 0;
     }
 
@@ -200,7 +211,7 @@ int ffmpeg_adec_release(ad_wrapper_t *wrapper)
 ad_wrapper_t ad_ffmpeg_ops = {
     .name = "ffmpeg audio decoder",
     .afmt = DT_AUDIO_FORMAT_UNKOWN, //support all afmt
-    .type = DT_TYPE_AUDIO,
+    .type = DTP_MEDIA_TYPE_AUDIO,
     .init = ffmpeg_adec_init,
     .decode_frame = ffmpeg_adec_decode,
     .release = ffmpeg_adec_release,

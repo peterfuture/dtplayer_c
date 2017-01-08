@@ -1,9 +1,15 @@
-#include "dtdemuxer.h"
-
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "dt_error.h"
+#include "dt_macro.h"
+#include "dt_rw.h"
+
+#include "dtstream_api.h"
+#include "dtdemuxer.h"
+#include "demuxer_wrapper.h"
 
 #define TAG "DEMUXER-AAC"
 
@@ -110,7 +116,8 @@ static int aac_parse_frame(uint8_t *buf, int *srate, int *num)
     }
     *srate = srates[sr];
 
-    fl = ((buf[i + 3] & 0x03) << 11) | (buf[i + 4] << 3) | ((buf[i + 5] >> 5) & 0x07);
+    fl = ((buf[i + 3] & 0x03) << 11) | (buf[i + 4] << 3) | ((
+                buf[i + 5] >> 5) & 0x07);
     *num = (buf[i + 6] & 0x02) + 1;
 
     return fl;
@@ -222,7 +229,8 @@ static int estimate_duration(demuxer_wrapper_t *wrapper)
             aac_ctx->size += len;
             aac_ctx->time += tm;
             aac_ctx->bitrate = (int)(aac_ctx->size / aac_ctx->time);
-            dt_debug(TAG, "READ ONE FRAME: len:%d size:%llu time:%f bit:%d\n", len, aac_ctx->size, aac_ctx->time, aac_ctx->bitrate);
+            dt_debug(TAG, "READ ONE FRAME: len:%d size:%llu time:%f bit:%d\n", len,
+                     aac_ctx->size, aac_ctx->time, aac_ctx->bitrate);
             buf2 += len - 8;
         } else {
             buf2 -= 6;
@@ -231,8 +239,10 @@ static int estimate_duration(demuxer_wrapper_t *wrapper)
     aac_ctx->last_pts = 0;
     aac_ctx->size = 0;
     aac_ctx->time = 0;
-    aac_ctx->duration = (aac_ctx->file_size > 0) ? (aac_ctx->file_size / aac_ctx->bitrate) : -1;
-    dt_info(TAG, "AAC ESTIMATE DURATION:bitrate:%d duration:%d \n", aac_ctx->bitrate, aac_ctx->duration);
+    aac_ctx->duration = (aac_ctx->file_size > 0) ? (aac_ctx->file_size /
+                        aac_ctx->bitrate) : -1;
+    dt_info(TAG, "AAC ESTIMATE DURATION:bitrate:%d duration:%d \n",
+            aac_ctx->bitrate, aac_ctx->duration);
     return 0;
 }
 
@@ -266,11 +276,12 @@ static int demuxer_aac_open(demuxer_wrapper_t *wrapper)
     return 0;
 }
 
-static int demuxer_aac_setup_info(demuxer_wrapper_t * wrapper, dt_media_info_t * info)
+static int demuxer_aac_setup_info(demuxer_wrapper_t * wrapper,
+                                  dtp_media_info_t * info)
 {
     dtdemuxer_context_t *ctx = (dtdemuxer_context_t *)(wrapper->parent);
     aac_ctx_t *aac_ctx = (aac_ctx_t *)wrapper->demuxer_priv;
-
+    track_info_t *tracks = &info->tracks;
     /*reset vars */
     memset(info, 0, sizeof(*info));
     //set cur stream index -1 ,other vars have been reset to 0
@@ -279,8 +290,8 @@ static int demuxer_aac_setup_info(demuxer_wrapper_t * wrapper, dt_media_info_t *
     info->cur_sst_index = -1;
 
     /*get media info */
-    info->format = DT_MEDIA_FORMAT_AAC;
-    strcpy(info->file_name, ctx->file_name);
+    info->format = DTP_MEDIA_FORMAT_AAC;
+    info->file = ctx->file_name;
     info->bit_rate = aac_ctx->bitrate;
     info->duration = aac_ctx->duration;
     info->file_size = aac_ctx->file_size;
@@ -298,15 +309,16 @@ static int demuxer_aac_setup_info(demuxer_wrapper_t * wrapper, dt_media_info_t *
     ast_info->bit_rate = aac_ctx->bitrate;
     ast_info->format = DT_AUDIO_FORMAT_AAC;
     ast_info->codec_priv = NULL;
-    info->astreams[info->ast_num] = ast_info;
-    info->ast_num++;
+    tracks->astreams[tracks->ast_num] = ast_info;
+    tracks->ast_num++;
 
     info->has_audio = 1;
     info->cur_ast_index = 0;
     return 0;
 }
 
-static int demuxer_aac_read_frame(demuxer_wrapper_t *wrapper, dt_av_pkt_t *frame)
+static int demuxer_aac_read_frame(demuxer_wrapper_t *wrapper,
+                                  dt_av_pkt_t *frame)
 {
     dtdemuxer_context_t *dem_ctx = (dtdemuxer_context_t *) wrapper->parent;
     aac_ctx_t *aac_ctx = (aac_ctx_t *)wrapper->demuxer_priv;
@@ -359,9 +371,10 @@ static int demuxer_aac_read_frame(demuxer_wrapper_t *wrapper, dt_av_pkt_t *frame
             aac_ctx->size += len;
             aac_ctx->time += tm;
             aac_ctx->bitrate = (int)(aac_ctx->size / aac_ctx->time);
-            dt_debug(TAG, "READ ONE FRAME: len:%d size:%llu time:%f bit:%d pts:%f \n", len, aac_ctx->size, aac_ctx->time, aac_ctx->bitrate, aac_ctx->last_pts);
+            dt_debug(TAG, "READ ONE FRAME: len:%d size:%llu time:%f bit:%d pts:%f \n", len,
+                     aac_ctx->size, aac_ctx->time, aac_ctx->bitrate, aac_ctx->last_pts);
             //setup frame
-            frame->type = DT_TYPE_AUDIO;
+            frame->type = DTP_MEDIA_TYPE_AUDIO;
             frame->data = data;
             frame->size = len;
             frame->pts = (int64_t)(aac_ctx->last_pts * 90000);

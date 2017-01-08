@@ -65,15 +65,19 @@ static int vo_x11_vfmt2rgb(AVPicture * dst, AVPicture * src)
 {
     static struct SwsContext *img_convert_ctx;
 
-    img_convert_ctx = sws_getCachedContext(img_convert_ctx, dlpctxp->pwidth, dlpctxp->pheight, src_pic_fmt, dw, dh, my_pic_fmt, SWS_BICUBIC, NULL, NULL, NULL);
+    img_convert_ctx = sws_getCachedContext(img_convert_ctx, dlpctxp->pwidth,
+                                           dlpctxp->pheight, src_pic_fmt, dw, dh, my_pic_fmt, SWS_BICUBIC, NULL, NULL,
+                                           NULL);
 
-    sws_scale(img_convert_ctx, src->data, src->linesize, 0, dh, dst->data, dst->linesize);
+    sws_scale(img_convert_ctx, src->data, src->linesize, 0, dh, dst->data,
+              dst->linesize);
 
     return 0;
 }
 
 /* Xlib font utils define */
-static XFontStruct *LoadQueryScalableFont(Display * dpy, int screen, char *name, int size)
+static XFontStruct *LoadQueryScalableFont(Display * dpy, int screen, char *name,
+        int size)
 {
     int i, j, field;
     char newname[500];          /* big enough for a long font name */
@@ -175,7 +179,8 @@ static int vo_x11_init()
     xswa.backing_store = Always;
     xswa.bit_gravity = StaticGravity;
 
-    Xvowin = XCreateWindow(Xdisplay, Xrootwin, dx, dy, dw, dh, 0, Xdepth, CopyFromParent, CopyFromParent, xswamask, &xswa);
+    Xvowin = XCreateWindow(Xdisplay, Xrootwin, dx, dy, dw, dh, 0, Xdepth,
+                           CopyFromParent, CopyFromParent, xswamask, &xswa);
 
     hint.x = dx;
     hint.y = dy;
@@ -194,12 +199,14 @@ static int vo_x11_init()
     Xvogc = XCreateGC(Xdisplay, Xrootwin, 0L, NULL);
     XSetForeground(Xdisplay, Xvogc, WhitePixel(Xdisplay, Xscreen));
 
-    Ximg = XCreateImage(Xdisplay, xvinfo.visual, Xdepth, ZPixmap, 0, NULL, dw, dh, 8, 0);
+    Ximg = XCreateImage(Xdisplay, xvinfo.visual, Xdepth, ZPixmap, 0, NULL, dw, dh,
+                        8, 0);
 
     {
         int i, fontcount;
         char **list;
-        list = XListFonts(Xdisplay, "-*-helvetica-*-*-*-*-0-0-*-*-*-0-*-*", 200, &fontcount);
+        list = XListFonts(Xdisplay, "-*-helvetica-*-*-*-*-0-0-*-*-*-0-*-*", 200,
+                          &fontcount);
         for (i = 0; i < fontcount; i++) {
             if (NULL == Xfont_120) {
                 Xfont_120 = LoadQueryScalableFont(Xdisplay, Xscreen, list[i], 120);
@@ -301,7 +308,8 @@ static void vo_x11_zoom(int mulriple)
     XSizeHints hint;
     XVisualInfo xvinfo;
 
-    if (dlpctxp->pwidth * mulriple > screen_width || dlpctxp->pheight * mulriple > screen_height) {
+    if (dlpctxp->pwidth * mulriple > screen_width
+        || dlpctxp->pheight * mulriple > screen_height) {
         av_log(NULL, AV_LOG_INFO, "vo x11: zoom %d will > fullscrren\n", mulriple);
         return;
     }
@@ -341,7 +349,8 @@ static void vo_x11_zoom(int mulriple)
     xswa.backing_store = Always;
     xswa.bit_gravity = StaticGravity;
 
-    Xvowin = XCreateWindow(Xdisplay, Xrootwin, dx, dy, dw, dh, 0, Xdepth, CopyFromParent, CopyFromParent, xswamask, &xswa);
+    Xvowin = XCreateWindow(Xdisplay, Xrootwin, dx, dy, dw, dh, 0, Xdepth,
+                           CopyFromParent, CopyFromParent, xswamask, &xswa);
 
     hint.x = dx;
     hint.y = dy;
@@ -357,7 +366,8 @@ static void vo_x11_zoom(int mulriple)
     XSelectInput(Xdisplay, Xvowin, event_mask);
     XSync(Xdisplay, False);
 
-    Ximg = XCreateImage(Xdisplay, xvinfo.visual, Xdepth, ZPixmap, 0, NULL, dw, dh, 8, 0);
+    Ximg = XCreateImage(Xdisplay, xvinfo.visual, Xdepth, ZPixmap, 0, NULL, dw, dh,
+                        8, 0);
 
     if (dw < 600) {
         Xfont = Xfont_120;
@@ -399,43 +409,43 @@ static void vo_x11_event_loop(void *arg)
         XNextEvent(Xdisplay, &event);
         switch (event.type) {
         case KeyPress: {
-            KeySym key = XKeycodeToKeysym(Xdisplay,
-                                          event.xkey.keycode, 0);
-            if (XK_Escape == key || XK_q == key) {
-                dlp_exit(-2);
-            } else if (XK_9 == key) {
-                dlp_sub_volume();
-            } else if (XK_0 == key) {
-                dlp_add_volume();
-            } else if (XK_1 == key) {
-                vo_x11_zoom(1);
-            } else if (XK_2 == key) {
-                vo_x11_zoom(2);
-            } else if (XK_3 == key) {
-                vo_x11_zoom(3);
-            } else if (XK_4 == key) {
-                vo_x11_zoom(4);
-            } else if (XK_p == key || XK_space == key) {
-                dlp_pause_play();
-            } else if (XK_Left == key) {
-                dlp_seek(-10);
-            } else if (XK_Right == key) {
-                dlp_seek(10);
-            } else if (XK_Page_Up == key) {
-                dlp_seek(-60);
-            } else if (XK_Page_Down == key) {
-                dlp_seek(60);
-            } else if (XK_h == key) {
-                show_ui_key();
-            } else if (XK_f == key) {
-                dlp_full_screen();
-            } else if (XK_s == key) {
-                dlp_screen_shot();
-            } else if (XK_o == key) {
-                dlp_show_osd(OSD_TEST);
+                KeySym key = XKeycodeToKeysym(Xdisplay,
+                                              event.xkey.keycode, 0);
+                if (XK_Escape == key || XK_q == key) {
+                    dlp_exit(-2);
+                } else if (XK_9 == key) {
+                    dlp_sub_volume();
+                } else if (XK_0 == key) {
+                    dlp_add_volume();
+                } else if (XK_1 == key) {
+                    vo_x11_zoom(1);
+                } else if (XK_2 == key) {
+                    vo_x11_zoom(2);
+                } else if (XK_3 == key) {
+                    vo_x11_zoom(3);
+                } else if (XK_4 == key) {
+                    vo_x11_zoom(4);
+                } else if (XK_p == key || XK_space == key) {
+                    dlp_pause_play();
+                } else if (XK_Left == key) {
+                    dlp_seek(-10);
+                } else if (XK_Right == key) {
+                    dlp_seek(10);
+                } else if (XK_Page_Up == key) {
+                    dlp_seek(-60);
+                } else if (XK_Page_Down == key) {
+                    dlp_seek(60);
+                } else if (XK_h == key) {
+                    show_ui_key();
+                } else if (XK_f == key) {
+                    dlp_full_screen();
+                } else if (XK_s == key) {
+                    dlp_screen_shot();
+                } else if (XK_o == key) {
+                    dlp_show_osd(OSD_TEST);
+                }
+                break;
             }
-            break;
-        }
         default:
             break;
         }

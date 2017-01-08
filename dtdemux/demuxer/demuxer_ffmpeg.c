@@ -1,11 +1,14 @@
-#include "../dtdemuxer.h"
-#include "dt_error.h"
+#include <string.h>
 
 #include "libavformat/avformat.h"
 #include "libavformat/avio.h"
 #include "libavutil/dict.h"
 
-#include <string.h>
+#include "dt_error.h"
+#include "dt_setting.h"
+
+#include "dtdemuxer.h"
+#include "dtstream_api.h"
 
 #define TAG "DEMUX-FFMPEG"
 
@@ -17,32 +20,32 @@ typedef struct {
 } type_map_t;
 
 static const type_map_t media_map[] = {
-    {"mpegts", DT_MEDIA_FORMAT_MPEGTS},
-    {"mpeg", DT_MEDIA_FORMAT_MPEGPS},
-    {"rm", DT_MEDIA_FORMAT_RM},
-    {"avi", DT_MEDIA_FORMAT_AVI},
-    {"mkv", DT_MEDIA_FORMAT_MKV},
-    {"matroska", DT_MEDIA_FORMAT_MKV},
-    {"mov", DT_MEDIA_FORMAT_MOV},
-    {"mp4", DT_MEDIA_FORMAT_MP4},
-    {"flv", DT_MEDIA_FORMAT_FLV},
-    {"aac", DT_MEDIA_FORMAT_AAC},
-    {"ac3", DT_MEDIA_FORMAT_AC3},
-    {"mp3", DT_MEDIA_FORMAT_MP3},
-    {"mp2", DT_MEDIA_FORMAT_MP3},
-    {"wav", DT_MEDIA_FORMAT_WAV},
-    {"dts", DT_MEDIA_FORMAT_DTS},
-    {"flac", DT_MEDIA_FORMAT_FLAC},
-    {"h264", DT_MEDIA_FORMAT_H264},
-    {"cavs", DT_MEDIA_FORMAT_AVS},
-    {"mpegvideo", DT_MEDIA_FORMAT_M2V},
-    {"p2p", DT_MEDIA_FORMAT_P2P},
-    {"asf", DT_MEDIA_FORMAT_ASF},
-    {"m4a", DT_MEDIA_FORMAT_MP4},
-    {"m4v", DT_MEDIA_FORMAT_MP4},
-    {"rtsp", DT_MEDIA_FORMAT_RTSP},
-    {"ape", DT_MEDIA_FORMAT_APE},
-    {"amr", DT_MEDIA_FORMAT_AMR},
+    {"mpegts", DTP_MEDIA_FORMAT_MPEGTS},
+    {"mpeg", DTP_MEDIA_FORMAT_MPEGPS},
+    {"rm", DTP_MEDIA_FORMAT_RM},
+    {"avi", DTP_MEDIA_FORMAT_AVI},
+    {"mkv", DTP_MEDIA_FORMAT_MKV},
+    {"matroska", DTP_MEDIA_FORMAT_MKV},
+    {"mov", DTP_MEDIA_FORMAT_MOV},
+    {"mp4", DTP_MEDIA_FORMAT_MP4},
+    {"flv", DTP_MEDIA_FORMAT_FLV},
+    {"aac", DTP_MEDIA_FORMAT_AAC},
+    {"ac3", DTP_MEDIA_FORMAT_AC3},
+    {"mp3", DTP_MEDIA_FORMAT_MP3},
+    {"mp2", DTP_MEDIA_FORMAT_MP3},
+    {"wav", DTP_MEDIA_FORMAT_WAV},
+    {"dts", DTP_MEDIA_FORMAT_DTS},
+    {"flac", DTP_MEDIA_FORMAT_FLAC},
+    {"h264", DTP_MEDIA_FORMAT_H264},
+    {"cavs", DTP_MEDIA_FORMAT_AVS},
+    {"mpegvideo", DTP_MEDIA_FORMAT_M2V},
+    {"p2p", DTP_MEDIA_FORMAT_P2P},
+    {"asf", DTP_MEDIA_FORMAT_ASF},
+    {"m4a", DTP_MEDIA_FORMAT_MP4},
+    {"m4v", DTP_MEDIA_FORMAT_MP4},
+    {"rtsp", DTP_MEDIA_FORMAT_RTSP},
+    {"ape", DTP_MEDIA_FORMAT_APE},
+    {"amr", DTP_MEDIA_FORMAT_AMR},
 };
 
 typedef struct {
@@ -90,14 +93,16 @@ static int demuxer_ffmpeg_open(demuxer_wrapper_t * wrapper)
             ffmpeg_ctx->buf = NULL;
             return -1;
         }
-        AVIOContext *io_ctx = avio_alloc_context(ffmpeg_ctx->buf, FFMPEG_BUF_SIZE, 0, ffmpeg_ctx->stream_ext, read_packet, NULL, seek_packet);
+        AVIOContext *io_ctx = avio_alloc_context(ffmpeg_ctx->buf, FFMPEG_BUF_SIZE, 0,
+                              ffmpeg_ctx->stream_ext, read_packet, NULL, seek_packet);
         ic->pb = io_ctx; // Here to replace AVIOContext
     } else {
         dt_info(TAG, "dtstream null, use ffmpeg instead \n");
     }
     err = avformat_open_input(&ic, file_name, ic->iformat, NULL);
     if (err < 0) {
-        dt_error(TAG, "avformat_open_input failed, err:%x - %x \n", err, AVUNERROR(err));
+        dt_error(TAG, "avformat_open_input failed, err:%x - %x \n", err,
+                 AVUNERROR(err));
         return -1;
     }
     dt_info(TAG, "[%s:%d] avformat_open_input ok\n", __FUNCTION__, __LINE__);
@@ -113,37 +118,46 @@ static int demuxer_ffmpeg_open(demuxer_wrapper_t * wrapper)
     ffmpeg_ctx->ic = ic;
     wrapper->demuxer_priv = (void *) ffmpeg_ctx;
 
-    dt_info(TAG, "[%s:%d] start_time:%lld \n", __FUNCTION__, __LINE__, ic->start_time);
+    dt_info(TAG, "[%s:%d] start_time:%lld \n", __FUNCTION__, __LINE__,
+            ic->start_time);
     return 0;
 FAIL:
     avformat_close_input(&ic);
     return ret;
 }
 
-static int64_t pts_exchange(AVPacket * avpkt, dt_media_info_t * media_info)
+static int64_t pts_exchange(AVPacket * avpkt, dtp_media_info_t * media_info)
 {
     double exchange = 1;
     int64_t result;
     int num, den;
+    track_info_t *tracks = &(media_info->tracks);
+
     int has_video = media_info->has_video;
     int has_audio = media_info->has_audio;
     int has_sub = media_info->has_sub;
 
-    int cur_vidx = (has_video && !media_info->disable_video) ? media_info->vstreams[media_info->cur_vst_index]->index : -1;
-    int cur_aidx = (has_audio && !media_info->disable_audio) ? media_info->astreams[media_info->cur_ast_index]->index : -1;
-    int cur_sidx = (has_sub && !media_info->disable_sub) ? media_info->sstreams[media_info->cur_sst_index]->index : -1;
+    int cur_vidx = (has_video
+                    && !media_info->disable_video) ?
+                   tracks->vstreams[media_info->cur_vst_index]->index : -1;
+    int cur_aidx = (has_audio
+                    && !media_info->disable_audio) ?
+                   tracks->astreams[media_info->cur_ast_index]->index : -1;
+    int cur_sidx = (has_sub
+                    && !media_info->disable_sub) ?
+                   tracks->sstreams[media_info->cur_sst_index]->index : -1;
 
     if (has_video && cur_vidx == avpkt->stream_index) {
-        num = media_info->vstreams[media_info->cur_vst_index]->time_base.num;
-        den = media_info->vstreams[media_info->cur_vst_index]->time_base.den;
+        num = tracks->vstreams[media_info->cur_vst_index]->time_base.num;
+        den = tracks->vstreams[media_info->cur_vst_index]->time_base.den;
         exchange = DT_PTS_FREQ * ((double)num / (double)den);
     } else if (has_audio && cur_aidx == avpkt->stream_index) {
-        num = media_info->astreams[media_info->cur_ast_index]->time_base.num;
-        den = media_info->astreams[media_info->cur_ast_index]->time_base.den;
+        num = tracks->astreams[media_info->cur_ast_index]->time_base.num;
+        den = tracks->astreams[media_info->cur_ast_index]->time_base.den;
         exchange = DT_PTS_FREQ * ((double)num / (double)den);
     } else if (has_sub && cur_sidx == avpkt->stream_index) {
-        //num = media_info->sstreams[media_info->cur_sst_index]->time_base.num;
-        //den = media_info->sstreams[media_info->cur_sst_index]->time_base.den;
+        //num = tracks->sstreams[media_info->cur_sst_index]->time_base.num;
+        //den = tracks->sstreams[media_info->cur_sst_index]->time_base.den;
         num = den = 1;
     } else { // err
         num = den = 1;
@@ -163,69 +177,29 @@ static int64_t pts_exchange(AVPacket * avpkt, dt_media_info_t * media_info)
 
     //dts valid case
     result = (int64_t)(exchange * avpkt->dts);
-    dt_debug(TAG, "pts:%llx dts: %llx  exchange:%f -> %llx\n", avpkt->pts, avpkt->dts, (float)exchange, result);
+    dt_debug(TAG, "pts:%llx dts: %llx  exchange:%f -> %llx\n", avpkt->pts,
+             avpkt->dts, (float)exchange, result);
     return result;
 }
 
-#ifdef ENABLE_ANDROID
-static int update_video_frame(demuxer_wrapper_t *wrapper, AVPacket *avpkt)
+static int demuxer_ffmpeg_read_frame(demuxer_wrapper_t * wrapper,
+                                     dt_av_pkt_t * frame)
 {
     dtdemuxer_context_t *dem_ctx = (dtdemuxer_context_t *) wrapper->parent;
-    dt_media_info_t *media_info = &dem_ctx->media_info;
-
-    int has_video = (media_info->disable_video) ? 0 : media_info->has_video;
-
-    int cur_vidx = (has_video) ? media_info->vstreams[media_info->cur_vst_index]->index : -1;
-
-    if (cur_vidx == -1) {
-        dt_info(TAG, "cur vidx invalid\n");
-        return 0;
-    }
-
-    ffmpeg_ctx_t *ctx = (ffmpeg_ctx_t *)wrapper->demuxer_priv;
-    AVFormatContext *ic = ctx->ic;
-
-    AVStream *pStream = ic->streams[cur_vidx];
-    AVCodecContext *pCodec = pStream->codec;
-
-    if (pCodec->codec_id != AV_CODEC_ID_H264) {
-        dt_info(TAG, "not H264, no need to filter\n");
-        return 0;
-    }
-    AVPacket pkt = *avpkt;
-    //init
-    if (!ctx->bsfc) {
-        ctx->bsfc = av_bitstream_filter_init("h264_mp4toannexb");
-        if (!ctx->bsfc) {
-            dt_info(TAG, "filter init failed \n");
-            return 0;
-        }
-    }
-
-    int ret = av_bitstream_filter_filter(ctx->bsfc, pCodec, NULL, &pkt.data, &pkt.size, avpkt->data, avpkt->size, avpkt->flags & AV_PKT_FLAG_KEY);
-    if (ret <= 0) {
-        return 0;
-    }
-    free(avpkt->data); // replace with pkt data, Here need to free
-    *avpkt = pkt;
-    return 0;
-}
-
-#endif
-
-static int demuxer_ffmpeg_read_frame(demuxer_wrapper_t * wrapper, dt_av_pkt_t * frame)
-{
-    dtdemuxer_context_t *dem_ctx = (dtdemuxer_context_t *) wrapper->parent;
-    dt_media_info_t *media_info = &dem_ctx->media_info;
+    dtp_media_info_t *media_info = &dem_ctx->media_info;
+    track_info_t *tracks = &(media_info->tracks);
     demuxer_statistics_info_t *p_statistics_info = &dem_ctx->statistics_info;
 
     int has_audio = (media_info->disable_audio) ? 0 : media_info->has_audio;
     int has_video = (media_info->disable_video) ? 0 : media_info->has_video;
     int has_sub = (media_info->disable_sub) ? 0 : media_info->has_sub;
 
-    int cur_aidx = (has_audio) ? media_info->astreams[media_info->cur_ast_index]->index : -1;
-    int cur_vidx = (has_video) ? media_info->vstreams[media_info->cur_vst_index]->index : -1;
-    int cur_sidx = (has_sub) ? media_info->sstreams[media_info->cur_sst_index]->index : -1;
+    int cur_aidx = (has_audio) ?
+                   tracks->astreams[media_info->cur_ast_index]->index : -1;
+    int cur_vidx = (has_video) ?
+                   tracks->vstreams[media_info->cur_vst_index]->index : -1;
+    int cur_sidx = (has_sub) ? tracks->sstreams[media_info->cur_sst_index]->index :
+                   -1;
 
     ffmpeg_ctx_t *ctx = (ffmpeg_ctx_t *)wrapper->demuxer_priv;
     AVFormatContext *ic = ctx->ic;
@@ -247,15 +221,6 @@ static int demuxer_ffmpeg_read_frame(demuxer_wrapper_t * wrapper, dt_av_pkt_t * 
     }
     //read frame ok
     if (has_video && cur_vidx == avpkt.stream_index) {
-#if 0
-#ifdef ENABLE_ANDROID
-        if (media_info->format ==  DT_MEDIA_FORMAT_MP4) {
-            dt_debug(TAG, "befor filter, %02x %02x %02x %02x \n", avpkt.data[0], avpkt.data[1], avpkt.data[2], avpkt.data[3]);
-            update_video_frame(wrapper, &avpkt); // update video frame, header etc...
-            dt_debug(TAG, "after filter, %02x %02x %02x %02x \n", avpkt.data[0], avpkt.data[1], avpkt.data[2], avpkt.data[3]);
-        }
-#endif
-#endif
         frame->type = AVMEDIA_TYPE_VIDEO;
     } else if (has_audio && cur_aidx == avpkt.stream_index) {
         frame->type = AVMEDIA_TYPE_AUDIO;
@@ -277,7 +242,8 @@ static int demuxer_ffmpeg_read_frame(demuxer_wrapper_t * wrapper, dt_av_pkt_t * 
     frame->key_frame = avpkt.flags & AV_PKT_FLAG_KEY;
     if (frame->type == (int)AVMEDIA_TYPE_AUDIO) {
         p_statistics_info->audio_frame_count++;
-        dt_debug(TAG, "GET AUDIO FRAME, pts:0x%llx dts:0x%llx time:%lld exchange_pts:%llx time_ex:%lld offset:0x%llx size:%d stream_index:%d\n",
+        dt_debug(TAG,
+                 "GET AUDIO FRAME, pts:0x%llx dts:0x%llx time:%lld exchange_pts:%llx time_ex:%lld offset:0x%llx size:%d stream_index:%d\n",
                  frame->pts, frame->dts, frame->pts / 90000, exchange_pts,
                  exchange_pts / 90000, p_statistics_info->a_offset, frame->size,
                  avpkt.stream_index);
@@ -288,7 +254,8 @@ static int demuxer_ffmpeg_read_frame(demuxer_wrapper_t * wrapper, dt_av_pkt_t * 
         if (frame->key_frame) {
             p_statistics_info->video_keyframe_count++;
         }
-        dt_debug(TAG, "GET VIDEO FRAME, pts:0x%llx dts:0x%llx time:%lld exchange_pts:%llx time_ex:%lld offset:0x%llx size:%d key:%d stream_index:%d \n",
+        dt_debug(TAG,
+                 "GET VIDEO FRAME, pts:0x%llx dts:0x%llx time:%lld exchange_pts:%llx time_ex:%lld offset:0x%llx size:%d key:%d stream_index:%d \n",
                  frame->pts, frame->dts, frame->pts / 90000, exchange_pts,
                  exchange_pts / 90000, p_statistics_info->v_offset, frame->size,
                  frame->key_frame, avpkt.stream_index);
@@ -296,7 +263,8 @@ static int demuxer_ffmpeg_read_frame(demuxer_wrapper_t * wrapper, dt_av_pkt_t * 
     }
     if (frame->type == (int)AVMEDIA_TYPE_SUBTITLE) {
         p_statistics_info->sub_frame_count++;
-        dt_debug(TAG, "GET SUB FRAME, pts:0x%llx dts:0x%llx size:%d time:%lld exchange_pts:%llx time_ex:%lld offset:0x%llx \n",
+        dt_debug(TAG,
+                 "GET SUB FRAME, pts:0x%llx dts:0x%llx size:%d time:%lld exchange_pts:%llx time_ex:%lld offset:0x%llx \n",
                  frame->pts, frame->dts, frame->size, frame->pts / 90000, \
                  exchange_pts, exchange_pts / 90000, p_statistics_info->s_offset);
         p_statistics_info->s_offset += frame->size;
@@ -310,7 +278,7 @@ static int demuxer_ffmpeg_read_frame(demuxer_wrapper_t * wrapper, dt_av_pkt_t * 
 static int media_format_convert(const char *name)
 {
     int i, j;
-    int type = DT_MEDIA_FORMAT_INVALID;
+    int type = DTP_MEDIA_FORMAT_INVALID;
     j = sizeof(media_map) / sizeof(type_map_t);
     for (i = 0; i < j; i++) {
         if (strcmp(name, media_map[i].key) == 0) {
@@ -324,7 +292,7 @@ static int media_format_convert(const char *name)
             }
             if (i == j) {
                 dt_error("Unsupport media type %s\n", name);
-                return DT_MEDIA_FORMAT_INVALID;
+                return DTP_MEDIA_FORMAT_INVALID;
             }
         }
     }
@@ -354,7 +322,8 @@ dtaudio_format_t audio_format_convert(enum AVCodecID id)
         format = DT_AUDIO_FORMAT_UNKOWN;
         break;
     }
-    dt_info(TAG, "[audio_format_convert]audio codec_id=0x%x format=%d\n", id, format);
+    dt_info(TAG, "[audio_format_convert]audio codec_id=0x%x format=%d\n", id,
+            format);
     return format;
 }
 
@@ -369,7 +338,8 @@ static int video_format_convert(enum AVCodecID id)
         format = DT_VIDEO_FORMAT_UNKOWN;
         break;
     }
-    dt_info(TAG, "[video_format_convert]video codec_id=0x%x format=%d\n", id, format);
+    dt_info(TAG, "[video_format_convert]video codec_id=0x%x format=%d\n", id,
+            format);
     return format;
 }
 
@@ -412,7 +382,8 @@ static int format2bps(int fmt)
     return ret;
 }
 
-static int demuxer_ffmpeg_setup_info(demuxer_wrapper_t * wrapper, dt_media_info_t * info)
+static int demuxer_ffmpeg_setup_info(demuxer_wrapper_t * wrapper,
+                                     dtp_media_info_t * info)
 {
     ffmpeg_ctx_t *ctx = (ffmpeg_ctx_t *)wrapper->demuxer_priv;
     AVFormatContext *ic = ctx->ic;
@@ -423,6 +394,7 @@ static int demuxer_ffmpeg_setup_info(demuxer_wrapper_t * wrapper, dt_media_info_
     sstream_info_t *sst_info;
     int i, j;
     AVDictionaryEntry *t;
+    track_info_t *tracks = &info->tracks;
 
     /*reset vars */
     memset(info, 0, sizeof(*info));
@@ -432,16 +404,17 @@ static int demuxer_ffmpeg_setup_info(demuxer_wrapper_t * wrapper, dt_media_info_
     info->cur_sst_index = -1;
 
     /*get media info */
-    info->format = DT_MEDIA_FORMAT_INVALID;
+    info->format = DTP_MEDIA_FORMAT_INVALID;
     info->bit_rate = ic->bit_rate;
     double duration = ((double) ic->duration / AV_TIME_BASE);
     info->duration = (int)(ic->duration / AV_TIME_BASE);
-    strcpy(info->file_name, ic->filename);
-    dt_info(TAG, "file name:%s duration:%lf\n", info->file_name, duration);
+    info->file = ic->filename;
+
+    dt_info(TAG, "file name:%s duration:%lf\n", info->file, duration);
     info->file_size = avio_size(ic->pb);
 
     info->format = media_format_convert(ic->iformat->name);
-    if (info->format == DT_MEDIA_FORMAT_INVALID) {
+    if (info->format == DTP_MEDIA_FORMAT_INVALID) {
         dt_warning(TAG, "get wrong media format\n");
     }
     info->start_time = ic->start_time * 9 / 100; // Need to convert from us->pts
@@ -452,7 +425,7 @@ static int demuxer_ffmpeg_setup_info(demuxer_wrapper_t * wrapper, dt_media_info_
         if (pCodec->codec_type == AVMEDIA_TYPE_VIDEO) {
 
             //for some mp3 have video, just skip
-            if (info->format == DT_MEDIA_FORMAT_MP3) {
+            if (info->format == DTP_MEDIA_FORMAT_MP3) {
                 continue;
             }
 
@@ -463,7 +436,8 @@ static int demuxer_ffmpeg_setup_info(demuxer_wrapper_t * wrapper, dt_media_info_
             vst_info->width = pCodec->width;
             vst_info->height = pCodec->height;
             vst_info->pix_fmt = pCodec->pix_fmt;
-            vst_info->duration = (int64_t)(pStream->duration * pStream->time_base.num / pStream->time_base.den);
+            vst_info->duration = (int64_t)(pStream->duration * pStream->time_base.num /
+                                           pStream->time_base.den);
             vst_info->bit_rate = pCodec->bit_rate;
             vst_info->format = video_format_convert(pCodec->codec_id);
             vst_info->sample_aspect_ratio.num = pStream->sample_aspect_ratio.num;
@@ -476,8 +450,8 @@ static int demuxer_ffmpeg_setup_info(demuxer_wrapper_t * wrapper, dt_media_info_
             vst_info->time_base.num = pStream->time_base.num;
             vst_info->time_base.den = pStream->time_base.den;
             vst_info->codec_priv = (void *) pCodec;
-            info->vstreams[info->vst_num] = vst_info;
-            info->vst_num++;
+            tracks->vstreams[tracks->vst_num] = vst_info;
+            tracks->vst_num++;
             t = av_dict_get(pStream->metadata, "language", NULL, 0);
             if (t) {
                 strcpy(vst_info->language, t->value);
@@ -489,7 +463,8 @@ static int demuxer_ffmpeg_setup_info(demuxer_wrapper_t * wrapper, dt_media_info_
                 memcpy(vst_info->extradata, pCodec->extradata, pCodec->extradata_size);
             }
             // Extra data details
-            dt_info(TAG, "VIDEO EXTRA DATA SIZE:%d - %d \n", pCodec->extradata_size, vst_info->extradata_size);
+            dt_info(TAG, "VIDEO EXTRA DATA SIZE:%d - %d \n", pCodec->extradata_size,
+                    vst_info->extradata_size);
             dt_info(TAG, "Extradata contert:\n");
             if (pCodec->extradata_size > 0) {
                 for (j = 0; j < pCodec->extradata_size && j > 10; j += 10)
@@ -509,7 +484,7 @@ static int demuxer_ffmpeg_setup_info(demuxer_wrapper_t * wrapper, dt_media_info_
             dt_info(TAG, "End\n");
 #if 0
 #if ENABLE_ANDROID
-            //if(info->format == DT_MEDIA_FORMAT_MPEGTS)
+            //if(info->format == DTP_MEDIA_FORMAT_MPEGTS)
             // android no need extradata for H264
             if (pCodec->codec_id == AV_CODEC_ID_H264) {
                 vst_info->extradata_size = 0;
@@ -519,7 +494,9 @@ static int demuxer_ffmpeg_setup_info(demuxer_wrapper_t * wrapper, dt_media_info_
 #endif
         } else if (pCodec->codec_type == AVMEDIA_TYPE_AUDIO) {
             if (pCodec->channels <= 0 || pCodec->sample_rate <= 0) {
-                dt_info(TAG, "Audio info invalid, skip audio track. channel:%d samplerate:%d \n", pCodec->channels, pCodec->sample_rate);
+                dt_info(TAG,
+                        "Audio info invalid, skip audio track. channel:%d samplerate:%d \n",
+                        pCodec->channels, pCodec->sample_rate);
                 continue;
             }
             ast_info = (astream_info_t *) malloc(sizeof(astream_info_t));
@@ -529,7 +506,8 @@ static int demuxer_ffmpeg_setup_info(demuxer_wrapper_t * wrapper, dt_media_info_
             ast_info->channels = pCodec->channels;
             ast_info->sample_rate = pCodec->sample_rate;
             ast_info->bps = format2bps(pCodec->sample_fmt);
-            ast_info->duration = (int64_t)(pStream->duration * pStream->time_base.num / pStream->time_base.den);
+            ast_info->duration = (int64_t)(pStream->duration * pStream->time_base.num /
+                                           pStream->time_base.den);
             ast_info->time_base.num = pStream->time_base.num;
             ast_info->time_base.den = pStream->time_base.den;
             ast_info->bit_rate = pCodec->bit_rate;
@@ -541,8 +519,8 @@ static int demuxer_ffmpeg_setup_info(demuxer_wrapper_t * wrapper, dt_media_info_
             }
             ast_info->format = audio_format_convert(pCodec->codec_id);
             ast_info->codec_priv = (void *)pCodec;
-            info->astreams[info->ast_num] = ast_info;
-            info->ast_num++;
+            tracks->astreams[tracks->ast_num] = ast_info;
+            tracks->ast_num++;
         } else if (pCodec->codec_type == AVMEDIA_TYPE_SUBTITLE) {
             sst_info = (sstream_info_t *) malloc(sizeof(sstream_info_t));
             memset(sst_info, 0, sizeof(sstream_info_t));
@@ -558,35 +536,37 @@ static int demuxer_ffmpeg_setup_info(demuxer_wrapper_t * wrapper, dt_media_info_
             }
             sst_info->format = subtitle_format_convert(pCodec->codec_id);
             sst_info->codec_priv = (void *) pCodec;
-            info->sstreams[info->sst_num] = sst_info;
-            info->sst_num++;
+            tracks->sstreams[tracks->sst_num] = sst_info;
+            tracks->sst_num++;
         }
     }
-    if (info->vst_num > 0) {
+    if (tracks->vst_num > 0) {
         info->has_video = 1;
         info->cur_vst_index = 0;
     }
-    if (info->ast_num > 0) {
+    if (tracks->ast_num > 0) {
         info->has_audio = 1;
         info->cur_ast_index = 0;
     }
-    if (info->sst_num > 0) {
+    if (tracks->sst_num > 0) {
         info->has_sub = 1;
         info->cur_sst_index = 0;
     }
     return 0;
 }
 
-static int demuxer_ffmpeg_seek_frame(demuxer_wrapper_t * wrapper, int64_t timestamp)
+static int demuxer_ffmpeg_seek_frame(demuxer_wrapper_t * wrapper,
+                                     int64_t timestamp)
 {
     ffmpeg_ctx_t *ctx = (ffmpeg_ctx_t *)wrapper->demuxer_priv;
     AVFormatContext *ic = ctx->ic;
     dtdemuxer_context_t *dem_ctx = (dtdemuxer_context_t *) wrapper->parent;
-    dt_media_info_t *media_info = &dem_ctx->media_info;
+    dtp_media_info_t *media_info = &dem_ctx->media_info;
 
     int seek_flags = 0; //seek key frame as default
 
-    seek_flags = (dtp_setting.demuxer_seek_keyframe == 0) ? AVSEEK_FLAG_ANY : AVSEEK_FLAG_BACKWARD;
+    seek_flags = (dtp_setting.demuxer_seek_keyframe == 0) ? AVSEEK_FLAG_ANY :
+                 AVSEEK_FLAG_BACKWARD;
     dt_info(TAG, "seek keyframe enabled:%d \n", dtp_setting.demuxer_seek_keyframe);
 
     // when seek to 0 or end, set backward flag
@@ -607,7 +587,7 @@ static int demuxer_ffmpeg_seek_frame(demuxer_wrapper_t * wrapper, int64_t timest
         seek_mode = dtp_setting.player_seekmode;
     } else {
         // some dynamic control
-        if (media_info->format == DT_MEDIA_FORMAT_MPEGTS) {
+        if (media_info->format == DTP_MEDIA_FORMAT_MPEGTS) {
             seek_mode = 1;
         }
     }
@@ -616,7 +596,8 @@ static int demuxer_ffmpeg_seek_frame(demuxer_wrapper_t * wrapper, int64_t timest
     if (seek_mode == 1) {
         seek_flags = AVSEEK_FLAG_BYTE;
         timestamp = (int64_t)(media_info->file_size * (double)s_time / duration);
-        dt_info(TAG, "Fixed seek by bytes. Duration(%lld s) seektopos:%lld\n", duration, timestamp);
+        dt_info(TAG, "Fixed seek by bytes. Duration(%lld s) seektopos:%lld\n", duration,
+                timestamp);
     } else {
         // seek by time
         timestamp = timestamp * AV_TIME_BASE + ic->start_time;
@@ -626,9 +607,11 @@ static int demuxer_ffmpeg_seek_frame(demuxer_wrapper_t * wrapper, int64_t timest
     int64_t seek_target = timestamp;
     int64_t seek_min = (seek_target > 0) ? seek_target - timestamp + 2 : INT64_MIN;
     int64_t seek_max = (seek_target < 0) ? seek_target - timestamp - 2 : INT64_MAX;
-    int64_t ret = avformat_seek_file(ic, -1, seek_min, seek_target, seek_max, seek_flags);
+    int64_t ret = avformat_seek_file(ic, -1, seek_min, seek_target, seek_max,
+                                     seek_flags);
 #else
-    dt_info(TAG, "seekto: %lld (%lld s) duration:%lld seek_flags:%d \n", timestamp, s_time, duration, seek_flags);
+    dt_info(TAG, "seekto: %lld (%lld s) duration:%lld seek_flags:%d \n", timestamp,
+            s_time, duration, seek_flags);
     int64_t ret = av_seek_frame(ic, -1, timestamp, seek_flags);
 
 #endif
@@ -645,9 +628,12 @@ static void dump_demuxer_statics_info(dtdemuxer_context_t *dem_ctx)
 {
     demuxer_statistics_info_t *p_info = &dem_ctx->statistics_info;
     dt_info(TAG, "==============demuxer statistics info============== \n");
-    dt_info(TAG, "AudioFrameCount: %d  size:%lld \n", p_info->audio_frame_count, p_info->a_offset);
-    dt_info(TAG, "VideoFrameCount: %d Key:%d size:%lld \n", p_info->video_frame_count, p_info->video_keyframe_count, p_info->v_offset);
-    dt_info(TAG, "SubFrameCount: %d size:%lld \n", p_info->sub_frame_count, p_info->s_offset);
+    dt_info(TAG, "AudioFrameCount: %d  size:%lld \n", p_info->audio_frame_count,
+            p_info->a_offset);
+    dt_info(TAG, "VideoFrameCount: %d Key:%d size:%lld \n",
+            p_info->video_frame_count, p_info->video_keyframe_count, p_info->v_offset);
+    dt_info(TAG, "SubFrameCount: %d size:%lld \n", p_info->sub_frame_count,
+            p_info->s_offset);
     dt_info(TAG, "=================================================== \n");
 }
 

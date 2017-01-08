@@ -1,13 +1,15 @@
 #ifndef DTPORT_H
 #define DTPORT_H
 
-#include "dt_packet_queue.h"
-#include "dt_av.h"
-#include "dtport_api.h"
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+
+#include "dt_utils.h"
+
+#include "dt_packet_queue.h"
+#include "dtp_av.h"
+#include "dtport_api.h"
 
 typedef enum {
     PORT_STATUS_IDLE = -1,

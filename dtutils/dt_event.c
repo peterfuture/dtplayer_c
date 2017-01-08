@@ -77,13 +77,15 @@ dt_service_mgt_t *dt_service_create()
 {
     pthread_t tid;
     int ret = 0;
-    dt_service_mgt_t *mgt = (dt_service_mgt_t *)dt_mallocz(sizeof(dt_service_mgt_t));
+    dt_service_mgt_t *mgt = (dt_service_mgt_t *)dt_mallocz(sizeof(
+                                dt_service_mgt_t));
     mgt->service = NULL;
     mgt->service_count = 0;
     mgt->exit_flag = 0;
     dt_lock_init(&mgt->service_lock, NULL);
 
-    service_t *service = dt_alloc_service(EVENT_SERVER_ID_MAIN, EVENT_SERVER_NAME_MAIN);
+    service_t *service = dt_alloc_service(EVENT_SERVER_ID_MAIN,
+                                          EVENT_SERVER_NAME_MAIN);
     service->event_count = 0;
     service->event = NULL;
     service->next = NULL;
@@ -185,7 +187,8 @@ int dt_register_service(dt_service_mgt_t *mgt, service_t * service)
         mgt->service_count++;
     }
     dt_unlock(&mgt->service_lock);
-    dt_info(TAG, "SERVICE:%s REGISTER OK,SERVERCOUNT:%d \n", service->name, mgt->service_count);
+    dt_info(TAG, "SERVICE:%s REGISTER OK,SERVERCOUNT:%d \n", service->name,
+            mgt->service_count);
     return 0;
 
 FAIL:
@@ -282,7 +285,8 @@ int dt_send_event(dt_service_mgt_t *mgt, event_t * event)
     }
     service_hub->event_count++;
     dt_unlock(&service_hub->event_lock);
-    dt_debug(TAG, "EVENT:%d SEND OK, event count:%d \n", event->type, service_hub->event_count);
+    dt_debug(TAG, "EVENT:%d SEND OK, event count:%d \n", event->type,
+             service_hub->event_count);
     return 0;
 }
 
@@ -361,7 +365,8 @@ static int dt_transport_event(event_t * event, dt_service_mgt_t * mgt)
 
     ret = dt_add_event(event, entry);
     if (ret < 0) {              //we need to free this event
-        dt_error(TAG, "we can not transport this event, id:%d type:%d\n ", event->service_id, event->type);
+        dt_error(TAG, "we can not transport this event, id:%d type:%d\n ",
+                 event->service_id, event->type);
         free(event);
         ret = -1;
         goto FAIL;

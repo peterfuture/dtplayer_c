@@ -1,8 +1,7 @@
-#include "dtstream.h"
-#include "dt_error.h"
-
 #include "libavformat/avformat.h"
 #include "libavformat/avio.h"
+
+#include "dtstream.h"
 
 #define TAG "STREAM-FFMPEG"
 
@@ -62,7 +61,8 @@ static int stream_ffmpeg_read(stream_wrapper_t * wrapper, uint8_t *buf, int len)
     return (r <= 0) ? -1 : r;
 }
 
-static int stream_ffmpeg_seek(stream_wrapper_t * wrapper, int64_t pos, int whence)
+static int stream_ffmpeg_seek(stream_wrapper_t * wrapper, int64_t pos,
+                              int whence)
 {
     AVIOContext *ctx = (AVIOContext *)wrapper->stream_priv;
     stream_ctrl_t *info = &wrapper->info;

@@ -1,15 +1,15 @@
 #ifndef DT_HOST_H
 #define DT_HOST_H
 
-#include "dthost_api.h"
-#include "dt_av.h"
-
 #include <stdlib.h>
+
+#include "dt_utils.h"
+#include "dthost_api.h"
 
 typedef struct {
     dthost_para_t para;
     /*av sync */
-    dt_sync_mode_t av_sync;
+    dtp_sync_mode_t av_sync;
     int64_t sys_time_start;
     int64_t sys_time_start_time; // First SystemTime Assignment Time(us)
     int64_t sys_time_first;      // First System Time - Equal To First_APTS OR FIRST_VPTS

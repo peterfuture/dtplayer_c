@@ -80,7 +80,8 @@ void
 command_help(command_t *self);
 
 void
-command_option(command_t *self, const char *small, const char *large, const char *desc, command_callback_t cb);
+command_option(command_t *self, const char *small, const char *large,
+               const char *desc, command_callback_t cb);
 
 void
 command_parse(command_t *self, int argc, char **argv);

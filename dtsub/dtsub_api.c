@@ -13,7 +13,6 @@
 
 #include "dtsub_para.h"
 #include "dtsub.h"
-#include "dt_av.h"
 #include "dthost_api.h"
 
 #include <stdio.h>
@@ -29,7 +28,7 @@
 ***********************************************************************/
 int dtsub_read_pkt(void *priv, dt_av_pkt_t * pkt)
 {
-    int type = DT_TYPE_SUBTITLE;
+    int type = DTP_MEDIA_TYPE_SUBTITLE;
     int ret = 0;
     dtsub_context_t *sctx = (dtsub_context_t *) priv;
     ret = dthost_read_frame(sctx->parent, pkt, type);
@@ -195,7 +194,8 @@ void dtsub_update_pts(void *priv)
     if (sctx->sub_status < SUB_STATUS_INITED) {
         return;
     }
-    dthost_set_info(sctx->parent, HOST_CMD_SET_SPTS, (unsigned long)(&sctx->current_pts));
+    dthost_set_info(sctx->parent, HOST_CMD_SET_SPTS,
+                    (unsigned long)(&sctx->current_pts));
     return;
 }
 

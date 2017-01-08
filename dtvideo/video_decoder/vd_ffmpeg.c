@@ -1,15 +1,9 @@
-/*
- *video decoder interface using ffmpeg
- * */
-
-#include "dt_av.h"
-
-#include "libavcodec/avcodec.h"
-#include "../dtvideo_decoder.h"
-
-//include ffmpeg header
 #include "libavcodec/avcodec.h"
 #include "libswscale/swscale.h"
+
+#include "dt_utils.h"
+#include "dtp_av.h"
+#include "dtvideo_decoder.h"
 
 #define TAG "VDEC-FFMPEG"
 
@@ -20,7 +14,7 @@ typedef struct vd_ffmpeg_ctx {
     int use_hwaccel;
 } vd_ffmpeg_ctx_t;
 
-static enum AVCodecID convert_to_id(int format)
+static int convert_to_id(int format)
 {
     switch (format) {
     case DT_VIDEO_FORMAT_H264:
@@ -52,7 +46,8 @@ static AVCodecContext * alloc_ffmpeg_ctx(dtvideo_decoder_t *decoder)
 #include <libavcodec/mediacodec.h>
 #include <libavutil/pixdesc.h>
 
-static enum AVPixelFormat mediacodec_hwaccel_get_format(AVCodecContext *avctx, const enum AVPixelFormat *pix_fmts)
+static enum AVPixelFormat mediacodec_hwaccel_get_format(AVCodecContext *avctx,
+        const enum AVPixelFormat *pix_fmts)
 {
     vd_ffmpeg_ctx_t *ctx = avctx->opaque;
     const enum AVPixelFormat *p = NULL;
@@ -173,7 +168,8 @@ use_sw_decoder:
         }
     }
     dt_info(TAG, " [%s:%d] Pixfmt:%d \n", __FUNCTION__, __LINE__, avctxp->pix_fmt);
-    dt_info(TAG, " [%s:%d] ffmpeg dec init ok. hw decoder enable:%d \n", __FUNCTION__, __LINE__, hw_codec_opened);
+    dt_info(TAG, " [%s:%d] ffmpeg dec init ok. hw decoder enable:%d \n",
+            __FUNCTION__, __LINE__, hw_codec_opened);
     //alloc one frame for decode
     vd_ctx->frame = av_frame_alloc();
     wrapper->para = &decoder->para;
@@ -183,7 +179,8 @@ use_sw_decoder:
 
 //convert to dst fmt
 #if 0
-static int convert_frame(dtvideo_decoder_t * decoder, AVFrame * src, int64_t pts, dt_av_frame_t ** p_pict)
+static int convert_frame(dtvideo_decoder_t * decoder, AVFrame * src,
+                         int64_t pts, dt_av_frame_t ** p_pict)
 {
     uint8_t *buffer;
     int buffer_size;
@@ -206,7 +203,8 @@ static int convert_frame(dtvideo_decoder_t * decoder, AVFrame * src, int64_t pts
     buffer = (uint8_t *) malloc(buffer_size * sizeof(uint8_t));
     avpicture_fill((AVPicture *) dst, buffer, df, dw, dh);
 
-    pSwsCtx = sws_getCachedContext(pSwsCtx, sw, sh, sf, dw, dh, df, SWS_BICUBIC, NULL, NULL, NULL);
+    pSwsCtx = sws_getCachedContext(pSwsCtx, sw, sh, sf, dw, dh, df, SWS_BICUBIC,
+                                   NULL, NULL, NULL);
     sws_scale(pSwsCtx, src->data, src->linesize, 0, sh, dst->data, dst->linesize);
 
     pict->pts = pts;
@@ -215,7 +213,8 @@ static int convert_frame(dtvideo_decoder_t * decoder, AVFrame * src, int64_t pts
 }
 #endif
 
-static int copy_frame(dtvideo_decoder_t * decoder, AVFrame * src, int64_t pts, dt_av_frame_t ** p_pict)
+static int copy_frame(dtvideo_decoder_t * decoder, AVFrame * src, int64_t pts,
+                      dt_av_frame_t ** p_pict)
 {
     dtvideo_para_t *para = &decoder->para;
     vd_ffmpeg_ctx_t *vd_ctx = (vd_ffmpeg_ctx_t *)decoder->vd_priv;
@@ -230,7 +229,7 @@ static int copy_frame(dtvideo_decoder_t * decoder, AVFrame * src, int64_t pts, d
     int sf = pixfmt;
     int df = pixfmt;
     //step1: malloc dt_av_frame_t
-    dt_av_frame_t *pict = dtav_new_frame();
+    dt_av_frame_t *pict = malloc(sizeof(dt_av_frame_t));
     memset(pict, 0, sizeof(dt_av_frame_t));
     //step2: convert to avpicture, ffmpeg struct
     AVPicture *dst = (AVPicture *)(pict);
@@ -242,7 +241,8 @@ static int copy_frame(dtvideo_decoder_t * decoder, AVFrame * src, int64_t pts, d
 #if 1
     av_picture_copy(dst, (AVPicture *)src, sf, sw, sh);
 #else
-    pSwsCtx = sws_getCachedContext(pSwsCtx, sw, sh, sf, dw, dh, df, SWS_BICUBIC, NULL, NULL, NULL);
+    pSwsCtx = sws_getCachedContext(pSwsCtx, sw, sh, sf, dw, dh, df, SWS_BICUBIC,
+                                   NULL, NULL, NULL);
     sws_scale(pSwsCtx, src->data, src->linesize, 0, sh, dst->data, dst->linesize);
 #endif
     pict->pts = pts;
@@ -263,12 +263,14 @@ static int copy_frame(dtvideo_decoder_t * decoder, AVFrame * src, int64_t pts, d
  *
  * */
 
-int ffmpeg_vdec_decode(dtvideo_decoder_t *decoder, dt_av_pkt_t * dt_frame, dt_av_frame_t ** pic)
+int ffmpeg_vdec_decode(dtvideo_decoder_t *decoder, dt_av_pkt_t * dt_frame,
+                       dt_av_frame_t ** pic)
 {
     int ret = 0;
     vd_ffmpeg_ctx_t *vd_ctx = (vd_ffmpeg_ctx_t *)decoder->vd_priv;
     AVCodecContext *avctxp = (AVCodecContext *) vd_ctx->avctxp;
-    dt_debug(TAG, "[%s:%d] param-- w:%d h:%d  extr_si:%d \n", __FUNCTION__, __LINE__, avctxp->width, avctxp->height, avctxp->extradata_size);
+    dt_debug(TAG, "[%s:%d] param-- w:%d h:%d  extr_si:%d \n", __FUNCTION__,
+             __LINE__, avctxp->width, avctxp->height, avctxp->extradata_size);
     int got_picture = 0;
     AVPacket pkt;
     memset(&pkt, 0, sizeof(AVPacket));
@@ -281,9 +283,11 @@ int ffmpeg_vdec_decode(dtvideo_decoder_t *decoder, dt_av_pkt_t * dt_frame, dt_av
     AVFrame *frame = vd_ctx->frame;
     avcodec_decode_video2(avctxp, frame, &got_picture, &pkt);
     if (got_picture) {
-        ret = copy_frame(decoder, frame, av_frame_get_best_effort_timestamp(frame), pic);
+        ret = copy_frame(decoder, frame, av_frame_get_best_effort_timestamp(frame),
+                         pic);
         //ret = copy_frame(decoder, frame, frame->pkt_pts, pic);
-        dt_debug(TAG, "==got picture pkt_pts:%llx best_effort:%llx \n", frame->pkt_pts, av_frame_get_best_effort_timestamp(frame));
+        dt_debug(TAG, "==got picture pkt_pts:%llx best_effort:%llx \n", frame->pkt_pts,
+                 av_frame_get_best_effort_timestamp(frame));
         //ret = convert_frame (decoder, frame, av_frame_get_best_effort_timestamp (frame), pic);
         if (ret == -1) {
             ret = 0;
@@ -322,7 +326,7 @@ int ffmpeg_vdec_release(dtvideo_decoder_t *decoder)
 vd_wrapper_t vd_ffmpeg_ops = {
     .name = "ffmpeg video decoder",
     .vfmt = DT_VIDEO_FORMAT_UNKOWN, //support all vfmt
-    .type = DT_TYPE_VIDEO,
+    .type = DTP_MEDIA_TYPE_VIDEO,
     .is_hw = 0,
     .init = ffmpeg_vdec_init,
     .decode_frame = ffmpeg_vdec_decode,

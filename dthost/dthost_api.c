@@ -1,3 +1,5 @@
+#include "dt_error.h"
+
 #include "dthost_api.h"
 #include "dthost.h"
 
@@ -58,7 +60,8 @@ int dthost_init(void **host_priv, dthost_para_t * para)
     }
     dthost_context_t *hctx = malloc(sizeof(dthost_context_t));
     if (!hctx) {
-        dt_info(TAG, "[%s:%d] dthost_context_t malloc failed\n", __FUNCTION__, __LINE__);
+        dt_info(TAG, "[%s:%d] dthost_context_t malloc failed\n", __FUNCTION__,
+                __LINE__);
         ret = -1;
         goto ERR0;
     }

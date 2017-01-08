@@ -1,9 +1,10 @@
 #ifndef AD_WRAPPER_H
 #define AD_WRAPPER_H
 
-#include "dt_buffer.h"
-#include "dt_av.h"
-#include "dtaudio_para.h"
+#include <pthread.h>
+
+#include "dtp_av.h"
+#include "dtp_audio_plugin.h"
 
 typedef enum {
     ADEC_STATUS_IDLE,
@@ -54,7 +55,7 @@ typedef struct dtaudio_decoder {
     int pts_cache_size;
 
     adec_ctrl_t info;
-    dt_buffer_t *buf_out;
+    //dt_buffer_t *buf_out;
     void *parent;
     void *decoder_priv;         //point to avcodeccontext
 } dtaudio_decoder_t;

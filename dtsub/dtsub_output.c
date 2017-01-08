@@ -232,7 +232,8 @@ static void *sub_output_thread(void *args)
         if (frame_pre->pts == -1) { //invalid pts, calc using last pts
             dt_error(TAG, "Err: sub frame pts invalid \n");
         }
-        dt_info(TAG, "read one sub frame, pts:%lld systime:%lld \n", frame_pre->pts, sys_time);
+        dt_info(TAG, "read one sub frame, pts:%lld systime:%lld \n", frame_pre->pts,
+                sys_time);
         //maybe need to block
         if (sys_time < frame_pre->pts) {
             dt_debug(TAG, "[%s:%d] not to show ! \n", __FUNCTION__, __LINE__);
@@ -259,7 +260,8 @@ static void *sub_output_thread(void *args)
         frame_pre = (dtav_sub_frame_t *) dtsub_output_pre_read(so->parent);
         if (frame_pre) {
             if (sys_time >= frame_pre->pts) {
-                dt_info(TAG, "drop frame,sys time:%lld thispts:%lld next->pts:%lld \n", sys_time, frame->pts, frame_pre->pts);
+                dt_info(TAG, "drop frame,sys time:%lld thispts:%lld next->pts:%lld \n",
+                        sys_time, frame->pts, frame_pre->pts);
                 dtsub_frame_free(frame);
                 free(frame);
                 continue;
@@ -278,7 +280,8 @@ static void *sub_output_thread(void *args)
         dt_usleep(REFRESH_DURATION);
     }
 EXIT:
-    dt_info(TAG, "[file:%s][%s:%d]so playback thread exit\n", __FILE__, __FUNCTION__, __LINE__);
+    dt_info(TAG, "[file:%s][%s:%d]so playback thread exit\n", __FILE__,
+            __FUNCTION__, __LINE__);
     pthread_exit(NULL);
     return NULL;
 }
@@ -305,10 +308,12 @@ int sub_output_init(dtsub_output_t * so, int so_id)
     /*start aout pthread */
     ret = pthread_create(&tid, NULL, sub_output_thread, (void *) so);
     if (ret != 0) {
-        dt_error(TAG, "[%s:%d] create sub output thread failed\n", __FUNCTION__, __LINE__);
+        dt_error(TAG, "[%s:%d] create sub output thread failed\n", __FUNCTION__,
+                 __LINE__);
         return ret;
     }
     so->output_thread_pid = tid;
-    dt_info(TAG, "[%s:%d] create sub output thread success\n", __FUNCTION__, __LINE__);
+    dt_info(TAG, "[%s:%d] create sub output thread success\n", __FUNCTION__,
+            __LINE__);
     return 0;
 }

@@ -36,7 +36,8 @@ static void register_sd(sd_wrapper_t * sd)
         p = &(*p)->next;
     }
     *p = sd;
-    dt_info(TAG, "[%s:%d] register sdec, name:%s fmt:%d \n", __FUNCTION__, __LINE__, (*p)->name, (*p)->sfmt);
+    dt_info(TAG, "[%s:%d] register sdec, name:%s fmt:%d \n", __FUNCTION__, __LINE__,
+            (*p)->name, (*p)->sfmt);
     sd->next = NULL;
 }
 
@@ -57,7 +58,8 @@ void register_sd_ext(sd_wrapper_t *sd)
             break;
         }
         if (strstr((*p)->name, sd->name) != NULL) {
-            dt_info(TAG, "[%s:%d] sdec already registerd, name:%s fmt:%d \n", __FUNCTION__, __LINE__, (*p)->name, (*p)->sfmt);
+            dt_info(TAG, "[%s:%d] sdec already registerd, name:%s fmt:%d \n", __FUNCTION__,
+                    __LINE__, (*p)->name, (*p)->sfmt);
             return;
         }
         p = &(*p)->next;
@@ -72,7 +74,8 @@ void register_sd_ext(sd_wrapper_t *sd)
         *p = sd;
     }
 
-    dt_info(TAG, "[%s:%d]register ext sd. sfmt:%d name:%s \n", __FUNCTION__, __LINE__, sd->sfmt, sd->name);
+    dt_info(TAG, "[%s:%d]register ext sd. sfmt:%d name:%s \n", __FUNCTION__,
+            __LINE__, sd->sfmt, sd->name);
 }
 
 /***********************************************************************
@@ -120,11 +123,13 @@ static int select_sub_decoder(dtsub_decoder_t * decoder)
         p = &(*p)->next;
     }
     if (*p == NULL) {
-        dt_info(TAG, "[%s:%d]no valid sub decoder found sfmt:%d\n", __FUNCTION__, __LINE__, para->sfmt);
+        dt_info(TAG, "[%s:%d]no valid sub decoder found sfmt:%d\n", __FUNCTION__,
+                __LINE__, para->sfmt);
         return -1;
     }
     decoder->wrapper = *p;
-    dt_info(TAG, "[%s:%d] select--%s sub decoder \n", __FUNCTION__, __LINE__, (*p)->name);
+    dt_info(TAG, "[%s:%d] select--%s sub decoder \n", __FUNCTION__, __LINE__,
+            (*p)->name);
     return 0;
 }
 
@@ -189,7 +194,8 @@ static void *sub_decode_loop(void *arg)
             }
             //no data left, maybe eof, need to flush left data
             memset(&pkt, 0, sizeof(dt_av_pkt_t));
-            dt_debug(TAG, "[%s:%d] no sub pkt left, flush left frames \n", __FUNCTION__, __LINE__);
+            dt_debug(TAG, "[%s:%d] no sub pkt left, flush left frames \n", __FUNCTION__,
+                     __LINE__);
         }
         /*read one pkt, enter decode pkt module */
         //will exec once for one time
@@ -212,7 +218,8 @@ static void *sub_decode_loop(void *arg)
         //update current pts, clear the buffer size
         if (pkt.pts >= 0 && decoder->pts_first == -1) {
             //we will use first pts to estimate pts
-            dt_info(TAG, "[%s:%d]first pkt decoded ok, pts:0x%llx dts:0x%llx size:%d\n", __FUNCTION__, __LINE__, pkt.pts, pkt.dts, pkt.size);
+            dt_info(TAG, "[%s:%d]first pkt decoded ok, pts:0x%llx dts:0x%llx size:%d\n",
+                    __FUNCTION__, __LINE__, pkt.pts, pkt.dts, pkt.size);
             decoder->pts_first = pts_exchange(decoder, frame->pts);
             decoder->pts_current = decoder->pts_first;
         }
@@ -231,7 +238,8 @@ DECODE_END:
             pkt.pts = -1;
         }
     } while (1);
-    dt_info(TAG, "[file:%s][%s:%d]decoder loop thread exit ok\n", __FILE__, __FUNCTION__, __LINE__);
+    dt_info(TAG, "[file:%s][%s:%d]decoder loop thread exit ok\n", __FILE__,
+            __FUNCTION__, __LINE__);
 
     pthread_exit(NULL);
     return NULL;

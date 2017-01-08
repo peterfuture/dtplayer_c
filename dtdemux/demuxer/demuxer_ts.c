@@ -95,11 +95,13 @@ static int ts_probe(demuxer_wrapper_t *wrapper, dt_buffer_t *probe_buf)
     const uint8_t *end = buf + probe_buf->level - 7;
 
     if (probe_buf->level < 10) {
-        dt_info(TAG, "[%s:%d] buf level:%d too low\n", __FUNCTION__, __LINE__, probe_buf->level);
+        dt_info(TAG, "[%s:%d] buf level:%d too low\n", __FUNCTION__, __LINE__,
+                probe_buf->level);
         return 0;
     }
 
-    dt_info(TAG, "[%s:%d] buf level:%d. %02x\n", __FUNCTION__, __LINE__, probe_buf->level, buf[0]);
+    dt_info(TAG, "[%s:%d] buf level:%d. %02x\n", __FUNCTION__, __LINE__,
+            probe_buf->level, buf[0]);
     int retry_times = 100;
     for (; buf < end; buf++) {
         uint32_t header = DT_RB8(buf);
@@ -143,10 +145,12 @@ static int
 dumpdvbnit(ts_stream_t *stream, ts_table_t *table, int complete)
 {
     if (0 == complete && 1 == table->expected) {
-        printf("  0x%04x - DVB Network Information Table 0x%02x (not yet defined)\n", (unsigned int) table->pid, table->tableid);
+        printf("  0x%04x - DVB Network Information Table 0x%02x (not yet defined)\n",
+               (unsigned int) table->pid, table->tableid);
         return 0;
     }
-    printf("  0x%04x - DVB Network Information Table 0x%02x\n", (unsigned int) table->pid, table->tableid);
+    printf("  0x%04x - DVB Network Information Table 0x%02x\n",
+           (unsigned int) table->pid, table->tableid);
     if (1 == table->expected) {
         if (1 == complete) {
             printf("  - Table defined but not present in stream\n");
@@ -164,17 +168,20 @@ dumppmt(ts_stream_t *stream, ts_table_t *table, int complete)
     const ts_streamtype_t *stype;
 
     if (0 == complete && 1 == table->expected) {
-        printf("  0x%04x - Program 0x%04x (not yet defined)\n", (unsigned int) table->pid, (unsigned int) table->progid);
+        printf("  0x%04x - Program 0x%04x (not yet defined)\n",
+               (unsigned int) table->pid, (unsigned int) table->progid);
         return 0;
     }
-    printf("  0x%04x - Program 0x%04x\n", (unsigned int) table->pid, (unsigned int) table->progid);
+    printf("  0x%04x - Program 0x%04x\n", (unsigned int) table->pid,
+           (unsigned int) table->progid);
     if (1 == table->expected) {
         if (1 == complete) {
             printf("  - Table defined but not present in stream\n");
         }
         return 0;
     }
-    printf("  - Table contains details of %lu streams\n", (unsigned long) table->d.pmt.nes);
+    printf("  - Table contains details of %lu streams\n",
+           (unsigned long) table->d.pmt.nes);
     for (c = 0; c < table->d.pmt.nes; c++) {
         info = table->d.pmt.es[c];
         printf("    0x%04x - ", info->pid);
@@ -260,7 +267,8 @@ dumptable(ts_stream_t *stream, ts_table_t *table, int complete)
     case TID_DVB_NIT:
         return dumpdvbnit(stream, table, complete);
     default:
-        printf("0x%04x - Unknown table ID 0x%02x\n", (unsigned int) table->pid, table->tableid);
+        printf("0x%04x - Unknown table ID 0x%02x\n", (unsigned int) table->pid,
+               table->tableid);
     }
     return 0;
 }
@@ -406,7 +414,8 @@ static int ts_open(demuxer_wrapper_t *wrapper)
         }
     }
 
-    dt_info(TAG, "esnum:%d anum:%d vnum:%d \n", ts_ctx->es_num, ts_ctx->audio_num, ts_ctx->video_num);
+    dt_info(TAG, "esnum:%d anum:%d vnum:%d \n", ts_ctx->es_num, ts_ctx->audio_num,
+            ts_ctx->video_num);
     if (ts_ctx->audio_num > 0) {
         pes_t *aes = &ts_ctx->es_audio;
         aes->state = TS_INVLAID;
@@ -483,9 +492,11 @@ NEXT_PKT:
     }
     //find last pts
     int read_size = MIN(ts_ctx->filesize, probe_buf->size);
-    dt_info(TAG, "[%s:%d]:filesize :%lld probe size:%d readsize:%d\n", __FUNCTION__, __LINE__, ts_ctx->filesize, probe_buf->size, read_size);
+    dt_info(TAG, "[%s:%d]:filesize :%lld probe size:%d readsize:%d\n", __FUNCTION__,
+            __LINE__, ts_ctx->filesize, probe_buf->size, read_size);
     if (read_size <=  188 * 10) {
-        dt_info(TAG, "[%s:%d]:readsize :%d less than 1880\n", __FUNCTION__, __LINE__, read_size);
+        dt_info(TAG, "[%s:%d]:readsize :%d less than 1880\n", __FUNCTION__, __LINE__,
+                read_size);
         return -1;
     }
     pos = ts_ctx->filesize - read_size;
@@ -610,21 +621,27 @@ static int ts_setup_info(demuxer_wrapper_t * wrapper, dt_media_info_t * info)
     }
 
     //set selcted stream pid
-    ts_ctx->es_audio.pid = (info->has_audio) ? info->astreams[info->cur_ast_index]->id : -1;
-    ts_ctx->es_video.pid = (info->has_video) ? info->vstreams[info->cur_vst_index]->id : -1;
+    ts_ctx->es_audio.pid = (info->has_audio) ?
+                           info->astreams[info->cur_ast_index]->id : -1;
+    ts_ctx->es_video.pid = (info->has_video) ?
+                           info->vstreams[info->cur_vst_index]->id : -1;
     if (info->has_audio) {
-        ts_ctx->es_audio.stream_type = ts_ctx->es_info[info->astreams[info->cur_ast_index]->index]->stype;
+        ts_ctx->es_audio.stream_type =
+            ts_ctx->es_info[info->astreams[info->cur_ast_index]->index]->stype;
     }
     if (info->has_video) {
-        ts_ctx->es_video.stream_type = ts_ctx->es_info[info->vstreams[info->cur_vst_index]->index]->stype;
+        ts_ctx->es_video.stream_type =
+            ts_ctx->es_info[info->vstreams[info->cur_vst_index]->index]->stype;
     }
-    dt_info(TAG, "audio STYPE:%d video stype:%d \n ", ts_ctx->es_audio.stream_type, ts_ctx->es_video.stream_type);
+    dt_info(TAG, "audio STYPE:%d video stype:%d \n ", ts_ctx->es_audio.stream_type,
+            ts_ctx->es_video.stream_type);
     return 0;
 }
 
 static int64_t parse_pes_pts(uint8_t *buf)
 {
-    return (int64_t)(*buf & 0x0e) << 29 | (DT_RB16(buf + 1) >> 1) << 15 | (DT_RB16(buf + 3) >> 1);
+    return (int64_t)(*buf & 0x0e) << 29 | (DT_RB16(buf + 1) >> 1) << 15 | (DT_RB16(
+                buf + 3) >> 1);
 }
 
 static int setup_frame(pes_t *es, dt_av_pkt_t *frame, int type)
@@ -643,7 +660,8 @@ static int setup_frame(pes_t *es, dt_av_pkt_t *frame, int type)
 }
 
 // 0 noerr 1 get one frame <0 err
-static int handle_ts_pkt(ts_ctx_t *ts_ctx, ts_packet_t *packet, dt_av_pkt_t *frame, int type)
+static int handle_ts_pkt(ts_ctx_t *ts_ctx, ts_packet_t *packet,
+                         dt_av_pkt_t *frame, int type)
 {
     int ret = 0;
     int is_start = packet->unitstart;
@@ -813,7 +831,8 @@ skip:
 
 #if 1 // just for test
                     int idx = 0;
-                    printf("payloda exceed total, data_index:%d buf_size:%d total:%d \n ", es->data_index, buf_size, es->total_size);
+                    printf("payloda exceed total, data_index:%d buf_size:%d total:%d \n ",
+                           es->data_index, buf_size, es->total_size);
                     for (idx = 0; idx < buf_size; idx++) {
                         printf("%02x ", buf[idx]);
                     }
@@ -859,8 +878,10 @@ static int ts_read_frame(demuxer_wrapper_t *wrapper, dt_av_pkt_t *frame)
     int has_video = (media_info->disable_video) ? 0 : media_info->has_video;
     int has_sub = (media_info->disable_sub) ? 0 : media_info->has_sub;
 
-    int apid = (has_audio) ? media_info->astreams[media_info->cur_ast_index]->id : -1;
-    int vpid = (has_video) ? media_info->vstreams[media_info->cur_vst_index]->id : -1;
+    int apid = (has_audio) ? media_info->astreams[media_info->cur_ast_index]->id :
+               -1;
+    int vpid = (has_video) ? media_info->vstreams[media_info->cur_vst_index]->id :
+               -1;
 
     uint8_t ts_pkt[188];
 

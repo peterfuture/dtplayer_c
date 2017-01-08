@@ -8,7 +8,8 @@ void version_info(void)
 {
     dt_info(version_tags, DT_MSG_DELIM "\n");
     dt_info(version_tags, "  dtplayer version 0.1\n");
-    dt_info(version_tags, "  based on FFMPEG, built on " __DATE__ " " __TIME__ "\n");
+    dt_info(version_tags, "  based on FFMPEG, built on " __DATE__ " " __TIME__
+            "\n");
     dt_info(version_tags, "  GCC: " __VERSION__ "\n");
     dt_info(version_tags, DT_MSG_DELIM "\n");
 }

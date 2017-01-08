@@ -6,7 +6,8 @@
 int dtvideo_init(void **video_priv, dtvideo_para_t * para, void *parent)
 {
     int ret = 0;
-    dtvideo_context_t *vctx = (dtvideo_context_t *) malloc(sizeof(dtvideo_context_t));
+    dtvideo_context_t *vctx = (dtvideo_context_t *) malloc(sizeof(
+                                  dtvideo_context_t));
     if (!vctx) {
         dt_error(TAG, "[%s:%d] video init failed \n", __FUNCTION__, __LINE__);
         ret = -1;
@@ -14,7 +15,8 @@ int dtvideo_init(void **video_priv, dtvideo_para_t * para, void *parent)
     }
     memcpy(&vctx->video_para, para, sizeof(dtvideo_para_t));
     vctx->video_para.extradata_size = para->extradata_size;
-    memcpy(&(vctx->video_para.extradata[0]), &(para->extradata[0]), para->extradata_size);
+    memcpy(&(vctx->video_para.extradata[0]), &(para->extradata[0]),
+           para->extradata_size);
 
     //we need to set parent early
     vctx->parent = parent;

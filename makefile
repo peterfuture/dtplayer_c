@@ -65,7 +65,7 @@ LDFLAGS += -L/usr/local/lib -L/usr/lib -L./
 DT_FFMPEG = yes
 DT_SDL = yes
 DT_SDL2 = no
-DT_ALSA = yes
+DT_ALSA = no
 DTAP=no
 
 #module
@@ -224,9 +224,7 @@ CFLAGS      += $(DT_CFLAGS)
 #                   SOURCECODE
 #======================================================
 #dtutils
-SRCS_COMMON-$(DT_UTIL) += dtutils/dt_av.c
 SRCS_COMMON-$(DT_UTIL) += dtutils/dt_log.c
-SRCS_COMMON-$(DT_UTIL) += dtutils/dt_lock.c
 SRCS_COMMON-$(DT_UTIL) += dtutils/dt_setting.c
 SRCS_COMMON-$(DT_UTIL) += dtutils/dt_ini.c
 SRCS_COMMON-$(DT_UTIL) += dtutils/dt_time.c
@@ -397,7 +395,7 @@ all: $(ALL_PRG)
 
 libdtp.so: $(OBJS_DTLIB_DEP_RELEASE) $(COMMON_LIBS) 
 	@$(CC) -shared -fPIC -o $@ $^ $(LDFLAGS)
-	@$(STRIP) $@
+	#@$(STRIP) $@
 	@echo =====================================================
 	@echo build $@ done
 	@echo =====================================================

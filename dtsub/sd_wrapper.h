@@ -2,7 +2,7 @@
 #define SD_WRAPPER_H
 
 #include "dt_buffer.h"
-#include "dt_av.h"
+#include "dtp_av.h"
 #include "dtsub_para.h"
 
 struct dtsub_decoder;
@@ -21,7 +21,8 @@ typedef struct sd_wrapper {
     int type;
 
     int (*init)(struct dtsub_decoder *decoder);
-    int (*decode_frame)(struct dtsub_decoder *decoder, dt_av_pkt_t * pkt, dtav_sub_frame_t ** frame);
+    int (*decode_frame)(struct dtsub_decoder *decoder, dt_av_pkt_t * pkt,
+                        dtav_sub_frame_t ** frame);
     int (*release)(struct dtsub_decoder *decoder);
 
     void *sd_priv;

@@ -23,10 +23,11 @@ int dtdemuxer_open(void **priv, dtdemuxer_para_t * para, void *parent)
     return 0;
 }
 
-dt_media_info_t *dtdemuxer_get_media_info(void *priv)
+int dtdemuxer_get_media_info(void *priv, dtp_media_info_t **info)
 {
     dtdemuxer_context_t *dem_ctx = (dtdemuxer_context_t *) priv;
-    return &(dem_ctx->media_info);
+    *info = &dem_ctx->media_info;
+    return 0;
 }
 
 int dtdemuxer_read_frame(void *priv, dt_av_pkt_t * frame)

@@ -1,6 +1,8 @@
 #ifndef DTSTREAM_H
 #define DTSTREAM_H
 
+#include "dt_utils.h"
+
 #include "stream_wrapper.h"
 
 #ifndef AVSEEK_SIZE

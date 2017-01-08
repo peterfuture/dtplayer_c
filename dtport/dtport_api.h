@@ -1,7 +1,8 @@
 #ifndef DTPORT_API_H
 #define DTPORT_API_H
 
-#include "dt_av.h"
+#include "dtp_av.h"
+#include "dtp_state.h"
 
 typedef struct {
     int has_video;

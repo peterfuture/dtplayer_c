@@ -308,7 +308,8 @@ bool ReadBool(cchr * Section, cchr * pKey, bool Default)
     if (Default != 0) {
         Val[0] = '1';
     }
-    return (atoi(ReadString(Section, pKey, Val)) ? 1 : 0);   /* Only 0 or 1 allowed */
+    return (atoi(ReadString(Section, pKey,
+                            Val)) ? 1 : 0);   /* Only 0 or 1 allowed */
 }
 
 /*=========================================================================
@@ -636,7 +637,8 @@ void CloseTypeFile()
 
 static int FileIsOpen = 0;
 
-int GetPrivateProfileString(char *appNam, char *keyNam, char *keyVal, char *filNam)
+int GetPrivateProfileString(char *appNam, char *keyNam, char *keyVal,
+                            char *filNam)
 {
     while (s_read_flags) {
         usleep(10000);
@@ -700,7 +702,8 @@ void CloseWriteFile(char *filNam)
     CloseTypeFile();
 }
 
-int WritePrivateProfileString(char *appNam, char *keyNam, char *keyVal, char *filNam)
+int WritePrivateProfileString(char *appNam, char *keyNam, char *keyVal,
+                              char *filNam)
 {
     while (s_read_flags) {
         usleep(10000);

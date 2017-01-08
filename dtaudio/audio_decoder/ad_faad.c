@@ -87,7 +87,8 @@ static int faad_open_dec(faad_ctx_t *this)
         dt_info(TAG, "bitrate:%d \n", bitrate);
     }
 
-    if ((bread = NeAACDecInit(hDecoder, this->buffer, this->bytes_into_buffer, &samplerate, &channels)) < 0) {
+    if ((bread = NeAACDecInit(hDecoder, this->buffer, this->bytes_into_buffer,
+                              &samplerate, &channels)) < 0) {
         /* If some error initializing occured, skip the file */
         dt_error(TAG, "Error initializing decoder library.\n");
         NeAACDecClose(hDecoder);
@@ -136,7 +137,8 @@ static int faad_decode(ad_wrapper_t *wrapper, adec_ctrl_t *pinfo)
 
     dt_debug(TAG, "start decoding %d data bytes...\n", pinfo->inlen);
 
-    sample_buffer = NeAACDecDecode(hDecoder, frameInfo, this->buffer, this->bytes_into_buffer);
+    sample_buffer = NeAACDecDecode(hDecoder, frameInfo, this->buffer,
+                                   this->bytes_into_buffer);
 
     if (frameInfo->error > 0) {
         dt_error(TAG, "Error: %s\n", NeAACDecGetErrorMessage(frameInfo->error));

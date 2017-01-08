@@ -35,7 +35,7 @@ ts__stream_pid_add(ts_stream_t *stream, uint16_t pid)
     switch (pid) {
     case PID_PAT:
         p->defined = 1;
-        /* Fallthrough */
+    /* Fallthrough */
     case PID_CAT:
     case PID_TSDT:
     case PID_DVB_NIT:

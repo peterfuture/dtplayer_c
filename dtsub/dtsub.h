@@ -1,9 +1,10 @@
 #ifndef DTSUB_H
 #define DTSUB_H
 
-#include "dt_av.h"
+#include "dt_utils.h"
+
+#include "dtp_av.h"
 #include "dtsub_api.h"
-#include "dt_queue.h"
 #include "dtsub_decoder.h"
 #include "dtsub_filter.h"
 #include "dtsub_output.h"

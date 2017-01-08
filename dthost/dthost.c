@@ -1,10 +1,13 @@
+#include "unistd.h"
+
+#include "dt_error.h"
+#include "dt_setting.h"
+
 #include "dthost.h"
 #include "dtport_api.h"
 #include "dtaudio_api.h"
 #include "dtvideo_api.h"
 #include "dtsub_api.h"
-
-#include "unistd.h"
 
 #define TAG "HOST-MGT"
 
@@ -54,7 +57,8 @@ int host_update_apts(dthost_context_t * hctx, int64_t apts)
         hctx->audio_discontinue_flag = 1;
         hctx->audio_discontinue_point = apts;
         hctx->audio_discontinue_step = jump;
-        dt_info(TAG, "apts discontinue,jump:%llx :%llx -> %llx \n", jump, host_get_apts(hctx), apts);
+        dt_info(TAG, "apts discontinue,jump:%llx :%llx -> %llx \n", jump,
+                host_get_apts(hctx), apts);
     }
 
     hctx->pts_audio_last = hctx->pts_audio_current;
@@ -75,18 +79,22 @@ int host_update_apts(dthost_context_t * hctx, int64_t apts)
     int64_t vpts = host_get_vpts(hctx);
     int64_t sys_time = host_get_systime(hctx);
     int64_t avdiff = llabs(host_get_avdiff(hctx));
-    int64_t asdiff = (llabs(apts - sys_time)) / DT_PTS_FREQ_MS;  //apts sys_time diff
+    int64_t asdiff = (llabs(apts - sys_time)) /
+                     DT_PTS_FREQ_MS;  //apts sys_time diff
 
-    if (sys_time == -1 || sys_time == DT_NOPTS_VALUE) {       //if systime have not been set,wait
+    if (sys_time == -1
+        || sys_time == DT_NOPTS_VALUE) {       //if systime have not been set,wait
         return 0;
     }
     if (host_sync_enable(hctx) && avdiff > AVSYNC_THRESHOLD_MAX) { //close sync
-        dt_info(TAG, "avdiff:%lld ecceed :%d ms, cloase sync \n", avdiff, AVSYNC_THRESHOLD_MAX);
+        dt_info(TAG, "avdiff:%lld ecceed :%d ms, cloase sync \n", avdiff,
+                AVSYNC_THRESHOLD_MAX);
         hctx->sync_mode = DT_SYNC_VIDEO_MASTER;
         return 0;
     }
 
-    if (hctx->sync_enable && hctx->sync_mode == DT_SYNC_VIDEO_MASTER && avdiff < AVSYNC_THRESHOLD_MAX) {
+    if (hctx->sync_enable && hctx->sync_mode == DT_SYNC_VIDEO_MASTER
+        && avdiff < AVSYNC_THRESHOLD_MAX) {
         hctx->sync_mode = DT_SYNC_AUDIO_MASTER;
     }
 
@@ -94,7 +102,9 @@ int host_update_apts(dthost_context_t * hctx, int64_t apts)
         return 0;
     }
     if (host_sync_enable(hctx)) {
-        dt_info(TAG, "[%s:%d] correct sys time apts:%llx vpts:%llx sys_time:%llx AVDIFF:%llx ASDIFF:%llx\n", __FUNCTION__, __LINE__, apts, vpts, sys_time, avdiff, asdiff);
+        dt_info(TAG,
+                "[%s:%d] correct sys time apts:%llx vpts:%llx sys_time:%llx AVDIFF:%llx ASDIFF:%llx\n",
+                __FUNCTION__, __LINE__, apts, vpts, sys_time, avdiff, asdiff);
         host_reset_systime(hctx, apts);
     }
     return 0;
@@ -107,7 +117,8 @@ int host_update_vpts(dthost_context_t * hctx, int64_t vpts)
         hctx->video_discontinue_flag = 1;
         hctx->video_discontinue_point = vpts;
         hctx->video_discontinue_step = jump;
-        dt_info(TAG, "vpts discontinue,jump:%llx :%llx -> %llx \n", jump, host_get_vpts(hctx), vpts);
+        dt_info(TAG, "vpts discontinue,jump:%llx :%llx -> %llx \n", jump,
+                host_get_vpts(hctx), vpts);
     }
 
     hctx->pts_video_last = hctx->pts_video_current;
@@ -123,19 +134,24 @@ int host_update_vpts(dthost_context_t * hctx, int64_t vpts)
 
     //when sync == 0, update systime with vpts
     if (host_sync_enable(hctx) == 0 && avdiff > AVSYNC_THRESHOLD) {
-        dt_info(TAG, "[%s:%d] disable avsync, sys:0x%llx vpts:0x%llx apts:0x%llx diff:0x%llx\n", __FUNCTION__, __LINE__, sys_time, vpts, host_get_apts(hctx), avdiff);
+        dt_info(TAG,
+                "[%s:%d] disable avsync, sys:0x%llx vpts:0x%llx apts:0x%llx diff:0x%llx\n",
+                __FUNCTION__, __LINE__, sys_time, vpts, host_get_apts(hctx), avdiff);
         return 0;
     }
 
     if (host_sync_enable(hctx) && avdiff > AVSYNC_THRESHOLD_MAX) { //close sync
-        dt_info(TAG, "avdiff:0x%lld (ms) ecceed :%d ms, disable av sync \n", avdiff, AVSYNC_THRESHOLD_MAX);
+        dt_info(TAG, "avdiff:0x%lld (ms) ecceed :%d ms, disable av sync \n", avdiff,
+                AVSYNC_THRESHOLD_MAX);
         hctx->sync_mode = DT_SYNC_VIDEO_MASTER;
         host_reset_systime(hctx, vpts);
         return 0;
     }
 
-    if (hctx->sync_enable && hctx->sync_mode == DT_SYNC_VIDEO_MASTER && avdiff < AVSYNC_THRESHOLD_MAX) {
-        dt_info(TAG, "[%s:%d]avdiff:%lld(ms) < %d ms, enable av sync \n", __FUNCTION__, __LINE__, avdiff, AVSYNC_THRESHOLD_MAX);
+    if (hctx->sync_enable && hctx->sync_mode == DT_SYNC_VIDEO_MASTER
+        && avdiff < AVSYNC_THRESHOLD_MAX) {
+        dt_info(TAG, "[%s:%d]avdiff:%lld(ms) < %d ms, enable av sync \n", __FUNCTION__,
+                __LINE__, avdiff, AVSYNC_THRESHOLD_MAX);
         hctx->sync_mode = DT_SYNC_AUDIO_MASTER;
         host_reset_systime(hctx, vpts);
     }
@@ -152,7 +168,9 @@ int host_update_spts(dthost_context_t * hctx, int64_t spts)
 int host_reset_systime(dthost_context_t * hctx, int64_t sys_time)
 {
     // First assignment
-    dt_info(TAG, "[%s:%d] apts:%llx vpts:%llx sys_time:%llx->%llx\n", __FUNCTION__, __LINE__, host_get_apts(hctx), host_get_vpts(hctx), host_get_systime(hctx), sys_time);
+    dt_info(TAG, "[%s:%d] apts:%llx vpts:%llx sys_time:%llx->%llx\n", __FUNCTION__,
+            __LINE__, host_get_apts(hctx), host_get_vpts(hctx), host_get_systime(hctx),
+            sys_time);
     hctx->sys_time_last = hctx->sys_time_current;
     hctx->sys_time_start = sys_time;
     hctx->sys_time_current = sys_time;
@@ -197,7 +215,9 @@ int64_t host_get_current_time(dthost_context_t * hctx)
         vtime = host_get_vpts(hctx);
     }
     ctime = hctx->sys_time_current;
-    dt_debug(TAG, "ctime:%llx atime:%llx vtime:%llx sys_time:%llx av_diff:%llx sync mode:%x\n", ctime, atime, vtime, hctx->sys_time_current, hctx->av_diff, hctx->av_sync);
+    dt_debug(TAG,
+             "ctime:%llx atime:%llx vtime:%llx sys_time:%llx av_diff:%llx sync mode:%x\n",
+             ctime, atime, vtime, hctx->sys_time_current, hctx->av_diff, hctx->av_sync);
     return ctime;
 }
 
@@ -215,7 +235,8 @@ int host_start(dthost_context_t * hctx)
     int video_start_flag = 0;
     int64_t first_apts = -1;
     int64_t first_vpts = -1;
-    dt_info(TAG, "check start condition has_audio:%d has_video:%d has_sub:%d\n", has_audio, has_video, has_sub);
+    dt_info(TAG, "check start condition has_audio:%d has_video:%d has_sub:%d\n",
+            has_audio, has_video, has_sub);
     // max delay 10s
     int print_cnt = 1000;
     do {
@@ -240,27 +261,32 @@ int host_start(dthost_context_t * hctx)
         }
         usleep(10000);
         if (print_cnt-- == 0) {
-            dt_info(TAG, "time out: audio:%d video:%d \n", audio_start_flag, video_start_flag);
+            dt_info(TAG, "time out: audio:%d video:%d \n", audio_start_flag,
+                    video_start_flag);
             break;
         }
     } while (1);
 
     if ((audio_start_flag & video_start_flag) == 0) {
-        dt_error(TAG, "Error: av not ready,  audio:%d video:%d \n", audio_start_flag, video_start_flag);
+        dt_error(TAG, "Error: av not ready,  audio:%d video:%d \n", audio_start_flag,
+                 video_start_flag);
         return -1;
     }
 
     dt_info(TAG, "first apts:0x%llx first vpts:0x%llx \n", first_apts, first_vpts);
     if (has_audio) {
-        hctx->pts_audio_first = hctx->pts_audio_last = hctx->pts_audio_current = first_apts;
+        hctx->pts_audio_first = hctx->pts_audio_last = hctx->pts_audio_current =
+                                    first_apts;
     }
     if (has_video) {
-        hctx->pts_video_first = hctx->pts_video_last = hctx->pts_video_current = first_vpts;
+        hctx->pts_video_first = hctx->pts_video_last = hctx->pts_video_current =
+                                    first_vpts;
     }
 
     if (host_sync_enable(hctx)) {
         int drop_flag = 0;
-        int av_diff_ms = abs(hctx->pts_video_first - hctx->pts_audio_first) / DT_PTS_FREQ_MS;
+        int av_diff_ms = abs(hctx->pts_video_first - hctx->pts_audio_first) /
+                         DT_PTS_FREQ_MS;
         if (av_diff_ms > AVSYNC_DROP_THRESHOLD) {
             dt_info(TAG, "FIRST AV DIFF EXCEED %d MS,DO NOT DROP\n", AVSYNC_DROP_THRESHOLD);
             hctx->sync_mode = DT_SYNC_VIDEO_MASTER;
@@ -282,10 +308,14 @@ int host_start(dthost_context_t * hctx)
             }
         }
     }
-    hctx->sys_time_first = (has_video) ? hctx->pts_video_current : hctx->pts_audio_current;
-    dt_info(TAG, "first_apts:0x%llx cur_apts:0x%llx \n", hctx->pts_audio_first, hctx->pts_audio_current);
-    dt_info(TAG, "first_vpts:0x%llx cur_vpts:0x%llx \n", hctx->pts_video_first, hctx->pts_video_current);
-    dt_info(TAG, "first_sys_time:0x%llx avdiff: 0x%llx ms\n", hctx->sys_time_first, host_get_avdiff(hctx));
+    hctx->sys_time_first = (has_video) ? hctx->pts_video_current :
+                           hctx->pts_audio_current;
+    dt_info(TAG, "first_apts:0x%llx cur_apts:0x%llx \n", hctx->pts_audio_first,
+            hctx->pts_audio_current);
+    dt_info(TAG, "first_vpts:0x%llx cur_vpts:0x%llx \n", hctx->pts_video_first,
+            hctx->pts_video_current);
+    dt_info(TAG, "first_sys_time:0x%llx avdiff: 0x%llx ms\n", hctx->sys_time_first,
+            host_get_avdiff(hctx));
 
     if (has_audio) {
         ret = dtaudio_start(hctx->audio_priv);
@@ -326,7 +356,8 @@ int host_pause(dthost_context_t * hctx)
     if (has_audio) {
         ret = dtaudio_pause(hctx->audio_priv);
         if (ret < 0) {
-            dt_error(TAG, "[%s:%d] dtaudio external pause failed \n", __FUNCTION__, __LINE__);
+            dt_error(TAG, "[%s:%d] dtaudio external pause failed \n", __FUNCTION__,
+                     __LINE__);
         }
     }
     if (has_video) {
@@ -355,7 +386,8 @@ int host_resume(dthost_context_t * hctx)
     if (has_audio) {
         ret = dtaudio_resume(hctx->audio_priv);
         if (ret < 0) {
-            dt_error(TAG, "[%s:%d] dtaudio external pause failed \n", __FUNCTION__, __LINE__);
+            dt_error(TAG, "[%s:%d] dtaudio external pause failed \n", __FUNCTION__,
+                     __LINE__);
         }
     }
 
@@ -415,7 +447,8 @@ int host_init(dthost_context_t * hctx)
     } else {
         hctx->av_sync = DT_SYNC_VIDEO_MASTER;
     }
-    hctx->sync_enable = (host_para->has_audio && host_para->has_video) && host_para->sync_enable;
+    hctx->sync_enable = (host_para->has_audio && host_para->has_video)
+                        && host_para->sync_enable;
     hctx->av_diff = 0;
 
     hctx->sys_time_start = DT_NOPTS_VALUE;
@@ -424,11 +457,13 @@ int host_init(dthost_context_t * hctx)
     hctx->sys_time_last  = DT_NOPTS_VALUE;
     hctx->sys_time_start_time = -1;
 
-    hctx->pts_audio_first = hctx->pts_audio_last = hctx->pts_audio_current = DT_NOPTS_VALUE;
+    hctx->pts_audio_first = hctx->pts_audio_last = hctx->pts_audio_current =
+                                DT_NOPTS_VALUE;
     hctx->audio_discontinue_flag = 0;
     hctx->audio_discontinue_point = -1;
     hctx->audio_discontinue_step = -1;
-    hctx->pts_video_first = hctx->pts_video_last = hctx->pts_video_current = DT_NOPTS_VALUE;
+    hctx->pts_video_first = hctx->pts_video_last = hctx->pts_video_current =
+                                DT_NOPTS_VALUE;
     hctx->video_discontinue_flag = 0;
     hctx->video_discontinue_point = -1;
     hctx->video_discontinue_step = -1;
@@ -456,14 +491,6 @@ int host_init(dthost_context_t * hctx)
         video_para.s_pixfmt = host_para->video_src_pixfmt;
         video_para.d_pixfmt = host_para->video_dest_pixfmt;
 
-#ifdef ENABLE_ANDROID
-        if (video_para.s_pixfmt == DTAV_PIX_FMT_YUV420P || video_para.s_pixfmt == DTAV_PIX_FMT_NV21 || video_para.s_pixfmt == DTAV_PIX_FMT_NV12) {
-            video_para.d_pixfmt = video_para.s_pixfmt;
-        } else {
-            video_para.d_pixfmt = DTAV_PIX_FMT_YUV420P;
-        }
-        dt_info(TAG, "for android platform, transform pixfmt using opengl. pixfmt:%d  dst:%d \n", video_para.s_pixfmt, video_para.d_pixfmt);
-#endif
         video_para.rate = host_para->video_rate;
         video_para.ratio = host_para->video_ratio;
         video_para.fps = host_para->video_fps;
@@ -473,7 +500,8 @@ int host_init(dthost_context_t * hctx)
         video_para.extradata_size = host_para->video_extra_size;
         if (video_para.extradata_size) {
             memset(video_para.extradata, 0, VIDEO_EXTRADATA_SIZE);
-            memcpy(video_para.extradata, host_para->video_extra_data, host_para->video_extra_size);
+            memcpy(video_para.extradata, host_para->video_extra_data,
+                   host_para->video_extra_size);
         }
         video_para.video_filter = host_para->video_filter;
         video_para.video_output = host_para->video_output;
@@ -485,7 +513,8 @@ int host_init(dthost_context_t * hctx)
         }
         dt_info(TAG, "[%s:%d] dtvideo init success \n", __FUNCTION__, __LINE__);
         if (!hctx->video_priv) {
-            dt_error(TAG, "[%s:%d] dtvideo init failed video_priv ==NULL \n", __FUNCTION__, __LINE__);
+            dt_error(TAG, "[%s:%d] dtvideo init failed video_priv ==NULL \n", __FUNCTION__,
+                     __LINE__);
             goto ERR3;
         }
     }
@@ -507,7 +536,8 @@ int host_init(dthost_context_t * hctx)
         audio_para.extradata_size = host_para->audio_extra_size;
         if (host_para->audio_extra_size) {
             memset(audio_para.extradata, 0, AUDIO_EXTRADATA_SIZE);
-            memcpy(audio_para.extradata, host_para->audio_extra_data, host_para->audio_extra_size);
+            memcpy(audio_para.extradata, host_para->audio_extra_data,
+                   host_para->audio_extra_size);
         }
         audio_para.audio_filter = host_para->audio_filter;
         audio_para.audio_output = host_para->audio_output;
@@ -519,7 +549,8 @@ int host_init(dthost_context_t * hctx)
         }
         dt_info(TAG, "[%s:%d]dtaudio init success \n", __FUNCTION__, __LINE__);
         if (!hctx->audio_priv) {
-            dt_error(TAG, "[%s:%d] dtaudio init failed audio_priv ==NULL \n", __FUNCTION__, __LINE__);
+            dt_error(TAG, "[%s:%d] dtaudio init failed audio_priv ==NULL \n", __FUNCTION__,
+                     __LINE__);
             return -1;
         }
     }
@@ -579,7 +610,7 @@ int host_write_frame(dthost_context_t * hctx, dt_av_pkt_t * frame, int type)
 {
 
     dthost_para_t *host_para = &hctx->para;
-    if (host_para->has_sub == 0 && type == DT_TYPE_SUBTITLE) {
+    if (host_para->has_sub == 0 && type == DTP_MEDIA_TYPE_SUBTITLE) {
         return DTERROR_NONE;
     }
 
@@ -611,7 +642,7 @@ int host_get_state(dthost_context_t * hctx, host_state_t * state)
     buf_state_t buf_state;
     dec_state_t dec_state;
     if (has_audio) {
-        dtport_get_state(hctx->port_priv, &buf_state, DT_TYPE_AUDIO);
+        dtport_get_state(hctx->port_priv, &buf_state, DTP_MEDIA_TYPE_AUDIO);
         dtaudio_get_state(hctx->audio_priv, &dec_state);
         state->abuf_level = buf_state.data_len;
         state->adec_err_cnt = dec_state.adec_error_count;
@@ -621,7 +652,7 @@ int host_get_state(dthost_context_t * hctx, host_state_t * state)
     }
 
     if (has_video) {
-        dtport_get_state(hctx->port_priv, &buf_state, DT_TYPE_VIDEO);
+        dtport_get_state(hctx->port_priv, &buf_state, DTP_MEDIA_TYPE_VIDEO);
         dtvideo_get_state(hctx->video_priv, &dec_state);
         state->vbuf_level = buf_state.data_len;
         state->vdec_err_cnt = dec_state.vdec_error_count;
@@ -631,7 +662,7 @@ int host_get_state(dthost_context_t * hctx, host_state_t * state)
     }
 
     if (has_sub) {
-        dtport_get_state(hctx->port_priv, &buf_state, DT_TYPE_SUBTITLE);
+        dtport_get_state(hctx->port_priv, &buf_state, DTP_MEDIA_TYPE_SUBTITLE);
         state->sbuf_level = buf_state.data_len;
         state->sdec_err_cnt = 0;
     } else {

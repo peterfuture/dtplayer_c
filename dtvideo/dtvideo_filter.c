@@ -9,7 +9,7 @@
 ***********************************************************************/
 
 #include "dtvideo.h"
-#include "dtvideo_filter.h"
+#include "dtp_vf.h"
 
 #define TAG "VIDEO-FILTER"
 
@@ -35,7 +35,8 @@ static void register_vf(vf_wrapper_t * vf)
         p = &(*p)->next;
     }
     *p = vf;
-    dt_info(TAG, "[%s:%d] register internal vf, name:%s \n", __FUNCTION__, __LINE__, (*p)->name);
+    dt_info(TAG, "[%s:%d] register internal vf, name:%s \n", __FUNCTION__, __LINE__,
+            (*p)->name);
     vf->next = NULL;
     return;
 }
@@ -56,7 +57,8 @@ void vf_register_ext(vf_wrapper_t *vf)
         vf->next = *p;
         *p = vf;
     }
-    dt_info(TAG, "[%s:%d]register external vf. name:%s \n", __FUNCTION__, __LINE__, vf->name);
+    dt_info(TAG, "[%s:%d]register external vf. name:%s \n", __FUNCTION__, __LINE__,
+            vf->name);
     return;
 }
 
@@ -103,7 +105,8 @@ static int select_vf(dtvideo_filter_t *filter, vf_cap_t cap)
 
     filter->wrapper = vf;
     if (vf) {
-        dt_info(TAG, "[%s:%d] %s video filter selected \n", __FUNCTION__, __LINE__, g_vf->name);
+        dt_info(TAG, "[%s:%d] %s video filter selected \n", __FUNCTION__, __LINE__,
+                g_vf->name);
     } else {
         dt_info(TAG, "[%s:%d] No video filter selected \n", __FUNCTION__, __LINE__);
     }
@@ -117,9 +120,6 @@ static int select_vf(dtvideo_filter_t *filter, vf_cap_t cap)
 ***********************************************************************/
 int video_filter_init(dtvideo_filter_t *filter)
 {
-    dt_lock_init(&filter->mutex, NULL);
-    dt_lock(&filter->mutex);
-
     int cap = 0;
     dtvideo_para_t *para = &filter->para;
     if (para->s_pixfmt != para->d_pixfmt) {
@@ -136,7 +136,8 @@ int video_filter_init(dtvideo_filter_t *filter)
     }
 
     vf_wrapper_t *wrapper = filter->wrapper;
-    ret = wrapper->init(filter);
+    memcpy(&wrapper->para, para, sizeof(dtvideo_para_t));
+    ret = wrapper->init(wrapper);
     if (ret >= 0) {
         filter->status = VF_STATUS_RUNNING;
     }
@@ -146,7 +147,6 @@ EXIT:
         ret = 0;
     }
 
-    dt_unlock(&filter->mutex);
     return ret;
 }
 
@@ -175,10 +175,8 @@ int video_filter_process(dtvideo_filter_t *filter, dt_av_frame_t *frame)
     if (filter->status == VF_STATUS_IDLE) { // No need to Process
         return 0;
     }
-    dt_lock(&filter->mutex);
     vf_wrapper_t *wrapper = filter->wrapper;
-    ret = wrapper->process(filter, frame);
-    dt_unlock(&filter->mutex);
+    ret = wrapper->process(wrapper, frame);
     return ret;
 }
 
@@ -189,16 +187,14 @@ int video_filter_process(dtvideo_filter_t *filter, dt_av_frame_t *frame)
 ***********************************************************************/
 int video_filter_stop(dtvideo_filter_t *filter)
 {
-    dt_lock(&filter->mutex);
     vf_wrapper_t *wrapper = filter->wrapper;
     if (!wrapper) {
         goto EXIT;
     }
     if (filter->status == VF_STATUS_RUNNING) {
-        wrapper->release(filter);
+        wrapper->release(wrapper);
     }
 EXIT:
     filter->status = VF_STATUS_IDLE;
-    dt_unlock(&filter->mutex);
     return 0;
 }

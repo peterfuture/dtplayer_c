@@ -11,9 +11,11 @@
 
 #ifdef ENABLE_VO_SDL
 
+#include "dt_lock.h"
+
 #include "gui.h"
 #include "dt_player.h"
-#include "dtvideo_filter.h"
+#include "dtp_vf.h"
 #include <SDL/SDL.h>
 
 #define TAG "SDL-GUI"
@@ -70,7 +72,8 @@ static int sdl_init(gui_ctx_t *gui)
     SDL_WM_SetCaption("dtplayer", "dttv");
     dt_lock_init(&window.mutex, NULL);
 
-    dt_info(TAG, "Create window with size<%d - %d> ok \n", gui->window_w, gui->window_h);
+    dt_info(TAG, "Create window with size<%d - %d> ok \n", gui->window_w,
+            gui->window_h);
     return 0;
 }
 
@@ -135,20 +138,20 @@ static gui_event_t sdl_get_event(gui_ctx_t *ctx , args_t *arg)
         break;
     case SDL_MOUSEBUTTONDOWN:
     case SDL_MOUSEMOTION: {
-        double x;
-        if (event.type == SDL_MOUSEBUTTONDOWN) {
-            x = event.button.x;
-        } else {
-            if (event.motion.state != SDL_PRESSED) {
-                break;
+            double x;
+            if (event.type == SDL_MOUSEBUTTONDOWN) {
+                x = event.button.x;
+            } else {
+                if (event.motion.state != SDL_PRESSED) {
+                    break;
+                }
+                x = event.motion.x;
             }
-            x = event.motion.x;
+            arg->arg1 = (int)x;
+            arg->arg2 = sdl_gui.window_w;
+            return EVENT_SEEK_RATIO;
         }
-        arg->arg1 = (int)x;
-        arg->arg2 = sdl_gui.window_w;
-        return EVENT_SEEK_RATIO;
-    }
-    break;
+        break;
     case SDL_VIDEORESIZE:
         arg->arg1 = event.resize.w;
         arg->arg2 = event.resize.h;
@@ -170,24 +173,24 @@ static int sdl_set_info(gui_ctx_t *ctx, gui_cmd_t cmd, args_t arg)
 {
     switch (cmd) {
     case GUI_CMD_SET_SIZE: {
-        dt_lock(&window.mutex);
-        int width = arg.arg1;
-        int height = arg.arg2;
-        int flags = SDL_HWSURFACE | SDL_ASYNCBLIT | SDL_HWACCEL;
-        if (width == sdl_gui.max_width) {
-            flags |= SDL_FULLSCREEN;
-        } else {
-            flags |= SDL_RESIZABLE;
+            dt_lock(&window.mutex);
+            int width = arg.arg1;
+            int height = arg.arg2;
+            int flags = SDL_HWSURFACE | SDL_ASYNCBLIT | SDL_HWACCEL;
+            if (width == sdl_gui.max_width) {
+                flags |= SDL_FULLSCREEN;
+            } else {
+                flags |= SDL_RESIZABLE;
+            }
+            window.screen = SDL_SetVideoMode(width , height, 0, flags);
+            SDL_WM_SetCaption("dtplayer", "dttv");
+            sdl_gui.window_w = width;
+            sdl_gui.window_h = height;
+            sdl_gui.rect.w = width;
+            sdl_gui.rect.h = height;
+            dt_unlock(&window.mutex);
         }
-        window.screen = SDL_SetVideoMode(width , height, 0, flags);
-        SDL_WM_SetCaption("dtplayer", "dttv");
-        sdl_gui.window_w = width;
-        sdl_gui.window_h = height;
-        sdl_gui.rect.w = width;
-        sdl_gui.rect.h = height;
-        dt_unlock(&window.mutex);
-    }
-    break;
+        break;
     default:
         break;
     }
@@ -253,21 +256,23 @@ static int map_sdl_supported_pixfmt(int pixfmt)
     return DTAV_PIX_FMT_YUV420P;
 }
 
-static int vo_sdl_init(dtvideo_output_t * vo)
+static int vo_sdl_init(vo_wrapper_t * vo)
 {
     int width = sdl_gui.window_w;
     int height = sdl_gui.window_h;
 
     //Init vf
     memset(&sdl_vf, 0, sizeof(dtvideo_filter_t));
-    memcpy(&sdl_vf.para, vo->para, sizeof(dtvideo_para_t));
+    memcpy(&sdl_vf.para, &vo->para, sizeof(dtvideo_para_t));
 
     if (sdl_vf.para.d_pixfmt != sdl_gui.pixfmt) {
-        dt_info(TAG, "dest pixfmt changed by setting.ini. update: %d->%d\n", sdl_gui.pixfmt, sdl_vf.para.d_pixfmt);
+        dt_info(TAG, "dest pixfmt changed by setting.ini. update: %d->%d\n",
+                sdl_gui.pixfmt, sdl_vf.para.d_pixfmt);
         sdl_gui.pixfmt = sdl_vf.para.d_pixfmt;
     }
     // Check SDL Support PixFmt
-    sdl_gui.pixfmt = sdl_vf.para.d_pixfmt = map_sdl_supported_pixfmt(sdl_gui.pixfmt);
+    sdl_gui.pixfmt = sdl_vf.para.d_pixfmt = map_sdl_supported_pixfmt(
+            sdl_gui.pixfmt);
 
     sdl_vf.para.d_width = width;
     sdl_vf.para.d_height = height;
@@ -276,7 +281,8 @@ static int vo_sdl_init(dtvideo_output_t * vo)
 
     // recalc max window widht & height
     SDL_Rect rect;
-    calculate_display_rect(&rect, 0, 0, sdl_gui.max_width, sdl_gui.max_height, sdl_gui.para.width, sdl_gui.para.height);
+    calculate_display_rect(&rect, 0, 0, sdl_gui.max_width, sdl_gui.max_height,
+                           sdl_gui.para.width, sdl_gui.para.height);
     dt_info(TAG, "recalc max [w:%d -h:%d] \n", rect.w, rect.h);
     sdl_gui.max_width = rect.w;
     sdl_gui.max_height = rect.h;
@@ -284,18 +290,22 @@ static int vo_sdl_init(dtvideo_output_t * vo)
     return 0;
 }
 
-static int vo_sdl_render(dtvideo_output_t * vo, dt_av_frame_t * frame)
+static int vo_sdl_render(vo_wrapper_t * vo, dt_av_frame_t * frame)
 {
     dt_lock(&window.mutex);
     dt_debug(TAG, "frame size [%d:%d] \n", frame->width, frame->height);
     // reset sdl vf and window size
     dtvideo_filter_t *vf = &sdl_vf;
-    if (vf->para.d_width != sdl_gui.window_w || vf->para.d_height != sdl_gui.window_h || frame->pixfmt != sdl_gui.pixfmt) {
+    if (vf->para.d_width != sdl_gui.window_w
+        || vf->para.d_height != sdl_gui.window_h || frame->pixfmt != sdl_gui.pixfmt) {
         vf->para.d_width = sdl_gui.window_w;
         vf->para.d_height = sdl_gui.window_h;
         vf->para.s_pixfmt = frame->pixfmt;
         vf->para.d_pixfmt = sdl_gui.pixfmt;
-        dt_info(TAG, "Need to Update Video Filter Parameter. w:%d->%d h:%d->%d pixfmt:%d->%d \n", vf->para);
+        dt_info(TAG,
+                "Need to Update Video Filter Parameter. w:%d->%d h:%d->%d pixfmt:%d->%d \n",
+                vf->para.s_width, vf->para.d_width, vf->para.s_height, vf->para.d_height ,
+                vf->para.s_pixfmt, vf->para.d_pixfmt);
         video_filter_update(vf);
     }
 
@@ -313,7 +323,8 @@ static int vo_sdl_render(dtvideo_output_t * vo, dt_av_frame_t * frame)
         SDL_FreeYUVOverlay(window.overlay);
     }
     // Create overlay
-    window.overlay = SDL_CreateYUVOverlay(width, height, map_sdl_overlay(sdl_gui.pixfmt), window.screen);
+    window.overlay = SDL_CreateYUVOverlay(width, height,
+                                          map_sdl_overlay(sdl_gui.pixfmt), window.screen);
 
     SDL_LockYUVOverlay(window.overlay);
     switch (sdl_gui.pixfmt) {
@@ -335,14 +346,15 @@ static int vo_sdl_render(dtvideo_output_t * vo, dt_av_frame_t * frame)
     rect.y = y;
     rect.w = w;
     rect.h = h;
-    dt_debug(TAG, "rect[%d-%d-%d-%d] size[%d-%d]\n", rect.x, rect.y, rect.w, rect.h, width, height);
+    dt_debug(TAG, "rect[%d-%d-%d-%d] size[%d-%d]\n", rect.x, rect.y, rect.w, rect.h,
+             width, height);
     SDL_DisplayYUVOverlay(window.overlay, &rect);
 
     dt_unlock(&window.mutex);
     return 0;
 }
 
-static int vo_sdl_stop(dtvideo_output_t * vo)
+static int vo_sdl_stop(vo_wrapper_t * vo)
 {
     dt_lock(&window.mutex);
     if (window.overlay) {
@@ -360,9 +372,9 @@ const char *vo_sdl_name = "SDL VO";
 vo_wrapper_t vo_sdl_ops = {
     .id = VO_ID_SDL,
     .name = "sdl",
-    .vo_init = vo_sdl_init,
-    .vo_stop = vo_sdl_stop,
-    .vo_render = vo_sdl_render,
+    .init = vo_sdl_init,
+    .stop = vo_sdl_stop,
+    .render = vo_sdl_render,
 };
 
 int setup_vo(vo_wrapper_t *wrapper)
@@ -372,9 +384,9 @@ int setup_vo(vo_wrapper_t *wrapper)
     }
     wrapper->id = VO_ID_SDL;
     wrapper->name = vo_sdl_name;
-    wrapper->vo_init = vo_sdl_init;
-    wrapper->vo_stop = vo_sdl_stop;
-    wrapper->vo_render = vo_sdl_render;
+    wrapper->init = vo_sdl_init;
+    wrapper->stop = vo_sdl_stop;
+    wrapper->render = vo_sdl_render;
     return 0;
 }
 

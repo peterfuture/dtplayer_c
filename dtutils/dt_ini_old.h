@@ -116,8 +116,10 @@ void CloseIniFile();
 bool WriteIniFile(cchr * FileName);
 void CloseTypeFile();
 //ssg add
-int GetPrivateProfileString(char *appNam, char *keyNam, char *keyVal, char *fileNam);
-int WritePrivateProfileString(char *appNam, char *keyNam, char *keyVal, char *filNam);
+int GetPrivateProfileString(char *appNam, char *keyNam, char *keyVal,
+                            char *fileNam);
+int WritePrivateProfileString(char *appNam, char *keyNam, char *keyVal,
+                              char *filNam);
 int OpenTypeFile(char *filNam);
 int GetTypeKeyVal(char *appNam, char *keyNam, char *keyVal);
 int SetTypeKeyVal(char *appNam, char *keyNam, char *keyVal);

@@ -147,7 +147,8 @@ static void init_texture(void)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, dw, dh, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, dw, dh, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                 image);
 #if 0
     glDisable(GL_BLEND);
     glDepthMask(GL_FALSE);
@@ -210,14 +211,18 @@ static int vo_gl_init(void)
         /* create a GLX context */
         cx = glXCreateContext(XDisplay, gl_vinfo, None, GL_TRUE);
         /* create a color map */
-        cmap = XCreateColormap(XDisplay, RootWindow(XDisplay, gl_vinfo->screen), gl_vinfo->visual, AllocNone);
+        cmap = XCreateColormap(XDisplay, RootWindow(XDisplay, gl_vinfo->screen),
+                               gl_vinfo->visual, AllocNone);
         /* create a window */
         swa.colormap = cmap;
         swa.border_pixel = 0;
         swa.event_mask = StructureNotifyMask;
-        win = XCreateWindow(XDisplay, RootWindow(XDisplay, gl_vinfo->screen), 0, 0, dw, dh, 0, gl_vinfo->depth, InputOutput, gl_vinfo->visual, CWBorderPixel | CWColormap | CWEventMask, &swa);
+        win = XCreateWindow(XDisplay, RootWindow(XDisplay, gl_vinfo->screen), 0, 0, dw,
+                            dh, 0, gl_vinfo->depth, InputOutput, gl_vinfo->visual,
+                            CWBorderPixel | CWColormap | CWEventMask, &swa);
 #define WIN_TITLE "Dawn Light Player"
-        XSetStandardProperties(XDisplay, win, WIN_TITLE, WIN_TITLE, None, NULL, 0, NULL);
+        XSetStandardProperties(XDisplay, win, WIN_TITLE, WIN_TITLE, None, NULL, 0,
+                               NULL);
         XMapWindow(XDisplay, win);
         XIfEvent(XDisplay, &event, WaitForNotify, (char *) win);
         /* connect the gl context to the window */
@@ -256,9 +261,11 @@ static int vo_gl_vfmt2rgb(AVPicture * dst, AVPicture * src)
 {
     static struct SwsContext *img_convert_ctx;
 
-    img_convert_ctx = sws_getCachedContext(img_convert_ctx, dw, dh, src_pic_fmt, dw, dh, my_pic_fmt, SWS_BICUBIC, NULL, NULL, NULL);
+    img_convert_ctx = sws_getCachedContext(img_convert_ctx, dw, dh, src_pic_fmt, dw,
+                                           dh, my_pic_fmt, SWS_BICUBIC, NULL, NULL, NULL);
 
-    sws_scale(img_convert_ctx, src->data, src->linesize, 0, dh, dst->data, dst->linesize);
+    sws_scale(img_convert_ctx, src->data, src->linesize, 0, dh, dst->data,
+              dst->linesize);
 
     return 0;
 }
@@ -267,7 +274,8 @@ static void update_texture(void)
 {
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, texName);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, dw, dh, GL_RGBA, GL_UNSIGNED_BYTE, image);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, dw, dh, GL_RGBA, GL_UNSIGNED_BYTE,
+                    image);
 #if 1
     glBegin(GL_POLYGON);
     glTexCoord2f(dx, dy);

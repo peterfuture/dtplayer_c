@@ -1,21 +1,15 @@
 #ifndef DTVIDEO_H
 #define DTVIDEO_H
 
-#include "dt_av.h"
-#include "dtvideo_api.h"
-#include "dt_buffer.h"
-#include "dt_queue.h"
-#include "dt_time.h"
-#include "dtvideo_decoder.h"
-#include "dtvideo_filter.h"
-#include "dtvideo_output.h"
-#if 0
-#include "dtvideo_filter.h"
-#include "dtvideo_output.h"
-#endif
-
 #include <pthread.h>
 #include <unistd.h>
+
+#include "dt_utils.h"
+
+#include "dtp_av.h"
+#include "dtvideo_api.h"
+#include "dtvideo_decoder.h"
+#include "dtvideo_output.h"
 
 #define DTVIDEO_BUF_SIZE 1024*1024
 
@@ -33,11 +27,8 @@ typedef enum {
 typedef struct {
     /*param */
     dtvideo_para_t video_para;
-    //dt_buffer_t video_decoded_buf;
-    dt_buffer_t video_filtered_buf;
     /*module */
     dtvideo_decoder_t video_dec;
-    dtvideo_filter_t video_filt;
     dtvideo_output_t video_out;
 
     queue_t *vo_queue;
@@ -58,7 +49,6 @@ typedef struct {
 void video_register_all();
 void video_remove_all();
 void register_ext_vd(vd_wrapper_t *vo);
-void register_ext_vf(vf_wrapper_t *vo);
 void register_ext_vo(vo_wrapper_t *vo);
 
 int dtvideo_read_frame(void *priv, dt_av_pkt_t * frame);

@@ -1,11 +1,12 @@
 #ifndef DT_AUDIO_H
 #define DT_AUDIO_H
 
-#include "dt_av.h"
+#include "dtp_av.h"
 #include "dt_utils.h"
 #include "dt_event.h"
 #include "dtaudio_api.h"
 
+#include "dtp_audio_plugin.h"
 #include "dtaudio_decoder.h"
 #include "dtaudio_filter.h"
 #include "dtaudio_output.h"

@@ -92,7 +92,7 @@ int audio_output_pause(dtaudio_output_t * ao)
 {
     ao->status = AO_STATUS_PAUSE;
     ao_wrapper_t *wrapper = ao->wrapper;
-    wrapper->ao_pause(ao);
+    wrapper->pause(wrapper);
     return 0;
 }
 
@@ -100,7 +100,7 @@ int audio_output_resume(dtaudio_output_t * ao)
 {
     ao->status = AO_STATUS_RUNNING;
     ao_wrapper_t *wrapper = ao->wrapper;
-    wrapper->ao_resume(ao);
+    wrapper->resume(wrapper);
     return 0;
 }
 
@@ -109,7 +109,7 @@ int audio_output_stop(dtaudio_output_t * ao)
     ao->status = AO_STATUS_EXIT;
     pthread_join(ao->output_thread_pid, NULL);
     ao_wrapper_t *wrapper = ao->wrapper;
-    wrapper->ao_stop(ao);
+    wrapper->stop(wrapper);
     return 0;
 }
 
@@ -122,15 +122,16 @@ int audio_output_latency(dtaudio_output_t * ao)
         return ao->last_valid_latency;
     }
     ao_wrapper_t *wrapper = ao->wrapper;
-    ao->last_valid_latency = wrapper->ao_latency(ao);
+    wrapper->get_parameter(wrapper, DTP_AO_CMD_GET_LATENCY, (unsigned long)(&ao->last_valid_latency));
     return ao->last_valid_latency;
 }
 
 int audio_output_get_level(dtaudio_output_t * ao)
 {
-
     ao_wrapper_t *wrapper = ao->wrapper;
-    return wrapper->ao_level(ao);
+    int level = 0;
+    wrapper->get_parameter(wrapper, DTP_AO_CMD_GET_LEVEL, (unsigned long)(&level));
+    return level;
 }
 
 static void *audio_output_thread(void *args)
@@ -186,7 +187,7 @@ static void *audio_output_thread(void *args)
 #endif
         }
         /*write to ao device */
-        wlen = wrapper->ao_write(ao, buffer, rlen);
+        wlen = wrapper->write(wrapper, buffer, rlen);
         if (wlen <= 0) {
             usleep(1000);
             continue;
@@ -221,7 +222,8 @@ int audio_output_init(dtaudio_output_t * ao, int ao_id)
     }
 
     ao_wrapper_t *wrapper = ao->wrapper;
-    wrapper->ao_init(ao, &ao->para);
+    memcpy(&wrapper->para, &ao->para, sizeof(dtaudio_para_t));
+    wrapper->init(wrapper, &ao->para);
     dt_info(TAG, "[%s:%d] audio output init success\n", __FUNCTION__, __LINE__);
 
     /*start aout pthread */
@@ -245,6 +247,6 @@ int64_t audio_output_get_latency(dtaudio_output_t * ao)
     }
 
     ao_wrapper_t *wrapper = ao->wrapper;
-    ao->last_valid_latency = wrapper->ao_latency(ao);
+    wrapper->get_parameter(wrapper, DTP_AO_CMD_GET_LATENCY, (unsigned long)(&ao->last_valid_latency));
     return ao->last_valid_latency;
 }

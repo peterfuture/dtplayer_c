@@ -71,7 +71,8 @@ static int vo_fb_init(void)
 
     fbctxp->fb = open(fbctxp->dev, O_RDWR);
     if (fbctxp->fb < 0) {
-        av_log(NULL, AV_LOG_ERROR, "Error opening %s: %m. Check kernel config\n", fbctxp->dev);
+        av_log(NULL, AV_LOG_ERROR, "Error opening %s: %m. Check kernel config\n",
+               fbctxp->dev);
         return -1;
     }
     if (-1 == ioctl(fbctxp->fb, FBIOGET_VSCREENINFO, &(fbctxp->varinfo))) {
@@ -83,7 +84,8 @@ static int vo_fb_init(void)
         return -1;
     }
 
-    fbctxp->orig_mem = (uint8_t *) mmap(NULL, fbctxp->fixinfo.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fbctxp->fb, 0);
+    fbctxp->orig_mem = (uint8_t *) mmap(NULL, fbctxp->fixinfo.smem_len,
+                                        PROT_READ | PROT_WRITE, MAP_SHARED, fbctxp->fb, 0);
 
     if (-1L == (long) fbctxp->orig_mem) {
         av_log(NULL, AV_LOG_ERROR, "mmap error\n");
@@ -109,7 +111,8 @@ static int vo_fb_init(void)
     fbctxp->dx = (fbctxp->varinfo.xres - fbctxp->dw) / 2;
     fbctxp->dy = (fbctxp->varinfo.yres - fbctxp->dh) / 2;
 
-    fbctxp->mem = fbctxp->orig_mem + (fbctxp->fixinfo.line_length * fbctxp->dy) + ((fbctxp->varinfo.bits_per_pixel / 8) * fbctxp->dx);
+    fbctxp->mem = fbctxp->orig_mem + (fbctxp->fixinfo.line_length * fbctxp->dy) + ((
+                      fbctxp->varinfo.bits_per_pixel / 8) * fbctxp->dx);
 
     switch (fbctxp->varinfo.bits_per_pixel) {
     case 32:
@@ -163,9 +166,12 @@ static int vo_fb_vfmt2rgb(AVPicture * dst, AVPicture * src)
 {
     static struct SwsContext *img_convert_ctx;
 
-    img_convert_ctx = sws_getCachedContext(img_convert_ctx, dlpctxp->pwidth, dlpctxp->pheight, dlpctxp->pixfmt, fbctxp->dw, fbctxp->dh, fbctxp->pixfmt, SWS_BICUBIC, NULL, NULL, NULL);
+    img_convert_ctx = sws_getCachedContext(img_convert_ctx, dlpctxp->pwidth,
+                                           dlpctxp->pheight, dlpctxp->pixfmt, fbctxp->dw, fbctxp->dh, fbctxp->pixfmt,
+                                           SWS_BICUBIC, NULL, NULL, NULL);
 
-    sws_scale(img_convert_ctx, src->data, src->linesize, 0, fbctxp->dh, dst->data, dst->linesize);
+    sws_scale(img_convert_ctx, src->data, src->linesize, 0, fbctxp->dh, dst->data,
+              dst->linesize);
 
     return 0;
 }
@@ -216,7 +222,8 @@ static void toggle_full_screen(void)
     fbctxp->dx = (fbctxp->varinfo.xres - fbctxp->dw) / 2;
     fbctxp->dy = (fbctxp->varinfo.yres - fbctxp->dh) / 2;
 
-    fbctxp->mem = fbctxp->orig_mem + (fbctxp->fixinfo.line_length * fbctxp->dy) + ((fbctxp->varinfo.bits_per_pixel / 8) * fbctxp->dx);
+    fbctxp->mem = fbctxp->orig_mem + (fbctxp->fixinfo.line_length * fbctxp->dy) + ((
+                      fbctxp->varinfo.bits_per_pixel / 8) * fbctxp->dx);
 
     clear_fb_screen();
 
@@ -231,7 +238,8 @@ static void toggle_full_screen(void)
 
 static void vo_fb_zoom(int mulriple)
 {
-    if (dlpctxp->pwidth * mulriple > fbctxp->varinfo.xres || dlpctxp->pheight * mulriple > fbctxp->varinfo.yres) {
+    if (dlpctxp->pwidth * mulriple > fbctxp->varinfo.xres
+        || dlpctxp->pheight * mulriple > fbctxp->varinfo.yres) {
         av_log(NULL, AV_LOG_INFO, "vo fb: zoom %d will > fullscrren\n", mulriple);
         return;
     }
@@ -249,7 +257,8 @@ static void vo_fb_zoom(int mulriple)
     fbctxp->dx = (fbctxp->varinfo.xres - fbctxp->dw) / 2;
     fbctxp->dy = (fbctxp->varinfo.yres - fbctxp->dh) / 2;
 
-    fbctxp->mem = fbctxp->orig_mem + (fbctxp->fixinfo.line_length * fbctxp->dy) + ((fbctxp->varinfo.bits_per_pixel / 8) * fbctxp->dx);
+    fbctxp->mem = fbctxp->orig_mem + (fbctxp->fixinfo.line_length * fbctxp->dy) + ((
+                      fbctxp->varinfo.bits_per_pixel / 8) * fbctxp->dx);
 
     clear_fb_screen();
 
