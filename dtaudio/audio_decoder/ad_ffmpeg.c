@@ -153,12 +153,14 @@ int ffmpeg_adec_decode(ad_wrapper_t *wrapper, adec_ctrl_t *pinfo)
     AVFrame frame_tmp;
     //AVFrame frame;
     AVPacket pkt;
+    memset(&pkt, 0, sizeof(AVPacket));
     pkt.data = pinfo->inptr;
     pkt.size = pinfo->inlen;
     pkt.side_data_elems = 0;
+    memset(&frame_tmp, 0, sizeof(AVFrame));
+    memset(frame, 0, sizeof(AVFrame));
 
     dtaudio_decoder_t *decoder = (dtaudio_decoder_t *)wrapper->parent;
-    memset(&frame_tmp, 0, sizeof(frame_tmp));
     dt_debug(TAG, "start decode size:%d %02x %02x \n", pkt.size, pkt.data[0],
              pkt.data[1]);
     ret = avcodec_decode_audio4(avctxp, frame, &got_samples, &pkt);

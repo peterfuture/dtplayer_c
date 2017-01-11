@@ -223,7 +223,7 @@ int audio_output_init(dtaudio_output_t * ao, int ao_id)
 
     ao_wrapper_t *wrapper = ao->wrapper;
     memcpy(&wrapper->para, &ao->para, sizeof(dtaudio_para_t));
-    wrapper->init(wrapper, &ao->para);
+    wrapper->init(wrapper);
     dt_info(TAG, "[%s:%d] audio output init success\n", __FUNCTION__, __LINE__);
 
     /*start aout pthread */

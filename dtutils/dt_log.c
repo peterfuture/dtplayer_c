@@ -84,7 +84,7 @@ void dt_error(void *tag, const char *fmt, ...)
         return;
     }
     display_time();
-    dt_get_log_level(DT_LOG_DEBUG);
+    dt_get_log_level(DT_LOG_ERROR);
     printf("[%s] ", (char *) tag);
     va_list vl;
     va_start(vl, fmt);

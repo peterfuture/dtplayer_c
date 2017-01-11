@@ -37,7 +37,7 @@ typedef struct {
 
 struct ao_wrapper;
 
-typedef int (*ao_init)(struct ao_wrapper *ao, dtaudio_para_t *para);
+typedef int (*ao_init)(struct ao_wrapper *ao);
 typedef int (*ao_start)(struct ao_wrapper *ao);
 typedef int (*ao_pause)(struct ao_wrapper *ao);
 typedef int (*ao_resume)(struct ao_wrapper *ao);

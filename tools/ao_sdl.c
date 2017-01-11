@@ -28,16 +28,17 @@ static void sdl_cb(void *userdata, uint8_t *buf, int size)
     return;
 }
 
-static int ao_sdl_init(ao_wrapper_t *ao, dtaudio_para_t *ppara)
+static int ao_sdl_init(ao_wrapper_t *ao)
 {
     int ret = 0;
+    dtaudio_para_t *para = &ao->para;
     sdl_ao_ctx_t *ctx = malloc(sizeof(*ctx));
     if (!ctx) {
         dt_info(TAG, "SDL CTX MALLOC FAILED \n");
         return -1;
     }
     memset(ctx, 0, sizeof(*ctx));
-    if (buf_init(&ctx->dbt, ppara->dst_samplerate * 4 / 10) < 0) { // 100ms
+    if (buf_init(&ctx->dbt, para->dst_samplerate * 4 / 10) < 0) { // 100ms
         ret = -1;
         goto FAIL;
     }
@@ -50,10 +51,10 @@ static int ao_sdl_init(ao_wrapper_t *ao, dtaudio_para_t *ppara)
     SDL_AudioSpec *pwanted = &ctx->wanted;
     SDL_AudioSpec *spec = &ctx->spec;
     //set audio paras
-    pwanted->freq = ppara->dst_samplerate;       // sample rate
+    pwanted->freq = para->dst_samplerate;       // sample rate
     pwanted->format = AUDIO_S16SYS;             // bps
     pwanted->silence = 0;
-    pwanted->channels = ppara->dst_channels;     // channels
+    pwanted->channels = para->dst_channels;     // channels
     pwanted->samples = SDL_AUDIO_BUFFER_SIZE;// samples every time
     pwanted->callback = sdl_cb;              // callback
     pwanted->userdata = ao;
