@@ -52,6 +52,7 @@ int64_t host_get_avdiff(dthost_context_t * hctx)
 
 int host_update_apts(dthost_context_t * hctx, int64_t apts)
 {
+    int aout_close = 0;
     int64_t jump = llabs(apts - host_get_apts(hctx));
     if (jump / DT_PTS_FREQ_MS >= DT_SYNC_DISCONTINUE_THRESHOLD) {
         hctx->audio_discontinue_flag = 1;
@@ -72,7 +73,14 @@ int host_update_apts(dthost_context_t * hctx, int64_t apts)
 
         return 0;
     }
+
     if (!hctx->para.sync_enable) { //sync disable, video will correct systime
+        return 0;
+    }
+
+    aout_close = host_get_aout_closed(hctx);
+    if (aout_close) {
+        dt_debug(TAG, "audio output closed. Not update pcr.\n");
         return 0;
     }
 
@@ -685,22 +693,44 @@ int host_get_state(dthost_context_t * hctx, host_state_t * state)
     return 0;
 }
 
-int host_get_out_closed(dthost_context_t * hctx)
+int host_get_aout_closed(dthost_context_t *hctx)
 {
     int aout_close = 0;
-    int vout_close = 0;
+    buf_state_t buf_state;
     if (hctx->para.has_audio) {
         aout_close = dtaudio_get_out_closed(hctx->audio_priv);
+        dtport_get_state(hctx->port_priv, &buf_state, DTP_MEDIA_TYPE_AUDIO);
+        if (buf_state.data_len > 0) {
+            aout_close = 0;
+        }
     } else {
         aout_close = 1;
     }
+
+    return aout_close;
+}
+
+int host_get_vout_closed(dthost_context_t *hctx)
+{
+    int vout_close = 0;
+    buf_state_t buf_state;
+
     if (hctx->para.has_video) {
         vout_close = dtvideo_get_out_closed(hctx->video_priv);
+        dtport_get_state(hctx->port_priv, &buf_state, DTP_MEDIA_TYPE_VIDEO);
+        if (buf_state.data_len > 0) {
+            vout_close = 0;
+        }
     } else {
         vout_close = 1;
     }
-    if (aout_close && vout_close) {
-        dt_info(TAG, "AV OUT CLOSED \n");
-    }
+
+    return vout_close;
+}
+
+int host_get_out_closed(dthost_context_t * hctx)
+{
+    int aout_close = host_get_aout_closed(hctx);
+    int vout_close = host_get_vout_closed(hctx);
     return (aout_close && vout_close);
 }

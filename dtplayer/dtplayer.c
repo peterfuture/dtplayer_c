@@ -514,6 +514,8 @@ START:
 static void *event_handle_loop(dtplayer_context_t * dtp_ctx)
 {
     int render_closed = 0;
+    int loop = dtp_ctx->player_para.loop_mode;
+    dtp_state_t *stat = &dtp_ctx->state;
     while (1) {
         player_handle_event(dtp_ctx);
         if (get_player_status(dtp_ctx) == PLAYER_STATUS_STOP) {
@@ -532,7 +534,13 @@ static void *event_handle_loop(dtplayer_context_t * dtp_ctx)
         }
         player_host_get_info(dtp_ctx, HOST_CMD_GET_RENDER_CLOSED,
                              (unsigned long)(&render_closed));
-        if (render_closed == 1) {
+        if (render_closed == 1 && stat->full_time > 0 && stat->cur_time >= stat->full_time - 2) {
+            if(loop > 0) {
+                event_t *event = dt_alloc_event(EVENT_SERVER_ID_PLAYER, PLAYER_EVENT_SEEK);
+                event->para.np = 0;
+                dt_send_event_sync(dtp_ctx->service_mgt, event);
+                continue;
+            }
             goto QUIT;
         }
     }

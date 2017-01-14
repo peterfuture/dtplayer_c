@@ -66,6 +66,8 @@ int host_reset_systime(dthost_context_t * hctx, int64_t sys_time);
 int host_update_systime(dthost_context_t * hctx, int64_t sys_time);
 int host_clear_discontinue_flag(dthost_context_t * hctx);
 int host_get_state(dthost_context_t * hctx, host_state_t * state);
+int host_get_aout_closed(dthost_context_t * hctx);
+int host_get_vout_closed(dthost_context_t * hctx);
 int host_get_out_closed(dthost_context_t * hctx);
 
 #endif

@@ -167,7 +167,7 @@ int audio_get_out_closed(dtaudio_context_t * actx)
     decoder_level = actx->audio_decoded_buf.level;
     total = decoder_level + output_level;
     default_level = actx->audio_param.samplerate * actx->audio_param.bps * actx->audio_param.channels / 8; //1s
-    dt_info(TAG, "[%s:%d] decode_level:%d output_level:%d total:%d thres:%d (100ms)\n", __FUNCTION__, __LINE__, decoder_level, output_level, total, default_level / 10);
+    dt_debug(TAG, "[%s:%d] decode_level:%d output_level:%d total:%d thres:%d (100ms)\n", __FUNCTION__, __LINE__, decoder_level, output_level, total, default_level / 10);
     if (total <= default_level / 10) {
         return 1;
     }
