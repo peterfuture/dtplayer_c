@@ -22,6 +22,7 @@ typedef struct {
     int64_t audio_discontinue_point;
     int     audio_discontinue_flag;
     int64_t audio_discontinue_step;
+    int64_t adec_last_ms;
 
     int64_t pts_video_first;
     int64_t pts_video_last;
@@ -29,6 +30,7 @@ typedef struct {
     int64_t video_discontinue_point;
     int     video_discontinue_flag;
     int64_t video_discontinue_step;
+    int64_t vdec_last_ms;
 
     int64_t pts_sub;
 

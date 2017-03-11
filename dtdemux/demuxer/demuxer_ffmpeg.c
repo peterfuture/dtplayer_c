@@ -382,6 +382,17 @@ static int format2bps(int fmt)
     return ret;
 }
 
+static int is_live(char *url)
+{
+    if (strstr(url, "udp:") != NULL) {
+        return 1;
+    }
+    if (strstr(url, "rtp:") != NULL) {
+        return 1;
+    }
+    return 0;
+}
+
 static int demuxer_ffmpeg_setup_info(demuxer_wrapper_t * wrapper,
                                      dtp_media_info_t * info)
 {
@@ -409,8 +420,10 @@ static int demuxer_ffmpeg_setup_info(demuxer_wrapper_t * wrapper,
     double duration = ((double) ic->duration / AV_TIME_BASE);
     info->duration = (int)(ic->duration / AV_TIME_BASE);
     info->file = ic->filename;
+    info->livemode = is_live(info->file);
 
-    dt_info(TAG, "file name:%s duration:%lf\n", info->file, duration);
+    dt_info(TAG, "file name:%s duration:%lf islive:%d\n", info->file, duration,
+            info->livemode);
     info->file_size = avio_size(ic->pb);
 
     info->format = media_format_convert(ic->iformat->name);

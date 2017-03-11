@@ -76,7 +76,11 @@ int player_prepare(dtplayer_context_t * dtp_ctx);
 int player_start(dtplayer_context_t * dtp_ctx);
 int player_pause(dtplayer_context_t * dtp_ctx);
 int player_resume(dtplayer_context_t * dtp_ctx);
+int player_dec_reset(dtplayer_context_t * dtp_ctx);
 int player_seekto(dtplayer_context_t * dtp_ctx, int seek_time); //s
+void set_player_status(dtplayer_context_t * dtp_ctx,
+                       player_status_t status);
+player_status_t get_player_status(dtplayer_context_t * dtp_ctx);
 int player_get_mediainfo(dtplayer_context_t * dtp_ctx,
                          dtp_media_info_t *info); //s
 int player_stop(dtplayer_context_t * dtp_ctx);

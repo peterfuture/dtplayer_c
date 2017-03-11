@@ -109,6 +109,10 @@ int dt_update_setting()
     if (dt_ini_get_entry("PLAYER", "player.seekmode", value) >= 0) {
         dtp_setting.player_seekmode = atoi(value);
     }
+    dtp_setting.player_live_timeout = 3000;
+    if (dt_ini_get_entry("PLAYER", "player.live_timeout", value) >= 0) {
+        dtp_setting.player_live_timeout = atoi(value);
+    }
 
     // HOST
     dtp_setting.host_drop = 1;

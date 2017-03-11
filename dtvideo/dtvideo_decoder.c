@@ -192,6 +192,7 @@ static void *video_decode_loop(void *arg)
         // statistics collection
         {
             p_vd_statistics_info->decoded_frame_count++;
+            p_vd_statistics_info->last_decode_ms = dt_gettime() / 1000;
         }
         decoder->frame_count++;
         //Got one frame

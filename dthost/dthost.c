@@ -654,6 +654,7 @@ int host_get_state(dthost_context_t * hctx, host_state_t * state)
         dtaudio_get_state(hctx->audio_priv, &dec_state);
         state->abuf_level = buf_state.data_len;
         state->adec_err_cnt = dec_state.adec_error_count;
+        state->adec_last_ms = dec_state.adec_last_ms;
     } else {
         state->abuf_level = -1;
         state->adec_err_cnt = -1;
@@ -664,6 +665,7 @@ int host_get_state(dthost_context_t * hctx, host_state_t * state)
         dtvideo_get_state(hctx->video_priv, &dec_state);
         state->vbuf_level = buf_state.data_len;
         state->vdec_err_cnt = dec_state.vdec_error_count;
+        state->vdec_last_ms = dec_state.vdec_last_ms;
     } else {
         state->vbuf_level = -1;
         state->vdec_err_cnt = -1;

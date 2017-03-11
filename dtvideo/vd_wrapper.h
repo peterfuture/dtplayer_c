@@ -34,6 +34,7 @@ typedef struct vd_wrapper {
 
 typedef struct {
     int decoded_frame_count;
+    int64_t last_decode_ms;
 } vd_statistics_info_t;
 
 typedef struct dtvideo_decoder {

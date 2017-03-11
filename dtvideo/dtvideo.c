@@ -149,13 +149,13 @@ int video_get_dec_state(dtvideo_context_t * vctx, dec_state_t * dec_state)
     if (vctx->video_status <= VIDEO_STATUS_INITED) {
         return -1;
     }
-    return -1;
     dtvideo_decoder_t *vdec = &vctx->video_dec;
     dec_state->vdec_error_count = vdec->decode_err_cnt;
     dec_state->vdec_fps = vdec->para.rate;
     dec_state->vdec_width = vdec->para.d_width;
     dec_state->vdec_height = vdec->para.d_height;
     dec_state->vdec_status = vdec->status;
+    dec_state->vdec_last_ms = vdec->statistics_info.last_decode_ms;
     return 0;
 }
 

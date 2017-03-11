@@ -43,14 +43,14 @@ void player_remove_all()
     }
 }
 
-static void set_player_status(dtplayer_context_t * dtp_ctx,
-                              player_status_t status)
+void set_player_status(dtplayer_context_t * dtp_ctx,
+                       player_status_t status)
 {
     dtp_ctx->state.last_status = dtp_ctx->state.cur_status;
     dtp_ctx->state.cur_status = status;
 }
 
-static player_status_t get_player_status(dtplayer_context_t * dtp_ctx)
+player_status_t get_player_status(dtplayer_context_t * dtp_ctx)
 {
     return dtp_ctx->state.cur_status;
 }
@@ -369,6 +369,21 @@ int player_resume(dtplayer_context_t * dtp_ctx)
     return 0;
 }
 
+int player_dec_reset(dtplayer_context_t *dtp_ctx)
+{
+    player_ctrl_t *ctrl_info = &dtp_ctx->ctrl_info;
+    if (get_player_status(dtp_ctx) < PLAYER_STATUS_INIT_EXIT) {
+        return -1;
+    }
+    pause_io_thread(dtp_ctx);
+    player_host_stop(dtp_ctx);
+    player_host_init(dtp_ctx);
+    ctrl_info->ctrl_wait_key_frame = 1;
+    resume_io_thread(dtp_ctx);
+    player_host_start(dtp_ctx);
+    return 0;
+}
+
 int player_seekto(dtplayer_context_t * dtp_ctx, int seek_time)
 {
     player_ctrl_t *ctrl_info = &dtp_ctx->ctrl_info;
@@ -525,17 +540,19 @@ static void *event_handle_loop(dtplayer_context_t * dtp_ctx)
         if (get_player_status(dtp_ctx) != PLAYER_STATUS_RUNNING) {
             continue;
         }
-        if (get_player_status(dtp_ctx) == PLAYER_STATUS_RUNNING) {
-            player_update_state(dtp_ctx);
-        }
+
+        player_update_state(dtp_ctx);
         player_handle_cb(dtp_ctx);
+
         if (!dtp_ctx->ctrl_info.eof_flag) {
             continue;
         }
+
         player_host_get_info(dtp_ctx, HOST_CMD_GET_RENDER_CLOSED,
                              (unsigned long)(&render_closed));
-        if (render_closed == 1 && stat->full_time > 0 && stat->cur_time >= stat->full_time - 2) {
-            if(loop > 0) {
+        if (render_closed == 1 && stat->full_time > 0
+            && stat->cur_time >= stat->full_time - 2) {
+            if (loop > 0) {
                 event_t *event = dt_alloc_event(EVENT_SERVER_ID_PLAYER, PLAYER_EVENT_SEEK);
                 event->para.np = 0;
                 dt_send_event_sync(dtp_ctx->service_mgt, event);

@@ -142,13 +142,46 @@ int player_handle_cb(dtplayer_context_t * dtp_ctx)
 
 }
 
+static int need_reset_decoder(dtplayer_context_t *dtp_ctx, host_state_t *state)
+{
+    dtp_media_info_t *info = dtp_ctx->media_info;
+    if (state->vdec_last_ms <= 0) {
+        return 0;
+    }
+    if (info->livemode <= 0) {
+        return 0;
+    }
+
+    int64_t block_ms = dt_gettime() / 1000 - state->vdec_last_ms;
+    if (block_ms < dtp_setting.player_live_timeout) {
+        return 0;
+    }
+    dt_info(TAG,
+            "[%s:%d] video block too long reset. last decoded time:%lldms now:%lldms block:%lld ms\n",
+            __FUNCTION__, __LINE__, state->vdec_last_ms, dt_gettime() / 1000, block_ms);
+
+    return 1;
+}
+
 void player_update_state(dtplayer_context_t * dtp_ctx)
 {
     dtp_state_t *play_stat = &dtp_ctx->state;
     host_state_t host_state;
 
+    if (get_player_status(dtp_ctx) != PLAYER_STATUS_RUNNING) {
+        return;
+    }
+
     /*update host state */
     player_host_get_info(dtp_ctx, HOST_CMD_GET_STATE, (unsigned long)(&host_state));
+
+    /* live reset check */
+    int need_reset = need_reset_decoder(dtp_ctx, &host_state);
+    if (need_reset) {
+        player_dec_reset(dtp_ctx);
+        return;
+    }
+
     /*calc cur time */
     calc_cur_time(dtp_ctx, &host_state);
 
