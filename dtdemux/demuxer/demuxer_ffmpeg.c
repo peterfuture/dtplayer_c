@@ -331,8 +331,17 @@ static int video_format_convert(enum AVCodecID id)
 {
     dtvideo_format_t format;
     switch (id) {
+    case AV_CODEC_ID_MPEG2VIDEO:
+        format = DT_VIDEO_FORMAT_MPEG2;
+        break;
+    case AV_CODEC_ID_MPEG4:
+        format = DT_VIDEO_FORMAT_MPEG4;
+        break;
     case AV_CODEC_ID_H264:
         format = DT_VIDEO_FORMAT_H264;
+        break;
+    case AV_CODEC_ID_HEVC:
+        format = DT_VIDEO_FORMAT_HEVC;
         break;
     default:
         format = DT_VIDEO_FORMAT_UNKOWN;

@@ -69,36 +69,135 @@ static int demuxer_select(dtdemuxer_context_t * dem_ctx)
     return 0;
 }
 
+static char *media_format_to_string(dtp_media_format_t format)
+{
+    switch (format) {
+    case DTP_MEDIA_FORMAT_MPEGTS:
+        return "mpegts";
+    case DTP_MEDIA_FORMAT_MPEGPS:
+        return "mpegps";
+    case DTP_MEDIA_FORMAT_RM:
+        return "rmvb";
+    case DTP_MEDIA_FORMAT_AVI:
+        return "avi";
+    case DTP_MEDIA_FORMAT_MKV:
+        return "mkv";
+    case DTP_MEDIA_FORMAT_MOV:
+        return "mov";
+    case DTP_MEDIA_FORMAT_MP4:
+        return "mp4";
+    case DTP_MEDIA_FORMAT_FLV:
+        return "flv";
+    case DTP_MEDIA_FORMAT_AAC:
+        return "aac";
+    case DTP_MEDIA_FORMAT_AC3:
+        return "flv";
+    case DTP_MEDIA_FORMAT_MP3:
+        return "mp3";
+    case DTP_MEDIA_FORMAT_WAV:
+        return "wav";
+    case DTP_MEDIA_FORMAT_DTS:
+        return "dts";
+    case DTP_MEDIA_FORMAT_FLAC:
+        return "flac";
+    case DTP_MEDIA_FORMAT_H264:
+        return "h264";
+    case DTP_MEDIA_FORMAT_AVS:
+        return "avs";
+    case DTP_MEDIA_FORMAT_M2V:
+        return "m2v";
+    case DTP_MEDIA_FORMAT_P2P:
+        return "p2p";
+    case DTP_MEDIA_FORMAT_ASF:
+        return "asf";
+    case DTP_MEDIA_FORMAT_RTSP:
+        return "rtsp";
+    case DTP_MEDIA_FORMAT_APE:
+        return "ape";
+    case DTP_MEDIA_FORMAT_AMR:
+        return "amr";
+    default:
+        return "unknown";
+
+    }
+}
+
+static char *video_format_to_string(dtvideo_format_t format)
+{
+    switch (format) {
+    case DT_VIDEO_FORMAT_MPEG2:
+        return "mpeg2";
+    case DT_VIDEO_FORMAT_MPEG4:
+        return "mpeg4";
+    case DT_VIDEO_FORMAT_H264:
+        return "h264";
+    case DT_VIDEO_FORMAT_HEVC:
+        return "hevc";
+    default:
+        return "unkown";
+    }
+}
+
+static char *audio_format_to_string(dtaudio_format_t format)
+{
+    switch (format) {
+    case DT_AUDIO_FORMAT_MP2:
+        return "mp2";
+    case DT_AUDIO_FORMAT_MP3:
+        return "mp3";
+    case DT_AUDIO_FORMAT_AAC:
+        return "aac";
+    case DT_AUDIO_FORMAT_AC3:
+        return "ac3";
+    default:
+        return "unkown";
+
+    }
+}
+
 static void dump_media_info(dtp_media_info_t * media)
 {
     int i = 0;
     track_info_t *info = &media->tracks;
-    
+
     dt_info(TAG, "|====================MEDIA INFO====================| \n");
     dt_info(TAG, "|file_name:%s\n", media->file);
     dt_info(TAG, "|file_size:%lld \n", media->file_size);
-    dt_info(TAG, "|file_format:%d \n", media->format);
+    dt_info(TAG, "|file_format:%s \n", media_format_to_string(media->format));
     dt_info(TAG, "|duration:%lld bitrate:%d\n", media->duration, media->bit_rate);
-    dt_info(TAG, "|has video:%d has audio:%d has sub:%d\n", media->has_video, media->has_audio, media->has_sub);
+    dt_info(TAG, "|has video:%d has audio:%d has sub:%d\n", media->has_video,
+            media->has_audio, media->has_sub);
     dt_info(TAG, "|====================VIDEO INFO====================| \n");
     dt_info(TAG, "|video stream info,num:%d\n", info->vst_num);
 
     for (i = 0; i < info->vst_num; i++) {
-        dt_info(TAG, "|--video stream:%d index:%d id:%d fmt:%d lang:%s \n", i, info->vstreams[i]->index, info->vstreams[i]->id, info->vstreams[i]->format, info->vstreams[i]->language);
-        dt_info(TAG, "|--bitrate:%d width:%d height:%d duration:%lld \n", info->vstreams[i]->bit_rate, info->vstreams[i]->width, info->vstreams[i]->height, info->vstreams[i]->duration);
+        dt_info(TAG, "|--video stream:%d index:%d id:%d fmt:%s lang:%s \n", i,
+                info->vstreams[i]->index, info->vstreams[i]->id,
+                video_format_to_string(info->vstreams[i]->format), info->vstreams[i]->language);
+        dt_info(TAG, "|--bitrate:%d width:%d height:%d duration:%lld \n",
+                info->vstreams[i]->bit_rate, info->vstreams[i]->width,
+                info->vstreams[i]->height, info->vstreams[i]->duration);
     }
     dt_info(TAG, "|====================AUDIO INFO====================| \n");
     dt_info(TAG, "|audio stream info,num:%d\n", info->ast_num);
     for (i = 0; i < info->ast_num; i++) {
-        dt_info(TAG, "|--audio stream:%d index:%d id:%d fmt:%d lang:%s \n", i, info->astreams[i]->index, info->astreams[i]->id, info->astreams[i]->format, info->astreams[i]->language);
-        dt_info(TAG, "|--bitrate:%d sample_rate:%d channels:%d bps:%d duration:%lld \n", info->astreams[i]->bit_rate, info->astreams[i]->sample_rate, info->astreams[i]->channels, info->astreams[i]->bps, info->astreams[i]->duration);
+        dt_info(TAG, "|--audio stream:%d index:%d id:%d fmt:%s lang:%s \n", i,
+                info->astreams[i]->index, info->astreams[i]->id,
+                audio_format_to_string(info->astreams[i]->format), info->astreams[i]->language);
+        dt_info(TAG, "|--bitrate:%d sample_rate:%d channels:%d bps:%d duration:%lld \n",
+                info->astreams[i]->bit_rate, info->astreams[i]->sample_rate,
+                info->astreams[i]->channels, info->astreams[i]->bps,
+                info->astreams[i]->duration);
     }
 
     dt_info(TAG, "|====================SUB INFO======================| \n");
     dt_info(TAG, "|subtitle stream num:%d\n", info->sst_num);
     for (i = 0; i < info->sst_num; i++) {
-        dt_info(TAG, "|--sub stream:%d index:%d id:%d fmt:%d lang:%s \n", i, info->sstreams[i]->index, info->sstreams[i]->id, info->sstreams[i]->format, info->sstreams[i]->language);
-        dt_info(TAG, "|--width:%d height:%d \n", info->sstreams[i]->width, info->sstreams[i]->height);
+        dt_info(TAG, "|--sub stream:%d index:%d id:%d fmt:%d lang:%s \n", i,
+                info->sstreams[i]->index, info->sstreams[i]->id, info->sstreams[i]->format,
+                info->sstreams[i]->language);
+        dt_info(TAG, "|--width:%d height:%d \n", info->sstreams[i]->width,
+                info->sstreams[i]->height);
     }
     dt_info(TAG, "|==================================================|\n");
 }
@@ -117,7 +216,8 @@ int demuxer_open(dtdemuxer_context_t * dem_ctx)
 
     dt_info(TAG, "probe enable start \n");
     int probe_enable = dtp_setting.demuxer_probe;
-    int probe_size = dtstream_local(dem_ctx->stream_priv) ? PROBE_LOCAL_SIZE : PROBE_STREAM_SIZE;
+    int probe_size = dtstream_local(dem_ctx->stream_priv) ? PROBE_LOCAL_SIZE :
+                     PROBE_STREAM_SIZE;
     dt_info(TAG, "probe enable:%d \n", probe_enable);
     dt_info(TAG, "probe size:%d \n", probe_size);
 

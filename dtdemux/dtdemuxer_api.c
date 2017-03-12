@@ -4,7 +4,8 @@
 #define TAG "DEMUX-API"
 int dtdemuxer_open(void **priv, dtdemuxer_para_t * para, void *parent)
 {
-    dtdemuxer_context_t *dem_ctx = (dtdemuxer_context_t *) malloc(sizeof(dtdemuxer_context_t));
+    dtdemuxer_context_t *dem_ctx = (dtdemuxer_context_t *) malloc(sizeof(
+                                       dtdemuxer_context_t));
     if (!dem_ctx) {
         dt_error(TAG, "demuxer context malloc failed \n");
         return -1;
