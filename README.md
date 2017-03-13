@@ -20,7 +20,7 @@ For more [details](http://blog.csdn.net/dtplayer).
 ### Android
 * [Install ToolChain](https://github.com/peterfuture/dttv-android/wiki/1-%E5%AE%89%E8%A3%85android-arm%E4%BA%A4%E5%8F%89%E7%BC%96%E8%AF%91%E9%93%BE)
 * Install [ffmpeg-android](https://github.com/peterfuture/ffmpeg_android)
-* make -f makefile-android -j8
+* ./build.sh android
 
 ## Demos
 * [dttv-desktop](https://github.com/peterfuture/dttv-desktop) - pc multimedia player

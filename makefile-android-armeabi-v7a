@@ -136,10 +136,10 @@ endif
 
 #use separate module
 FFMPEGPARTS_ALL = libavfilter libavformat libavcodec libswscale libswresample libavutil 
-FFMPEGPARTS = $(foreach part, $(FFMPEGPARTS_ALL), $(if $(wildcard $(DT_FFMPEG_ANDROID_DIR)/lib), $(part)))
-FFMPEGLIBS  = $(foreach part, $(FFMPEGPARTS), $(DT_FFMPEG_ANDROID_DIR)/lib/$(part).a)
+FFMPEGPARTS = $(foreach part, $(FFMPEGPARTS_ALL), $(if $(wildcard $(DT_FFMPEG_ANDROID_DIR)/armv7/lib), $(part)))
+FFMPEGLIBS  = $(foreach part, $(FFMPEGPARTS), $(DT_FFMPEG_ANDROID_DIR)/armv7/lib/$(part).a)
 
-DT_CFLAGS-$(DT_FFMPEG)   += -I$(DT_FFMPEG_ANDROID_DIR)/include
+DT_CFLAGS-$(DT_FFMPEG)   += -I$(DT_FFMPEG_ANDROID_DIR)/armv7/include
 COMMON_LIBS-$(DT_FFMPEG) += $(FFMPEGLIBS)
 
 #======================================================
