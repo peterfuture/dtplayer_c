@@ -399,6 +399,9 @@ static int is_live(char *url)
     if (strstr(url, "rtp:") != NULL) {
         return 1;
     }
+    if (strstr(url, ".sdp") != NULL) {
+        return 1;
+    }
     return 0;
 }
 

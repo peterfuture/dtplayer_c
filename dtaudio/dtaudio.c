@@ -321,7 +321,6 @@ int audio_init(dtaudio_context_t * actx)
 
     /*audio decoder init */
     memset(audio_dec, 0, sizeof(dtaudio_decoder_t));
-    memset(&audio_dec->para, 0, sizeof(dtaudio_para_t));
     memcpy(&audio_dec->para, &actx->audio_param, sizeof(dtaudio_para_t));
     audio_dec->parent = actx;
     ret = audio_decoder_init(audio_dec);
