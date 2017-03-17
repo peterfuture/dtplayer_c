@@ -92,18 +92,24 @@ int dtplayer_resume(void *player_priv)
 
 int dtplayer_stop(void *player_priv)
 {
+    /*need to wait until player stop ok */
     dtplayer_context_t *dtp_ctx = (dtplayer_context_t *)player_priv;
     event_t *event = dt_alloc_event(EVENT_SERVER_ID_PLAYER, PLAYER_EVENT_STOP);
     dt_send_event(dtp_ctx->service_mgt, event);
+    dt_info(TAG, "EVENT_LOOP_ID:%lu \n", dtp_ctx->event_loop_id);
+    pthread_join(dtp_ctx->event_loop_id, NULL);
+    return 0;
+}
 
-    /*need to wait until player stop ok */
+int dtplayer_stop_async(void *player_priv)
+{
     //comments: after sending quit cmd
     //player will enter quit process
     //here has no need to block ,player will
     //exit after receiving quit status through update_cb in dtplayer.c
-
-    //dt_info(TAG, "EVENT_LOOP_ID:%lu \n", dtp_ctx->event_loop_id);
-    //pthread_join(dtp_ctx->event_loop_id, NULL);
+    dtplayer_context_t *dtp_ctx = (dtplayer_context_t *)player_priv;
+    event_t *event = dt_alloc_event(EVENT_SERVER_ID_PLAYER, PLAYER_EVENT_STOP);
+    dt_send_event(dtp_ctx->service_mgt, event);
     return 0;
 }
 
