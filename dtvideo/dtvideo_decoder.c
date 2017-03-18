@@ -139,7 +139,7 @@ static void *video_decode_loop(void *arg)
     dt_av_frame_t *picture = NULL;
     int ret;
     dt_info(TAG, "[%s:%d] start decode loop \n", __FUNCTION__, __LINE__);
-
+    int video_frame_in = 0;
     do {
         //exit check before idle, maybe recieve exit cmd in idle status
         if (decoder->status == VDEC_STATUS_EXIT) {
@@ -175,6 +175,7 @@ static void *video_decode_loop(void *arg)
             dt_debug(TAG, "[%s:%d] no video frame left, flush left frames \n", __FUNCTION__,
                      __LINE__);
         }
+        video_frame_in++;
         /*read one frame,enter decode frame module */
         //will exec once for one time
         ret = wrapper->decode_frame(decoder, &frame, &picture);
@@ -203,8 +204,8 @@ static void *video_decode_loop(void *arg)
         if (decoder->first_frame_decoded == 0 && PTS_INVALID(decoder->pts_first)) {
             decoder->pts_first = decoder->pts_current = picture->pts;
             decoder->first_frame_decoded = 1;
-            dt_info(TAG, "[%s:%d]first frame decoded ok, pts:0x%llx dts:0x%llx\n",
-                    __FUNCTION__, __LINE__, picture->pts, picture->dts);
+            dt_info(TAG, "[%s:%d]first frame decoded ok, pts:0x%llx dts:0x%llx used:%d frames\n",
+                    __FUNCTION__, __LINE__, picture->pts, picture->dts, video_frame_in);
         } else {
             if (pts_mode || PTS_INVALID(picture->pts)) {
                 int fps = decoder->para.fps;

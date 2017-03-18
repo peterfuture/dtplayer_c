@@ -42,6 +42,7 @@ static int tag_enable(char *filter, char *tag)
 
 static int display_time()
 {
+    /*
     time_t timer;
     char buffer[25];
     struct tm* tm_info;
@@ -49,6 +50,14 @@ static int display_time()
     tm_info = localtime(&timer);
     strftime(buffer, 25, "%Y-%m-%d %H:%M:%S", tm_info);
     printf("%s[%s]", KYEL, buffer);
+    */
+    char buffer[30];
+    struct timeval tv;
+    time_t curtime;
+    gettimeofday(&tv, NULL); 
+    curtime=tv.tv_sec;
+    strftime(buffer,30,"%Y-%m-%d %T.",localtime(&curtime));
+    printf("[%s%ld]",buffer,tv.tv_usec);
     return 0;
 }
 
