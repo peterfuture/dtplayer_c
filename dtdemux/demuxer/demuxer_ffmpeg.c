@@ -490,9 +490,9 @@ static int demuxer_ffmpeg_setup_info(demuxer_wrapper_t * wrapper,
             // Extra data details
             dt_info(TAG, "VIDEO EXTRA DATA SIZE:%d - %d \n", pCodec->extradata_size,
                     vst_info->extradata_size);
-            dt_info(TAG, "Extradata contert:\n");
+            dt_info(TAG, "Extradata content:\n");
             if (pCodec->extradata_size > 0) {
-                for (j = 0; j < pCodec->extradata_size && j > 10; j += 10)
+                for (j = 0; j < pCodec->extradata_size && pCodec->extradata_size > 10; j += 10)
                     dt_info(TAG, "%02x %02x %02x %02x %02x %02x %02x %02x %02x %02x\n",
                             pCodec->extradata[j],
                             pCodec->extradata[j + 1],

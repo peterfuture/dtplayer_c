@@ -208,6 +208,18 @@ static void *video_output_thread(void *args)
             usleep(100);
             continue;
         }
+
+        /* Maybe need switch vo*/
+        if(wrapper->id == VO_ID_NULL) {
+            ret = select_vo_device(vo, -1);
+            wrapper = vo->wrapper;
+            if(wrapper->id != VO_ID_NULL) {
+                memcpy(&wrapper->para, &vo->para, sizeof(dtvideo_para_t));
+                wrapper->init(wrapper);
+                dt_info(TAG, "[%s:%d]vo switch to %s! \n", __FUNCTION__, __LINE__, wrapper->name);
+            }
+        }
+
         /*pre read picture and update sys time */
         picture_pre = (dt_av_frame_t *) dtvideo_output_pre_read(vo->parent);
         if (!picture_pre) {
