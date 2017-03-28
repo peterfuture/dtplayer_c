@@ -204,7 +204,8 @@ static void *video_decode_loop(void *arg)
         if (decoder->first_frame_decoded == 0 && PTS_INVALID(decoder->pts_first)) {
             decoder->pts_first = decoder->pts_current = picture->pts;
             decoder->first_frame_decoded = 1;
-            dt_info(TAG, "[%s:%d]first frame decoded ok, pts:0x%llx dts:0x%llx used:%d frames\n",
+            dt_info(TAG,
+                    "[%s:%d]first frame decoded ok, pts:0x%llx dts:0x%llx used:%d frames\n",
                     __FUNCTION__, __LINE__, picture->pts, picture->dts, video_frame_in);
         } else {
             if (pts_mode || PTS_INVALID(picture->pts)) {

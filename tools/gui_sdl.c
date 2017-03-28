@@ -256,14 +256,14 @@ static int map_sdl_supported_pixfmt(int pixfmt)
     return DTAV_PIX_FMT_YUV420P;
 }
 
-static int vo_sdl_init(vo_wrapper_t * vo)
+static int vo_sdl_init(vo_context_t * voc)
 {
     int width = sdl_gui.window_w;
     int height = sdl_gui.window_h;
 
     //Init vf
     memset(&sdl_vf, 0, sizeof(dtvideo_filter_t));
-    memcpy(&sdl_vf.para, &vo->para, sizeof(dtvideo_para_t));
+    memcpy(&sdl_vf.para, &voc->para, sizeof(dtvideo_para_t));
 
     if (sdl_vf.para.d_pixfmt != sdl_gui.pixfmt) {
         dt_info(TAG, "dest pixfmt changed by setting.ini. update: %d->%d\n",
@@ -290,7 +290,7 @@ static int vo_sdl_init(vo_wrapper_t * vo)
     return 0;
 }
 
-static int vo_sdl_render(vo_wrapper_t * vo, dt_av_frame_t * frame)
+static int vo_sdl_render(vo_context_t * voc, dt_av_frame_t * frame)
 {
     dt_lock(&window.mutex);
     dt_debug(TAG, "frame size [%d:%d] \n", frame->width, frame->height);
@@ -354,7 +354,7 @@ static int vo_sdl_render(vo_wrapper_t * vo, dt_av_frame_t * frame)
     return 0;
 }
 
-static int vo_sdl_stop(vo_wrapper_t * vo)
+static int vo_sdl_stop(vo_context_t * voc)
 {
     dt_lock(&window.mutex);
     if (window.overlay) {
@@ -375,19 +375,7 @@ vo_wrapper_t vo_sdl_ops = {
     .init = vo_sdl_init,
     .stop = vo_sdl_stop,
     .render = vo_sdl_render,
+    .private_data_size = 0
 };
-
-int setup_vo(vo_wrapper_t *wrapper)
-{
-    if (!wrapper) {
-        return -1;
-    }
-    wrapper->id = VO_ID_SDL;
-    wrapper->name = vo_sdl_name;
-    wrapper->init = vo_sdl_init;
-    wrapper->stop = vo_sdl_stop;
-    wrapper->render = vo_sdl_render;
-    return 0;
-}
 
 #endif

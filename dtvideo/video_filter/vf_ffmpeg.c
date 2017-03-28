@@ -48,16 +48,16 @@ static int ffmpeg_vf_capable(vf_cap_t cap)
 ** Init ffmpeg filter
 **
 ***********************************************************************/
-static int ffmpeg_vf_init(vf_wrapper_t *wrapper)
+static int ffmpeg_vf_init(vf_context_t *vfc)
 {
     int ret = -1; // -1 means not support or no need to process
-    vf_ffmpeg_ctx_t *vf_ctx = (vf_ffmpeg_ctx_t *)malloc(sizeof(vf_ffmpeg_ctx_t));
+    vf_ffmpeg_ctx_t *vf_ctx = (vf_ffmpeg_ctx_t *)vfc->private_data;
     if (!vf_ctx) {
         return ret;
     }
     memset(vf_ctx, 0, sizeof(*vf_ctx));
 
-    dtvideo_para_t *para = &wrapper->para;
+    dtvideo_para_t *para = &vfc->para;
     int sw = para->s_width;
     int sh = para->s_height;
     int dw = para->d_width;
@@ -68,7 +68,6 @@ static int ffmpeg_vf_init(vf_wrapper_t *wrapper)
     dt_info(TAG, "[%s:%d] sw:%d dw:%d sh:%d dh:%d sf:%d df:%d need_process:%d \n",
             __FUNCTION__, __LINE__, sw, dw, sh, dh, sf, df, vf_ctx->need_process);
 
-    wrapper->vf_priv = vf_ctx;
     if (vf_ctx->need_process) {
         vf_ctx->swap_frame = (dt_av_frame_t *)malloc(sizeof(dt_av_frame_t));
         ret = 0;
@@ -83,13 +82,13 @@ static int ffmpeg_vf_init(vf_wrapper_t *wrapper)
 ** Process one frame with ffmpeg-libavfilter
 **
 ***********************************************************************/
-static int convert_picture(vf_wrapper_t * wrapper, dt_av_frame_t * src)
+static int convert_picture(vf_context_t * vfc, dt_av_frame_t * src)
 {
     uint8_t *buffer;
     int buffer_size;
 
-    vf_ffmpeg_ctx_t *vf_ctx = (vf_ffmpeg_ctx_t *)(wrapper->vf_priv);
-    dtvideo_para_t *para = &wrapper->para;
+    vf_ffmpeg_ctx_t *vf_ctx = (vf_ffmpeg_ctx_t *)vfc->private_data;
+    dtvideo_para_t *para = &vfc->para;
     int sw = para->s_width;
     int dw = para->d_width;
     int sh = para->s_height;
@@ -145,16 +144,16 @@ static int convert_picture(vf_wrapper_t * wrapper, dt_av_frame_t * src)
 ** Process one frame
 **
 ***********************************************************************/
-static int ffmpeg_vf_process(vf_wrapper_t *wrapper, dt_av_frame_t *frame)
+static int ffmpeg_vf_process(vf_context_t *vfc, dt_av_frame_t *frame)
 {
-    vf_ffmpeg_ctx_t *vf_ctx = (vf_ffmpeg_ctx_t *)(wrapper->vf_priv);
+    vf_ffmpeg_ctx_t *vf_ctx = (vf_ffmpeg_ctx_t *)vfc->private_data;
     if (vf_ctx->need_process == 0) {
         dt_info(TAG, "[%s:%d] no need to process but called \n", __FUNCTION__,
                 __LINE__);
         return 0;
     }
 
-    int ret = convert_picture(wrapper, frame);
+    int ret = convert_picture(vfc, frame);
     if (ret < 0) {
         dt_info(TAG, "[%s:%d] vf process failed \n", __FUNCTION__, __LINE__);
     }
@@ -167,9 +166,10 @@ static int ffmpeg_vf_process(vf_wrapper_t *wrapper, dt_av_frame_t *frame)
 ** Release ffmpeg filter
 **
 ***********************************************************************/
-static int ffmpeg_vf_release(vf_wrapper_t *wrapper)
+static int ffmpeg_vf_release(vf_context_t *vfc)
 {
-    vf_ffmpeg_ctx_t *vf_ctx = (vf_ffmpeg_ctx_t *)(wrapper->vf_priv);
+    vf_ffmpeg_ctx_t *vf_ctx = (vf_ffmpeg_ctx_t *)vfc->private_data;
+
     if (!vf_ctx) {
         return 0;
     }
@@ -177,9 +177,6 @@ static int ffmpeg_vf_release(vf_wrapper_t *wrapper)
     if (vf_ctx->pSwsCtx) {
         sws_freeContext(vf_ctx->pSwsCtx);
     }
-
-    free(vf_ctx);
-    vf_ctx = NULL;
 
     dt_info(TAG, "[%s:%d] vf release ok \n", __FUNCTION__, __LINE__);
     return 0;
@@ -192,4 +189,5 @@ vf_wrapper_t vf_ffmpeg_ops = {
     .init       = ffmpeg_vf_init,
     .process    = ffmpeg_vf_process,
     .release    = ffmpeg_vf_release,
+    .private_data_size = sizeof(vf_ffmpeg_ctx_t)
 };

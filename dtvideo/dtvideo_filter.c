@@ -22,8 +22,7 @@
 static vf_wrapper_t *g_vf = NULL;
 
 
-/***********************************************************************
-**
+/***********************************************************************    **
 ** register internal filter
 **
 ***********************************************************************/
@@ -86,31 +85,52 @@ void vf_remove_all()
 ** cap: vf capbilities set
 **
 ***********************************************************************/
-static int select_vf(dtvideo_filter_t *filter, vf_cap_t cap)
+static vf_wrapper_t *select_vf(vf_cap_t cap)
 {
-    int ret = -1;
     vf_wrapper_t *vf = g_vf;
 
     if (!vf) {
-        return ret;
+        return NULL;
     }
 
     while (vf != NULL) {
         if (vf->capable(cap) == cap) { // maybe cap have several elements
-            ret = 0;
-            break;
+            dt_info(TAG, "[%s:%d] %s video filter selected \n", __FUNCTION__, __LINE__,
+                    vf->name);
+            return vf;
         }
         vf = vf->next;
     }
+    return NULL;
+}
 
-    filter->wrapper = vf;
-    if (vf) {
-        dt_info(TAG, "[%s:%d] %s video filter selected \n", __FUNCTION__, __LINE__,
-                g_vf->name);
-    } else {
-        dt_info(TAG, "[%s:%d] No video filter selected \n", __FUNCTION__, __LINE__);
+static vf_context_t *alloc_vf_context(vf_wrapper_t *wrapper)
+{
+    vf_context_t *vfc = (vf_context_t *)malloc(sizeof(vf_context_t));
+    if (!vfc) {
+        return NULL;
     }
-    return ret;
+    if (wrapper->private_data_size > 0) {
+        vfc->private_data = malloc(wrapper->private_data_size);
+        if (!vfc->private_data) {
+            free(vfc);
+            return NULL;
+        }
+    }
+    vfc->wrapper = wrapper;
+    return vfc;
+}
+
+static void free_vf_context(vf_context_t *vfc)
+{
+    if (!vfc) {
+        return;
+    }
+    if (!vfc->private_data) {
+        free(vfc->private_data);
+    }
+    free(vfc);
+    return;
 }
 
 /***********************************************************************
@@ -130,24 +150,28 @@ int video_filter_init(dtvideo_filter_t *filter)
         cap |= VF_CAP_CLIP;
     }
 
-    int ret = select_vf(filter, cap);
-    if (ret < 0) {
-        goto EXIT;
+    vf_wrapper_t *wrapper = select_vf(cap);
+    if (!wrapper) {
+        return -1;
     }
 
-    vf_wrapper_t *wrapper = filter->wrapper;
-    memcpy(&wrapper->para, para, sizeof(dtvideo_para_t));
-    ret = wrapper->init(wrapper);
-    if (ret >= 0) {
-        filter->status = VF_STATUS_RUNNING;
+    vf_context_t *vfc = alloc_vf_context(wrapper);
+    if (!vfc) {
+        return -1;
     }
-EXIT:
+    memcpy(&vfc->para, para, sizeof(dtvideo_para_t));
+    filter->vfc = vfc;
+    int ret = wrapper->init(vfc);
     if (ret < 0) {
-        filter->wrapper = NULL;
-        ret = 0;
+        goto FAIL;
     }
-
-    return ret;
+    filter->status = VF_STATUS_RUNNING;
+    return 0;
+FAIL:
+    if (vfc) {
+        free_vf_context(vfc);
+    }
+    return -1;
 }
 
 /***********************************************************************
@@ -175,8 +199,9 @@ int video_filter_process(dtvideo_filter_t *filter, dt_av_frame_t *frame)
     if (filter->status == VF_STATUS_IDLE) { // No need to Process
         return 0;
     }
-    vf_wrapper_t *wrapper = filter->wrapper;
-    ret = wrapper->process(wrapper, frame);
+    vf_context_t *vfc = filter->vfc;
+    vf_wrapper_t *wrapper = vfc->wrapper;
+    ret = wrapper->process(vfc, frame);
     return ret;
 }
 
@@ -187,12 +212,14 @@ int video_filter_process(dtvideo_filter_t *filter, dt_av_frame_t *frame)
 ***********************************************************************/
 int video_filter_stop(dtvideo_filter_t *filter)
 {
-    vf_wrapper_t *wrapper = filter->wrapper;
+    vf_context_t *vfc = filter->vfc;
+    vf_wrapper_t *wrapper = vfc->wrapper;
     if (!wrapper) {
         goto EXIT;
     }
     if (filter->status == VF_STATUS_RUNNING) {
-        wrapper->release(wrapper);
+        wrapper->release(vfc);
+        free_vf_context(vfc);
     }
 EXIT:
     filter->status = VF_STATUS_IDLE;

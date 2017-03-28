@@ -200,8 +200,8 @@ int main(int argc, char **argv)
     }
 
     if (info.has_video) {
-        setup_vo(&player.vo);
-        dtplayer_register_plugin(DTP_PLUGIN_TYPE_VO, &player.vo);
+        extern vo_wrapper_t vo_sdl_ops;
+        dtplayer_register_plugin(DTP_PLUGIN_TYPE_VO, &vo_sdl_ops);
     }
     if (info.has_audio) {
         setup_ao(&player.ao);

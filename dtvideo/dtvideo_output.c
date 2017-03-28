@@ -51,19 +51,16 @@ void vout_remove_all()
     g_vo = NULL;
 }
 
-/*default alsa*/
-int select_vo_device(dtvideo_output_t * vo, int id)
+vo_wrapper_t *select_vo_device(int id)
 {
-    vo_wrapper_t **p;
-    p = &g_vo;
+    vo_wrapper_t **p = &g_vo;
 
     if (id == -1) { // user did not choose vo,use default one
         if (!*p) {
-            return -1;
+            return NULL;
         }
-        vo->wrapper = *p;
-        dt_info(TAG, "SELECT VO:%s \n", (*p)->name);
-        return 0;
+        dt_info(TAG, "No Specify VO. SELECT %s \n", (*p)->name);
+        return *p;
     }
 
     while (*p != NULL && (*p)->id != id) {
@@ -71,12 +68,42 @@ int select_vo_device(dtvideo_output_t * vo, int id)
     }
     if (!*p) {
         dt_error(TAG, "no valid vo device found\n");
-        return -1;
+        return NULL;
     }
-    vo->wrapper = *p;
     dt_info(TAG, "SELECT VO:%s \n", (*p)->name);
-    return 0;
+    return *p;
 }
+
+static vo_context_t *alloc_vo_context(vo_wrapper_t *wrapper)
+{
+    vo_context_t *voc = (vo_context_t *)malloc(sizeof(vo_context_t));
+    if (!voc) {
+        return NULL;
+    }
+    if (wrapper->private_data_size > 0) {
+        voc->private_data = malloc(wrapper->private_data_size);
+        if (!voc->private_data) {
+            free(voc);
+            return NULL;
+        }
+    }
+    voc->wrapper = wrapper;
+    return voc;
+}
+
+
+static void free_vo_context(vo_context_t *voc)
+{
+    if (!voc) {
+        return;
+    }
+    if (!voc->private_data) {
+        free(voc->private_data);
+    }
+    free(voc);
+    return;
+}
+
 
 int video_output_start(dtvideo_output_t * vo)
 {
@@ -99,10 +126,12 @@ int video_output_resume(dtvideo_output_t * vo)
 
 int video_output_stop(dtvideo_output_t * vo)
 {
-    vo_wrapper_t *wrapper = vo->wrapper;
+    vo_context_t *voc = vo->voc;
+    vo_wrapper_t *wrapper = voc->wrapper;
     vo->status = VO_STATUS_EXIT;
     pthread_join(vo->output_thread_pid, NULL);
-    wrapper->stop(wrapper);
+    wrapper->stop(voc);
+    free_vo_context(voc);
     dt_info(TAG, "[%s:%d] vout stop ok \n", __FUNCTION__, __LINE__);
     return 0;
 }
@@ -183,7 +212,8 @@ static void *video_output_thread(void *args)
 {
     dtvideo_output_t *vo = (dtvideo_output_t *) args;
     dtvideo_context_t *vctx = (dtvideo_context_t *) vo->parent;
-    vo_wrapper_t *wrapper = vo->wrapper;
+    vo_context_t *voc = vo->voc;
+    vo_wrapper_t *wrapper = voc->wrapper;
     int ret, wlen;
     ret = wlen = 0;
     dt_av_frame_t *picture_pre;
@@ -209,14 +239,18 @@ static void *video_output_thread(void *args)
             continue;
         }
 
-        /* Maybe need switch vo*/
-        if(wrapper->id == VO_ID_NULL) {
-            ret = select_vo_device(vo, -1);
-            wrapper = vo->wrapper;
-            if(wrapper->id != VO_ID_NULL) {
-                memcpy(&wrapper->para, &vo->para, sizeof(dtvideo_para_t));
-                wrapper->init(wrapper);
-                dt_info(TAG, "[%s:%d]vo switch to %s! \n", __FUNCTION__, __LINE__, wrapper->name);
+        /* dynamic switch vo*/
+        if (wrapper->id == VO_ID_NULL) {
+            vo_wrapper_t *tmp = select_vo_device(-1);
+            if (tmp->id != VO_ID_NULL) {
+                // setup new vo
+                free_vo_context(vo->voc);
+                vo->voc = alloc_vo_context(tmp);
+                memcpy(&vo->voc->para, &vo->para, sizeof(dtvideo_para_t));
+                wrapper = tmp;
+                wrapper->init(vo->voc);
+                dt_info(TAG, "[%s:%d]vo switch to %s! \n", __FUNCTION__, __LINE__,
+                        wrapper->name);
             }
         }
 
@@ -313,7 +347,7 @@ static void *video_output_thread(void *args)
         }
 RENDER:
         /*display picture & update vpts */
-        ret = wrapper->render(wrapper, pic);
+        ret = wrapper->render(voc, pic);
         if (ret < 0) {
             dt_error(TAG, "frame toggle failed! \n");
             usleep(1000);
@@ -343,14 +377,19 @@ int video_output_init(dtvideo_output_t * vo, int vo_id)
     int ret = 0;
     pthread_t tid;
 
-    /*select ao device */
-    ret = select_vo_device(vo, vo_id);
-    if (ret < 0) {
+    vo_wrapper_t *wrapper = select_vo_device(vo_id);
+    if (!wrapper) {
+        dt_info(TAG, "[%s:%d] TRACE\n", __FUNCTION__, __LINE__);
         return -1;
     }
-    vo_wrapper_t *wrapper = vo->wrapper;
-    memcpy(&wrapper->para, &vo->para, sizeof(dtvideo_para_t));
-    wrapper->init(wrapper);
+
+    vo_context_t *voc = alloc_vo_context(wrapper);
+    if (!voc) {
+        return -1;
+    }
+    memcpy(&voc->para, &vo->para, sizeof(dtvideo_para_t));
+    vo->voc = voc;
+    wrapper->init(voc);
     dt_info(TAG, "[%s:%d] video output init success\n", __FUNCTION__, __LINE__);
 
     /*start aout pthread */
