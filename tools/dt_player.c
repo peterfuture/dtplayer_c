@@ -204,8 +204,8 @@ int main(int argc, char **argv)
         dtplayer_register_plugin(DTP_PLUGIN_TYPE_VO, &vo_sdl_ops);
     }
     if (info.has_audio) {
-        setup_ao(&player.ao);
-        dtplayer_register_plugin(DTP_PLUGIN_TYPE_AO, &player.ao);
+        extern ao_wrapper_t ao_sdl_ops;
+        dtplayer_register_plugin(DTP_PLUGIN_TYPE_AO, &ao_sdl_ops);
     }
     dtplayer_start(player_priv);
 
