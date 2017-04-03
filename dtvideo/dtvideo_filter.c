@@ -213,6 +213,8 @@ int video_filter_process(dtvideo_filter_t *filter, dt_av_frame_t *frame)
 int video_filter_stop(dtvideo_filter_t *filter)
 {
     vf_context_t *vfc = filter->vfc;
+    if(!vfc)
+        return 0;
     vf_wrapper_t *wrapper = vfc->wrapper;
     if (!wrapper) {
         goto EXIT;
