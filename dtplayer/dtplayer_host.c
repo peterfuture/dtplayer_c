@@ -61,6 +61,7 @@ int player_host_init(dtplayer_context_t * dtp_ctx)
         }
         host_para->audio_filter = -1; //default
         host_para->audio_output = -1; //defualt
+        host_para->ao_device = dtp_ctx->ao_device;
         dt_info(TAG, "host-audio setup ok, cur index:%d \n", media_info->cur_ast_index);
         dt_info(TAG, "[%s:%d] audio extra_size:%d time_base.num:%d den:%d\n",
                 __FUNCTION__, __LINE__, host_para->audio_extra_size, host_para->audio_num,
@@ -126,6 +127,7 @@ int player_host_init(dtplayer_context_t * dtp_ctx)
         }
         host_para->video_filter = -1; //defualt
         host_para->video_output = -1; //defualt
+        host_para->vo_device = dtp_ctx->vo_device;
         dt_info(TAG, "host-video Setup ok, cur index:%d \n", media_info->cur_vst_index);
         dt_info(TAG,
                 "[%s:%d]format:%d width:%d->%d height:%d->%d fmt:%d rate:%d ratio:%d fps:%g extra_size:%d\n",
@@ -149,6 +151,7 @@ int player_host_init(dtplayer_context_t * dtp_ctx)
         host_para->sub_format = sstream->format;
         host_para->sub_width = sstream->width;
         host_para->sub_height = sstream->height;
+        host_para->so_device = dtp_ctx->so_device;
         host_para->sctx_priv = sstream->codec_priv;
         dt_info(TAG, "host-sub setup ok, cur index:%d \n", media_info->cur_sst_index);
     }

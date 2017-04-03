@@ -8,6 +8,7 @@ typedef struct {
     int width;
     int height;
     int sub_output;
+    void *device;         // sub render device
     void *avctx_priv;
 } dtsub_para_t;
 

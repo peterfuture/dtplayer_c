@@ -149,3 +149,17 @@ int dtplayer_get_states(void *player_priv, dtp_state_t * state)
     memcpy(state, &dtp_ctx->state, sizeof(*state));
     return 0;
 }
+
+int dtplayer_get_parameter(void *handle, int cmd, unsigned long arg)
+{
+    dtplayer_context_t *dtp_ctx = (dtplayer_context_t *)handle;
+    return player_get_parameter(dtp_ctx, cmd, arg);
+}
+
+int dtplayer_set_parameter(void *handle, int cmd, unsigned long arg)
+{
+    dtplayer_context_t *dtp_ctx = (dtplayer_context_t *)handle;
+    return player_set_parameter(dtp_ctx, cmd, arg);
+}
+
+

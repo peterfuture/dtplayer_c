@@ -55,6 +55,7 @@ typedef struct {
     int audio_filter;           //audio filter options
     int audio_output;           //audio output device select
     int aflag;                  //DISABLE_HW_ACODEC ETC.
+    void *ao_device;
     void *actx_priv;            //point to
     /*video */
     int video_format;
@@ -76,6 +77,7 @@ typedef struct {
     int video_filter;
     int video_output;
     int vflag;                  //DISABLE_HW_VCODEC ETC.
+    void *vo_device;
     void *vctx_priv;
     /*sub */
     int sub_format;
@@ -83,6 +85,7 @@ typedef struct {
     int sub_width;
     int sub_height;
     int sflag;                  //DISABLE_HW_SCODEC ETC.
+    void *so_device;
     void *sctx_priv;
 
     void *service_mgt;          //service manager context

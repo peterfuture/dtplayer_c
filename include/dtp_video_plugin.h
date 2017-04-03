@@ -31,6 +31,7 @@ typedef struct {
     int flag;                   // setting from player
     int video_filter;
     int video_output;
+    void *device;               // video render device. Ext: surfaceview for android
     void *avctx_priv;
 } dtvideo_para_t;
 

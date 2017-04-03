@@ -464,6 +464,32 @@ int player_stop(dtplayer_context_t * dtp_ctx)
     return 0;
 }
 
+int player_get_parameter(dtplayer_context_t *dtp_ctx, int cmd, unsigned long arg)
+{
+    return 0;
+}
+
+int player_set_parameter(dtplayer_context_t *dtp_ctx, int cmd, unsigned long arg)
+{
+    if(!dtp_ctx)
+        return -1;
+    switch(cmd) {
+        case DTP_CMD_SET_AODEVICE:
+            dtp_ctx->ao_device = arg;
+            break;
+        case DTP_CMD_SET_VODEVICE:
+            dtp_ctx->vo_device = arg;
+            break;
+        case DTP_CMD_SET_SODEVICE:
+            dtp_ctx->so_device = arg;
+            break;
+        default:
+            break;
+    }
+    
+    return 0;
+}
+
 static char * get_event_name(int cmd)
 {
     switch (cmd) {

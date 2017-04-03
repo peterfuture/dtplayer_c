@@ -513,6 +513,7 @@ int host_init(dthost_context_t * hctx)
         }
         video_para.video_filter = host_para->video_filter;
         video_para.video_output = host_para->video_output;
+        video_para.device = host_para->vo_device;
         video_para.avctx_priv = host_para->vctx_priv;
         video_para.flag = host_para->vflag;
         ret = dtvideo_init(&hctx->video_priv, &video_para, hctx);
@@ -549,6 +550,7 @@ int host_init(dthost_context_t * hctx)
         }
         audio_para.audio_filter = host_para->audio_filter;
         audio_para.audio_output = host_para->audio_output;
+        audio_para.device = host_para->ao_device;
         audio_para.avctx_priv = host_para->actx_priv;
 
         ret = dtaudio_init(&hctx->audio_priv, &audio_para, hctx);
@@ -569,6 +571,7 @@ int host_init(dthost_context_t * hctx)
         sub_para.width = host_para->sub_width;
         sub_para.height = host_para->sub_height;
         sub_para.sub_output = -1;
+        sub_para.device = host_para->so_device;
         sub_para.avctx_priv = host_para->sctx_priv;
         ret = dtsub_init(&hctx->sub_priv, &sub_para, hctx);
         if (ret < 0) {

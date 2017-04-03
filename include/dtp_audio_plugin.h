@@ -31,6 +31,7 @@ typedef struct {
     int afmt;
     int audio_filter;
     int audio_output;
+    void *device;               // audio render device.
     void *avctx_priv;           // point to avcodec_context
     void *service_mgt;          // service manager context
 } dtaudio_para_t;

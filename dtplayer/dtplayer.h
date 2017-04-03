@@ -66,6 +66,11 @@ typedef struct dtplayer_context {
     service_t *player_service;
     void *cookie;
     dt_service_mgt_t *service_mgt;
+
+    // audio-video-sub out device
+    void *ao_device;
+    void *vo_device;
+    void *so_device;
 } dtplayer_context_t;
 
 void player_register_all();
