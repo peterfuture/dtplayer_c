@@ -43,6 +43,7 @@ static int stream_ffmpeg_open(stream_wrapper_t * wrapper, char *stream_name)
     info->stream_size = size;
     info->seek_support = ctx->seekable;
 
+    dt_info(TAG, "[ffmpeg] Opening %s ok. ret:%d\n", filename, ret);
     return DTERROR_NONE;
 }
 

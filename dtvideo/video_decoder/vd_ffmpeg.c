@@ -222,9 +222,9 @@ static int copy_frame(dtvideo_decoder_t * decoder, AVFrame * src, int64_t pts,
     uint8_t *buffer;
     int buffer_size;
     int pixfmt = avctxp->pix_fmt;
-    int sw = para->s_width;
+    int sw = src->width;
     int dw = sw;
-    int sh = para->s_height;
+    int sh = src->height;
     int dh = sh;
     int sf = pixfmt;
     int df = pixfmt;
