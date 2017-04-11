@@ -80,12 +80,14 @@ static vo_context_t *alloc_vo_context(vo_wrapper_t *wrapper)
     if (!voc) {
         return NULL;
     }
+    memset(voc, 0, sizeof(vo_context_t));
     if (wrapper->private_data_size > 0) {
         voc->private_data = malloc(wrapper->private_data_size);
         if (!voc->private_data) {
             free(voc);
             return NULL;
         }
+        memset(voc->private_data, 0, sizeof(wrapper->private_data_size));
     }
     voc->wrapper = wrapper;
     return voc;
