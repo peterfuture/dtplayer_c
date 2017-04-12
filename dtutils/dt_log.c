@@ -125,7 +125,6 @@ void dt_debug(void *tag, const char *fmt, ...)
 #endif
 #if ENABLE_ANDROID
     __android_log_vprint(ANDROID_LOG_DEBUG, tag, fmt, vl);
-    __android_log_vprint(ANDROID_LOG_INFO, tag, fmt, vl);
 #endif
     va_end(vl);
 }

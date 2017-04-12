@@ -35,7 +35,7 @@ void stream_register_all()
     REGISTER_STREAM(CURL, curl);
 #endif
 #ifdef ENABLE_STREAM_FFMPEG
-    REGISTER_STREAM(FFMPEG, ffmpeg);
+    //REGISTER_STREAM(FFMPEG, ffmpeg);
 #endif
 }
 

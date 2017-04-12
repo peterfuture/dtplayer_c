@@ -234,6 +234,7 @@ static void *video_output_thread(void *args)
     int dump_index = 0;
     for (;;) {
         if (vo->status == VO_STATUS_EXIT) {
+            dt_info(TAG, "[%s:%d] get exit quit thread \n", __FUNCTION__, __LINE__);
             goto EXIT;
         }
         if (vo->status == VO_STATUS_IDLE || vo->status == VO_STATUS_PAUSE) {
@@ -368,7 +369,7 @@ RENDER:
         //dt_usleep (REFRESH_DURATION);
     }
 EXIT:
-    dt_info(TAG, "[file:%s][%s:%d]ao playback thread exit\n", __FILE__,
+    dt_info(TAG, "[file:%s][%s:%d]vo playback thread exit\n", __FILE__,
             __FUNCTION__, __LINE__);
     pthread_exit(NULL);
     return NULL;
