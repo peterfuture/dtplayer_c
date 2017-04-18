@@ -72,6 +72,35 @@ static int demuxer_ffmpeg_probe(demuxer_wrapper_t *wrapper, dt_buffer_t *buf)
     return 1;
 }
 
+#if ENABLE_ANDROID
+static void my_log_callback(void *ptr, int level, const char *fmt, va_list vl)
+{
+    switch (level) {
+    case AV_LOG_DEBUG:
+        __android_log_vprint(ANDROID_LOG_VERBOSE, "FFMPEG", fmt, vl);
+        break;
+    case AV_LOG_VERBOSE:
+        __android_log_vprint(ANDROID_LOG_DEBUG, "FFMPEG", fmt, vl);
+        break;
+    case AV_LOG_INFO:
+        __android_log_vprint(ANDROID_LOG_INFO, "FFMPEG", fmt, vl);
+        break;
+    case AV_LOG_WARNING:
+        __android_log_vprint(ANDROID_LOG_WARN, "FFMPEG", fmt, vl);
+        break;
+    case AV_LOG_ERROR:
+        __android_log_vprint(ANDROID_LOG_ERROR, "FFMPEG", fmt, vl);
+        break;
+    }
+}
+
+static void syslog_init()
+{
+    av_log_set_level(AV_LOG_DEBUG);
+    av_log_set_callback(my_log_callback);
+}
+#endif
+
 static int demuxer_ffmpeg_open(demuxer_wrapper_t * wrapper)
 {
     int err, ret;
@@ -79,9 +108,13 @@ static int demuxer_ffmpeg_open(demuxer_wrapper_t * wrapper)
     dtdemuxer_context_t *ctx = (dtdemuxer_context_t *)wrapper->parent;
     char *file_name = ctx->file_name;
 
+#if ENABLE_ANDROID
+    syslog_init();
+#endif
     ffmpeg_ctx_t *ffmpeg_ctx = (ffmpeg_ctx_t *)malloc(sizeof(*ffmpeg_ctx));
     memset(ffmpeg_ctx, 0, sizeof(ffmpeg_ctx_t));
     av_register_all();
+    avformat_network_init();
     AVFormatContext *ic = avformat_alloc_context();
     /*register ext stream, ffmpeg will use */
     //==================================================
