@@ -13,5 +13,6 @@
 #include "dt_ini.h"
 #include "dt_rw.h"
 #include "dt_mem.h"
+#include "dt_interrupt.h"
 
 #endif

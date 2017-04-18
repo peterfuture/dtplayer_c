@@ -73,6 +73,12 @@ static int player_service_release(dtplayer_context_t * dtp_ctx)
     return 0;
 }
 
+static int player_interrupt_cb_default(void *opaque)
+{
+    dtplayer_context_t *ctx = (dtplayer_context_t *)opaque;
+    return ctx->abort_request;
+}
+
 int player_init(dtplayer_context_t * dtp_ctx)
 {
     int ret = 0;
@@ -91,8 +97,12 @@ int player_init(dtplayer_context_t * dtp_ctx)
     dtp_ctx->file_name = dtp_ctx->player_para.file_name;
     dtp_ctx->update_cb = dtp_ctx->player_para.update_cb;
 
+    dtp_ctx->interrupt_cb.callback = player_interrupt_cb_default;
+    dtp_ctx->interrupt_cb.opaque = (void *)dtp_ctx;
+
     dtdemuxer_para_t demux_para;
     demux_para.file_name = dtp_ctx->file_name;
+    demux_para.cb = &dtp_ctx->interrupt_cb;
     ret = dtdemuxer_open(&dtp_ctx->demuxer_priv, &demux_para, dtp_ctx);
     if (ret < 0) {
         ret = -1;
@@ -461,32 +471,36 @@ int player_stop(dtplayer_context_t * dtp_ctx)
 {
     dt_info(TAG, "PLAYER STOP STATUS SET\n");
     set_player_status(dtp_ctx, PLAYER_STATUS_STOP);
+    dtp_ctx->abort_request = 1;
     return 0;
 }
 
-int player_get_parameter(dtplayer_context_t *dtp_ctx, int cmd, unsigned long arg)
+int player_get_parameter(dtplayer_context_t *dtp_ctx, int cmd,
+                         unsigned long arg)
 {
     return 0;
 }
 
-int player_set_parameter(dtplayer_context_t *dtp_ctx, int cmd, unsigned long arg)
+int player_set_parameter(dtplayer_context_t *dtp_ctx, int cmd,
+                         unsigned long arg)
 {
-    if(!dtp_ctx)
+    if (!dtp_ctx) {
         return -1;
-    switch(cmd) {
-        case DTP_CMD_SET_AODEVICE:
-            dtp_ctx->ao_device = arg;
-            break;
-        case DTP_CMD_SET_VODEVICE:
-            dtp_ctx->vo_device = arg;
-            break;
-        case DTP_CMD_SET_SODEVICE:
-            dtp_ctx->so_device = arg;
-            break;
-        default:
-            break;
     }
-    
+    switch (cmd) {
+    case DTP_CMD_SET_AODEVICE:
+        dtp_ctx->ao_device = (void *)arg;
+        break;
+    case DTP_CMD_SET_VODEVICE:
+        dtp_ctx->vo_device = (void *)arg;
+        break;
+    case DTP_CMD_SET_SODEVICE:
+        dtp_ctx->so_device = (void *)arg;
+        break;
+    default:
+        break;
+    }
+
     return 0;
 }
 
@@ -562,6 +576,7 @@ static void *event_handle_loop(dtplayer_context_t * dtp_ctx)
         if (get_player_status(dtp_ctx) == PLAYER_STATUS_STOP) {
             goto QUIT;
         }
+
         usleep(300 * 1000);    // 1/3s update
         if (get_player_status(dtp_ctx) != PLAYER_STATUS_RUNNING) {
             continue;

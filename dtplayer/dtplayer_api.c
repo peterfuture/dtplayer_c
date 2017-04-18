@@ -96,8 +96,8 @@ int dtplayer_stop(void *player_priv)
     dtplayer_context_t *dtp_ctx = (dtplayer_context_t *)player_priv;
     event_t *event = dt_alloc_event(EVENT_SERVER_ID_PLAYER, PLAYER_EVENT_STOP);
     dt_send_event(dtp_ctx->service_mgt, event);
-    dt_info(TAG, "EVENT_LOOP_ID:%lu \n", dtp_ctx->event_loop_id);
     pthread_join(dtp_ctx->event_loop_id, NULL);
+    dt_info(TAG, "EVENT_LOOP_ID:%lu \n", dtp_ctx->event_loop_id);
     return 0;
 }
 

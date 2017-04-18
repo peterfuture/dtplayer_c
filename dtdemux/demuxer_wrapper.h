@@ -6,6 +6,7 @@
 #include <stdint.h>
 
 #include "dt_buffer.h"
+#include "dt_interrupt.h"
 
 #include "dtp_av.h"
 #include "dtp.h"
@@ -22,6 +23,7 @@ typedef enum {
 
 typedef struct {
     char *file_name;
+    dt_interrupt_cb *cb;
 } dtdemuxer_para_t;
 
 typedef struct demuxer_wrapper {
@@ -55,6 +57,7 @@ typedef struct {
     demuxer_wrapper_t *demuxer;
     dt_buffer_t probe_buf;
     demuxer_statistics_info_t statistics_info;
+    dt_interrupt_cb *cb;
     void *stream_priv;
     void *parent;
 } dtdemuxer_context_t;

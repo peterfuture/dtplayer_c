@@ -261,7 +261,7 @@ static void *video_output_thread(void *args)
         picture_pre = (dt_av_frame_t *) dtvideo_output_pre_read(vo->parent);
         if (!picture_pre) {
             dt_debug(TAG, "[%s:%d]frame read failed ! \n", __FUNCTION__, __LINE__);
-            usleep(100);
+            usleep(10 * 1000);
             continue;
         }
 

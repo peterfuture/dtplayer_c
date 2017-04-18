@@ -149,24 +149,24 @@ static void *video_decode_loop(void *arg)
 
         if (decoder->status == VDEC_STATUS_IDLE) {
             dt_info(TAG, "[%s:%d] Idle status ,please wait \n", __FUNCTION__, __LINE__);
-            usleep(100);
+            usleep(10 * 1000);
             continue;
         }
 
         /*read frame */
         if (!decoder->parent) {
-            usleep(100);
+            usleep(10 * 1000);
             continue;
         }
 
         if (picture_queue->length >= VIDEO_OUT_MAX_COUNT) {
             //vo queue full
-            usleep(1000);
+            usleep(10 * 1000);
             continue;
         }
         ret = dtvideo_read_frame(decoder->parent, &frame);
         if (ret < 0) {
-            dt_usleep(1000);
+            dt_usleep(10 * 1000);
             if (decoder->pts_first == DT_NOPTS_VALUE) {
                 continue;
             }
@@ -185,7 +185,6 @@ static void *video_decode_loop(void *arg)
             picture = NULL;
             usleep(10000);
             continue;
-            goto DECODE_END;
         }
         if (!picture) {
             goto DECODE_END;

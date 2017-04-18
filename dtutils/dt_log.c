@@ -54,10 +54,10 @@ static int display_time()
     char buffer[30];
     struct timeval tv;
     time_t curtime;
-    gettimeofday(&tv, NULL); 
-    curtime=tv.tv_sec;
-    strftime(buffer,30,"%Y-%m-%d %T.",localtime(&curtime));
-    printf("[%s%ld]",buffer,tv.tv_usec);
+    gettimeofday(&tv, NULL);
+    curtime = tv.tv_sec;
+    strftime(buffer, 30, "%Y-%m-%d %T.", localtime(&curtime));
+    printf("[%s%ld]", buffer, tv.tv_usec);
     return 0;
 }
 

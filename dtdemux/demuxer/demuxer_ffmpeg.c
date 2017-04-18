@@ -101,6 +101,13 @@ static void syslog_init()
 }
 #endif
 
+
+static int ff_interrupt_cb(void *arg)
+{
+    dtdemuxer_context_t *ctx = (dtdemuxer_context_t *)arg;
+    return dt_check_interrupt(ctx->cb);
+}
+
 static int demuxer_ffmpeg_open(demuxer_wrapper_t * wrapper)
 {
     int err, ret;
@@ -132,7 +139,15 @@ static int demuxer_ffmpeg_open(demuxer_wrapper_t * wrapper)
     } else {
         dt_info(TAG, "dtstream null, use ffmpeg instead \n");
     }
-    err = avformat_open_input(&ic, file_name, ic->iformat, NULL);
+
+    AVDictionary *d = NULL;
+    // set options
+    av_dict_set(&d, "protocol_whitelist", "file,udp,rtp", 0);
+    // register interrupt
+    ic->interrupt_callback.callback = ff_interrupt_cb;
+    ic->interrupt_callback.opaque = ctx;
+    dt_info(TAG, "Interrupt: %p\n", ffmpeg_ctx);
+    err = avformat_open_input(&ic, file_name, ic->iformat, &d);
     if (err < 0) {
         dt_error(TAG, "avformat_open_input failed, err:%x - %x \n", err,
                  AVUNERROR(err));
@@ -702,7 +717,6 @@ static int demuxer_ffmpeg_close(demuxer_wrapper_t * wrapper)
     AVFormatContext *ic = ctx->ic;
 
     dump_demuxer_statics_info(dem_ctx);
-
     if (ic) {
         avformat_close_input(&ic);
     }

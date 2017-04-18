@@ -63,6 +63,9 @@ typedef struct dtplayer_context {
     io_loop_t io_loop;
     pthread_t event_loop_id;
 
+    int abort_request;
+    dt_interrupt_cb interrupt_cb;
+
     service_t *player_service;
     void *cookie;
     dt_service_mgt_t *service_mgt;
@@ -90,5 +93,9 @@ int player_get_mediainfo(dtplayer_context_t * dtp_ctx,
                          dtp_media_info_t *info); //s
 int player_stop(dtplayer_context_t * dtp_ctx);
 int player_video_resize(dtplayer_context_t * dtp_ctx, int w, int h);
+int player_get_parameter(dtplayer_context_t *dtp_ctx, int cmd,
+                         unsigned long arg);
+int player_set_parameter(dtplayer_context_t *dtp_ctx, int cmd,
+                         unsigned long arg);
 
 #endif

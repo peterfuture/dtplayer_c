@@ -233,6 +233,7 @@ SRCS_COMMON-$(DT_UTIL) += dtutils/dt_mem.c
 SRCS_COMMON-$(DT_UTIL) += dtutils/dt_buffer.c
 SRCS_COMMON-$(DT_UTIL) += dtutils/dt_queue.c
 SRCS_COMMON-$(DT_UTIL) += dtutils/commander.c
+SRCS_COMMON-$(DT_UTIL) += dtutils/dt_interrupt.c
 
 #dtstream
 SRCS_COMMON-$(DT_STREAM)      +=dtstream/dtstream_api.c

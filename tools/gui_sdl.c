@@ -294,7 +294,6 @@ static int vo_sdl_render(vo_context_t * voc, dt_av_frame_t * frame)
 {
     dt_lock(&window.mutex);
     dt_info(TAG, "frame size [%d:%d] \n", frame->width, frame->height);
-    dt_info(TAG, "d_width \n", frame->width, frame->height);
     // reset sdl vf and window size
     dtvideo_filter_t *vf = &sdl_vf;
     if (vf->para.d_width != sdl_gui.window_w

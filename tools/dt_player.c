@@ -237,6 +237,7 @@ int main(int argc, char **argv)
                 break;
             }
         case EVENT_STOP:
+            dt_info(TAG, "enter stop \n");
             dtplayer_stop(player_priv);
             goto QUIT_CHECK;
             break;
@@ -262,7 +263,7 @@ int main(int argc, char **argv)
     }
 QUIT_CHECK:
     while (!player.quit) {
-        usleep(100);
+        usleep(10*1000);
         break;
     }
     player.gui->stop(player.gui);
