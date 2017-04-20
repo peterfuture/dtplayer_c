@@ -312,6 +312,7 @@ ERR2:
 ERR3:
     set_player_status(dtp_ctx, PLAYER_STATUS_ERROR);
     player_handle_cb(dtp_ctx);
+    pthread_join(dtp_ctx->event_loop_id, NULL);
     return ret;
 
 }
@@ -342,10 +343,12 @@ int player_start(dtplayer_context_t * dtp_ctx)
     return 0;
 
 ERR1:
+    dtp_ctx->abort_request = 1;
     stop_io_thread(dtp_ctx);
     player_host_stop(dtp_ctx);
     set_player_status(dtp_ctx, PLAYER_STATUS_ERROR);
     player_handle_cb(dtp_ctx);
+    pthread_join(dtp_ctx->event_loop_id, NULL);
     return ret;
 }
 

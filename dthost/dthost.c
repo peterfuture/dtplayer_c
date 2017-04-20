@@ -269,9 +269,16 @@ int host_start(dthost_context_t * hctx)
         }
         usleep(10000);
         if (print_cnt-- == 0) {
-            dt_info(TAG, "time out: audio:%d video:%d \n", audio_start_flag,
+            dt_info(TAG, "time out. has_audio:%d audio:%d has_video:%d video:%d \n",
+                    has_audio, audio_start_flag, has_video,
                     video_start_flag);
-            break;
+
+            // check play failed
+            if ((has_audio == 1 && audio_start_flag == 1) || (has_video == 1
+                    && video_start_flag == 1)) {
+                break;
+            }
+            return -1;
         }
     } while (1);
 
