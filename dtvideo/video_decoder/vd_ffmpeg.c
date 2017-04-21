@@ -12,6 +12,7 @@ typedef struct vd_ffmpeg_ctx {
     AVFrame *frame;
     struct SwsContext *pSwsCtx;
     int use_hwaccel;
+    void *surface;
 } vd_ffmpeg_ctx_t;
 
 static int convert_to_id(int format)
@@ -41,6 +42,33 @@ static AVCodecContext * alloc_ffmpeg_ctx(dtvideo_decoder_t *decoder)
     return ctx;
 }
 
+static void ff_log_callback(void *ptr, int level, const char *fmt, va_list vl)
+{
+    switch (level) {
+    case AV_LOG_DEBUG:
+        __android_log_vprint(ANDROID_LOG_VERBOSE, "FFMPEG", fmt, vl);
+        break;
+    case AV_LOG_VERBOSE:
+        __android_log_vprint(ANDROID_LOG_DEBUG, "FFMPEG", fmt, vl);
+        break;
+    case AV_LOG_INFO:
+        __android_log_vprint(ANDROID_LOG_INFO, "FFMPEG", fmt, vl);
+        break;
+    case AV_LOG_WARNING:
+        __android_log_vprint(ANDROID_LOG_WARN, "FFMPEG", fmt, vl);
+        break;
+    case AV_LOG_ERROR:
+        __android_log_vprint(ANDROID_LOG_ERROR, "FFMPEG", fmt, vl);
+        break;
+    }
+}
+
+static void ff_log_init()
+{
+    av_log_set_level(AV_LOG_DEBUG);
+    av_log_set_callback(ff_log_callback);
+}
+
 #if ENABLE_ANDROID
 
 #include <libavcodec/mediacodec.h>
@@ -51,26 +79,34 @@ static enum AVPixelFormat mediacodec_hwaccel_get_format(AVCodecContext *avctx,
 {
     vd_ffmpeg_ctx_t *ctx = avctx->opaque;
     const enum AVPixelFormat *p = NULL;
+    int ret = -1;
 
     for (p = pix_fmts; *p != AV_PIX_FMT_NONE; p++) {
         AVMediaCodecContext *mediacodec_ctx = NULL;
         const AVPixFmtDescriptor *desc = av_pix_fmt_desc_get(*p);
 
         if (!(desc->flags & AV_PIX_FMT_FLAG_HWACCEL)) {
+            dt_info(TAG, "Not HWACCEL.\n");
             break;
         }
 
         if (*p != AV_PIX_FMT_MEDIACODEC) {
+        
+            dt_info(TAG, "Not mediacodec:%d.\n", *p);
             continue;
         }
 
+        dt_info(TAG, "allocate hwaccel ctx.\n");
         mediacodec_ctx = av_mediacodec_alloc_context();
         if (!mediacodec_ctx) {
             fprintf(stderr, "Failed to allocate hwaccel ctx\n");
             continue;
         }
+        dt_info(TAG, "default init enter.\n");
+        ret = av_mediacodec_default_init(avctx, mediacodec_ctx, ctx->surface);
         avctx->hwaccel_context = mediacodec_ctx;
         ctx->use_hwaccel = 1;
+        dt_info(TAG, "Default init setup surface. ret:%d\n", ret);
         break;
     }
 
@@ -88,7 +124,7 @@ int ffmpeg_vdec_init(dtvideo_decoder_t *decoder)
         return -1;
     }
     memset(vd_ctx, 0, sizeof(vd_ffmpeg_ctx_t));
-
+    ff_log_init();
     AVCodecContext *avctxp = NULL;
     if (decoder->vd_priv) {
         avctxp = (AVCodecContext *) decoder->vd_priv;
@@ -104,6 +140,7 @@ int ffmpeg_vdec_init(dtvideo_decoder_t *decoder)
     AVCodec *codec = NULL;
     enum AVCodecID id = avctxp->codec_id;
     avctxp->opaque = vd_ctx;
+    vd_ctx->surface = para->device;
     int hw_codec_opened = 0;
     if (para->flag & DTAV_FLAG_DISABLE_HW_CODEC) {
         dt_info(TAG, "disable hw codec, use sw codec.\n");
@@ -231,6 +268,16 @@ static int copy_frame(dtvideo_decoder_t * decoder, AVFrame * src, int64_t pts,
     //step1: malloc dt_av_frame_t
     dt_av_frame_t *pict = malloc(sizeof(dt_av_frame_t));
     memset(pict, 0, sizeof(dt_av_frame_t));
+
+#ifdef ENABLE_ANDROID
+    if(vd_ctx->use_hwaccel && vd_ctx->surface != NULL) {
+        pict->data[3] = src->data[3];
+        AVMediaCodecBuffer *buffer = (AVMediaCodecBuffer *)src->data[3];
+        dt_info(TAG, "buffer:%p\n", buffer);
+        goto set_para;
+    }
+#endif
+    
     //step2: convert to avpicture, ffmpeg struct
     AVPicture *dst = (AVPicture *)(pict);
     //step3: allocate an AVFrame structure
@@ -245,6 +292,7 @@ static int copy_frame(dtvideo_decoder_t * decoder, AVFrame * src, int64_t pts,
                                    NULL, NULL, NULL);
     sws_scale(pSwsCtx, src->data, src->linesize, 0, sh, dst->data, dst->linesize);
 #endif
+set_para:
     pict->pts = pts;
     pict->width = sw;
     pict->height = sh;
