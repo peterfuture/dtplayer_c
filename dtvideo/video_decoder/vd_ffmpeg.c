@@ -142,7 +142,7 @@ int ffmpeg_vdec_init(dtvideo_decoder_t *decoder)
     AVCodec *codec = NULL;
     enum AVCodecID id = avctxp->codec_id;
     avctxp->opaque = vd_ctx;
-    vd_ctx->surface = para->device;
+    //vd_ctx->surface = para->device; // switch on & off
     int hw_codec_opened = 0;
     if (para->flag & DTAV_FLAG_DISABLE_HW_CODEC) {
         dt_info(TAG, "disable hw codec, use sw codec.\n");
