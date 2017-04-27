@@ -73,7 +73,8 @@ ao_wrapper_t *select_ao_device(int id)
         dt_info(LOG_TAG, "no valid ao device found\n");
         return NULL;
     }
-    dt_info(TAG, "[%s:%d]select--%s audio device \n", __FUNCTION__, __LINE__, (*p)->name);
+    dt_info(TAG, "[%s:%d]select--%s audio device \n", __FUNCTION__, __LINE__,
+            (*p)->name);
     return *p;
 }
 
@@ -153,37 +154,47 @@ int audio_output_latency(dtaudio_output_t * ao)
     }
     ao_context_t *aoc = ao->aoc;
     ao_wrapper_t *wrapper = aoc->wrapper;
-    wrapper->get_parameter(aoc, DTP_AO_CMD_GET_LATENCY, (unsigned long)(&ao->last_valid_latency));
+    wrapper->get_parameter(aoc, DTP_AO_CMD_GET_LATENCY,
+                           (unsigned long)(&ao->last_valid_latency));
     return ao->last_valid_latency;
 }
 
 int audio_output_get_level(dtaudio_output_t * ao)
 {
-    ao_context_t *aoc = ao->aoc;
-    ao_wrapper_t *wrapper = aoc->wrapper;
     int level = 0;
-    wrapper->get_parameter(aoc, DTP_AO_CMD_GET_LEVEL, (unsigned long)(&level));
+    ao_context_t *aoc = ao->aoc;
+    if (aoc) {
+        ao_wrapper_t *wrapper = aoc->wrapper;
+        wrapper->get_parameter(aoc, DTP_AO_CMD_GET_LEVEL, (unsigned long)(&level));
+    }
     return level;
 }
 
 static void *audio_output_thread(void *args)
 {
     dtaudio_output_t *ao = (dtaudio_output_t *) args;
-    ao_context_t *aoc = ao->aoc;
-    ao_wrapper_t *wrapper = aoc->wrapper;
- 
-    int rlen, ret, wlen;
-    rlen = ret = wlen = 0;
+    ao_context_t *aoc = NULL;
+    ao_wrapper_t *wrapper = NULL;
+    int rlen = 0, wlen = 0;
+    dtaudio_para_t *para = ao->para;
+    int render_inited = 0;
 
-    dtaudio_para_t *para = &ao->para;
-    int bytes_per_sample = para->data_width * para->dst_channels / 8;
-    int unit_size = PCM_WRITE_SIZE * para->dst_samplerate * bytes_per_sample / 1000;
+    int bytes_per_sample = NULL;
+    int unit_size = 0;
+    uint8_t *buffer = NULL;
+
+
+    int data_width = (para->data_width <= 2) ? 2 : para->data_width;
+    int channels = (para->channels <= 2) ? 2 : para->channels;
+    int samplerate = (para->samplerate <= 0) ? 48000 : para->samplerate;
+
+    bytes_per_sample = data_width * channels / 8;
+    unit_size = PCM_WRITE_SIZE * samplerate * bytes_per_sample / 1000;
     unit_size = unit_size - unit_size % (4 * bytes_per_sample);
-    uint8_t *buffer = malloc(unit_size);
-    if (!buffer) { // err
-        goto EXIT;
+    buffer = malloc(unit_size);
+    if (!buffer) {
+        return NULL;
     }
-    dt_info(TAG, "write :%d ms :%d bytes one time \n", PCM_WRITE_SIZE, unit_size);
 
     for (;;) {
         if (ao->status == AO_STATUS_EXIT) {
@@ -219,6 +230,26 @@ static void *audio_output_thread(void *args)
             }
 #endif
         }
+
+        // Here to init audio render - incase audio parameter not set
+        if (render_inited == 0) {
+            render_inited = 1;
+
+            wrapper = select_ao_device(-1);
+            if (!wrapper) {
+                return NULL;
+            }
+            aoc = alloc_ao_context(wrapper);
+            if (!aoc) {
+                return NULL;
+            }
+            memcpy(&aoc->para, ao->para, sizeof(dtaudio_para_t));
+            ao->aoc = aoc;
+            wrapper->init(aoc);
+
+            dt_info(TAG, "[%s:%d] audio output init success\n", __FUNCTION__, __LINE__);
+        }
+
         /*write to ao device */
         wlen = wrapper->write(aoc, buffer, rlen);
         if (wlen <= 0) {
@@ -233,7 +264,8 @@ static void *audio_output_thread(void *args)
         wlen = 0;
     }
 EXIT:
-    dt_info(LOG_TAG, "[file:%s][%s:%d]ao playback thread exit\n", __FILE__, __FUNCTION__, __LINE__);
+    dt_info(LOG_TAG, "[file:%s][%s:%d]ao playback thread exit\n", __FILE__,
+            __FUNCTION__, __LINE__);
     if (buffer) {
         free(buffer);
     }
@@ -247,26 +279,16 @@ int audio_output_init(dtaudio_output_t * ao, int ao_id)
 {
     int ret = 0;
     pthread_t tid;
-
-    ao_wrapper_t *wrapper = select_ao_device(ao_id);
-    if(!wrapper)
-        return -1;
-    ao_context_t *aoc = alloc_ao_context(wrapper); 
-    if(!aoc)
-        return -1;
-    memcpy(&aoc->para, &ao->para, sizeof(dtaudio_para_t));
-    ao->aoc = aoc;
-    wrapper->init(aoc);
-    dt_info(TAG, "[%s:%d] audio output init success\n", __FUNCTION__, __LINE__);
-
     /*start aout pthread */
     ret = pthread_create(&tid, NULL, audio_output_thread, (void *) ao);
     if (ret != 0) {
-        dt_error(TAG, "[%s:%d] create audio output thread failed\n", __FUNCTION__, __LINE__);
+        dt_error(TAG, "[%s:%d] create audio output thread failed\n", __FUNCTION__,
+                 __LINE__);
         return ret;
     }
     ao->output_thread_pid = tid;
-    dt_info(TAG, "[%s:%d] create audio output thread success\n", __FUNCTION__, __LINE__);
+    dt_info(TAG, "[%s:%d] create audio output thread success\n", __FUNCTION__,
+            __LINE__);
     return ret;
 }
 
@@ -280,7 +302,10 @@ int64_t audio_output_get_latency(dtaudio_output_t * ao)
     }
 
     ao_context_t *aoc = ao->aoc;
-    ao_wrapper_t *wrapper = aoc->wrapper;
-    wrapper->get_parameter(aoc, DTP_AO_CMD_GET_LATENCY, (unsigned long)(&ao->last_valid_latency));
+    if (aoc) {
+        ao_wrapper_t *wrapper = aoc->wrapper;
+        wrapper->get_parameter(aoc, DTP_AO_CMD_GET_LATENCY,
+                               (unsigned long)(&ao->last_valid_latency));
+    }
     return ao->last_valid_latency;
 }

@@ -18,7 +18,8 @@ static void register_adec(ad_wrapper_t * adec)
         p = &(*p)->next;
     }
     *p = adec;
-    dt_info(TAG, "[%s:%d] register adec, name:%s fmt:%d \n", __FUNCTION__, __LINE__, (*p)->name, (*p)->afmt);
+    dt_info(TAG, "[%s:%d] register adec, name:%s fmt:%d \n", __FUNCTION__, __LINE__,
+            (*p)->name, (*p)->afmt);
     adec->next = NULL;
 }
 
@@ -43,7 +44,7 @@ void adec_remove_all()
 static int select_audio_decoder(dtaudio_decoder_t * decoder)
 {
     ad_wrapper_t **p;
-    dtaudio_para_t *para = &(decoder->para);
+    dtaudio_para_t *para = decoder->para;
     p = &g_ad;
     while (*p != NULL) {
         if ((*p)->afmt == DT_AUDIO_FORMAT_UNKOWN) {
@@ -56,11 +57,13 @@ static int select_audio_decoder(dtaudio_decoder_t * decoder)
         }
     }
     if (!*p) {
-        dt_info(DTAUDIO_LOG_TAG, "[%s:%d]no valid audio decoder found afmt:%d\n", __FUNCTION__, __LINE__, para->afmt);
+        dt_info(DTAUDIO_LOG_TAG, "[%s:%d]no valid audio decoder found afmt:%d\n",
+                __FUNCTION__, __LINE__, para->afmt);
         return -1;
     }
     decoder->wrapper = *p;
-    dt_info(TAG, "[%s:%d] select--%s audio decoder \n", __FUNCTION__, __LINE__, (*p)->name);
+    dt_info(TAG, "[%s:%d] select--%s audio decoder \n", __FUNCTION__, __LINE__,
+            (*p)->name);
     return 0;
 }
 
@@ -75,8 +78,8 @@ int transport_direct(char *inbuf, int *inlen, char *outbuf, int *outlen)
 
 static int64_t pts_exchange(dtaudio_decoder_t * decoder, int64_t pts)
 {
-    int num = decoder->para.num;
-    int den = decoder->para.den;
+    int num = decoder->para->num;
+    int den = decoder->para->den;
     double exchange = DT_PTS_FREQ * ((double)num / (double)den);
     int64_t result = DT_NOPTS_VALUE;
     if (PTS_VALID(pts)) {
@@ -92,7 +95,7 @@ static void *audio_decode_loop(void *arg)
 {
     int ret;
     dtaudio_decoder_t *decoder = (dtaudio_decoder_t *) arg;
-    dtaudio_para_t *para = &decoder->para;
+    dtaudio_para_t *para = decoder->para;
     dt_av_pkt_t frame;
     ad_wrapper_t *wrapper = decoder->wrapper;
     dtaudio_context_t *actx = (dtaudio_context_t *) decoder->parent;
@@ -118,7 +121,8 @@ static void *audio_decode_loop(void *arg)
     do {
         //maybe receive exit cmd in idle status, so exit prior to idle
         if (decoder->status == ADEC_STATUS_EXIT) {
-            dt_debug(TAG, "[%s:%d] receive decode loop exit cmd \n", __FUNCTION__, __LINE__);
+            dt_debug(TAG, "[%s:%d] receive decode loop exit cmd \n", __FUNCTION__,
+                     __LINE__);
             if (frame_data) {
                 free(frame_data);
             }
@@ -143,7 +147,8 @@ static void *audio_decode_loop(void *arg)
         ret = audio_read_frame(decoder->parent, &frame);
         if (ret < 0 || frame.size <= 0) {
             usleep(1000);
-            dt_debug(TAG, "[%s:%d] dtaudio decoder loop read frame failed \n", __FUNCTION__, __LINE__);
+            dt_debug(TAG, "[%s:%d] dtaudio decoder loop read frame failed \n", __FUNCTION__,
+                     __LINE__);
             continue;
         }
         //read ok,update current pts, clear the buffer size
@@ -158,12 +163,16 @@ static void *audio_decode_loop(void *arg)
                 decoder->pts_first = decoder->pts_current = decoder->pts_last_valid = frame.pts;
             }
             decoder->first_frame_decoded = 1;
-            dt_info(TAG, "[%s:%d]Audio first frame decoded ok, pts:0x%llx dts:0x%llx\n", __FUNCTION__, __LINE__, frame.pts, frame.dts);
+            dt_info(TAG, "[%s:%d]Audio first frame read ok, pts:0x%llx dts:0x%llx\n",
+                    __FUNCTION__, __LINE__, frame.pts, frame.dts);
         } else {
             decoder->pts_last_valid = decoder->pts_current;
             decoder->pts_current = frame.pts;
             decoder->pts_buffer_size = 0;
-            dt_debug(TAG, "pkt pts:%lld current:%lld duration:%d pts_s:%lld dts:%lld buf_size:%d \n", frame.pts, decoder->pts_current, frame.duration, frame.pts / 90000, frame.dts, decoder->pts_buffer_size);
+            dt_debug(TAG,
+                     "pkt pts:%lld current:%lld duration:%d pts_s:%lld dts:%lld buf_size:%d \n",
+                     frame.pts, decoder->pts_current, frame.duration, frame.pts / 90000, frame.dts,
+                     decoder->pts_buffer_size);
         }
 
         //repack the frame
@@ -225,11 +234,13 @@ DECODE_LOOP:
              * if decoder is not ffmpeg, restore raw stream packet if decode failed
              * */
             if (!strcmp(wrapper->name, "ffmpeg audio decoder")) {
-                dt_error(TAG, "[%s:%d] ffmpeg failed to decode this frame, just break\n", __FUNCTION__, __LINE__);
+                dt_error(TAG, "[%s:%d] ffmpeg failed to decode this frame, just break\n",
+                         __FUNCTION__, __LINE__);
                 decoder->decode_offset += pinfo->inlen;
             }
             continue;
-        } else if (used == 0 && pinfo->outlen == 0) { // used == 0 && out == 0 means need more data
+        } else if (used == 0
+                   && pinfo->outlen == 0) { // used == 0 && out == 0 means need more data
             //maybe need more data
             rest_data = malloc(pinfo->inlen);
             if (rest_data == NULL) {
@@ -242,6 +253,20 @@ DECODE_LOOP:
             dt_info(TAG, "Maybe we need more data\n");
             continue;
         }
+
+        if (pinfo->outlen > 0) {
+            // audio parameter changed
+            if (pinfo->channels != para->channels
+                || pinfo->samplerate != para->samplerate) {
+                dt_info(TAG, "Audio parameter changed. channels[%d->%d] samplerate[%d->%d] \n",
+                        para->channels, pinfo->channels, para->samplerate, pinfo->samplerate);
+                para->channels = pinfo->channels;
+                para->samplerate = pinfo->channels;
+                para->data_width = 16;
+            }
+
+        }
+
         declen += used;
         pinfo->inlen -= used;
         decoder->decode_offset += used;
@@ -258,16 +283,18 @@ REFILL_BUFFER:
         }
         /*write pcm */
         // check latency
-        {
+        if (para->channels > 0 && para->samplerate > 0) {
 
             float pts_ratio = (float) DT_PTS_FREQ / para->samplerate;
             int64_t delay_pts = audio_output_get_latency(&actx->audio_out);
             int len = out->level;
-            int frame_num = (len) / (para->bps * para->channels / 8);
+            int frame_num = (len) / (para->data_width * para->channels / 8);
             delay_pts += (frame_num) * pts_ratio;
 
             if (delay_pts / DT_PTS_FREQ_MS >= 500 || buf_space(out) < pinfo->outlen) {
-                dt_debug(TAG, "[%s:%d] output buffer do not left enough space ,space=%d level:%d outsie:%d \n", __FUNCTION__, __LINE__, buf_space(out), buf_level(out), pinfo->outlen);
+                dt_debug(TAG,
+                         "[%s:%d] output buffer do not left enough space ,space=%d level:%d outsie:%d \n",
+                         __FUNCTION__, __LINE__, buf_space(out), buf_level(out), pinfo->outlen);
                 usleep(1000);
                 goto REFILL_BUFFER;
             }
@@ -285,7 +312,8 @@ REFILL_BUFFER:
         }
     } while (1);
 EXIT:
-    dt_info(TAG, "[file:%s][%s:%d]decoder loop thread exit ok\n", __FILE__, __FUNCTION__, __LINE__);
+    dt_info(TAG, "[file:%s][%s:%d]decoder loop thread exit ok\n", __FILE__,
+            __FUNCTION__, __LINE__);
     /* free adec_ctrl_t buf */
     if (pinfo->outptr) {
         free(pinfo->outptr);
@@ -307,11 +335,12 @@ int audio_decoder_init(dtaudio_decoder_t * decoder)
     }
     /*init decoder */
     decoder->pts_current = decoder->pts_first = -1;
-    decoder->decoder_priv = decoder->para.avctx_priv;
-    if (decoder->para.num == 0 || decoder->para.den == 0) {
-        decoder->para.num = decoder->para.den = 1;
+    decoder->decoder_priv = decoder->para->avctx_priv;
+    if (decoder->para->num == 0 || decoder->para->den == 0) {
+        decoder->para->num = decoder->para->den = 1;
     } else {
-        dt_info(TAG, "[%s:%d] param: num:%d den:%d\n", __FUNCTION__, __LINE__, decoder->para.num, decoder->para.den);
+        dt_info(TAG, "[%s:%d] param: num:%d den:%d\n", __FUNCTION__, __LINE__,
+                decoder->para->num, decoder->para->den);
     }
 
     ad_wrapper_t *wrapper = decoder->wrapper;
@@ -323,12 +352,16 @@ int audio_decoder_init(dtaudio_decoder_t * decoder)
     dt_info(TAG, "[%s:%d] audio decoder init ok\n", __FUNCTION__, __LINE__);
     /*init pcm buffer */
     dtaudio_context_t *actx = (dtaudio_context_t *) decoder->parent;
-    int channels = actx->audio_param.dst_channels;
-    int sample_rate = actx->audio_param.samplerate;
-    int bps = actx->audio_param.bps;
+
+    dtaudio_para_t *para = decoder->para;
+
+    int channels = (para->channels > 0) ? para->channels : 2;
+    int sample_rate = (para->samplerate > 0) ? para->samplerate : 48000;
+    int bps = (para->bps > 0) ? para->bps : 16;
 
     int size = ((channels * sample_rate * 8) / bps) * DTAUDIO_PCM_BUF_SIZE_MS ;
-    dt_info(TAG, "[%s:%d] audio decoder out buffer: time:%d ms size:%d \n", __FUNCTION__, __LINE__, DTAUDIO_PCM_BUF_SIZE_MS, size);
+    dt_info(TAG, "[%s:%d] audio decoder out buffer: time:%d ms size:%d \n",
+            __FUNCTION__, __LINE__, DTAUDIO_PCM_BUF_SIZE_MS, size);
     ret = buf_init(&actx->audio_decoded_buf, size);
     if (ret < 0) {
         ret = -1;
@@ -384,17 +417,23 @@ int64_t audio_decoder_get_pts(dtaudio_decoder_t * decoder)
     dtaudio_context_t *actx = (dtaudio_context_t *) decoder->parent;
     dt_buffer_t *out = &actx->audio_decoded_buf;
 
-    if (decoder->status == ADEC_STATUS_IDLE || decoder->status == ADEC_STATUS_EXIT) {
+    if (decoder->status == ADEC_STATUS_IDLE
+        || decoder->status == ADEC_STATUS_EXIT) {
         return -1;
     }
-    channels = decoder->para.dst_channels;
-    sample_rate = decoder->para.samplerate;
-    bps = decoder->para.bps;
+    channels = decoder->para->dst_channels;
+    sample_rate = decoder->para->samplerate;
+    bps = decoder->para->bps;
     pts_ratio = (float) DT_PTS_FREQ / sample_rate;
     pts = 0;
     if (-1 == decoder->pts_first) {
         return -1;
     }
+
+    if (channels <= 0 || sample_rate <= 0) {
+        return -1;
+    }
+
     if (PTS_INVALID(decoder->pts_current)) { //case 1 current_pts invalid
         if (decoder->pts_last_valid) {
             pts = decoder->pts_last_valid;
@@ -404,7 +443,10 @@ int64_t audio_decoder_get_pts(dtaudio_decoder_t * decoder)
         frame_num = (len) / (bps * channels / 8);
         pts += (frame_num) * pts_ratio;
         pts += decoder->pts_first;
-        dt_debug(TAG, "[%s:%d] first_pts:%llx pts:%llx pts_s:%lld frame_num:%d len:%d pts_ratio:%5.1f\n", __FUNCTION__, __LINE__, decoder->pts_first, pts, pts / 90000, frame_num, len, pts_ratio);
+        dt_debug(TAG,
+                 "[%s:%d] first_pts:%llx pts:%llx pts_s:%lld frame_num:%d len:%d pts_ratio:%5.1f\n",
+                 __FUNCTION__, __LINE__, decoder->pts_first, pts, pts / 90000, frame_num, len,
+                 pts_ratio);
         return pts;
     }
     //case 2 current_pts valid,calc pts mentally
@@ -412,7 +454,10 @@ int64_t audio_decoder_get_pts(dtaudio_decoder_t * decoder)
     len = decoder->pts_buffer_size - out->level - decoder->pts_cache_size;
     frame_num = (len) / (bps * channels / 8);
     delay_pts = (frame_num) * pts_ratio;
-    dt_debug(TAG, "[%s:%d] current_pts:%llx delay_pts:%lld  pts_s:%lld frame_num:%d pts_ratio:%5.1f\n", __FUNCTION__, __LINE__, decoder->pts_current, delay_pts, pts / 90000, frame_num, pts_ratio);
+    dt_debug(TAG,
+             "[%s:%d] current_pts:%llx delay_pts:%lld  pts_s:%lld frame_num:%d pts_ratio:%5.1f\n",
+             __FUNCTION__, __LINE__, decoder->pts_current, delay_pts, pts / 90000, frame_num,
+             pts_ratio);
     pts += delay_pts;
     if (pts < 0) {
         pts = 0;

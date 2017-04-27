@@ -30,7 +30,7 @@ typedef struct {
 
 typedef struct dtaudio_output {
     /*para */
-    dtaudio_para_t para;
+    dtaudio_para_t *para;
     ao_context_t *aoc;
     ao_status_t status;
     pthread_t output_thread_pid;

@@ -36,13 +36,13 @@ static enum AVCodecID convert_to_id(int format)
     }
 
     ctx->codec_type = AVMEDIA_TYPE_AUDIO;
-    ctx->codec_id = convert_to_id(decoder->para.afmt);
+    ctx->codec_id = convert_to_id(decoder->para->afmt);
     if (ctx->codec_id == 0) {
         av_free(ctx);
         return NULL;
     }
-    ctx->channels = decoder->para.channels;
-    ctx->sample_rate = decoder->para.samplerate;
+    ctx->channels = decoder->para->channels;
+    ctx->sample_rate = decoder->para->samplerate;
     ctx->sample_fmt = AV_SAMPLE_FMT_S16;
     ctx->internal = NULL;
 
@@ -68,9 +68,9 @@ int ffmpeg_adec_init(ad_wrapper_t *wrapper, void *parent)
     enum AVCodecID id = avctxp->codec_id;
     dt_info(TAG, "[%s:%d] param-- src channel:%d sample:%d id:%d format:%d \n",
             __FUNCTION__, __LINE__, avctxp->channels, avctxp->sample_rate, id,
-            decoder->para.afmt);
+            decoder->para->afmt);
     dt_info(TAG, "[%s:%d] param-- dst channels:%d samplerate:%d \n", __FUNCTION__,
-            __LINE__, decoder->para.dst_channels, decoder->para.dst_samplerate);
+            __LINE__, decoder->para->dst_channels, decoder->para->dst_samplerate);
     codec = avcodec_find_decoder(id);
     if (NULL == codec) {
         dt_error(TAG, "[%s:%d] video codec find failed \n", __FUNCTION__, __LINE__);
@@ -93,6 +93,7 @@ static void audio_convert(dtaudio_decoder_t *decoder, AVFrame * dst,
     int nb_sample;
     int dst_buf_size;
     int out_channels;
+    int out_samplerate;
     //for audio post processor
     //struct SwsContext *m_sws_ctx = NULL;
     struct SwrContext *m_swr_ctx = NULL;
@@ -100,11 +101,15 @@ static void audio_convert(dtaudio_decoder_t *decoder, AVFrame * dst,
     enum AVSampleFormat src_fmt = avctxp->sample_fmt;
     enum AVSampleFormat dst_fmt = AV_SAMPLE_FMT_S16;
 
+    dtaudio_para_t *para = decoder->para;
+
     dst->linesize[0] = src->linesize[0];
     *dst = *src;
 
     dst->data[0] = NULL;
-    out_channels = decoder->para.dst_channels;
+    out_channels = (para->dst_channels > 0 ? para->dst_channels : src->channels);
+    out_samplerate = (para->dst_samplerate > 0 ? para->dst_samplerate :
+                      src->sample_rate);
     nb_sample = frame->nb_samples;
     dst_buf_size = nb_sample * av_get_bytes_per_sample(dst_fmt) * out_channels;
     dst->data[0] = (uint8_t *) av_malloc(dst_buf_size);
@@ -113,12 +118,12 @@ static void audio_convert(dtaudio_decoder_t *decoder, AVFrame * dst,
                              0);
     dt_debug(TAG, "SRCFMT:%d dst_fmt:%d \n", src_fmt, dst_fmt);
     /* resample toAV_SAMPLE_FMT_S16 */
-    if (src_fmt != dst_fmt || out_channels != decoder->para.channels) {
+    if (src_fmt != dst_fmt || out_channels != decoder->para->channels) {
         if (!m_swr_ctx) {
-            uint64_t in_channel_layout = av_get_default_channel_layout(avctxp->channels);
+            uint64_t in_channel_layout = av_get_default_channel_layout(src->channels);
             uint64_t out_channel_layout = av_get_default_channel_layout(out_channels);
             m_swr_ctx = swr_alloc_set_opts(NULL, out_channel_layout, dst_fmt,
-                                           avctxp->sample_rate, in_channel_layout, src_fmt, avctxp->sample_rate, 0, NULL);
+                                           src->sample_rate, in_channel_layout, src_fmt, src->sample_rate, 0, NULL);
             swr_init(m_swr_ctx);
         }
         uint8_t **out = (uint8_t **) & dst->data;
@@ -133,7 +138,8 @@ static void audio_convert(dtaudio_decoder_t *decoder, AVFrame * dst,
                 printf("audio convert failed, set mute data\n");
             }
         }
-    } else {                    // no need to convert ,just copy
+    } else {
+        // no need to convert ,just copy
         memcpy(dst->data[0], src->data[0], src->linesize[0]);
     }
     //free context
@@ -176,6 +182,10 @@ int ffmpeg_adec_decode(ad_wrapper_t *wrapper, adec_ctrl_t *pinfo)
         pinfo->outlen = 0;
         goto EXIT;
     }
+
+    pinfo->channels = frame->channels;
+    pinfo->samplerate = frame->sample_rate;
+
     data_size = av_samples_get_buffer_size(frame->linesize, avctxp->channels,
                                            frame->nb_samples, avctxp->sample_fmt, 1);
     if (data_size > 0) {

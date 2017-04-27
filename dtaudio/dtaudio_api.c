@@ -5,7 +5,8 @@
 
 static int audio_service_init(dtaudio_context_t * actx)
 {
-    service_t *service = dt_alloc_service(EVENT_SERVER_ID_AUDIO, EVENT_SERVER_NAME_AUDIO);
+    service_t *service = dt_alloc_service(EVENT_SERVER_ID_AUDIO,
+                                          EVENT_SERVER_NAME_AUDIO);
     dt_info(TAG, "AUDIO SERVER INIT :%p \n", service);
     if (!service) {
         dt_error(TAG, "AUDIO SERVER ALLOC FAILED \n");
@@ -28,7 +29,8 @@ static int audio_service_release(dtaudio_context_t * actx)
 int dtaudio_init(void **audio_priv, dtaudio_para_t * para, void *parent)
 {
     int ret = 0;
-    dtaudio_context_t *actx = (dtaudio_context_t *) malloc(sizeof(dtaudio_context_t));
+    dtaudio_context_t *actx = (dtaudio_context_t *) malloc(sizeof(
+                                  dtaudio_context_t));
     if (!actx) {
         dt_error(TAG, "[%s:%d] dtaudio_init failed \n", __FUNCTION__, __LINE__);
         return -1;
@@ -36,7 +38,8 @@ int dtaudio_init(void **audio_priv, dtaudio_para_t * para, void *parent)
     memset(actx, 0, sizeof(dtaudio_context_t));
     memcpy(&actx->audio_param, para, sizeof(dtaudio_para_t));
     actx->audio_param.extradata_size = para->extradata_size;
-    memcpy(&(actx->audio_param.extradata[0]), &(para->extradata[0]), para->extradata_size);
+    memcpy(&(actx->audio_param.extradata[0]), &(para->extradata[0]),
+           para->extradata_size);
     /*init service */
     ret = audio_service_init(actx);
     if (ret < 0) {

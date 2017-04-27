@@ -78,7 +78,8 @@ int audio_drop(dtaudio_context_t * actx, int64_t target_pts)
 
     size = size - size % 16;
 
-    dt_info(TAG, "[%s:%d]Target:%lld(diff: %d MS) ,Need to drop :%d pcm \n", __FUNCTION__, __LINE__, target_pts, diff_time, size);
+    dt_info(TAG, "[%s:%d]Target:%lld(diff: %d MS) ,Need to drop :%d pcm \n",
+            __FUNCTION__, __LINE__, target_pts, diff_time, size);
     int read_size_once = 1024;
     uint8_t buf[1024];
     int rlen = 0;
@@ -91,7 +92,8 @@ int audio_drop(dtaudio_context_t * actx, int64_t target_pts)
             dt_info(TAG, "Audio drop timeout: %lld ms\n", drop_timeout);
             break;
         }
-        rlen = audio_output_read((void *) actx, buf, (size > read_size_once) ? read_size_once : size);
+        rlen = audio_output_read((void *) actx, buf,
+                                 (size > read_size_once) ? read_size_once : size);
         if (rlen == -1) {
             if (drop_count-- == 0) {
                 break;
@@ -129,7 +131,10 @@ void audio_update_pts(void *priv)
     if (delay_pts == -1) {
         delay_pts = 0;
     }
-    dt_debug(TAG, "[%s:%d] pts:%lld  delay:%lld  actual:%lld time:%d cur_time:%lld\n", __FUNCTION__, __LINE__, pts, delay_pts, pts - delay_pts, (int)((pts - delay_pts) / 90000), dt_gettime());
+    dt_debug(TAG,
+             "[%s:%d] pts:%lld  delay:%lld  actual:%lld time:%d cur_time:%lld\n",
+             __FUNCTION__, __LINE__, pts, delay_pts, pts - delay_pts,
+             (int)((pts - delay_pts) / 90000), dt_gettime());
     if (delay_pts < pts) {
         pts -= delay_pts;
     } else {
@@ -145,10 +150,10 @@ int audio_get_dec_state(dtaudio_context_t * actx, dec_state_t * dec_state)
         return -1;
     }
     dtaudio_decoder_t *adec = &actx->audio_dec;
-    dec_state->adec_channels = adec->para.channels;
+    dec_state->adec_channels = adec->para->channels;
     dec_state->adec_error_count = adec->decode_err_cnt;
-    dec_state->adec_bps = adec->para.bps;
-    dec_state->adec_sample_rate = adec->para.samplerate;
+    dec_state->adec_bps = adec->para->bps;
+    dec_state->adec_sample_rate = adec->para->samplerate;
     dec_state->adec_status = adec->status;
     return 0;
 }
@@ -166,8 +171,11 @@ int audio_get_out_closed(dtaudio_context_t * actx)
     //get decoder buffer level
     decoder_level = actx->audio_decoded_buf.level;
     total = decoder_level + output_level;
-    default_level = actx->audio_param.samplerate * actx->audio_param.bps * actx->audio_param.channels / 8; //1s
-    dt_debug(TAG, "[%s:%d] decode_level:%d output_level:%d total:%d thres:%d (100ms)\n", __FUNCTION__, __LINE__, decoder_level, output_level, total, default_level / 10);
+    default_level = actx->audio_param.samplerate * actx->audio_param.bps *
+                    actx->audio_param.channels / 8; //1s
+    dt_debug(TAG,
+             "[%s:%d] decode_level:%d output_level:%d total:%d thres:%d (100ms)\n",
+             __FUNCTION__, __LINE__, decoder_level, output_level, total, default_level / 10);
     if (total <= default_level / 10) {
         return 1;
     }
@@ -211,7 +219,8 @@ int audio_pause(dtaudio_context_t * actx)
         audio_output_pause(audio_out);
         actx->audio_state = AUDIO_STATUS_PAUSED;
     } else {
-        dt_error(TAG, "[%s:%d]audio pause failed , status invalid \n", __FUNCTION__, __LINE__);
+        dt_error(TAG, "[%s:%d]audio pause failed , status invalid \n", __FUNCTION__,
+                 __LINE__);
     }
     return 0;
 }
@@ -249,7 +258,8 @@ static void *event_handle_loop(void *args)
     event_t *event = NULL;
     service_t *service = (service_t *) actx->audio_service;
 
-    dt_info(TAG, "[%s:%d] dtaudio init ok, enter event handle loop\n", __FUNCTION__, __LINE__);
+    dt_info(TAG, "[%s:%d] dtaudio init ok, enter event handle loop\n", __FUNCTION__,
+            __LINE__);
     do {
         if (actx->audio_state == AUDIO_STATUS_STOP) {
             break;
@@ -321,7 +331,7 @@ int audio_init(dtaudio_context_t * actx)
 
     /*audio decoder init */
     memset(audio_dec, 0, sizeof(dtaudio_decoder_t));
-    memcpy(&audio_dec->para, &actx->audio_param, sizeof(dtaudio_para_t));
+    audio_dec->para = &actx->audio_param;
     audio_dec->parent = actx;
     ret = audio_decoder_init(audio_dec);
     if (ret < 0) {
@@ -337,7 +347,7 @@ int audio_init(dtaudio_context_t * actx)
 
     /*audio output decoder */
     memset(audio_out, 0, sizeof(dtaudio_output_t));
-    memcpy(&(audio_out->para), &(actx->audio_param), sizeof(audio_out->para));
+    audio_out->para = &actx->audio_param;
     audio_out->parent = actx;
     ret = audio_output_init(audio_out, actx->audio_param.audio_output);
     if (ret < 0) {
@@ -355,16 +365,19 @@ int audio_init(dtaudio_context_t * actx)
 
     return 0;
 err1:
-    dt_info(DTAUDIO_LOG_TAG, "[%s:%d]audio decoder init failed \n", __FUNCTION__, __LINE__);
+    dt_info(DTAUDIO_LOG_TAG, "[%s:%d]audio decoder init failed \n", __FUNCTION__,
+            __LINE__);
     return -1;
 err2:
     audio_decoder_stop(audio_dec);
-    dt_info(DTAUDIO_LOG_TAG, "[%s:%d]audio filter init failed \n", __FUNCTION__, __LINE__);
+    dt_info(DTAUDIO_LOG_TAG, "[%s:%d]audio filter init failed \n", __FUNCTION__,
+            __LINE__);
     return -2;
 err3:
     audio_decoder_stop(audio_dec);
     audio_filter_stop(audio_filter);
-    dt_info(DTAUDIO_LOG_TAG, "[%s:%d]audio output init failed \n", __FUNCTION__, __LINE__);
+    dt_info(DTAUDIO_LOG_TAG, "[%s:%d]audio output init failed \n", __FUNCTION__,
+            __LINE__);
     return -3;
 
 }
