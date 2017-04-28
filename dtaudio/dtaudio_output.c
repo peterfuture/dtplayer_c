@@ -144,26 +144,11 @@ int audio_output_stop(dtaudio_output_t * ao)
     return 0;
 }
 
-int audio_output_latency(dtaudio_output_t * ao)
-{
-    if (ao->status == AO_STATUS_IDLE) {
-        return 0;
-    }
-    if (ao->status == AO_STATUS_PAUSE) {
-        return ao->last_valid_latency;
-    }
-    ao_context_t *aoc = ao->aoc;
-    ao_wrapper_t *wrapper = aoc->wrapper;
-    wrapper->get_parameter(aoc, DTP_AO_CMD_GET_LATENCY,
-                           (unsigned long)(&ao->last_valid_latency));
-    return ao->last_valid_latency;
-}
-
 int audio_output_get_level(dtaudio_output_t * ao)
 {
     int level = 0;
     ao_context_t *aoc = ao->aoc;
-    if (aoc) {
+    if (aoc && ao->first_frame_rendered == 1) {
         ao_wrapper_t *wrapper = aoc->wrapper;
         wrapper->get_parameter(aoc, DTP_AO_CMD_GET_LEVEL, (unsigned long)(&level));
     }
@@ -179,7 +164,7 @@ static void *audio_output_thread(void *args)
     dtaudio_para_t *para = ao->para;
     int render_inited = 0;
 
-    int bytes_per_sample = NULL;
+    int bytes_per_sample = 0;
     int unit_size = 0;
     uint8_t *buffer = NULL;
 
@@ -245,9 +230,11 @@ static void *audio_output_thread(void *args)
             }
             memcpy(&aoc->para, ao->para, sizeof(dtaudio_para_t));
             ao->aoc = aoc;
-            wrapper->init(aoc);
-
-            dt_info(TAG, "[%s:%d] audio output init success\n", __FUNCTION__, __LINE__);
+            if (wrapper->init(aoc) < 0) {
+                dt_info(TAG, "[%s:%d] audio output init failed.\n", __FUNCTION__, __LINE__);
+                goto EXIT;
+            }
+            dt_info(TAG, "[%s:%d] audio output init success.\n", __FUNCTION__, __LINE__);
         }
 
         /*write to ao device */
@@ -255,6 +242,10 @@ static void *audio_output_thread(void *args)
         if (wlen <= 0) {
             usleep(1000);
             continue;
+        }
+
+        if (ao->first_frame_rendered == 0) {
+            ao->first_frame_rendered = 1;
         }
 
         rlen -= wlen;
@@ -302,7 +293,7 @@ int64_t audio_output_get_latency(dtaudio_output_t * ao)
     }
 
     ao_context_t *aoc = ao->aoc;
-    if (aoc) {
+    if (aoc && ao->first_frame_rendered == 1) {
         ao_wrapper_t *wrapper = aoc->wrapper;
         wrapper->get_parameter(aoc, DTP_AO_CMD_GET_LATENCY,
                                (unsigned long)(&ao->last_valid_latency));

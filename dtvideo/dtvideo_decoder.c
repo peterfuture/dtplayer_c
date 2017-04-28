@@ -138,7 +138,7 @@ static void *video_decode_loop(void *arg)
     /*used for decode */
     dt_av_frame_t *picture = NULL;
     int ret;
-    dt_info(TAG, "[%s:%d] start decode loop \n", __FUNCTION__, __LINE__);
+    dt_info(TAG, "[%s:%d] start decode loop.\n", __FUNCTION__, __LINE__);
     int video_frame_in = 0;
     do {
         //exit check before idle, maybe recieve exit cmd in idle status
@@ -298,9 +298,7 @@ static void dump_vd_statistics_info(dtvideo_decoder_t * decoder)
 static void dtav_clear_frame(void *pic)
 {
     dt_av_frame_t *picture = (dt_av_frame_t *)(pic);
-    if (picture->data) {
-        free(picture->data[0]);
-    }
+    dtp_frame_unref(picture, 0);
     return;
 }
 

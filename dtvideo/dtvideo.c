@@ -100,8 +100,7 @@ int video_drop(dtvideo_context_t * vctx, int64_t target_pts)
         drop_count = 300;
         cur_pts = pic->pts;
         dt_debug(TAG, "read pts:%lld \n", pic->pts);
-        free(pic);
-        pic = NULL;
+        dtp_frame_free(pic, 0);
         if (cur_pts > target_pts) {
             break;
         }

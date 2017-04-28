@@ -48,10 +48,10 @@ static void ff_log_callback(void *ptr, int level, const char *fmt, va_list vl)
 {
     switch (level) {
     case AV_LOG_DEBUG:
-        __android_log_vprint(ANDROID_LOG_VERBOSE, "FFMPEG", fmt, vl);
+        __android_log_vprint(ANDROID_LOG_DEBUG, "FFMPEG", fmt, vl);
         break;
     case AV_LOG_VERBOSE:
-        __android_log_vprint(ANDROID_LOG_DEBUG, "FFMPEG", fmt, vl);
+        __android_log_vprint(ANDROID_LOG_VERBOSE, "FFMPEG", fmt, vl);
         break;
     case AV_LOG_INFO:
         __android_log_vprint(ANDROID_LOG_INFO, "FFMPEG", fmt, vl);
@@ -61,6 +61,9 @@ static void ff_log_callback(void *ptr, int level, const char *fmt, va_list vl)
         break;
     case AV_LOG_ERROR:
         __android_log_vprint(ANDROID_LOG_ERROR, "FFMPEG", fmt, vl);
+        break;
+    default:
+        __android_log_vprint(ANDROID_LOG_DEBUG, "FFMPEG", fmt, vl);
         break;
     }
 }
@@ -142,7 +145,7 @@ int ffmpeg_vdec_init(dtvideo_decoder_t *decoder)
     AVCodec *codec = NULL;
     enum AVCodecID id = avctxp->codec_id;
     avctxp->opaque = vd_ctx;
-    //vd_ctx->surface = para->device; // switch on & off
+    vd_ctx->surface = para->device; // switch on & off
     int hw_codec_opened = 0;
     if (para->flag & DTAV_FLAG_DISABLE_HW_CODEC) {
         dt_info(TAG, "disable hw codec, use sw codec.\n");
@@ -271,16 +274,6 @@ static int copy_frame(dtvideo_decoder_t * decoder, AVFrame * src, int64_t pts,
     dt_av_frame_t *pict = malloc(sizeof(dt_av_frame_t));
     memset(pict, 0, sizeof(dt_av_frame_t));
 
-#ifdef ENABLE_ANDROID
-    if (vd_ctx->use_hwaccel && vd_ctx->surface != NULL) {
-        pict->data[0] = (uint8_t *)src->buf[0]; // store AVBufferRef * buf[0]
-        pict->data[3] = src->data[3];
-        AVMediaCodecBuffer *buffer = (AVMediaCodecBuffer *)src->data[3];
-        dt_info(TAG, "buffer:%p\n", buffer);
-        goto set_para;
-    }
-#endif
-
     //step2: convert to avpicture, ffmpeg struct
     AVPicture *dst = (AVPicture *)(pict);
     //step3: allocate an AVFrame structure
@@ -295,11 +288,11 @@ static int copy_frame(dtvideo_decoder_t * decoder, AVFrame * src, int64_t pts,
                                    NULL, NULL, NULL);
     sws_scale(pSwsCtx, src->data, src->linesize, 0, sh, dst->data, dst->linesize);
 #endif
-set_para:
     pict->pts = pts;
     pict->width = sw;
     pict->height = sh;
     pict->pixfmt = pixfmt;
+    pict->flags |= DTP_FRAME_FLAG_NONE;
     *p_pict = pict;
     return 0;
 }
@@ -314,7 +307,7 @@ set_para:
  *
  * */
 
-int ffmpeg_vdec_decode(dtvideo_decoder_t *decoder, dt_av_pkt_t * dt_frame,
+int ffmpeg_vdec_decode(dtvideo_decoder_t *decoder, dt_av_pkt_t * dtp_pkt,
                        dt_av_frame_t ** pic)
 {
     int ret = 0;
@@ -325,47 +318,44 @@ int ffmpeg_vdec_decode(dtvideo_decoder_t *decoder, dt_av_pkt_t * dt_frame,
     int got_picture = 0;
     AVPacket pkt;
     memset(&pkt, 0, sizeof(AVPacket));
-    pkt.data = dt_frame->data;
-    pkt.size = dt_frame->size;
-    pkt.pts = dt_frame->pts;
-    pkt.dts = dt_frame->dts;
+    pkt.data = dtp_pkt->data;
+    pkt.size = dtp_pkt->size;
+    pkt.pts = dtp_pkt->pts;
+    pkt.dts = dtp_pkt->dts;
     pkt.side_data_elems = 0;
     pkt.buf = NULL;
-    AVFrame *frame = vd_ctx->frame;
-    avcodec_decode_video2(avctxp, frame, &got_picture, &pkt);
-    if (got_picture) {
+    AVFrame *frame = av_frame_alloc(); // Alloc New Frame EveryTime
 
-#if 0
+    ret = avcodec_send_packet(avctxp, &pkt);
+    ret = avcodec_receive_frame(avctxp, frame);
+    if (ret == 0) {
+#ifdef ENABLE_ANDROID
+        // Android MediaCodec with SurfaceView Case
         if (vd_ctx->use_hwaccel && vd_ctx->surface != NULL) {
-            AVMediaCodecBuffer *buffer = (AVMediaCodecBuffer *)frame->data[3];
-            ret = av_mediacodec_release_buffer(buffer, 1);
-            dt_info(TAG, "Render one frame ok .pts:%lld ret:%d\n", frame->pts, ret);
-            av_frame_unref(frame);
-            return -1;
+            dt_av_frame_t *dtp_frame = dtp_frame_alloc();
+            dtp_frame->data[3] = frame->data[3]; // Just need to store AVMediaCodecBuffer
+            dtp_frame->pts = av_frame_get_best_effort_timestamp(frame);
+            dtp_frame->flags |= DTP_FRAME_FLAG_MEDIACODEC;
+            dtp_frame->opaque = (void *)frame;
+            *pic = dtp_frame;
+            //av_frame_unref(frame);
+            //av_mediacodec_release_buffer((struct MediaCodecBuffer *)frame->data[3], 1);
+            //return 0;
+            return 1;
         }
 #endif
+        // Use Dtp build-in frame
         ret = copy_frame(decoder, frame, av_frame_get_best_effort_timestamp(frame),
                          pic);
-        //ret = copy_frame(decoder, frame, frame->pkt_pts, pic);
-        dt_debug(TAG, "==got picture pkt_pts:%llx best_effort:%llx \n", frame->pkt_pts,
+        dt_debug(TAG, "[%s:%d] got picture pkt_pts:%llx best_effort:%llx \n",
+                 __FUNCTION__, __LINE__, frame->pkt_pts,
                  av_frame_get_best_effort_timestamp(frame));
-        //ret = convert_frame (decoder, frame, av_frame_get_best_effort_timestamp (frame), pic);
-        if (ret == -1) {
-            ret = 0;
-        } else {
-            ret = 1;
-        }
-
-        // Android: mediacodec + surface case will unref frame in render function
-        // otherwise, since new frame has copied. need to unref orig frame
-        if (vd_ctx->use_hwaccel && vd_ctx->surface != NULL) {
-            ; // do nothing
-        } else {
-            av_frame_unref(frame);
-        }
+        ret = (ret < 0) ? 0 : 1;
     }
-    //no need to free dt_frame
-    //will be freed outside
+
+    av_frame_free(&frame);
+
+    //dtp_pkt will be free outside
     return ret;
 }
 

@@ -198,15 +198,6 @@ static void dump_frame(dt_av_frame_t * pFrame, int index)
     fclose(pFile);  // close
 }
 
-static void dtav_clear_frame(void *pic)
-{
-    dt_av_frame_t *picture = (dt_av_frame_t *)(pic);
-    if (picture->data) {
-        free(picture->data[0]);
-    }
-    return;
-}
-
 //output one frame to output gragh
 //using pts
 #define REFRESH_DURATION 10*1000 //us
@@ -220,7 +211,6 @@ static void *video_output_thread(void *args)
     ret = wlen = 0;
     dt_av_frame_t *picture_pre;
     dt_av_frame_t *picture;
-    dt_av_frame_t *pic;
 
     int64_t render_clock_start = -1;
     int render_mode = dtp_setting.video_render_mode;
@@ -275,7 +265,6 @@ static void *video_output_thread(void *args)
                 continue;
             }
             picture = (dt_av_frame_t *) dtvideo_output_read(vo->parent);
-            pic = (dt_av_frame_t *) picture;
             goto RENDER;
         }
 
@@ -317,7 +306,6 @@ static void *video_output_thread(void *args)
             usleep(1000);
             continue;
         }
-        pic = (dt_av_frame_t *) picture;
         //update pts
         if (vctx->last_valid_pts == -1) {
             vctx->last_valid_pts = vctx->current_pts = picture->pts;
@@ -342,29 +330,27 @@ static void *video_output_thread(void *args)
                     dt_info(TAG, "drop frame,sys clock:%lld thispts:%lld next->pts:%lld \n",
                             sys_clock, picture->pts, picture_pre->pts);
                     dtvideo_update_pts(vo->parent);  // drop means not render, but need update vpts
-                    dtav_clear_frame(pic);
-                    free(picture);
+                    dtp_frame_free(picture, 0);
                     continue;
                 }
             }
         }
 RENDER:
         /*display picture & update vpts */
-        ret = wrapper->render(voc, pic);
+        ret = wrapper->render(voc, picture);
         if (ret < 0) {
             dt_error(TAG, "frame toggle failed! \n");
             usleep(1000);
         } else {
             // dump video check
             if (dump_mode == 5 && dump_index < 5) {
-                dump_frame(pic, dump_index++);
+                dump_frame(picture, dump_index++);
             }
         }
 
         /*update vpts */
         dtvideo_update_pts(vo->parent);
-        dtav_clear_frame(pic);
-        free(picture);
+        dtp_frame_free(picture, 1);
         video_discontinue = 0;
         //dt_usleep (REFRESH_DURATION);
     }

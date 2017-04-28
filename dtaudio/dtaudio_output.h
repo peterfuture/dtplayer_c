@@ -36,6 +36,7 @@ typedef struct dtaudio_output {
     pthread_t output_thread_pid;
     ao_state_t state;
 
+    int first_frame_rendered;
     int64_t last_valid_latency;
     void *parent;               //point to dtaudio_t, can used for param of pcm get interface
     void *ao_priv;

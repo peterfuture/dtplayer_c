@@ -106,6 +106,9 @@ else
 endif
 
 DT_CFLAGS += -DENABLE_LINUX=1
+ifeq ($(DT_FFMPEG),yes)
+	DT_CFLAGS += -DENABLE_FFMPEG=1
+endif
 
 #stream
 ifeq ($(DT_STREAM_FILE),yes)
@@ -305,6 +308,7 @@ SRCS_COMMON-$(DT_PLAYER) +=dtplayer/dtplayer_host.c
 SRCS_COMMON-$(DT_PLAYER) +=dtplayer/dtplayer_io.c
 SRCS_COMMON-$(DT_PLAYER) +=dtplayer/dtplayer_magic.c
 SRCS_COMMON-$(DT_PLAYER) +=dtplayer/dtplayer_update.c
+SRCS_COMMON-$(DT_PLAYER) +=dtplayer/dtplayer_frame.c
 
 SRCS_COMMON +=$(SRCS_COMMON-yes)
 OBJS_COMMON_RELEASE += $(addsuffix .o, $(basename $(SRCS_COMMON)))

@@ -14,7 +14,7 @@
 //==Part1:PTS Relative
 int host_sync_enable(dthost_context_t * hctx)
 {
-    return hctx->sync_enable && (hctx->sync_mode == DT_SYNC_AUDIO_MASTER);
+    return 0;// hctx->sync_enable && (hctx->sync_mode == DT_SYNC_AUDIO_MASTER);
 }
 
 int64_t host_get_apts(dthost_context_t * hctx)

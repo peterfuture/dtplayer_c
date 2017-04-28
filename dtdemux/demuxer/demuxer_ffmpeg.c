@@ -77,10 +77,10 @@ static void my_log_callback(void *ptr, int level, const char *fmt, va_list vl)
 {
     switch (level) {
     case AV_LOG_DEBUG:
-        __android_log_vprint(ANDROID_LOG_VERBOSE, "FFMPEG", fmt, vl);
+        __android_log_vprint(ANDROID_LOG_DEBUG, "FFMPEG", fmt, vl);
         break;
     case AV_LOG_VERBOSE:
-        __android_log_vprint(ANDROID_LOG_DEBUG, "FFMPEG", fmt, vl);
+        __android_log_vprint(ANDROID_LOG_VERBOSE, "FFMPEG", fmt, vl);
         break;
     case AV_LOG_INFO:
         __android_log_vprint(ANDROID_LOG_INFO, "FFMPEG", fmt, vl);
@@ -91,6 +91,8 @@ static void my_log_callback(void *ptr, int level, const char *fmt, va_list vl)
     case AV_LOG_ERROR:
         __android_log_vprint(ANDROID_LOG_ERROR, "FFMPEG", fmt, vl);
         break;
+    default:
+        __android_log_vprint(ANDROID_LOG_DEBUG, "FFMPEG", fmt, vl);
     }
 }
 
@@ -116,7 +118,7 @@ static int demuxer_ffmpeg_open(demuxer_wrapper_t * wrapper)
     char *file_name = ctx->file_name;
 
 #if ENABLE_ANDROID
-    syslog_init();
+    //syslog_init();
 #endif
     ffmpeg_ctx_t *ffmpeg_ctx = (ffmpeg_ctx_t *)malloc(sizeof(*ffmpeg_ctx));
     memset(ffmpeg_ctx, 0, sizeof(ffmpeg_ctx_t));
