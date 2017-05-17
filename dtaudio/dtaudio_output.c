@@ -234,7 +234,10 @@ static void *audio_output_thread(void *args)
                 dt_info(TAG, "[%s:%d] audio output init failed.\n", __FUNCTION__, __LINE__);
                 goto EXIT;
             }
-            dt_info(TAG, "[%s:%d] audio output init success.\n", __FUNCTION__, __LINE__);
+            dt_info(TAG,
+                    "[%s:%d] audio output init success. dst channels[%d - %d] sample[%d - %d]\n",
+                    __FUNCTION__, __LINE__, aoc->para.channels, aoc->para.dst_channels,
+                    aoc->para.samplerate, aoc->para.dst_samplerate);
         }
 
         /*write to ao device */

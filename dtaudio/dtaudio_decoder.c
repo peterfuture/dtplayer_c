@@ -261,8 +261,13 @@ DECODE_LOOP:
                 dt_info(TAG, "Audio parameter changed. channels[%d->%d] samplerate[%d->%d] \n",
                         para->channels, pinfo->channels, para->samplerate, pinfo->samplerate);
                 para->channels = pinfo->channels;
-                para->samplerate = pinfo->channels;
+                para->samplerate = pinfo->samplerate;
                 para->data_width = 16;
+
+                para->dst_channels = (para->dst_channels > 0) ? para->dst_channels :
+                                     para->channels;
+                para->dst_samplerate = (para->dst_samplerate > 0) ? para->dst_samplerate :
+                                       para->samplerate;
             }
 
         }

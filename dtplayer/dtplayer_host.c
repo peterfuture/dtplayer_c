@@ -43,9 +43,10 @@ int player_host_init(dtplayer_context_t * dtp_ctx)
         if (downmix) {
             host_para->audio_dst_channels = (astream->channels > 2) ? 2 : astream->channels;
         } else {
-            host_para->audio_dst_channels = astream->channels;
+            host_para->audio_dst_channels = 0;
         }
-        host_para->audio_dst_samplerate = astream->sample_rate;
+        // Fixme: user set dst samplerate
+        host_para->audio_dst_samplerate = 0;
         host_para->audio_bitrate = astream->bit_rate;
         host_para->audio_sample_fmt = astream->bps;
 
