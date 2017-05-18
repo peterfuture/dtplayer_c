@@ -177,6 +177,13 @@ static void dump_media_info(dtp_media_info_t * media)
         dt_info(TAG, "|--bitrate:%d width:%d height:%d duration:%lld \n",
                 info->vstreams[i]->bit_rate, info->vstreams[i]->width,
                 info->vstreams[i]->height, info->vstreams[i]->duration);
+        dt_info(TAG,
+                "|--frame rate ratio:[%d:%d] sample aspect ration:[%d:%d] time_base:[%d:%d] \n",
+                info->vstreams[i]->frame_rate_ratio.num,
+                info->vstreams[i]->frame_rate_ratio.den,
+                info->vstreams[i]->sample_aspect_ratio.num,
+                info->vstreams[i]->sample_aspect_ratio.den,
+                info->vstreams[i]->time_base.num, info->vstreams[i]->time_base.den);
     }
     dt_info(TAG, "|====================AUDIO INFO====================| \n");
     dt_info(TAG, "|audio stream info,num:%d\n", info->ast_num);

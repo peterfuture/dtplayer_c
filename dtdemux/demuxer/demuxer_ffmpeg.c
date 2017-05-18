@@ -515,15 +515,24 @@ static int demuxer_ffmpeg_setup_info(demuxer_wrapper_t * wrapper,
                                            pStream->time_base.den);
             vst_info->bit_rate = pCodec->bit_rate;
             vst_info->format = video_format_convert(pCodec->codec_id);
-            vst_info->sample_aspect_ratio.num = pStream->sample_aspect_ratio.num;
-            vst_info->sample_aspect_ratio.den = pStream->sample_aspect_ratio.den;
-            //vst_info->frame_rate_ratio.num = pStream->r_frame_rate.num;
-            //vst_info->frame_rate_ratio.den = pStream->r_frame_rate.den;
-            AVRational ratio = av_guess_frame_rate(ic, pStream, NULL);
+
+            AVRational ratio = av_guess_sample_aspect_ratio(ic, pStream, NULL);
+            AVRational display = {0};
+
+            av_reduce(&display.num, &display.den,
+                      pCodec->width  * (int64_t)ratio.num,
+                      pCodec->height * (int64_t)ratio.den,
+                      1024 * 1024);
+            vst_info->sample_aspect_ratio.num = display.num;
+            vst_info->sample_aspect_ratio.den = display.den;
+
+            ratio = av_guess_frame_rate(ic, pStream, NULL);
             vst_info->frame_rate_ratio.num = ratio.num;
             vst_info->frame_rate_ratio.den = ratio.den;
+
             vst_info->time_base.num = pStream->time_base.num;
             vst_info->time_base.den = pStream->time_base.den;
+
             vst_info->codec_priv = (void *) pCodec;
             tracks->vstreams[tracks->vst_num] = vst_info;
             tracks->vst_num++;
