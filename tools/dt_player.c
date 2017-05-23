@@ -26,6 +26,9 @@ static int update_cb(void *cookie, dtp_state_t * state)
         dt_info(TAG, "RECEIVE EXIT CMD\n");
         player.quit = 1;
     }
+    if (state->cur_status == PLAYER_STATUS_PREPARE_START) {
+        dt_info(TAG, "vdec type:%d.\n", state->vdec_type);
+    }
     play_info_t *pinfo = &player.info;
     pinfo->cur_time = state->cur_time;
     pinfo->cur_time_ms = state->cur_time_ms;
@@ -263,7 +266,7 @@ int main(int argc, char **argv)
     }
 QUIT_CHECK:
     while (!player.quit) {
-        usleep(10*1000);
+        usleep(10 * 1000);
         break;
     }
     player.gui->stop(player.gui);

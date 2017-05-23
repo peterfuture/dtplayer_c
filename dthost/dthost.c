@@ -676,6 +676,7 @@ int host_get_state(dthost_context_t * hctx, host_state_t * state)
         state->vbuf_level = buf_state.data_len;
         state->vdec_err_cnt = dec_state.vdec_error_count;
         state->vdec_last_ms = dec_state.vdec_last_ms;
+        state->vdec_type = dec_state.vdec_type;
     } else {
         state->vbuf_level = -1;
         state->vdec_err_cnt = -1;

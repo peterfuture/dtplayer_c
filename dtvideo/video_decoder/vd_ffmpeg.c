@@ -189,6 +189,7 @@ int ffmpeg_vdec_init(dtvideo_decoder_t *decoder)
             dt_info(TAG, "Android use hw decoder. name:%s \n", codec_name);
             if (avcodec_open2(avctxp, codec, NULL) >= 0) {
                 hw_codec_opened = 1;
+                decoder->type = DT_VDEC_TYPE_MEDIACODEC;
             } else {
                 dt_info(TAG, "Android hw decoder open failed.\n");
             }
@@ -208,6 +209,7 @@ use_sw_decoder:
             dt_error(TAG, "[%s:%d] video codec open failed \n", __FUNCTION__, __LINE__);
             return -1;
         }
+        decoder->type = DT_VDEC_TYPE_FFMPEG;
     }
     dt_info(TAG, " [%s:%d] Pixfmt:%d \n", __FUNCTION__, __LINE__, avctxp->pix_fmt);
     dt_info(TAG, " [%s:%d] ffmpeg dec init ok. hw decoder enable:%d \n",

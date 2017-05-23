@@ -145,7 +145,7 @@ void dtvideo_update_pts(void *priv)
 
 int video_get_dec_state(dtvideo_context_t * vctx, dec_state_t * dec_state)
 {
-    if (vctx->video_status <= VIDEO_STATUS_INITED) {
+    if (vctx->video_status < VIDEO_STATUS_INITED) {
         return -1;
     }
     dtvideo_decoder_t *vdec = &vctx->video_dec;
@@ -155,6 +155,7 @@ int video_get_dec_state(dtvideo_context_t * vctx, dec_state_t * dec_state)
     dec_state->vdec_height = vdec->para.d_height;
     dec_state->vdec_status = vdec->status;
     dec_state->vdec_last_ms = vdec->statistics_info.last_decode_ms;
+    dec_state->vdec_type = vdec->type;
     return 0;
 }
 

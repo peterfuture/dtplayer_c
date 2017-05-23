@@ -51,8 +51,9 @@ typedef struct dtvideo_decoder {
     unsigned int pts_buffer_size;
     unsigned int pts_cache_size;
     int frame_count;
-
+    
     dt_buffer_t *buf_out;
+    int type;
     vd_statistics_info_t statistics_info;
     void *parent;
     void *vd_priv;

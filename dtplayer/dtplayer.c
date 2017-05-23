@@ -304,6 +304,14 @@ int player_prepare(dtplayer_context_t *dtp_ctx)
                  __FUNCTION__, __LINE__);
         goto ERR2;
     }
+
+    // Notify vdec type info
+    host_state_t host_state;
+    dtp_state_t *state = &dtp_ctx->state;
+    player_host_get_info(dtp_ctx, HOST_CMD_GET_STATE, (unsigned long)(&host_state));
+    state->vdec_type = host_state.vdec_type;
+    player_handle_cb(dtp_ctx);
+
     set_player_status(dtp_ctx, PLAYER_STATUS_PREPARED);
 
     return 0;

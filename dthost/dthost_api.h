@@ -113,6 +113,7 @@ typedef struct {
     int     video_discontinue_flag;
     int64_t video_discontinue_point;
     int64_t vdec_last_ms;
+    int     vdec_type;
 } host_state_t;
 
 int dthost_start(void *host_priv);

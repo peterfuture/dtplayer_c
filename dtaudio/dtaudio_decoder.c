@@ -263,13 +263,16 @@ DECODE_LOOP:
                 para->channels = pinfo->channels;
                 para->samplerate = pinfo->samplerate;
                 para->data_width = 16;
-
                 para->dst_channels = (para->dst_channels > 0) ? para->dst_channels :
                                      para->channels;
                 para->dst_samplerate = (para->dst_samplerate > 0) ? para->dst_samplerate :
                                        para->samplerate;
             }
 
+            if (para->dst_channels <= 0 || para->dst_samplerate <= 0) {
+                para->dst_channels = para->channels;
+                para->dst_samplerate = para->samplerate;
+            }
         }
 
         declen += used;

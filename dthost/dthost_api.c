@@ -278,7 +278,6 @@ int dthost_get_info(void *host_priv, enum HOST_CMD cmd, unsigned long arg)
         *((int *)arg) = dthost_get_discontinue_flag(host_priv);
         break;
 #endif
-
     case HOST_CMD_GET_RENDER_CLOSED:
         *((int *)arg) = dthost_get_render_closed(host_priv);
         break;

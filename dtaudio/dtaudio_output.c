@@ -135,11 +135,13 @@ int audio_output_resume(dtaudio_output_t * ao)
 int audio_output_stop(dtaudio_output_t * ao)
 {
     ao_context_t *aoc = ao->aoc;
-    ao_wrapper_t *wrapper = aoc->wrapper;
     ao->status = AO_STATUS_EXIT;
     pthread_join(ao->output_thread_pid, NULL);
-    wrapper->stop(aoc);
-    free_ao_context(aoc);
+    if (aoc) {
+        ao_wrapper_t *wrapper = aoc->wrapper;
+        wrapper->stop(aoc);
+        free_ao_context(aoc);
+    }
     dt_info(TAG, "[%s:%d] aout stop ok \n", __FUNCTION__, __LINE__);
     return 0;
 }

@@ -139,7 +139,6 @@ int player_handle_cb(dtplayer_context_t * dtp_ctx)
         dtp_ctx->update_cb(dtp_ctx->cookie, state);
     }
     return 0;
-
 }
 
 static int need_reset_decoder(dtplayer_context_t *dtp_ctx, host_state_t *state)

@@ -297,7 +297,7 @@ static int vo_sdl_render(vo_context_t * voc, dt_av_frame_t * frame)
     // reset sdl vf and window size
     dtvideo_filter_t *vf = &sdl_vf;
     if (vf->para.d_width != sdl_gui.window_w
-        || vf->para.d_height != sdl_gui.window_h 
+        || vf->para.d_height != sdl_gui.window_h
         || vf->para.s_width != frame->width
         || vf->para.s_height != frame->height
         || frame->pixfmt != sdl_gui.pixfmt) {
