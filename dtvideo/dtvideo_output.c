@@ -222,6 +222,7 @@ static void *video_output_thread(void *args)
 
     int dump_mode = dtp_setting.player_dump_mode; // 5 for video dump
     int dump_index = 0;
+
     for (;;) {
         if (vo->status == VO_STATUS_EXIT) {
             dt_info(TAG, "[%s:%d] get exit quit thread \n", __FUNCTION__, __LINE__);

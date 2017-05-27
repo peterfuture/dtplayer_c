@@ -117,6 +117,64 @@ int dthost_write_frame(void *host_priv, dt_av_pkt_t * frame, int type)
 }
 
 //==Part3: PTS Relative
+static int64_t dthost_set_first_apts(void *host_priv, int64_t pts)
+{
+    if (!host_priv) {
+        return -1;
+    }
+    dthost_context_t *hctx = (dthost_context_t *)(host_priv);
+    hctx->pts_audio_first = hctx->pts_audio_last = hctx->pts_audio_current =
+                                pts;
+    return 0;
+}
+
+static int64_t dthost_get_first_apts(void *host_priv)
+{
+    if (!host_priv) {
+        return -1;
+    }
+    dthost_context_t *hctx = (dthost_context_t *)(host_priv);
+    return hctx->pts_audio_first;
+}
+
+static int64_t dthost_set_first_vpts(void *host_priv, int64_t pts)
+{
+    if (!host_priv) {
+        return -1;
+    }
+    dthost_context_t *hctx = (dthost_context_t *)(host_priv);
+    hctx->pts_video_first = hctx->pts_video_last = hctx->pts_video_current =
+                                pts;
+    return 0;
+}
+
+static int64_t dthost_get_first_vpts(void *host_priv)
+{
+    if (!host_priv) {
+        return -1;
+    }
+    dthost_context_t *hctx = (dthost_context_t *)(host_priv);
+    return hctx->pts_video_first;
+}
+
+static void dthost_set_drop_done(void *host_priv)
+{
+    if (!host_priv) {
+        return -1;
+    }
+    dthost_context_t *hctx = (dthost_context_t *)(host_priv);
+    hctx->drop_done = 1;
+    return;
+}
+
+static int64_t dthost_get_drop_done(void *host_priv)
+{
+    if (!host_priv) {
+        return -1;
+    }
+    dthost_context_t *hctx = (dthost_context_t *)(host_priv);
+    return hctx->drop_done;
+}
 
 static int64_t dthost_get_apts(void *host_priv)
 {
@@ -255,6 +313,15 @@ int dthost_get_info(void *host_priv, enum HOST_CMD cmd, unsigned long arg)
     }
 
     switch (cmd) {
+    case HOST_CMD_GET_FIRST_APTS:
+        *(int64_t *) arg = dthost_get_first_apts(host_priv);
+        break;
+    case HOST_CMD_GET_FIRST_VPTS:
+        *(int64_t *) arg = dthost_get_first_vpts(host_priv);
+        break;
+    case HOST_CMD_GET_DROP_DONE:
+        *(int *) arg = dthost_get_drop_done(host_priv);
+        break;
     case HOST_CMD_GET_APTS:
         *((int64_t *)arg) = dthost_get_apts(host_priv);
         break;
@@ -302,6 +369,15 @@ int dthost_set_info(void *host_priv, enum HOST_CMD cmd, unsigned long arg)
     }
 
     switch (cmd) {
+    case HOST_CMD_SET_FIRST_APTS:
+        dthost_set_first_apts(host_priv, *((int64_t *)arg));
+        break;
+    case HOST_CMD_SET_FIRST_VPTS:
+        dthost_set_first_vpts(host_priv, *((int64_t *)arg));
+        break;
+    case HOST_CMD_SET_DROP_DONE:
+        dthost_set_drop_done(host_priv);
+        break;
     case HOST_CMD_SET_APTS:
         dthost_update_apts(host_priv, *((int64_t *)arg));
         break;

@@ -70,8 +70,10 @@ int dtplayer_start(void *player_priv)
     //Since some app just want to get mediaInfo in dtplayer_init
     //No need to create loop there
     dtp_ctx->service_mgt = dt_service_create();
-    int ret = player_start(dtp_ctx);
-    return ret;
+    player_prepare(dtp_ctx);
+    event_t *event = dt_alloc_event(EVENT_SERVER_ID_PLAYER, PLAYER_EVENT_START);
+    dt_send_event(dtp_ctx->service_mgt, event);
+    return 0;
 }
 
 int dtplayer_pause(void *player_priv)

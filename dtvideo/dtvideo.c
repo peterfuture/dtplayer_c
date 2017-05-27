@@ -69,6 +69,26 @@ int64_t video_get_first_pts(dtvideo_context_t * vctx)
     return vctx->video_dec.pts_first;
 }
 
+int video_host_ioctl(void *priv, int cmd, unsigned long arg)
+{
+    dtvideo_context_t *vctx = (dtvideo_context_t *) priv;
+    if (!priv) {
+        return 0;
+    }
+    switch (cmd) {
+    case HOST_CMD_GET_FIRST_APTS:
+    case HOST_CMD_GET_DROP_DONE:
+        return dthost_get_info(vctx->parent, cmd, arg);
+    case HOST_CMD_SET_FIRST_VPTS:
+    case HOST_CMD_SET_DROP_DONE:
+        return dthost_set_info(vctx->parent, cmd, arg);
+    default:
+        break;
+    }
+
+    return;
+}
+
 int video_drop(dtvideo_context_t * vctx, int64_t target_pts)
 {
     int64_t diff = target_pts - video_get_first_pts(vctx);

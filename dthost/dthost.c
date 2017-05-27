@@ -238,99 +238,14 @@ int host_start(dthost_context_t * hctx)
     has_video = hctx->para.has_video;
     has_sub = hctx->para.has_sub;
 
-    /*check start condition */
-    int audio_start_flag = 0;
-    int video_start_flag = 0;
-    int64_t first_apts = -1;
-    int64_t first_vpts = -1;
-    dt_info(TAG, "check start condition has_audio:%d has_video:%d has_sub:%d\n",
-            has_audio, has_video, has_sub);
-    // max delay 10s
-    int print_cnt = 1000;
-    do {
-        if (!has_audio) {
-            audio_start_flag = 1;
-        } else {
-            ret = dtaudio_get_first_pts(hctx->audio_priv, &first_apts);
-            if (ret >= 0) {
-                audio_start_flag = 1;
-            }
-        }
-        if (!has_video) {
-            video_start_flag = 1;
-        } else {
-            ret = dtvideo_get_first_pts(hctx->video_priv, &first_vpts);
-            if (ret >= 0) {
-                video_start_flag = 1;
-            }
-        }
-        if (audio_start_flag && video_start_flag) {
-            break;
-        }
-        usleep(10000);
-        if (print_cnt-- == 0) {
-            dt_info(TAG, "time out. has_audio:%d audio:%d has_video:%d video:%d \n",
-                    has_audio, audio_start_flag, has_video,
-                    video_start_flag);
-
-            // check play failed
-            if ((has_audio == 1 && audio_start_flag == 1) || (has_video == 1
-                    && video_start_flag == 1)) {
-                break;
-            }
-            return -1;
-        }
-    } while (1);
-
-    if ((audio_start_flag & video_start_flag) == 0) {
-        dt_error(TAG, "Error: av not ready,  audio:%d video:%d \n", audio_start_flag,
-                 video_start_flag);
-        return -1;
+    int drop_enable = dtp_setting.host_drop;
+    if (has_audio == 0 || has_video == 0) {
+        drop_enable = 0;
     }
-
-    dt_info(TAG, "first apts:0x%llx first vpts:0x%llx \n", first_apts, first_vpts);
-    if (has_audio) {
-        hctx->pts_audio_first = hctx->pts_audio_last = hctx->pts_audio_current =
-                                    first_apts;
+    if (drop_enable == 0) {
+        dt_info(TAG, "[%s:%d] disable drop.\n", __FUNCTION__, __LINE__);
+        hctx->drop_done = 1;
     }
-    if (has_video) {
-        hctx->pts_video_first = hctx->pts_video_last = hctx->pts_video_current =
-                                    first_vpts;
-    }
-
-    if (host_sync_enable(hctx)) {
-        int drop_flag = 0;
-        int av_diff_ms = abs(hctx->pts_video_first - hctx->pts_audio_first) /
-                         DT_PTS_FREQ_MS;
-        if (av_diff_ms > AVSYNC_DROP_THRESHOLD) {
-            dt_info(TAG, "FIRST AV DIFF EXCEED %d MS,DO NOT DROP\n", AVSYNC_DROP_THRESHOLD);
-            hctx->sync_mode = DT_SYNC_VIDEO_MASTER;
-        } else {
-            drop_flag = (av_diff_ms > 100 && av_diff_ms < AVSYNC_DROP_THRESHOLD);
-
-            //env set dropable
-            int drop_enable = dtp_setting.host_drop;
-            dt_info(TAG, "HOST.drop.enable = %d \n", drop_enable);
-            if (drop_enable == 0) {
-                drop_flag = 0;
-            }
-            if (drop_flag) {
-                if (hctx->pts_audio_first > hctx->pts_video_first) {
-                    dtvideo_drop(hctx->video_priv, hctx->pts_audio_first);
-                } else {
-                    dtaudio_drop(hctx->audio_priv, hctx->pts_video_first);
-                }
-            }
-        }
-    }
-    hctx->sys_time_first = (has_video) ? hctx->pts_video_current :
-                           hctx->pts_audio_current;
-    dt_info(TAG, "first_apts:0x%llx cur_apts:0x%llx \n", hctx->pts_audio_first,
-            hctx->pts_audio_current);
-    dt_info(TAG, "first_vpts:0x%llx cur_vpts:0x%llx \n", hctx->pts_video_first,
-            hctx->pts_video_current);
-    dt_info(TAG, "first_sys_time:0x%llx avdiff: 0x%llx ms\n", hctx->sys_time_first,
-            host_get_avdiff(hctx));
 
     if (has_audio) {
         ret = dtaudio_start(hctx->audio_priv);

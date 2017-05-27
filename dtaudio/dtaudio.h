@@ -10,6 +10,7 @@
 #include "dtaudio_decoder.h"
 #include "dtaudio_filter.h"
 #include "dtaudio_output.h"
+#include "dthost_api.h"
 
 #include <pthread.h>
 #include <unistd.h>
@@ -68,6 +69,7 @@ int audio_output_read(void *priv, uint8_t * buf, int size);
 int64_t audio_get_current_pts(dtaudio_context_t * actx);
 int audio_first_frame_decoded(dtaudio_context_t * actx);
 int64_t audio_get_first_pts(dtaudio_context_t * actx);
+int audio_host_ioctl(void *priv, int cmd, unsigned long arg);
 int audio_drop(dtaudio_context_t * actx, int64_t target_pts);
 void audio_update_pts(void *priv);
 int audio_get_dec_state(dtaudio_context_t * actx, dec_state_t * dec_state);

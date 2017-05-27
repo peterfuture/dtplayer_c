@@ -328,20 +328,16 @@ ERR3:
 int player_start(dtplayer_context_t * dtp_ctx)
 {
     int ret;
-
-    if (get_player_status(dtp_ctx) < PLAYER_STATUS_PREPARE_START) {
-        ret = player_prepare(dtp_ctx);
-        if (ret < 0) {
-            return ret;
-        }
-    }
-
     set_player_status(dtp_ctx, PLAYER_STATUS_START);
     ret = player_host_start(dtp_ctx);
     if (ret != 0) {
         dt_error(TAG, "[%s:%d] player host start failed \n", __FILE__, __LINE__);
         set_player_status(dtp_ctx, PLAYER_STATUS_ERROR);
         goto ERR1;
+    }
+
+    if(dtp_ctx->abort_request == 1) {
+        return 0;
     }
 
     dt_info(TAG, "PLAYER START OK\n");

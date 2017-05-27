@@ -10,6 +10,7 @@
 #include "dtvideo_api.h"
 #include "dtvideo_decoder.h"
 #include "dtvideo_output.h"
+#include "dthost_api.h"
 
 #define DTVIDEO_BUF_SIZE 1024*1024
 
@@ -58,6 +59,7 @@ int dtvideo_get_avdiff(void *priv);
 int64_t dtvideo_get_current_pts(dtvideo_context_t * vctx);
 int video_first_frame_decoded(dtvideo_context_t * vctx);
 int64_t video_get_first_pts(dtvideo_context_t * vctx);
+int video_host_ioctl(void *priv, int cmd, unsigned long arg);
 int video_drop(dtvideo_context_t * vctx, int64_t target_pts);
 int64_t dtvideo_get_systime(void *priv);
 void dtvideo_update_systime(void *priv, int64_t sys_time);

@@ -37,6 +37,8 @@ typedef struct {
     int sync_enable;
     int sync_mode;
     int64_t av_diff;
+
+    int drop_done;
     /*a-v-s port part */
     void *port_priv;
     void *audio_priv;

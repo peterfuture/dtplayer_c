@@ -62,6 +62,26 @@ int64_t audio_get_first_pts(dtaudio_context_t * actx)
     return actx->audio_dec.pts_first;
 }
 
+int audio_host_ioctl(void *priv, int cmd, unsigned long arg)
+{
+    dtaudio_context_t *actx = (dtaudio_context_t *) priv;
+    if (!priv) {
+        return 0;
+    }
+    switch (cmd) {
+    case HOST_CMD_GET_FIRST_VPTS:
+    case HOST_CMD_GET_DROP_DONE:
+        return dthost_get_info(actx->parent, cmd, arg);
+    case HOST_CMD_SET_FIRST_APTS:
+    case HOST_CMD_SET_DROP_DONE:
+        return dthost_set_info(actx->parent, cmd, arg);
+    default:
+        break;
+    }
+
+    return;
+}
+
 int audio_drop(dtaudio_context_t * actx, int64_t target_pts)
 {
     int64_t diff = target_pts - audio_get_first_pts(actx);
