@@ -110,6 +110,8 @@ static void audio_convert(dtaudio_decoder_t *decoder, AVFrame * dst,
     out_channels = (para->dst_channels > 0 ? para->dst_channels : src->channels);
     out_samplerate = (para->dst_samplerate > 0 ? para->dst_samplerate :
                       src->sample_rate);
+    dst->channels = out_channels;
+    dst->sample_rate = out_samplerate;
     nb_sample = frame->nb_samples;
     dst_buf_size = nb_sample * av_get_bytes_per_sample(dst_fmt) * out_channels;
     dst->data[0] = (uint8_t *) av_malloc(dst_buf_size);
@@ -117,6 +119,7 @@ static void audio_convert(dtaudio_decoder_t *decoder, AVFrame * dst,
     avcodec_fill_audio_frame(dst, out_channels, dst_fmt, dst->data[0], dst_buf_size,
                              0);
     dt_debug(TAG, "SRCFMT:%d dst_fmt:%d \n", src_fmt, dst_fmt);
+    dt_debug(TAG, "[%d - %d] -> [%d - %d]\n", src->channels, src->sample_rate, out_channels, out_samplerate);
     /* resample toAV_SAMPLE_FMT_S16 */
     if (src_fmt != dst_fmt || out_channels != decoder->para->channels) {
         if (!m_swr_ctx) {
@@ -183,13 +186,12 @@ int ffmpeg_adec_decode(ad_wrapper_t *wrapper, adec_ctrl_t *pinfo)
         goto EXIT;
     }
 
-    pinfo->channels = frame->channels;
-    pinfo->samplerate = frame->sample_rate;
-
     data_size = av_samples_get_buffer_size(frame->linesize, avctxp->channels,
                                            frame->nb_samples, avctxp->sample_fmt, 1);
     if (data_size > 0) {
         audio_convert(decoder, &frame_tmp, frame);
+        pinfo->channels = frame_tmp.channels;
+        pinfo->samplerate = frame_tmp.sample_rate;
         //out frame too large, realloc out buf
         if (pinfo->outsize < frame_tmp.linesize[0]) {
             pinfo->outptr = realloc(pinfo->outptr, frame_tmp.linesize[0] * 2);
