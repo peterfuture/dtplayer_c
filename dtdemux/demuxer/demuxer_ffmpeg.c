@@ -621,6 +621,25 @@ static int demuxer_ffmpeg_setup_info(demuxer_wrapper_t * wrapper,
             sst_info->codec_priv = (void *) pCodec;
             tracks->sstreams[tracks->sst_num] = sst_info;
             tracks->sst_num++;
+            dt_info(TAG, "Extradata content:\n");
+            if (pCodec->extradata_size > 0) {
+                for (j = 0; j < pCodec->extradata_size && pCodec->extradata_size > 10; j += 10)
+                    dt_info(TAG, "%02x %02x %02x %02x %02x %02x %02x %02x %02x %02x\n",
+                            pCodec->extradata[j],
+                            pCodec->extradata[j + 1],
+                            pCodec->extradata[j + 2],
+                            pCodec->extradata[j + 3],
+                            pCodec->extradata[j + 4],
+                            pCodec->extradata[j + 5],
+                            pCodec->extradata[j + 6],
+                            pCodec->extradata[j + 7],
+                            pCodec->extradata[j + 8],
+                            pCodec->extradata[j + 9]
+                           );
+            }
+            dt_info(TAG, "End\n");
+
+
         }
     }
     if (tracks->vst_num > 0) {

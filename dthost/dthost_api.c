@@ -160,7 +160,7 @@ static int64_t dthost_get_first_vpts(void *host_priv)
 static void dthost_set_drop_done(void *host_priv)
 {
     if (!host_priv) {
-        return -1;
+        return;
     }
     dthost_context_t *hctx = (dthost_context_t *)(host_priv);
     hctx->drop_done = 1;

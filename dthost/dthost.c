@@ -660,5 +660,6 @@ int host_get_out_closed(dthost_context_t * hctx)
 {
     int aout_close = host_get_aout_closed(hctx);
     int vout_close = host_get_vout_closed(hctx);
+    dt_info(TAG, "aout_close:%d vout_close:%d \n", aout_close, vout_close);
     return (aout_close && vout_close);
 }

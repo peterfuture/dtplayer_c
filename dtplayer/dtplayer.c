@@ -336,7 +336,7 @@ int player_start(dtplayer_context_t * dtp_ctx)
         goto ERR1;
     }
 
-    if(dtp_ctx->abort_request == 1) {
+    if (dtp_ctx->abort_request == 1) {
         return 0;
     }
 
@@ -599,13 +599,15 @@ static void *event_handle_loop(dtplayer_context_t * dtp_ctx)
         player_host_get_info(dtp_ctx, HOST_CMD_GET_RENDER_CLOSED,
                              (unsigned long)(&render_closed));
         if (render_closed == 1 && stat->full_time > 0
-            && stat->cur_time >= stat->full_time - 2) {
+            && stat->cur_time >= stat->full_time - 10) {
             if (loop > 0) {
                 event_t *event = dt_alloc_event(EVENT_SERVER_ID_PLAYER, PLAYER_EVENT_SEEK);
                 event->para.np = 0;
                 dt_send_event_sync(dtp_ctx->service_mgt, event);
                 continue;
             }
+
+            dt_info(TAG, "playend.\n");
             goto QUIT;
         }
     }

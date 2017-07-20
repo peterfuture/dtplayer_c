@@ -138,20 +138,20 @@ static gui_event_t sdl_get_event(gui_ctx_t *ctx , args_t *arg)
         break;
     case SDL_MOUSEBUTTONDOWN:
     case SDL_MOUSEMOTION: {
-            double x;
-            if (event.type == SDL_MOUSEBUTTONDOWN) {
-                x = event.button.x;
-            } else {
-                if (event.motion.state != SDL_PRESSED) {
-                    break;
-                }
-                x = event.motion.x;
+        double x;
+        if (event.type == SDL_MOUSEBUTTONDOWN) {
+            x = event.button.x;
+        } else {
+            if (event.motion.state != SDL_PRESSED) {
+                break;
             }
-            arg->arg1 = (int)x;
-            arg->arg2 = sdl_gui.window_w;
-            return EVENT_SEEK_RATIO;
+            x = event.motion.x;
         }
-        break;
+        arg->arg1 = (int)x;
+        arg->arg2 = sdl_gui.window_w;
+        return EVENT_SEEK_RATIO;
+    }
+    break;
     case SDL_VIDEORESIZE:
         arg->arg1 = event.resize.w;
         arg->arg2 = event.resize.h;
@@ -173,24 +173,24 @@ static int sdl_set_info(gui_ctx_t *ctx, gui_cmd_t cmd, args_t arg)
 {
     switch (cmd) {
     case GUI_CMD_SET_SIZE: {
-            dt_lock(&window.mutex);
-            int width = arg.arg1;
-            int height = arg.arg2;
-            int flags = SDL_HWSURFACE | SDL_ASYNCBLIT | SDL_HWACCEL;
-            if (width == sdl_gui.max_width) {
-                flags |= SDL_FULLSCREEN;
-            } else {
-                flags |= SDL_RESIZABLE;
-            }
-            window.screen = SDL_SetVideoMode(width , height, 0, flags);
-            SDL_WM_SetCaption("dtplayer", "dttv");
-            sdl_gui.window_w = width;
-            sdl_gui.window_h = height;
-            sdl_gui.rect.w = width;
-            sdl_gui.rect.h = height;
-            dt_unlock(&window.mutex);
+        dt_lock(&window.mutex);
+        int width = arg.arg1;
+        int height = arg.arg2;
+        int flags = SDL_HWSURFACE | SDL_ASYNCBLIT | SDL_HWACCEL;
+        if (width == sdl_gui.max_width) {
+            flags |= SDL_FULLSCREEN;
+        } else {
+            flags |= SDL_RESIZABLE;
         }
-        break;
+        window.screen = SDL_SetVideoMode(width , height, 0, flags);
+        SDL_WM_SetCaption("dtplayer", "dttv");
+        sdl_gui.window_w = width;
+        sdl_gui.window_h = height;
+        sdl_gui.rect.w = width;
+        sdl_gui.rect.h = height;
+        dt_unlock(&window.mutex);
+    }
+    break;
     default:
         break;
     }
@@ -293,7 +293,7 @@ static int vo_sdl_init(vo_context_t * voc)
 static int vo_sdl_render(vo_context_t * voc, dt_av_frame_t * frame)
 {
     dt_lock(&window.mutex);
-    dt_info(TAG, "frame size [%d:%d] \n", frame->width, frame->height);
+    dt_debug(TAG, "frame size [%d:%d] \n", frame->width, frame->height);
     // reset sdl vf and window size
     dtvideo_filter_t *vf = &sdl_vf;
     if (vf->para.d_width != sdl_gui.window_w

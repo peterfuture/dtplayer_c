@@ -186,8 +186,8 @@ void player_update_state(dtplayer_context_t * dtp_ctx)
 
     /*show info */
     dt_info(TAG,
-            "[%s:%d]alevel:%d vlevel:%d slevel:%d cur_time:%lld(s) %lld(ms) duration:%lld(s) \n",
+            "[%s:%d]alevel:%d vlevel:%d slevel:%d cur_time:%lld(s) %lld(ms) duration:%lld(s) eof:%d\n",
             __FUNCTION__, __LINE__, host_state.abuf_level, host_state.vbuf_level,
             host_state.sbuf_level, play_stat->cur_time, play_stat->cur_time_ms,
-            dtp_ctx->media_info->duration);
+            dtp_ctx->media_info->duration, dtp_ctx->ctrl_info.eof_flag);
 }
