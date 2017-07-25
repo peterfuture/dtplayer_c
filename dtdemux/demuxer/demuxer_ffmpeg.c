@@ -144,7 +144,7 @@ static int demuxer_ffmpeg_open(demuxer_wrapper_t * wrapper)
 
     AVDictionary *d = NULL;
     // set options
-    av_dict_set(&d, "protocol_whitelist", "file,udp,rtp", 0);
+    av_dict_set(&d, "protocol_whitelist", "file,http,hls,udp,rtp,rtsp,tcp", 0);
     // register interrupt
     ic->interrupt_callback.callback = ff_interrupt_cb;
     ic->interrupt_callback.opaque = ctx;
