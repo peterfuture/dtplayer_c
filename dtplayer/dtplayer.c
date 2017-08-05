@@ -504,6 +504,9 @@ int player_set_parameter(dtplayer_context_t *dtp_ctx, int cmd,
     case DTP_CMD_SET_SODEVICE:
         dtp_ctx->so_device = (void *)arg;
         break;
+    case DTP_CMD_SET_LOOPING:
+        dtp_ctx->player_para.loop_mode = (int)arg;
+        break;
     default:
         break;
     }
