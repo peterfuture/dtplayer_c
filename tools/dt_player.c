@@ -147,6 +147,9 @@ int main(int argc, char **argv)
         return 0;
     }
 
+    // av options set
+    dtplayer_set_option(NULL, 0, "protocol_whitelist", "file,http,hls,udp,rtp,rtsp,tcp");
+
     memset(&player, 0, sizeof(player_t));
     para.update_cb = update_cb;
     para.file_name = argv[argc - 1];

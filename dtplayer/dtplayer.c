@@ -16,6 +16,11 @@
 
 #define TAG "PLAYER"
 
+#if ENABLE_FFMPEG
+#include "libavutil/dict.h"
+static AVDictionary *av_options;
+#endif
+
 static void *event_handle_loop(dtplayer_context_t * dtp_ctx);
 
 static int register_ok = 0;
@@ -100,9 +105,12 @@ int player_init(dtplayer_context_t * dtp_ctx)
     dtp_ctx->interrupt_cb.callback = player_interrupt_cb_default;
     dtp_ctx->interrupt_cb.opaque = (void *)dtp_ctx;
 
-    dtdemuxer_para_t demux_para;
+    dtdemuxer_para_t demux_para = {0};
     demux_para.file_name = dtp_ctx->file_name;
     demux_para.cb = &dtp_ctx->interrupt_cb;
+#if ENABLE_FFMPEG
+    demux_para.options = (void *)av_options;
+#endif
     ret = dtdemuxer_open(&dtp_ctx->demuxer_priv, &demux_para, dtp_ctx);
     if (ret < 0) {
         ret = -1;
@@ -512,6 +520,15 @@ int player_set_parameter(dtplayer_context_t *dtp_ctx, int cmd,
     }
 
     return 0;
+}
+
+void player_set_option(dtplayer_context_t *dtp_ctx, int category, const char *name, const char *value)
+{
+#if ENABLE_FFMPEG
+    AVDictionary **dict = &av_options;
+    av_dict_set(dict, name, value, 0);
+#endif
+    return;
 }
 
 static char * get_event_name(int cmd)

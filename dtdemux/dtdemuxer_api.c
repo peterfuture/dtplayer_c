@@ -11,8 +11,7 @@ int dtdemuxer_open(void **priv, dtdemuxer_para_t * para, void *parent)
         return -1;
     }
     memset(dem_ctx, 0, sizeof(dtdemuxer_context_t));
-    dem_ctx->file_name = para->file_name;
-    dem_ctx->cb = para->cb;
+    memcpy(&dem_ctx->para, para, sizeof(dtdemuxer_para_t));
     if (demuxer_open(dem_ctx) == -1) {
         dt_error(TAG, "demuxer context open failed \n");
         free(dem_ctx);

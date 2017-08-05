@@ -291,7 +291,7 @@ static int demuxer_aac_setup_info(demuxer_wrapper_t * wrapper,
 
     /*get media info */
     info->format = DTP_MEDIA_FORMAT_AAC;
-    info->file = ctx->file_name;
+    info->file = ctx->para.file_name;
     info->bit_rate = aac_ctx->bitrate;
     info->duration = aac_ctx->duration;
     info->file_size = aac_ctx->file_size;

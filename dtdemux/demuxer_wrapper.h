@@ -23,12 +23,14 @@ typedef enum {
 
 typedef struct {
     char *file_name;
+    void *options;
     dt_interrupt_cb *cb;
 } dtdemuxer_para_t;
 
 typedef struct demuxer_wrapper {
     char *name;
     int id;
+    dtdemuxer_para_t *para;
     //int (*probe) (struct demuxer_wrapper *wrapper,void *parent);
     int (*probe)(struct demuxer_wrapper *wrapper, dt_buffer_t *buf);
     int (*open)(struct demuxer_wrapper * wrapper);
@@ -52,12 +54,11 @@ typedef struct {
 } demuxer_statistics_info_t;
 
 typedef struct {
-    char *file_name;
+    dtdemuxer_para_t para;
     dtp_media_info_t media_info;
     demuxer_wrapper_t *demuxer;
     dt_buffer_t probe_buf;
     demuxer_statistics_info_t statistics_info;
-    dt_interrupt_cb *cb;
     void *stream_priv;
     void *parent;
 } dtdemuxer_context_t;

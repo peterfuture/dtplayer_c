@@ -214,7 +214,7 @@ int demuxer_open(dtdemuxer_context_t * dem_ctx)
     int ret = 0;
     /* open stream */
     dtstream_para_t para;
-    para.stream_name = dem_ctx->file_name;
+    para.stream_name = dem_ctx->para.file_name;
     ret = dtstream_open(&dem_ctx->stream_priv, &para, dem_ctx);
     if (ret != DTERROR_NONE) {
         dt_error(TAG, "stream open failed \n");
@@ -292,6 +292,7 @@ DEMUXER_SELECT:
     }
     demuxer_wrapper_t *wrapper = dem_ctx->demuxer;
     wrapper->parent = dem_ctx;
+    wrapper->para = &dem_ctx->para;
     ret = wrapper->open(wrapper);
     if (ret < 0) {
         dt_error(TAG, "demuxer open failed\n");

@@ -164,4 +164,9 @@ int dtplayer_set_parameter(void *handle, int cmd, unsigned long arg)
     return player_set_parameter(dtp_ctx, cmd, arg);
 }
 
-
+void dtplayer_set_option(void *handle, int category, const char *name, const char *value)
+{
+    dtplayer_context_t *dtp_ctx = (dtplayer_context_t *)handle;
+    player_set_option(dtp_ctx, category, name, value);
+    return;
+}

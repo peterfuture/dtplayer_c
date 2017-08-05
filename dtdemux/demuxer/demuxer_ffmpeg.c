@@ -107,7 +107,7 @@ static void syslog_init()
 static int ff_interrupt_cb(void *arg)
 {
     dtdemuxer_context_t *ctx = (dtdemuxer_context_t *)arg;
-    return dt_check_interrupt(ctx->cb);
+    return dt_check_interrupt(ctx->para.cb);
 }
 
 static int demuxer_ffmpeg_open(demuxer_wrapper_t * wrapper)
@@ -115,7 +115,7 @@ static int demuxer_ffmpeg_open(demuxer_wrapper_t * wrapper)
     int err, ret;
 
     dtdemuxer_context_t *ctx = (dtdemuxer_context_t *)wrapper->parent;
-    char *file_name = ctx->file_name;
+    char *file_name = ctx->para.file_name;
 
 #if ENABLE_ANDROID
     //syslog_init();
@@ -142,9 +142,9 @@ static int demuxer_ffmpeg_open(demuxer_wrapper_t * wrapper)
         dt_info(TAG, "dtstream null, use ffmpeg instead \n");
     }
 
-    AVDictionary *d = NULL;
+    AVDictionary *d = wrapper->para->options;
     // set options
-    av_dict_set(&d, "protocol_whitelist", "file,http,hls,udp,rtp,rtsp,tcp", 0);
+    //av_dict_set(&d, "protocol_whitelist", "file,http,hls,udp,rtp,rtsp,tcp", 0);
     // register interrupt
     ic->interrupt_callback.callback = ff_interrupt_cb;
     ic->interrupt_callback.opaque = ctx;
