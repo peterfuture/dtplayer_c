@@ -141,6 +141,8 @@ static void *video_decode_loop(void *arg)
     dt_info(TAG, "[%s:%d] start decode loop.\n", __FUNCTION__, __LINE__);
     int video_frame_in = 0;
 
+    int64_t drop_timeout = 3 * 1000;
+    int64_t drop_start = -1;
     int drop_done = 0;
     int need_drop = -1;
     int64_t first_apts = -1;
@@ -230,6 +232,16 @@ static void *video_decode_loop(void *arg)
         while (drop_done == 0) {
 
             if (decoder->status == VDEC_STATUS_EXIT) {
+                break;
+            }
+
+            if (drop_start < 0) {
+                drop_start = dt_gettime();
+            }
+
+            if (dt_gettime() - drop_start >= drop_timeout * 1000) {
+                video_host_ioctl(decoder->parent, HOST_CMD_SET_DROP_DONE, &drop_done);
+                drop_done = 1;
                 break;
             }
 
