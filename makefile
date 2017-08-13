@@ -63,8 +63,8 @@ LDFLAGS += -L/usr/local/lib -L/usr/lib -L./
 
 #extlib
 DT_FFMPEG = yes
-DT_SDL = yes
-DT_SDL2 = no
+DT_SDL = no
+DT_SDL2 = yes
 DT_ALSA = no
 DTAP=no
 
@@ -374,7 +374,7 @@ OBJS_DTLIB_DEP_RELEASE = $(OBJS_COMMON_RELEASE)
 ALL_PRG += $(DTLIB_DEBUG) $(DTLIB_RELEASE)
 
 #dtm player
-RENDER-$(DT_SDL2) += tools/gui_sdl2.c
+RENDER-$(DT_SDL2) += tools/ao_sdl2.c tools/vo_sdl2.c
 RENDER-$(DT_SDL)  += tools/ao_sdl.c tools/gui_sdl.c
 SRCS_DTPLAYER     += tools/dt_player.c tools/version.c
 SRCS_DTPLAYER     += $(RENDER-yes)

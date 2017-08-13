@@ -343,6 +343,7 @@ typedef enum _AO_ID_ {
     AO_ID_EX,                   // ex ao set to 0 default
     AO_ID_ALSA,                 // 0 default
     AO_ID_SDL,
+    AO_ID_SDL2,
     AO_ID_OSS,
     AO_ID_DSOUND,
     AO_ID_ANDROID = 0x100,

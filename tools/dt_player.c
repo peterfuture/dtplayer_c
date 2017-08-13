@@ -207,12 +207,24 @@ int main(int argc, char **argv)
     }
 
     if (info.has_video) {
+#ifdef ENABLE_VO_SDL
         extern vo_wrapper_t vo_sdl_ops;
         dtplayer_register_plugin(DTP_PLUGIN_TYPE_VO, &vo_sdl_ops);
+#endif
+#ifdef ENABLE_VO_SDL2
+        extern vo_wrapper_t vo_sdl2_ops;
+        dtplayer_register_plugin(DTP_PLUGIN_TYPE_VO, &vo_sdl2_ops);
+#endif
     }
     if (info.has_audio) {
+#ifdef ENABLE_AO_SDL
         extern ao_wrapper_t ao_sdl_ops;
         dtplayer_register_plugin(DTP_PLUGIN_TYPE_AO, &ao_sdl_ops);
+#endif
+#ifdef ENABLE_AO_SDL2
+        extern ao_wrapper_t ao_sdl2_ops;
+        dtplayer_register_plugin(DTP_PLUGIN_TYPE_AO, &ao_sdl2_ops);
+#endif
     }
     dtplayer_start(player_priv);
 

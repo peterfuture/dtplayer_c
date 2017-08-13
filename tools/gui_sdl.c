@@ -372,8 +372,6 @@ static int vo_sdl_stop(vo_context_t * voc)
     return 0;
 }
 
-const char *vo_sdl_name = "SDL VO";
-
 vo_wrapper_t vo_sdl_ops = {
     .id = VO_ID_SDL,
     .name = "sdl",

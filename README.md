@@ -13,7 +13,7 @@ For more [details](http://blog.csdn.net/dtplayer).
 
 ## Installation
 ### Linux
-* install sdl1.0
+* install sdl2.0
 * install [ffmpeg](https://github.com/FFmpeg/FFmpeg)
 * make -j8
 
