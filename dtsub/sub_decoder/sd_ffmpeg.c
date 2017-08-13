@@ -222,7 +222,6 @@ int ffmpeg_sdec_decode(dtsub_decoder_t *decoder, dt_av_pkt_t * dt_frame,
         dt_info(TAG, "get sub, type:%d size:%d starttime:%u endtime:%u pts:%lld \n",
                 (int)sub->format, pkt.size, sub->start_display_time, sub->end_display_time,
                 sub->pts);
-
         dtav_sub_frame_t *sub_frame_tmp = (dtav_sub_frame_t *)malloc(sizeof(
                                               dtav_sub_frame_t));
         if (sub->format == 0) {  // graphics
@@ -235,6 +234,7 @@ int ffmpeg_sdec_decode(dtsub_decoder_t *decoder, dt_av_pkt_t * dt_frame,
                     YUVA_OUT((uint32_t*)sub->rects[i]->pict.data[1] + j, y, u, v, a);
                 }
             }
+            sub->pts = (sub->pts * 9 / 1000); // use ffplay calc way
         }
         memcpy(sub_frame_tmp, sub, sizeof(dtav_sub_frame_t));
         *sub_frame = sub_frame_tmp;

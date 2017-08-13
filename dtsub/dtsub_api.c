@@ -179,7 +179,7 @@ int64_t dtsub_get_systime(void *priv)
         return -1;
     }
     int systime = 0;
-    dthost_set_info(sctx->parent, HOST_CMD_GET_SYSTIME, (unsigned long)(&systime));
+    dthost_get_info(sctx->parent, HOST_CMD_GET_SYSTIME, (unsigned long)(&systime));
     return systime;
 }
 
