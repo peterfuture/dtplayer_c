@@ -226,6 +226,14 @@ int main(int argc, char **argv)
         dtplayer_register_plugin(DTP_PLUGIN_TYPE_AO, &ao_sdl2_ops);
 #endif
     }
+    if (info.has_sub) {
+#ifdef ENABLE_VO_SDL2
+        extern so_wrapper_t so_sdl2_ops;
+        dtplayer_register_plugin(DTP_PLUGIN_TYPE_SO, &so_sdl2_ops);
+#endif
+    }
+
+
     dtplayer_start(player_priv);
 
     //event handle

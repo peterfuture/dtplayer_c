@@ -1,7 +1,7 @@
 #ifndef DTSUB_API_H
 #define DTSUB_API_H
 
-#include "dtsub_para.h"
+#include "dtp_sub_plugin.h"
 #include "dtp_state.h"
 
 int dtsub_init(void **sub_priv, dtsub_para_t * para, void *parent);

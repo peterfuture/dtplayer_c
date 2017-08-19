@@ -2,7 +2,7 @@
 #define SF_FILTER_H
 
 #include "dtp_av.h"
-#include "dtsub_para.h"
+#include "dtp_sub_plugin.h"
 
 struct dtsub_filter;
 

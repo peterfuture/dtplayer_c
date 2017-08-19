@@ -23,6 +23,9 @@ void dtplayer_register_plugin(dtp_plugin_type_t type, void *plugin)
     case DTP_PLUGIN_TYPE_VO:
         register_ext_vo((vo_wrapper_t *)plugin);
         break;
+    case DTP_PLUGIN_TYPE_SO:
+        register_ext_so((so_wrapper_t *)plugin);
+        break;
     case DTP_PLUGIN_TYPE_VD:
         register_ext_vd((vd_wrapper_t *)plugin);
         break;

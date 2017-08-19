@@ -3,7 +3,7 @@
 
 #include "dt_buffer.h"
 #include "dtp_av.h"
-#include "dtsub_para.h"
+#include "dtp_plugin.h"
 
 struct dtsub_decoder;
 

@@ -139,7 +139,7 @@ static int demuxer_ffmpeg_open(demuxer_wrapper_t * wrapper)
     dtdemuxer_context_t *ctx = (dtdemuxer_context_t *)wrapper->parent;
     char *file_name = ctx->para.file_name;
 
-    syslog_init();
+    //syslog_init();
     ffmpeg_ctx_t *ffmpeg_ctx = (ffmpeg_ctx_t *)malloc(sizeof(*ffmpeg_ctx));
     memset(ffmpeg_ctx, 0, sizeof(ffmpeg_ctx_t));
     av_register_all();

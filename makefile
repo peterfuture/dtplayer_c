@@ -150,7 +150,9 @@ ifeq ($(DT_SDL),yes)
 endif
 
 ifeq ($(DT_SDL2),yes)
+	DT_CFLAGS += -DENABLE_AO_SDL2=1
 	DT_CFLAGS += -DENABLE_VO_SDL2=1
+	DT_CFLAGS += -DENABLE_SO_SDL2=1
 endif
 
 #DT_CFLAGS += -DENABLE_VO_FB=0
@@ -172,10 +174,6 @@ endif
 
 ifeq ($(DT_SDL),yes)
 	DT_CFLAGS += -DENABLE_AO_SDL=1
-endif
-
-ifeq ($(DT_SDL2),yes)
-	DT_CFLAGS += -DENABLE_AO_SDL2=1
 endif
 
 ifeq ($(DT_ALSA),yes)
@@ -374,7 +372,7 @@ OBJS_DTLIB_DEP_RELEASE = $(OBJS_COMMON_RELEASE)
 ALL_PRG += $(DTLIB_DEBUG) $(DTLIB_RELEASE)
 
 #dtm player
-RENDER-$(DT_SDL2) += tools/ao_sdl2.c tools/vo_sdl2.c
+RENDER-$(DT_SDL2) += tools/ao_sdl2.c tools/vo_sdl2.c tools/so_sdl2.c
 RENDER-$(DT_SDL)  += tools/ao_sdl.c tools/gui_sdl.c
 SRCS_DTPLAYER     += tools/dt_player.c tools/version.c
 SRCS_DTPLAYER     += $(RENDER-yes)

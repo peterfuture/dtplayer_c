@@ -360,6 +360,13 @@ typedef enum {
     DT_SUB_FORMAT_UNKOWN,
 } dtsub_format_t;
 
+typedef enum _so_ID_ {
+    SO_ID_INVALID = -1,
+    SO_ID_NULL    = 0,
+    SO_ID_SDL2,
+    SO_ID_ANDROID,
+} dt_so_t;
+
 typedef enum dtav_sub_type {
     DT_SUBTITLE_NONE,
 
@@ -377,7 +384,6 @@ typedef enum dtav_sub_type {
      */
     DT_SUBTITLE_ASS,
 } dtav_sub_type_t;
-
 
 typedef struct dt_sub_Rect {
     int x;         ///< top left corner  of pict, undefined when pict is not set

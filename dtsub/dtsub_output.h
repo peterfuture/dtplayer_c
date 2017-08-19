@@ -1,7 +1,29 @@
 #ifndef DTSUB_OUTPUT_H
 #define DTSUB_OUTPUT_H
 
-#include "so_wrapper.h"
+#include "dtp_sub_plugin.h"
+
+typedef enum {
+    SO_STATUS_IDLE,
+    SO_STATUS_PAUSE,
+    SO_STATUS_RUNNING,
+    SO_STATUS_EXIT,
+} so_status_t;
+
+typedef struct {
+    int sout_buf_size;
+    int sout_buf_level;
+} so_state_t;
+
+typedef struct dtsub_output {
+    dtsub_para_t *para;
+    so_wrapper_t *wrapper;
+    so_status_t status;
+    pthread_t output_thread_pid;
+    so_state_t state;
+
+    void *parent;               //point to dtsub_output_t
+} dtsub_output_t;
 
 void so_register_all();
 void so_remove_all();

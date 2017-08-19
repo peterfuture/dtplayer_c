@@ -144,7 +144,7 @@ int player_host_init(dtplayer_context_t * dtp_ctx)
     //----sub part------
     if (pctrl->has_sub) {
         if (media_info->cur_sst_index >= tracks->sst_num) {
-            dt_warning(TAG, "sub index set exceed max video num ,reset to 0 \n");
+            dt_warning(TAG, "sub index set exceed max sub num ,reset to 0 \n");
             media_info->cur_sst_index = 0;
         }
 
