@@ -17,7 +17,7 @@ typedef struct {
 
 typedef struct dtsub_output {
     dtsub_para_t *para;
-    so_wrapper_t *wrapper;
+    so_context_t *soc;
     so_status_t status;
     pthread_t output_thread_pid;
     so_state_t state;

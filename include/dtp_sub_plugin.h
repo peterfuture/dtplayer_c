@@ -2,7 +2,7 @@
  * =====================================================================================
  *
  *    Filename   :  dtp_sub_plugin.h
- *    Description:  
+ *    Description:
  *    Version    :  1.0
  *    Created    :  2017年08月16日 20时42分19秒
  *    Revision   :  none
@@ -15,6 +15,10 @@
 
 #ifndef DTP_SUB_PLUGIN_H
 #define DTP_SUB_PLUGIN_H
+
+#ifdef  __cplusplus
+extern "C" {
+#endif
 
 #include "dtp_av.h"
 
@@ -53,5 +57,9 @@ typedef struct so_context {
     so_wrapper_t *wrapper;
     void *private_data;
 } so_context_t;
+
+#ifdef  __cplusplus
+}
+#endif
 
 #endif

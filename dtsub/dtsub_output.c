@@ -91,18 +91,17 @@ void so_remove_all()
 ** select_so_device
 **
 ***********************************************************************/
-int select_so_device(dtsub_output_t * so, int id)
+so_wrapper_t *select_so_device(int id)
 {
     so_wrapper_t **p;
     p = &g_so;
 
     if (id == -1) { // user did not choose vo,use default one
         if (!*p) {
-            return -1;
+            return NULL;
         }
-        so->wrapper = *p;
         dt_info(TAG, "SELECT SO:%s \n", (*p)->name);
-        return 0;
+        return *p;
     }
 
     while (*p != NULL && (*p)->id != id) {
@@ -110,12 +109,41 @@ int select_so_device(dtsub_output_t * so, int id)
     }
     if (!*p) {
         dt_error(TAG, "no valid so device found\n");
-        return -1;
+        return NULL;
     }
-    so->wrapper = *p;
     dt_info(TAG, "SELECT SO:%s \n", (*p)->name);
-    return 0;
+    return *p;
 }
+
+static so_context_t *alloc_so_context(so_wrapper_t *wrapper)
+{
+    so_context_t *soc = (so_context_t *)malloc(sizeof(so_context_t));
+    if (!soc) {
+        return NULL;
+    }
+    if (wrapper->private_data_size > 0) {
+        soc->private_data = malloc(wrapper->private_data_size);
+        if (!soc->private_data) {
+            free(soc);
+            return NULL;
+        }
+    }
+    soc->wrapper = wrapper;
+    return soc;
+}
+
+static void free_so_context(so_context_t *soc)
+{
+    if (!soc) {
+        return;
+    }
+    if (!soc->private_data) {
+        free(soc->private_data);
+    }
+    free(soc);
+    return;
+}
+
 
 /***********************************************************************
 **
@@ -157,10 +185,14 @@ int sub_output_resume(dtsub_output_t * so)
 ***********************************************************************/
 int sub_output_stop(dtsub_output_t * so)
 {
-    so_wrapper_t *wrapper = so->wrapper;
+    so_context_t *soc = so->soc;
     so->status = SO_STATUS_EXIT;
     pthread_join(so->output_thread_pid, NULL);
-    wrapper->so_stop(so);
+    if (soc) {
+        so_wrapper_t *wrapper = soc->wrapper;
+        wrapper->so_stop(soc);
+        free_so_context(soc);
+    }
     dt_info(TAG, "[%s:%d] sout stop ok \n", __FUNCTION__, __LINE__);
     return 0;
 }
@@ -203,7 +235,8 @@ static void *sub_output_thread(void *args)
 {
     dtsub_output_t *so = (dtsub_output_t *) args;
     dtsub_context_t *sctx = (dtsub_context_t *) so->parent;
-    so_wrapper_t *wrapper = so->wrapper;
+    so_context_t *soc = so->soc;
+    so_wrapper_t *wrapper = soc->wrapper;
     int ret, wlen;
     ret = wlen = 0;
     dtav_sub_frame_t *frame_pre;
@@ -267,7 +300,7 @@ static void *sub_output_thread(void *args)
                 continue;
             }
         }
-        ret = wrapper->so_render(so, frame);
+        ret = wrapper->so_render(soc, frame);
         if (ret < 0) {
             dt_error(TAG, "frame toggle failed! \n");
             usleep(1000);
@@ -297,12 +330,18 @@ int sub_output_init(dtsub_output_t * so, int so_id)
     pthread_t tid;
 
     /*select ao device */
-    ret = select_so_device(so, so_id);
-    if (ret < 0) {
+    so_wrapper_t *wrapper = select_so_device(so_id);
+    if (wrapper == NULL) {
         return -1;
     }
-    so_wrapper_t *wrapper = so->wrapper;
-    wrapper->so_init(so);
+
+    so_context_t *soc = alloc_so_context(wrapper);
+    if (!soc) {
+        return -1;
+    }
+    memcpy(&soc->para, so->para, sizeof(dtsub_para_t));
+    so->soc = soc;
+    wrapper->so_init(soc);
     dt_info(TAG, "[%s:%d] sub output init success\n", __FUNCTION__, __LINE__);
 
     /*start aout pthread */

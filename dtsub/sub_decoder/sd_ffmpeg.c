@@ -219,9 +219,9 @@ int ffmpeg_sdec_decode(dtsub_decoder_t *decoder, dt_av_pkt_t * dt_frame,
     }
 
     if (got_sub) {
-        dt_info(TAG, "get sub, type:%d size:%d starttime:%u endtime:%u pts:%lld \n",
-                (int)sub->format, pkt.size, sub->start_display_time, sub->end_display_time,
-                sub->pts);
+        dt_debug(TAG, "get sub, type:%d size:%d starttime:%u endtime:%u pts:%lld \n",
+                 (int)sub->format, pkt.size, sub->start_display_time, sub->end_display_time,
+                 sub->pts);
         dtav_sub_frame_t *sub_frame_tmp = (dtav_sub_frame_t *)malloc(sizeof(
                                               dtav_sub_frame_t));
         if (sub->format == 0) {  // graphics
@@ -239,9 +239,9 @@ int ffmpeg_sdec_decode(dtsub_decoder_t *decoder, dt_av_pkt_t * dt_frame,
         memcpy(sub_frame_tmp, sub, sizeof(dtav_sub_frame_t));
         *sub_frame = sub_frame_tmp;
         memset(sub, 0, sizeof(AVSubtitle));
-        dt_info(TAG, "get sub, type:%d size:%d starttime:%u endtime:%u pts:%lld\n",
-                (int)sub_frame_tmp->format, pkt.size, sub_frame_tmp->start_display_time,
-                sub_frame_tmp->end_display_time, sub_frame_tmp->pts);
+        dt_debug(TAG, "get sub, type:%d size:%d starttime:%u endtime:%u pts:%lld\n",
+                 (int)sub_frame_tmp->format, pkt.size, sub_frame_tmp->start_display_time,
+                 sub_frame_tmp->end_display_time, sub_frame_tmp->pts);
     }
 
     return got_sub;

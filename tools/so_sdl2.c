@@ -2,7 +2,7 @@
  * =====================================================================================
  *
  *    Filename   :  so_sdl2.c
- *    Description:  
+ *    Description:
  *    Version    :  1.0
  *    Created    :  2017年08月16日 18时34分16秒
  *    Revision   :  none
