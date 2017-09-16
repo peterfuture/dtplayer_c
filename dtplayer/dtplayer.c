@@ -525,8 +525,10 @@ int player_set_parameter(dtplayer_context_t *dtp_ctx, int cmd,
 void player_set_option(dtplayer_context_t *dtp_ctx, int category, const char *name, const char *value)
 {
 #if ENABLE_FFMPEG
-    AVDictionary **dict = &av_options;
-    av_dict_set(dict, name, value, 0);
+    AVDictionary *d = av_options;           // "create" an empty dictionary
+    char *k = av_strdup(name);       // if your strings are already allocated,
+    char *v = av_strdup(value);     // you can avoid copying them like this
+    av_dict_set(&d, k, v, AV_DICT_DONT_STRDUP_KEY | AV_DICT_DONT_STRDUP_VAL);
 #endif
     return;
 }
@@ -641,6 +643,10 @@ QUIT:
     dt_info(TAG, "EXIT PLAYER EVENT HANDLE LOOP\n");
     set_player_status(dtp_ctx, PLAYER_STATUS_EXIT);
     player_handle_cb(dtp_ctx);
+#if ENABLE_FFMPEG
+    AVDictionary *d = av_options;           // "create" an empty dictionary
+    av_dict_free(&d);
+#endif
 
     free(dtp_ctx);
     player_remove_all();
