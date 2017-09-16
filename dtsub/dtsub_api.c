@@ -86,6 +86,7 @@ int dtsub_init(void **sub_priv, dtsub_para_t *para, void *parent)
         ret = -1;
         goto ERR0;
     }
+    memset(sctx, 0, sizeof(dtsub_context_t));
     memcpy(&sctx->sub_para, para, sizeof(dtsub_para_t));
 
     //we need to set parent early

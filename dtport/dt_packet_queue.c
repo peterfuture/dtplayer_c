@@ -11,10 +11,7 @@ int packet_queue_init(dt_packet_queue_t * queue)
     if (!queue) {
         return -1;
     }
-    //memset(queue,0,sizeof(queue));
-    queue->first = NULL;
-    queue->last = NULL;
-    queue->size = 0;
+    memset(queue, 0, sizeof(dt_packet_queue_t));
     dt_lock_init(&queue->mutex, NULL);
     return 0;
 }

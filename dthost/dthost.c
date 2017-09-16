@@ -352,8 +352,12 @@ int host_stop(dthost_context_t * hctx)
             dt_error(TAG, "[%s:%d] dtvideo stop failed \n", __FUNCTION__, __LINE__);
         }
     }
-    if (has_sub)
-        ;
+    if (has_sub) {
+        ret = dtsub_stop(hctx->sub_priv);
+        if (ret < 0) {
+            dt_error(TAG, "[%s:%d] dtsub stop failed \n", __FUNCTION__, __LINE__);
+        }
+    }
     /*stop dtport module at last */
     ret = dtport_stop(hctx->port_priv);
     if (ret < 0) {
