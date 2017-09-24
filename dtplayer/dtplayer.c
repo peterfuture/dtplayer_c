@@ -109,7 +109,7 @@ int player_init(dtplayer_context_t * dtp_ctx)
     demux_para.file_name = dtp_ctx->file_name;
     demux_para.cb = &dtp_ctx->interrupt_cb;
 #if ENABLE_FFMPEG
-    demux_para.options = (void *)av_options;
+    demux_para.options = (void *)&av_options;
 #endif
     ret = dtdemuxer_open(&dtp_ctx->demuxer_priv, &demux_para, dtp_ctx);
     if (ret < 0) {
@@ -525,10 +525,28 @@ int player_set_parameter(dtplayer_context_t *dtp_ctx, int cmd,
 void player_set_option(dtplayer_context_t *dtp_ctx, int category, const char *name, const char *value)
 {
 #if ENABLE_FFMPEG
-    AVDictionary *d = av_options;           // "create" an empty dictionary
+    AVDictionary **d = &av_options;           // "create" an empty dictionary
     char *k = av_strdup(name);       // if your strings are already allocated,
     char *v = av_strdup(value);     // you can avoid copying them like this
-    av_dict_set(&d, k, v, AV_DICT_DONT_STRDUP_KEY | AV_DICT_DONT_STRDUP_VAL);
+#endif
+    if (category == OPTION_CATEGORY_DTP) {
+        goto dtp_option;
+    }
+    if (category == OPTION_CATEGORY_FFMPEG) {
+        goto ffmpeg_option;
+    }
+    // unknown option
+    return;
+dtp_option:
+    if (strcmp(name, "player.live_timeout") == 0) {
+        dtp_setting.player_live_timeout = atoi(value);
+        dt_info(TAG, "use specify live timeout:%dms\n", dtp_setting.player_live_timeout);
+    }
+    return;
+ffmpeg_option:
+#if ENABLE_FFMPEG
+    av_dict_set(d, k, v, AV_DICT_DONT_STRDUP_KEY | AV_DICT_DONT_STRDUP_VAL);
+    dt_info(TAG, "ffmpeg option set. key:%s value:%s. count:%d\n", k, v, av_dict_count(*d));
 #endif
     return;
 }

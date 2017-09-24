@@ -162,13 +162,26 @@ static int demuxer_ffmpeg_open(demuxer_wrapper_t * wrapper)
         dt_info(TAG, "dtstream null, use ffmpeg instead \n");
     }
 
-    AVDictionary *d = wrapper->para->options;
+    AVDictionary *d = *(AVDictionary **)wrapper->para->options;
     // set options
-    //av_dict_set(&d, "protocol_whitelist", "file,http,hls,udp,rtp,rtsp,tcp", 0);
+    //av_dict_set(&d, "protocol_whitelist", "file,http,hls,udp,rtp,rtsp,tcp,sdp", 0);
+    //av_dict_set(&d, "timeout", "10000000", 0);
+    //av_dict_set(&d, "timeout", "20000", 0);
     // register interrupt
+    // dump options
+    dt_info(TAG, "dict count:%d \n", av_dict_count(d));
+
     ic->interrupt_callback.callback = ff_interrupt_cb;
     ic->interrupt_callback.opaque = ctx;
+    //ic->flags |= AVFMT_FLAG_NONBLOCK;
+
     dt_info(TAG, "Interrupt: %p\n", ffmpeg_ctx);
+
+    // rtp - udp - sdp specify h264
+    if (strstr(file_name, "sdp") != NULL) {
+        ic->iformat = av_find_input_format("sdp");
+    }
+
     err = avformat_open_input(&ic, file_name, ic->iformat, &d);
     if (err < 0) {
         dt_error(TAG, "avformat_open_input failed, err:%x - %x \n", err,
