@@ -178,8 +178,9 @@ static int demuxer_ffmpeg_open(demuxer_wrapper_t * wrapper)
     dt_info(TAG, "Interrupt: %p\n", ffmpeg_ctx);
 
     // rtp - udp - sdp specify h264
-    if (strstr(file_name, "sdp") != NULL) {
+    if (strstr(file_name, ".sdp") != NULL) {
         ic->iformat = av_find_input_format("sdp");
+        dt_info(TAG, "specify sdp protocal.\n");
     }
 
     err = avformat_open_input(&ic, file_name, ic->iformat, &d);
