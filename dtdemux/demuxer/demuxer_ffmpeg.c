@@ -162,11 +162,19 @@ static int demuxer_ffmpeg_open(demuxer_wrapper_t * wrapper)
         dt_info(TAG, "dtstream null, use ffmpeg instead \n");
     }
 
-    AVDictionary *d = *(AVDictionary **)wrapper->para->options;
+    //AVDictionary *d = *(AVDictionary **)wrapper->para->options;
+    AVDictionary *d = NULL;
+   AVDictionaryEntry *t = NULL;
     // set options
-    //av_dict_set(&d, "protocol_whitelist", "file,http,hls,udp,rtp,rtsp,tcp,sdp", 0);
-    //av_dict_set(&d, "timeout", "10000000", 0);
-    //dt_info(TAG, "dict count:%d \n", av_dict_count(d));
+    char buf[20];
+    av_dict_set(&d, "protocol_whitelist", "file,http,hls,udp,rtp,rtsp,tcp,sdp", 0);
+    sprintf(buf, "%d", dtp_setting.player_live_timeout*1000); // us
+    av_dict_set(&d, "timeout", buf, 0);
+// dump key
+    dt_info(TAG, "dict count:%d \n", av_dict_count(d));
+    while (t = av_dict_get(d, "", t, AV_DICT_IGNORE_SUFFIX)) {
+        dt_info(TAG, "key:%s value:%s \n", t->key, t->value);
+    }
 
     // register interrupt
     ic->interrupt_callback.callback = ff_interrupt_cb;
@@ -182,6 +190,7 @@ static int demuxer_ffmpeg_open(demuxer_wrapper_t * wrapper)
     }
 
     err = avformat_open_input(&ic, file_name, ic->iformat, &d);
+    av_dict_free(&d);
     if (err < 0) {
         dt_error(TAG, "avformat_open_input failed, err:%x - %x \n", err,
                  AVUNERROR(err));

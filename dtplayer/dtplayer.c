@@ -533,7 +533,8 @@ void player_set_option(dtplayer_context_t *dtp_ctx, int category, const char *na
         goto dtp_option;
     }
     if (category == OPTION_CATEGORY_FFMPEG) {
-        goto ffmpeg_option;
+        return; // no support, will crash
+        //goto ffmpeg_option;
     }
     // unknown option
     return;
@@ -656,10 +657,10 @@ QUIT:
     stop_io_thread(dtp_ctx);
     player_host_stop(dtp_ctx);
 #if ENABLE_FFMPEG
-    AVDictionary **d = &av_options;           // "create" an empty dictionary
-    dt_info(TAG, "dict count:%d \n", av_dict_count(*d));
-    av_dict_free(d);
-    av_options = NULL;
+    //AVDictionary **d = &av_options;           // "create" an empty dictionary
+    //dt_info(TAG, "dict count:%d \n", av_dict_count(*d));
+    //av_dict_free(d);
+    //av_options = NULL;
 #endif
     dtdemuxer_close(dtp_ctx->demuxer_priv);
     player_service_release(dtp_ctx);
