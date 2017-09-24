@@ -655,17 +655,18 @@ static void *event_handle_loop(dtplayer_context_t * dtp_ctx)
 QUIT:
     stop_io_thread(dtp_ctx);
     player_host_stop(dtp_ctx);
+#if ENABLE_FFMPEG
+    AVDictionary **d = &av_options;           // "create" an empty dictionary
+    dt_info(TAG, "dict count:%d \n", av_dict_count(*d));
+    av_dict_free(d);
+    av_options = NULL;
+#endif
     dtdemuxer_close(dtp_ctx->demuxer_priv);
     player_service_release(dtp_ctx);
     dt_service_release(dtp_ctx->service_mgt);
     dt_info(TAG, "EXIT PLAYER EVENT HANDLE LOOP\n");
     set_player_status(dtp_ctx, PLAYER_STATUS_EXIT);
     player_handle_cb(dtp_ctx);
-#if ENABLE_FFMPEG
-    AVDictionary *d = av_options;           // "create" an empty dictionary
-    av_dict_free(&d);
-#endif
-
     free(dtp_ctx);
     player_remove_all();
     pthread_exit(NULL);

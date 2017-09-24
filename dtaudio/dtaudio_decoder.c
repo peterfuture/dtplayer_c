@@ -170,7 +170,7 @@ static void *audio_decode_loop(void *arg)
             }
             decoder->first_frame_decoded = 1;
             first_apts = decoder->pts_first;
-            audio_host_ioctl(decoder->parent, HOST_CMD_SET_FIRST_APTS, &decoder->pts_first);
+            audio_host_ioctl(decoder->parent, HOST_CMD_SET_FIRST_APTS, (unsigned long)(&decoder->pts_first));
             dt_info(TAG, "[%s:%d]Audio first frame read ok, pts:0x%llx dts:0x%llx\n",
                     __FUNCTION__, __LINE__, frame.pts, frame.dts);
         } else {
@@ -293,8 +293,8 @@ DECODE_LOOP:
                 goto EXIT;
             }
             if (PTS_INVALID(first_vpts)) {
-                audio_host_ioctl(decoder->parent, HOST_CMD_GET_FIRST_VPTS, &first_vpts);
-                audio_host_ioctl(decoder->parent, HOST_CMD_GET_DROP_DONE, &drop_done);
+                audio_host_ioctl(decoder->parent, HOST_CMD_GET_FIRST_VPTS, (unsigned long)(&first_vpts));
+                audio_host_ioctl(decoder->parent, HOST_CMD_GET_DROP_DONE, (unsigned long)(&drop_done));
                 if (PTS_INVALID(first_vpts)) {
                     usleep(10 * 1000);
                     dt_info(TAG, "wait first video decoded.\n");
@@ -308,7 +308,7 @@ DECODE_LOOP:
                     // calc drop size
                     int64_t diff = first_vpts - first_apts;
                     if (diff / 90 > AVSYNC_DROP_THRESHOLD || diff / 90 <= AVSYNC_THRESHOLD) {
-                        audio_host_ioctl(decoder->parent, HOST_CMD_SET_DROP_DONE, &drop_done);
+                        audio_host_ioctl(decoder->parent, HOST_CMD_SET_DROP_DONE, (unsigned long)(&drop_done));
                         drop_done = 1;
                         dt_info(TAG, "no need drop. first_apts:%lld first_vpts:%lld diff:%d \n",
                                 first_apts, first_vpts, (int)diff / 90);
@@ -324,7 +324,7 @@ DECODE_LOOP:
                 continue;
             }
 
-            audio_host_ioctl(decoder->parent, HOST_CMD_GET_DROP_DONE, &drop_done);
+            audio_host_ioctl(decoder->parent, HOST_CMD_GET_DROP_DONE, (unsigned long)(&drop_done));
             if (drop_size == 0) {
                 dt_info(TAG, "wait video drop.\n");
                 usleep(10 * 1000);
@@ -335,7 +335,7 @@ DECODE_LOOP:
             drop_size -= pinfo->outlen;
             pinfo->outlen = 0;
             if (drop_size <= 0) {
-                audio_host_ioctl(decoder->parent, HOST_CMD_SET_DROP_DONE, &drop_done);
+                audio_host_ioctl(decoder->parent, HOST_CMD_SET_DROP_DONE, (unsigned long)(&drop_done));
                 drop_size = 0;
                 dt_info(TAG, "drop finished.\n");
             }

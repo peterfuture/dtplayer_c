@@ -213,7 +213,7 @@ static void *video_decode_loop(void *arg)
             decoder->pts_first = decoder->pts_current = picture->pts;
             decoder->first_frame_decoded = 1;
             first_vpts = picture->pts;
-            video_host_ioctl(decoder->parent, HOST_CMD_SET_FIRST_VPTS, &first_vpts);
+            video_host_ioctl(decoder->parent, HOST_CMD_SET_FIRST_VPTS, (unsigned long)(&first_vpts));
             dt_info(TAG,
                     "[%s:%d]first frame decoded ok, pts:0x%llx dts:0x%llx used:%d frames\n",
                     __FUNCTION__, __LINE__, picture->pts, picture->dts, video_frame_in);
@@ -240,14 +240,14 @@ static void *video_decode_loop(void *arg)
             }
 
             if (dt_gettime() - drop_start >= drop_timeout * 1000) {
-                video_host_ioctl(decoder->parent, HOST_CMD_SET_DROP_DONE, &drop_done);
+                video_host_ioctl(decoder->parent, HOST_CMD_SET_DROP_DONE, (unsigned long)(&drop_done));
                 drop_done = 1;
                 break;
             }
 
             if (PTS_INVALID(first_apts)) {
-                video_host_ioctl(decoder->parent, HOST_CMD_GET_FIRST_APTS, &first_apts);
-                video_host_ioctl(decoder->parent, HOST_CMD_GET_DROP_DONE, &drop_done);
+                video_host_ioctl(decoder->parent, HOST_CMD_GET_FIRST_APTS, (unsigned long)(&first_apts));
+                video_host_ioctl(decoder->parent, HOST_CMD_GET_DROP_DONE, (unsigned long)(&drop_done));
                 if (PTS_INVALID(first_apts)) {
                     usleep(10 * 1000);
                     dt_info(TAG, "wait first audio decoded.\n");
@@ -261,7 +261,7 @@ static void *video_decode_loop(void *arg)
                     // calc drop size
                     int64_t diff = first_apts - first_vpts;
                     if (diff / 90 > AVSYNC_DROP_THRESHOLD || diff / 90 <= AVSYNC_THRESHOLD) {
-                        video_host_ioctl(decoder->parent, HOST_CMD_SET_DROP_DONE, &drop_done);
+                        video_host_ioctl(decoder->parent, HOST_CMD_SET_DROP_DONE, (unsigned long)(&drop_done));
                         drop_done = 1;
                         dt_info(TAG, "no need drop. first_apts:%lld first_vpts:%lld diff:%d \n",
                                 first_apts, first_vpts, (int)diff / 90);
@@ -275,7 +275,7 @@ static void *video_decode_loop(void *arg)
                 continue;
             }
 
-            video_host_ioctl(decoder->parent, HOST_CMD_GET_DROP_DONE, &drop_done);
+            video_host_ioctl(decoder->parent, HOST_CMD_GET_DROP_DONE, (unsigned long)(&drop_done));
             if (need_drop == 0) {
                 dt_info(TAG, "wait audio drop.\n");
                 usleep(10 * 1000);
@@ -284,7 +284,7 @@ static void *video_decode_loop(void *arg)
 
             // drop video
             if (picture->pts >= first_apts) {
-                video_host_ioctl(decoder->parent, HOST_CMD_SET_DROP_DONE, &drop_done);
+                video_host_ioctl(decoder->parent, HOST_CMD_SET_DROP_DONE, (unsigned long)(&drop_done));
                 drop_done = 1;
                 dt_info(TAG, "drop finished.\n");
             }

@@ -86,7 +86,7 @@ int video_host_ioctl(void *priv, int cmd, unsigned long arg)
         break;
     }
 
-    return;
+    return 0;
 }
 
 int video_drop(dtvideo_context_t * vctx, int64_t target_pts)

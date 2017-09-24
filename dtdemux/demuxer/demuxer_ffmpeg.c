@@ -166,11 +166,9 @@ static int demuxer_ffmpeg_open(demuxer_wrapper_t * wrapper)
     // set options
     //av_dict_set(&d, "protocol_whitelist", "file,http,hls,udp,rtp,rtsp,tcp,sdp", 0);
     //av_dict_set(&d, "timeout", "10000000", 0);
-    //av_dict_set(&d, "timeout", "20000", 0);
-    // register interrupt
-    // dump options
-    dt_info(TAG, "dict count:%d \n", av_dict_count(d));
+    //dt_info(TAG, "dict count:%d \n", av_dict_count(d));
 
+    // register interrupt
     ic->interrupt_callback.callback = ff_interrupt_cb;
     ic->interrupt_callback.opaque = ctx;
     //ic->flags |= AVFMT_FLAG_NONBLOCK;

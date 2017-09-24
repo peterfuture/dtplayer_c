@@ -79,7 +79,7 @@ int audio_host_ioctl(void *priv, int cmd, unsigned long arg)
         break;
     }
 
-    return;
+    return 0;
 }
 
 int audio_drop(dtaudio_context_t * actx, int64_t target_pts)
