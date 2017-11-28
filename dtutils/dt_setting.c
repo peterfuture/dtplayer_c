@@ -15,9 +15,11 @@ int dt_update_setting()
 
     dt_ini_open(NULL);
 
-    dtp_setting.log_level = 0;
-    if (dt_ini_get_entry("LOG", "log.level", value) >= 0) {
-        dtp_setting.log_level = atoi(value);
+    if (dtp_setting.log_level <= 0) {
+        dtp_setting.log_level = 0;
+        if (dt_ini_get_entry("LOG", "log.level", value) >= 0) {
+            dtp_setting.log_level = atoi(value);
+        }
     }
     memset(dtp_setting.log_filter, 0, 1024);
     dtp_setting.log_filter[0] = '\0';

@@ -14,7 +14,7 @@
 //==Part1:PTS Relative
 int host_sync_enable(dthost_context_t * hctx)
 {
-    return 0;// hctx->sync_enable && (hctx->sync_mode == DT_SYNC_AUDIO_MASTER);
+    return hctx->sync_enable;
 }
 
 int64_t host_get_apts(dthost_context_t * hctx)
@@ -74,7 +74,7 @@ int host_update_apts(dthost_context_t * hctx, int64_t apts)
         return 0;
     }
 
-    if (!hctx->para.sync_enable) { //sync disable, video will correct systime
+    if (host_sync_enable(hctx) == 0) { //sync disable, video will correct systime
         return 0;
     }
 
@@ -95,13 +95,14 @@ int host_update_apts(dthost_context_t * hctx, int64_t apts)
         return 0;
     }
     if (host_sync_enable(hctx) && avdiff > AVSYNC_THRESHOLD_MAX) { //close sync
-        dt_info(TAG, "avdiff:%lld ecceed :%d ms, cloase sync \n", avdiff,
-                AVSYNC_THRESHOLD_MAX);
+        if (hctx->sync_mode == DT_SYNC_VIDEO_MASTER)
+            dt_info(TAG, "avdiff:%lld ecceed :%d ms, cloase sync \n", avdiff,
+                    AVSYNC_THRESHOLD_MAX);
         hctx->sync_mode = DT_SYNC_VIDEO_MASTER;
         return 0;
     }
 
-    if (hctx->sync_enable && hctx->sync_mode == DT_SYNC_VIDEO_MASTER
+    if (host_sync_enable(hctx) && hctx->sync_mode == DT_SYNC_VIDEO_MASTER
         && avdiff < AVSYNC_THRESHOLD_MAX) {
         hctx->sync_mode = DT_SYNC_AUDIO_MASTER;
     }
@@ -135,24 +136,28 @@ int host_update_vpts(dthost_context_t * hctx, int64_t vpts)
     //int64_t apts = host_get_apts(hctx);
     int64_t sys_time = host_get_systime(hctx);
     int64_t avdiff = llabs(host_get_avdiff(hctx));
+    int64_t vsdiff = llabs(sys_time - vpts);
 
     if (sys_time == -1 || sys_time == DT_NOPTS_VALUE) {
         return 0;
     }
 
     //when sync == 0, update systime with vpts
-    if (host_sync_enable(hctx) == 0 && avdiff > AVSYNC_THRESHOLD) {
-        dt_info(TAG,
-                "[%s:%d] disable avsync, sys:0x%llx vpts:0x%llx apts:0x%llx diff:0x%llx\n",
-                __FUNCTION__, __LINE__, sys_time, vpts, host_get_apts(hctx), avdiff);
+    if (host_sync_enable(hctx) == 0) {
+        if (vsdiff > AVSYNC_THRESHOLD) {
+            host_reset_systime(hctx, vpts);
+        }
         return 0;
     }
 
     if (host_sync_enable(hctx) && avdiff > AVSYNC_THRESHOLD_MAX) { //close sync
-        dt_info(TAG, "avdiff:0x%lld (ms) ecceed :%d ms, disable av sync \n", avdiff,
-                AVSYNC_THRESHOLD_MAX);
+        if (hctx->sync_mode == DT_SYNC_VIDEO_MASTER)
+            dt_info(TAG, "avdiff:0x%lld (ms) ecceed :%d ms, disable av sync \n", avdiff,
+                    AVSYNC_THRESHOLD_MAX);
         hctx->sync_mode = DT_SYNC_VIDEO_MASTER;
-        host_reset_systime(hctx, vpts);
+        if (vsdiff > AVSYNC_THRESHOLD) {
+            host_reset_systime(hctx, vpts);
+        }
         return 0;
     }
 
@@ -161,7 +166,6 @@ int host_update_vpts(dthost_context_t * hctx, int64_t vpts)
         dt_info(TAG, "[%s:%d]avdiff:%lld(ms) < %d ms, enable av sync \n", __FUNCTION__,
                 __LINE__, avdiff, AVSYNC_THRESHOLD_MAX);
         hctx->sync_mode = DT_SYNC_AUDIO_MASTER;
-        host_reset_systime(hctx, vpts);
     }
     return 0;
 }

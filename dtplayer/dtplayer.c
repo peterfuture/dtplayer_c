@@ -542,6 +542,22 @@ dtp_option:
     if (strcmp(name, "player.live_timeout") == 0) {
         dtp_setting.player_live_timeout = atoi(value);
         dt_info(TAG, "use specify live timeout:%dms\n", dtp_setting.player_live_timeout);
+    } else if (strcmp(name, "player.log_level") == 0) {
+        dtp_setting.log_level = atoi(value);
+        dt_info(TAG, "use specify loglevel:%d\n", dtp_setting.log_level);
+        dt_set_log_level(dtp_setting.log_level);
+    } else if (strcmp(name, "port.audio_max_num") == 0) {
+        dtp_setting.audio_max_num = atoi(value);
+        dt_info(TAG, "use specify audio_max_num:%d\n", atoi(value));
+    } else if (strcmp(name, "port.audio_max_size") == 0) {
+        dtp_setting.audio_max_size = atoi(value);
+        dt_info(TAG, "use specify audio_max_size:%d\n", atoi(value));
+    } else if (strcmp(name, "port.video_max_num") == 0) {
+        dtp_setting.video_max_num = atoi(value);
+        dt_info(TAG, "use specify video_max_num:%d\n", atoi(value));
+    } else if (strcmp(name, "port.video_max_size") == 0) {
+        dtp_setting.video_max_size = atoi(value);
+        dt_info(TAG, "use specify video_max_size:%d\n", atoi(value));
     }
     return;
 ffmpeg_option:

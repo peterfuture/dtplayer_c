@@ -49,6 +49,20 @@ int port_init(dtport_context_t * pctx, dtport_para_t * para)
                 __LINE__, pctx->param.has_subtitle);
         packet_queue_init(&(pctx->queue_subtitle));
     }
+
+    // update setting
+    if (dtp_setting.audio_max_num <= 0) {
+        dtp_setting.audio_max_num = QUEUE_MAX_PACK_NUM;
+    }
+    if (dtp_setting.audio_max_size <= 0) {
+        dtp_setting.audio_max_size = QUEUE_MAX_ABUF_SIZE;
+    }
+    if (dtp_setting.video_max_num <= 0) {
+        dtp_setting.video_max_num = QUEUE_MAX_PACK_NUM;
+    }
+    if (dtp_setting.video_max_size <= 0) {
+        dtp_setting.video_max_size = QUEUE_MAX_VBUF_SIZE;
+    }
     return ret;
 ERR0:
     return ret;
@@ -61,12 +75,12 @@ int port_write_frame(dtport_context_t * pctx, dt_av_pkt_t * frame, int type)
     int video_write_enable = 1;
 
     if (pctx->param.has_audio) {
-        audio_write_enable = (pctx->queue_audio.nb_packets < QUEUE_MAX_PACK_NUM);
+        audio_write_enable = (pctx->queue_audio.nb_packets < dtp_setting.audio_max_num);
     } else {
         audio_write_enable = 0;
     }
     if (pctx->param.has_video) {
-        video_write_enable = (pctx->queue_video.nb_packets < QUEUE_MAX_PACK_NUM);
+        video_write_enable = (pctx->queue_video.nb_packets < dtp_setting.video_max_size);
     } else {
         video_write_enable = 0;
     }

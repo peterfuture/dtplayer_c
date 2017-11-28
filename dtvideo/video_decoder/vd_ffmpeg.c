@@ -128,7 +128,7 @@ int ffmpeg_vdec_init(dtvideo_decoder_t *decoder)
     }
     memset(vd_ctx, 0, sizeof(vd_ffmpeg_ctx_t));
 #if ENABLE_ANDROID
-    ff_log_init();
+    //ff_log_init();
 #endif
     AVCodecContext *avctxp = NULL;
     if (decoder->vd_priv) {

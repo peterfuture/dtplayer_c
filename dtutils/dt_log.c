@@ -25,8 +25,7 @@ static int dt_log_level = DT_LOG_INFO;
 
 static int check_level(int level)
 {
-    dt_log_level = dtp_setting.log_level;
-    return level >= dt_log_level;
+    return level >= dtp_setting.log_level;
 }
 
 static int tag_enable(char *filter, char *tag)

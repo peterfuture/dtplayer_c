@@ -15,12 +15,16 @@ typedef struct dt_setting {
     // AUDIO
     int audio_downmix;
     int audio_index;
+    int audio_max_num;
+    int audio_max_size;
     //VIDEO
     int video_pts_mode;
     int video_pixel_format;
     int video_index;
     int video_render_mode;
     int video_render_duration;
+    int video_max_num;
+    int video_max_size;
     // SUB
     int sub_index;
     // PLAYER

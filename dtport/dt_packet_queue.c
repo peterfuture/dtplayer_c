@@ -48,16 +48,16 @@ int packet_queue_put(dt_packet_queue_t * queue, dt_av_pkt_t * frame)
     int ret;
     dt_lock(&queue->mutex);
 
-    if (frame->type == 0 && queue->size >= QUEUE_MAX_VBUF_SIZE) {
-        dt_debug(TAG, "[%s:%d]type:%d(0 video 1 audio) packet queue exceed size\n",
-                 __FUNCTION__, __LINE__, frame->type);
+    if (frame->type == 0 && queue->size >= dtp_setting.video_max_size) {
+        dt_debug(TAG, "[%s:%d]video packet queue size:%d exceed max:%d\n",
+                 __FUNCTION__, __LINE__, queue->size, dtp_setting.video_max_size);
         ret = -1;
         goto END;
     }
 
-    if (frame->type == 1 && queue->size >= QUEUE_MAX_ABUF_SIZE) {
-        dt_debug(TAG, "[%s:%d]type:%d(0 video 1 audio) packet queue exceed size\n",
-                 __FUNCTION__, __LINE__, frame->type);
+    if (frame->type == 1 && queue->size >= dtp_setting.audio_max_size) {
+        dt_debug(TAG, "[%s:%d]audio packet queue size:%d exceed max:%d\n",
+                 __FUNCTION__, __LINE__, queue->size, dtp_setting.audio_max_size);
         ret = -2;
         goto END;
     }

@@ -147,12 +147,19 @@ int main(int argc, char **argv)
         return 0;
     }
 
-    // av options set
-    dtplayer_set_option(NULL, OPTION_CATEGORY_FFMPEG, "protocol_whitelist", "file,http,hls,udp,rtp,rtsp,tcp");
-    dtplayer_set_option(NULL, OPTION_CATEGORY_FFMPEG, "loglevel", "100");
-    dtplayer_set_option(NULL, OPTION_CATEGORY_FFMPEG, "timeout", "5000000");
-    dtplayer_set_option(NULL, OPTION_CATEGORY_DTP, "player.live_timeout", "10000");
+    // av options set - samplecode
+    /*
+        dtplayer_set_option(NULL, OPTION_CATEGORY_FFMPEG, "protocol_whitelist", "file,http,hls,udp,rtp,rtsp,tcp");
+        dtplayer_set_option(NULL, OPTION_CATEGORY_FFMPEG, "loglevel", "100");
+        dtplayer_set_option(NULL, OPTION_CATEGORY_FFMPEG, "timeout", "5000000");
 
+        dtplayer_set_option(NULL, OPTION_CATEGORY_DTP, "player.live_timeout", "10000");
+        dtplayer_set_option(NULL, OPTION_CATEGORY_DTP, "player.log_level", "2"); // 3-error 2-info 1-warnning 0-debug
+        dtplayer_set_option(NULL, OPTION_CATEGORY_DTP, "port.audio_max_num", "8");
+        dtplayer_set_option(NULL, OPTION_CATEGORY_DTP, "port.audio_max_size", "1000000"); // 10M
+        dtplayer_set_option(NULL, OPTION_CATEGORY_DTP, "port.video_max_num", "8");
+        dtplayer_set_option(NULL, OPTION_CATEGORY_DTP, "port.video_max_size", "10000000"); // 50M
+    */
     memset(&player, 0, sizeof(player_t));
     para.update_cb = update_cb;
     para.file_name = argv[argc - 1];
