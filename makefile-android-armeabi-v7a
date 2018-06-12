@@ -258,7 +258,7 @@ SRCS_COMMON-$(DT_VIDEO) += dtvideo/dtvideo_filter.c
 SRCS_COMMON-$(DT_VIDEO) += dtvideo/dtvideo_output.c
 SRCS_COMMON-$(DT_FFMPEG) += dtvideo/video_decoder/vd_ffmpeg.c         #dec
 SRCS_COMMON-$(DT_FFMPEG) += dtvideo/video_filter/vf_ffmpeg.c          #filter
-SRCS_COMMON-$(DT_FFMPEG) += dtvideo/video_out/vo_null.c               #default-render
+SRCS_COMMON-$(DT_VIDEO)  += dtvideo/video_out/vo_null.c               #default-render
 #dtsub
 SRCS_COMMON-$(DT_SUB)    += dtsub/dtsub_api.c
 SRCS_COMMON-$(DT_SUB)    += dtsub/dtsub.c
