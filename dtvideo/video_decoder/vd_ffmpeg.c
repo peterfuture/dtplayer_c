@@ -336,7 +336,7 @@ int ffmpeg_vdec_decode(dtvideo_decoder_t *decoder, dt_av_pkt_t * dtp_pkt,
         if (vd_ctx->use_hwaccel && vd_ctx->surface != NULL) {
             dt_av_frame_t *dtp_frame = dtp_frame_alloc();
             dtp_frame->data[3] = frame->data[3]; // Just need to store AVMediaCodecBuffer
-            dtp_frame->pts = av_frame_get_best_effort_timestamp(frame);
+            dtp_frame->pts = frame->pts;
             dtp_frame->flags |= DTP_FRAME_FLAG_MEDIACODEC;
             dtp_frame->opaque = (void *)frame;
             *pic = dtp_frame;
