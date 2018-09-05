@@ -299,8 +299,24 @@ static int copy_frame(dtvideo_decoder_t * decoder, AVFrame * src, int64_t pts,
     return 0;
 }
 
+int ffmpeg_vdec_send_pkt(dtvideo_decoder_t *decoder, dt_av_pkt_t * dtp_pkt)
+{
+    vd_ffmpeg_ctx_t *vd_ctx = (vd_ffmpeg_ctx_t *)decoder->vd_priv;
+    AVCodecContext *avctxp = (AVCodecContext *) vd_ctx->avctxp;
+
+    AVPacket pkt = {0};
+    pkt.data = dtp_pkt->data;
+    pkt.size = dtp_pkt->size;
+    pkt.pts = dtp_pkt->pts;
+    pkt.dts = dtp_pkt->dts;
+    pkt.side_data_elems = 0;
+    pkt.buf = NULL;
+
+    return avcodec_send_packet(avctxp, &pkt);
+}
+
 /*
- *decode one frame using ffmpeg
+ * get one frame ffmpeg decoder
  *
  * return value
  * 1  dec one frame and get one frame
@@ -309,8 +325,7 @@ static int copy_frame(dtvideo_decoder_t * decoder, AVFrame * src, int64_t pts,
  *
  * */
 
-int ffmpeg_vdec_decode(dtvideo_decoder_t *decoder, dt_av_pkt_t * dtp_pkt,
-                       dt_av_frame_t ** pic)
+int ffmpeg_vdec_receive_frame(dtvideo_decoder_t *decoder, dt_av_frame_t ** pic)
 {
     int ret = 0;
     vd_ffmpeg_ctx_t *vd_ctx = (vd_ffmpeg_ctx_t *)decoder->vd_priv;
@@ -318,17 +333,7 @@ int ffmpeg_vdec_decode(dtvideo_decoder_t *decoder, dt_av_pkt_t * dtp_pkt,
     dt_debug(TAG, "[%s:%d] param-- w:%d h:%d  extr_si:%d \n", __FUNCTION__,
              __LINE__, avctxp->width, avctxp->height, avctxp->extradata_size);
     int got_picture = 0;
-    AVPacket pkt;
-    memset(&pkt, 0, sizeof(AVPacket));
-    pkt.data = dtp_pkt->data;
-    pkt.size = dtp_pkt->size;
-    pkt.pts = dtp_pkt->pts;
-    pkt.dts = dtp_pkt->dts;
-    pkt.side_data_elems = 0;
-    pkt.buf = NULL;
     AVFrame *frame = av_frame_alloc(); // Alloc New Frame EveryTime
-
-    ret = avcodec_send_packet(avctxp, &pkt);
     ret = avcodec_receive_frame(avctxp, frame);
     if (ret == 0) {
 #ifdef ENABLE_ANDROID
@@ -348,7 +353,7 @@ int ffmpeg_vdec_decode(dtvideo_decoder_t *decoder, dt_av_pkt_t * dtp_pkt,
 #endif
         // Use Dtp build-in frame
         ret = copy_frame(decoder, frame, av_frame_get_best_effort_timestamp(frame),
-                         pic);
+                        pic);
         dt_debug(TAG, "[%s:%d] got picture pkt_pts:%llx best_effort:%llx \n",
                  __FUNCTION__, __LINE__, frame->pkt_pts,
                  av_frame_get_best_effort_timestamp(frame));
@@ -389,7 +394,8 @@ vd_wrapper_t vd_ffmpeg_ops = {
     .type = DTP_MEDIA_TYPE_VIDEO,
     .is_hw = 0,
     .init = ffmpeg_vdec_init,
-    .decode_frame = ffmpeg_vdec_decode,
+    .send_packet = ffmpeg_vdec_send_pkt,
+    .receive_frame = ffmpeg_vdec_receive_frame,
     .info_changed = ffmpeg_vdec_info_changed,
     .release = ffmpeg_vdec_release,
 };

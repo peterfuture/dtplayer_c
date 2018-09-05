@@ -118,8 +118,10 @@ int audio_output_pause(dtaudio_output_t * ao)
 {
     ao->status = AO_STATUS_PAUSE;
     ao_context_t *aoc = ao->aoc;
-    ao_wrapper_t *wrapper = aoc->wrapper;
-    wrapper->pause(aoc);
+    if(aoc) {
+        ao_wrapper_t *wrapper = aoc->wrapper;
+        wrapper->pause(aoc);
+    }
     return 0;
 }
 

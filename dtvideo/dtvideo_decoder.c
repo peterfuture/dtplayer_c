@@ -147,6 +147,7 @@ static void *video_decode_loop(void *arg)
     int need_drop = -1;
     int64_t first_apts = -1;
     int64_t first_vpts = -1;
+    int packet_pending = 0;
 
     do {
         //exit check before idle, maybe recieve exit cmd in idle status
@@ -172,30 +173,49 @@ static void *video_decode_loop(void *arg)
             usleep(10 * 1000);
             continue;
         }
+        ret = 0;
+        if(packet_pending == 1)
+            goto send_packet;
+
         ret = dtvideo_read_frame(decoder->parent, &frame);
-        if (ret < 0) {
+        if(ret >= 0 && frame.data != NULL) {
+            packet_pending = 1;
+        } else {
             dt_usleep(10 * 1000);
             if (decoder->pts_first == DT_NOPTS_VALUE) {
                 continue;
             }
             //no data left, maybe eof, need to flush left data
             memset(&frame, 0, sizeof(dt_av_pkt_t));
-            dt_debug(TAG, "[%s:%d] no video frame left, flush left frames \n", __FUNCTION__,
+            dt_info(TAG, "[%s:%d] no video frame left, flush left frames \n", __FUNCTION__,
                      __LINE__);
+            goto recv_frame;
         }
-        video_frame_in++;
+
+send_packet:
+        ret = wrapper->send_packet(decoder, &frame);
+        if(ret >= 0) {
+            packet_pending = 0;
+            video_frame_in++;
+            //we successfully send one frame
+            free(frame.data);
+            frame.data = NULL;
+            frame.size = 0;
+            frame.pts = -1;
+        }
+recv_frame:
         /*read one frame,enter decode frame module */
         //will exec once for one time
-        ret = wrapper->decode_frame(decoder, &frame, &picture);
+        ret = wrapper->receive_frame(decoder, &picture);
         if (ret <= 0) {
             decoder->decode_err_cnt++;
-            dt_debug(TAG, "[%s:%d]decode failed. ret:%d.\n", __FUNCTION__, __LINE__, ret);
+            dt_info(TAG, "[%s:%d]decode failed. ret:%d.\n", __FUNCTION__, __LINE__, ret);
             picture = NULL;
             usleep(10000);
             continue;
         }
         if (!picture) {
-            goto DECODE_END;
+            continue;
         }
 
         // statistics collection
@@ -294,16 +314,6 @@ static void *video_decode_loop(void *arg)
         /*queue in */
         queue_push_tail(picture_queue, picture);
         picture = NULL;
-DECODE_END:
-        //we successfully decodec one frame
-        if (frame.data) {
-            if (frame.data) {
-                free(frame.data);
-            }
-            frame.data = NULL;
-            frame.size = 0;
-            frame.pts = -1;
-        }
     } while (1);
     dt_info(TAG, "[file:%s][%s:%d]decoder loop thread exit ok\n", __FILE__,
             __FUNCTION__, __LINE__);
