@@ -558,7 +558,7 @@ int host_write_frame(dthost_context_t * hctx, dt_av_pkt_t * frame, int type)
     return dtport_write_frame(hctx->port_priv, frame, type);
 }
 
-int host_read_frame(dthost_context_t * hctx, dt_av_pkt_t * frame, int type)
+int host_read_frame(dthost_context_t * hctx, dt_av_pkt_t **frame, int type)
 {
     if (hctx == NULL) {
         dt_error(TAG, "dthost_context is NULL\n");

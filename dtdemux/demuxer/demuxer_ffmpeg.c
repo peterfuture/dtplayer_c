@@ -274,7 +274,7 @@ static int64_t pts_exchange(AVPacket * avpkt, dtp_media_info_t * media_info)
 }
 
 static int demuxer_ffmpeg_read_frame(demuxer_wrapper_t * wrapper,
-                                     dt_av_pkt_t * frame)
+                                     dt_av_pkt_t **pkt)
 {
     dtdemuxer_context_t *dem_ctx = (dtdemuxer_context_t *) wrapper->parent;
     dtp_media_info_t *media_info = &dem_ctx->media_info;
@@ -309,6 +309,11 @@ static int demuxer_ffmpeg_read_frame(demuxer_wrapper_t * wrapper,
             }
         }
         return DTERROR_READ_AGAIN;
+    }
+    dt_av_pkt_t *frame = dtp_packet_alloc();
+    if(!frame) {
+        dt_error(TAG, "[%s:%d] out of memory\n", __FUNCTION__, __LINE__);
+        return DTERROR_READ_FAILED;
     }
     //read frame ok
     if (has_video && cur_vidx == avpkt.stream_index) {
@@ -360,6 +365,12 @@ static int demuxer_ffmpeg_read_frame(demuxer_wrapper_t * wrapper,
                  exchange_pts, exchange_pts / 90000, p_statistics_info->s_offset);
         p_statistics_info->s_offset += frame->size;
     }
+
+    frame->opaque = (void *)av_packet_clone(&avpkt);
+    if(frame->opaque != NULL)
+        frame->flags |= DTP_PACKET_FLAG_FFMPEG;
+
+    *pkt = frame;
     //dt_info(TAG, "read ok,frame size:%d %02x %02x %02x %02x addr:%p type:%d\n", frame->size, frame->data[0], frame->data[1], frame->data[2], frame->data[3], frame->data,frame->type);
     //dt_debug(TAG, "SIDE_DATA_ELEMENT:%d \n", avpkt.side_data_elems);
 

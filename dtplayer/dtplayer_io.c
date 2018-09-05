@@ -14,9 +14,9 @@
 
 static void *player_io_thread(dtplayer_context_t * dtp_ctx);
 
-static int player_read_frame(dtplayer_context_t * dtp_ctx, dt_av_pkt_t * frame)
+static int player_read_frame(dtplayer_context_t * dtp_ctx, dt_av_pkt_t ** pkt)
 {
-    return dtdemuxer_read_frame(dtp_ctx->demuxer_priv, frame);
+    return dtdemuxer_read_frame(dtp_ctx->demuxer_priv, pkt);
 }
 
 static int player_write_frame(dtplayer_context_t * dtp_ctx, dt_av_pkt_t * frame)
@@ -78,8 +78,8 @@ static void *player_io_thread(dtplayer_context_t * dtp_ctx)
 {
     player_ctrl_t *play_ctrl = &dtp_ctx->ctrl_info;
     io_loop_t *io_ctl = &dtp_ctx->io_loop;
-    dt_av_pkt_t frame;
-    int frame_valid = 0;
+    dt_av_pkt_t *pkt = NULL;
+    int pkt_valid = 0;
     int ret = 0;
 
     int dump_mode = dtp_setting.player_dump_mode;
@@ -96,21 +96,21 @@ static void *player_io_thread(dtplayer_context_t * dtp_ctx)
         }
         if (io_ctl->status == IO_LOOP_PAUSED) {
             //when pause read thread,we need skip currnet pkt
-            if (frame_valid == 1) {
-                free(frame.data);
+            if (pkt_valid == 1) {
+                dtp_packet_free(pkt);
             }
-            frame_valid = 0;
+            pkt_valid = 0;
             usleep(100);
             continue;
         }
         /*io ops */
-        if (frame_valid == 1) {
-            goto WRITE_FRAME;
+        if (pkt_valid == 1) {
+            goto WRITE_PACKET;
         }
-        memset(&frame, 0, sizeof(dt_av_pkt_t));
-        ret = player_read_frame(dtp_ctx, &frame);
+        pkt = NULL;
+        ret = player_read_frame(dtp_ctx, &pkt);
         if (ret == DTERROR_NONE) {
-            frame_valid = 1;
+            pkt_valid = 1;
         } else {
             if (ret == DTERROR_READ_EOF) {
                 io_ctl->status = IO_LOOP_QUIT;
@@ -122,45 +122,46 @@ static void *player_io_thread(dtplayer_context_t * dtp_ctx)
 
         // key frame check
         if (play_ctrl->ctrl_wait_key_frame == 1) {
-            if (frame.type == DTP_MEDIA_TYPE_VIDEO && frame.key_frame == 1) {
+            if (pkt->type == DTP_MEDIA_TYPE_VIDEO && pkt->key_frame == 1) {
                 play_ctrl->ctrl_wait_key_frame = 0;
             } else {
-                dt_info(TAG, "wait key frame skip:type:%s pts:%lld (%lld ms)\n",
-                        (frame.type == DTP_MEDIA_TYPE_VIDEO) ? "VIDEO" : "AUDIO", frame.pts,
-                        frame.pts / 90);
-                if (frame_valid == 1) {
-                    free(frame.data);
+                dt_debug(TAG, "wait key frame skip:type:%s pts:%lld (%lld ms)\n",
+                        (pkt->type == DTP_MEDIA_TYPE_VIDEO) ? "VIDEO" : "AUDIO", pkt->pts,
+                        pkt->pts / 90);
+                if (pkt_valid == 1) {
+                    dtp_packet_free(pkt);
+                    pkt = NULL;
                 }
-                frame_valid = 0;
+                pkt_valid = 0;
                 continue;
             }
         }
 
-        dt_debug(TAG, "read ok size:%d pts:%llx \n", frame.size, frame.pts);
-WRITE_FRAME:
-        ret = player_write_frame(dtp_ctx, &frame);
+        dt_debug(TAG, "read ok size:%d pts:%llx \n", pkt->size, pkt->pts);
+WRITE_PACKET:
+        ret = player_write_frame(dtp_ctx, pkt);
         // dump code
         if (ret == DTERROR_NONE) {
             dt_debug(TAG, "player write ok \n");
-            frame_valid = 0;
+            pkt_valid = 0;
 
-            if (frame.type == DTP_MEDIA_TYPE_AUDIO && dump_mode == 1) {
+            if (pkt->type == DTP_MEDIA_TYPE_AUDIO && dump_mode == 1) {
                 FILE *fp = fopen("./raw_audio.out", "ab+");
-                fwrite(frame.data, 1, frame.size, fp);
+                fwrite(pkt->data, 1, pkt->size, fp);
                 fclose(fp);
             }
-            if (frame.type == DTP_MEDIA_TYPE_VIDEO && dump_mode == 2) {
+            if (pkt->type == DTP_MEDIA_TYPE_VIDEO && dump_mode == 2) {
                 FILE *fp = fopen("./raw_video.out", "ab+");
-                fwrite(frame.data, 1, frame.size, fp);
+                fwrite(pkt->data, 1, pkt->size, fp);
                 fclose(fp);
             }
-            if (frame.type == DTP_MEDIA_TYPE_VIDEO && dump_mode == 3) {
+            if (pkt->type == DTP_MEDIA_TYPE_VIDEO && dump_mode == 3) {
                 FILE *fp = fopen("./raw_sub.out", "ab+");
-                fwrite(frame.data, 1, frame.size, fp);
+                fwrite(pkt->data, 1, pkt->size, fp);
                 fclose(fp);
             }
         } else {
-            dt_debug(TAG, "write frame failed , write again \n");
+            dt_debug(TAG, "write pkt failed , write again \n");
             usleep(10000);
         }
     } while (1);

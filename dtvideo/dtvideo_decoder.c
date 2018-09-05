@@ -129,7 +129,7 @@ static int64_t pts_exchange(dtvideo_decoder_t * decoder, int64_t pts)
 
 static void *video_decode_loop(void *arg)
 {
-    dt_av_pkt_t frame;
+    dt_av_pkt_t *frame = NULL;
     dtvideo_decoder_t *decoder = (dtvideo_decoder_t *) arg;
     vd_wrapper_t *wrapper = decoder->wrapper;
     vd_statistics_info_t *p_vd_statistics_info = &decoder->statistics_info;
@@ -176,9 +176,8 @@ static void *video_decode_loop(void *arg)
         ret = 0;
         if(packet_pending == 1)
             goto send_packet;
-
         ret = dtvideo_read_frame(decoder->parent, &frame);
-        if(ret >= 0 && frame.data != NULL) {
+        if(ret >= 0 && frame->data != NULL) {
             packet_pending = 1;
         } else {
             dt_usleep(10 * 1000);
@@ -186,22 +185,19 @@ static void *video_decode_loop(void *arg)
                 continue;
             }
             //no data left, maybe eof, need to flush left data
-            memset(&frame, 0, sizeof(dt_av_pkt_t));
+            memset(frame, 0, sizeof(dt_av_pkt_t));
             dt_info(TAG, "[%s:%d] no video frame left, flush left frames \n", __FUNCTION__,
                      __LINE__);
             goto recv_frame;
         }
 
 send_packet:
-        ret = wrapper->send_packet(decoder, &frame);
+        ret = wrapper->send_packet(decoder, frame);
         if(ret >= 0) {
             packet_pending = 0;
             video_frame_in++;
             //we successfully send one frame
-            free(frame.data);
-            frame.data = NULL;
-            frame.size = 0;
-            frame.pts = -1;
+            dtp_packet_free(frame);
         }
 recv_frame:
         /*read one frame,enter decode frame module */
@@ -393,8 +389,6 @@ int video_decoder_stop(dtvideo_decoder_t * decoder)
     /*Decode thread exit */
     decoder->status = VDEC_STATUS_EXIT;
     pthread_join(decoder->video_decoder_pid, NULL);
-    wrapper->release(decoder);
-
     /*release queue */
     dtvideo_context_t *vctx = (dtvideo_context_t *) decoder->parent;
     queue_t *picture_queue = vctx->vo_queue;
@@ -402,5 +396,6 @@ int video_decoder_stop(dtvideo_decoder_t * decoder)
         queue_free(picture_queue, (free_func)dtav_clear_frame);
         picture_queue = NULL;
     }
+    wrapper->release(decoder);
     return 0;
 }

@@ -64,7 +64,7 @@ void audio_register_all();
 void audio_remove_all();
 void register_ext_ao(ao_wrapper_t *ao);
 
-int audio_read_frame(void *priv, dt_av_pkt_t * frame);
+int audio_read_frame(void *priv, dt_av_pkt_t ** frame);
 int audio_output_read(void *priv, uint8_t * buf, int size);
 int64_t audio_get_current_pts(dtaudio_context_t * actx);
 int audio_first_frame_decoded(dtaudio_context_t * actx);
