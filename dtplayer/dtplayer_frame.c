@@ -37,7 +37,7 @@ void dtp_frame_unref(dt_av_frame_t *frame, int render)
                 __FUNCTION__, __LINE__, buffer);
         av_mediacodec_release_buffer(buffer, render);
     }
-    av_frame_free(&ff_frame);
+    av_frame_unref(ff_frame);
 #endif
 
     if (frame->data[0]) {
@@ -59,7 +59,7 @@ void dtp_frame_free(dt_av_frame_t *frame, int render)
                 __FUNCTION__, __LINE__, buffer);
         av_mediacodec_release_buffer(buffer, render);
     }
-    av_frame_free(&ff_frame);
+    av_frame_free(ff_frame);
 #endif
 
     if (frame->data[0]) {

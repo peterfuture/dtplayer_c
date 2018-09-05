@@ -393,8 +393,6 @@ int video_decoder_stop(dtvideo_decoder_t * decoder)
     /*Decode thread exit */
     decoder->status = VDEC_STATUS_EXIT;
     pthread_join(decoder->video_decoder_pid, NULL);
-    wrapper->release(decoder);
-
     /*release queue */
     dtvideo_context_t *vctx = (dtvideo_context_t *) decoder->parent;
     queue_t *picture_queue = vctx->vo_queue;
@@ -402,5 +400,6 @@ int video_decoder_stop(dtvideo_decoder_t * decoder)
         queue_free(picture_queue, (free_func)dtav_clear_frame);
         picture_queue = NULL;
     }
+    wrapper->release(decoder);
     return 0;
 }

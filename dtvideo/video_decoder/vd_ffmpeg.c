@@ -332,7 +332,6 @@ int ffmpeg_vdec_receive_frame(dtvideo_decoder_t *decoder, dt_av_frame_t ** pic)
     AVCodecContext *avctxp = (AVCodecContext *) vd_ctx->avctxp;
     dt_debug(TAG, "[%s:%d] param-- w:%d h:%d  extr_si:%d \n", __FUNCTION__,
              __LINE__, avctxp->width, avctxp->height, avctxp->extradata_size);
-    int got_picture = 0;
     AVFrame *frame = av_frame_alloc(); // Alloc New Frame EveryTime
     ret = avcodec_receive_frame(avctxp, frame);
     if (ret == 0) {
