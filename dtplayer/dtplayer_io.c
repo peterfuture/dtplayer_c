@@ -78,7 +78,7 @@ static void *player_io_thread(dtplayer_context_t * dtp_ctx)
 {
     player_ctrl_t *play_ctrl = &dtp_ctx->ctrl_info;
     io_loop_t *io_ctl = &dtp_ctx->io_loop;
-    dt_av_pkt_t frame;
+    dt_av_pkt_t *frame = NULL;
     int frame_valid = 0;
     int ret = 0;
 
@@ -107,8 +107,8 @@ static void *player_io_thread(dtplayer_context_t * dtp_ctx)
         if (frame_valid == 1) {
             goto WRITE_FRAME;
         }
-        memset(&frame, 0, sizeof(dt_av_pkt_t));
-        ret = player_read_frame(dtp_ctx, &frame);
+        frame = NULL;
+        ret = player_read_frame(dtp_ctx, frame);
         if (ret == DTERROR_NONE) {
             frame_valid = 1;
         } else {
@@ -129,7 +129,8 @@ static void *player_io_thread(dtplayer_context_t * dtp_ctx)
                         (frame.type == DTP_MEDIA_TYPE_VIDEO) ? "VIDEO" : "AUDIO", frame.pts,
                         frame.pts / 90);
                 if (frame_valid == 1) {
-                    free(frame.data);
+                    dtp_packet_free(frame);
+                    frame = NULL;
                 }
                 frame_valid = 0;
                 continue;
@@ -138,7 +139,7 @@ static void *player_io_thread(dtplayer_context_t * dtp_ctx)
 
         dt_debug(TAG, "read ok size:%d pts:%llx \n", frame.size, frame.pts);
 WRITE_FRAME:
-        ret = player_write_frame(dtp_ctx, &frame);
+        ret = player_write_frame(dtp_ctx, frame);
         // dump code
         if (ret == DTERROR_NONE) {
             dt_debug(TAG, "player write ok \n");

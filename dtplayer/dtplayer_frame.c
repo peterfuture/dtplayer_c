@@ -68,3 +68,32 @@ void dtp_frame_free(dt_av_frame_t *frame, int render)
 
     free(frame);
 }
+
+dt_av_pkt_t *dtp_packet_alloc(void)
+{
+    dt_av_pkt_t *pkt = malloc(sizeof(dt_av_pkt_t));
+    if (!pkt) {
+        return NULL;
+    }
+    memset(pkt, 0, sizeof(dt_av_pkt_t));
+    return pkt;
+}
+
+void dtp_packet_free(dt_av_pkt_t *pkt);
+{
+    if (pkt == NULL) {
+        return;
+    }
+#if ENABLE_FFMPEG
+    AVPacket *ff_pkt = (AVPacket *)pkt->opaque;
+    if (pkt->flags & DTP_PACKET_FLAG_FFMPEG && ff_pkt != NULL) {
+        av_packet_unref(ff_pkt);
+    }
+#endif
+    if (pkt->flags == 0) {
+        if (frame->data[0]) {
+            free(frame->data[0]);
+        }
+    }
+    free(pkt);
+}

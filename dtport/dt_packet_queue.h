@@ -13,7 +13,7 @@
 #define QUEUE_MAX_VBUF_SIZE 50*1024*1024 // 50M
 
 typedef struct pack {
-    dt_av_pkt_t frame;
+    dt_av_pkt_t *frame;
     //dt_av_pkt_t *next;
     struct pack *next;
 } dt_packet_list_t;

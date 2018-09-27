@@ -304,6 +304,12 @@ int ffmpeg_vdec_send_pkt(dtvideo_decoder_t *decoder, dt_av_pkt_t * dtp_pkt)
     vd_ffmpeg_ctx_t *vd_ctx = (vd_ffmpeg_ctx_t *)decoder->vd_priv;
     AVCodecContext *avctxp = (AVCodecContext *) vd_ctx->avctxp;
 
+    // FFmpeg packet mode
+    if(dtp_pkt->flags & DTP_PACKET_FLAG_FFMPEG && dtp_pkt->data != NULL) {
+        return avcodec_send_packet(avctxp, (AVPacket *)dtp_pkt->opaque);
+    }
+
+    // dtp packet mode
     AVPacket pkt = {0};
     pkt.data = dtp_pkt->data;
     pkt.size = dtp_pkt->size;

@@ -28,7 +28,8 @@ int packet_queue_put_frame(dt_packet_queue_t * queue, dt_av_pkt_t * frame)
         return -1;
     }
     //list->frame=*frame;
-    memcpy(&list->frame, frame, sizeof(dt_av_pkt_t));
+    //memcpy(&list->frame, frame, sizeof(dt_av_pkt_t));
+    list->frame = frame;
     list->next = NULL;
     if (!(queue->last)) {
         queue->first = list;
@@ -82,10 +83,10 @@ int packet_queue_get_frame(dt_packet_queue_t * queue, dt_av_pkt_t * frame)
             queue->last = NULL;
         }
         queue->nb_packets--;
-        *frame = (list->frame);
+        frame = list->frame;
         queue->size -= frame->size;
         //queue->size-=frame->size+sizeof(*list);
-        list->frame.data = NULL;
+        list->frame = NULL;
         free(list);
         dt_debug(TAG, "[%s:%d] queue get frame ok\n", __FUNCTION__, __LINE__);
         return 0;
