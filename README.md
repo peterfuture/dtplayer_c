@@ -12,6 +12,11 @@ For more [details](http://blog.csdn.net/dtplayer).
 
 
 ## Installation
+### Mac
+* install sdl2.0
+* install [ffmpeg](https://github.com/FFmpeg/FFmpeg)
+* make -f makefile-mac
+
 ### Linux
 * install sdl2.0
 * install [ffmpeg](https://github.com/FFmpeg/FFmpeg)
