@@ -16,8 +16,10 @@ static int calc_cur_time(dtplayer_context_t * dtp_ctx,
     int64_t apts_first = host_state->pts_audio_first;
     int64_t vpts_first = host_state->pts_video_first;
 
-    if (ctrl_info->start_time > 0) {
+    if (ctrl_info->start_time >= 0) {
         play_stat->start_time = ctrl_info->start_time;
+        // For now, we use first time from ffmpeg ic->start_time
+        ctrl_info->first_time = ctrl_info->start_time;
         dt_info(TAG, "START TIME:0x%llx \n", ctrl_info->start_time);
     }
 
@@ -39,7 +41,7 @@ static int calc_cur_time(dtplayer_context_t * dtp_ctx,
                 ctrl_info->first_time = vpts_first;
             }
         } else {
-            ctrl_info->first_time = host_state->sys_time_current;
+            ctrl_info->first_time = ctrl_info->start_time;
         }
 
         dt_info(TAG,
