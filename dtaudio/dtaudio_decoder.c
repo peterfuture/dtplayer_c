@@ -96,7 +96,7 @@ static void *audio_decode_loop(void *arg)
     int ret;
     dtaudio_decoder_t *decoder = (dtaudio_decoder_t *) arg;
     dtaudio_para_t *para = decoder->para;
-    dt_av_pkt_t frame;
+    dt_av_pkt_t *frame = NULL;
     ad_wrapper_t *wrapper = decoder->wrapper;
     dtaudio_context_t *actx = (dtaudio_context_t *) decoder->parent;
     dt_buffer_t *out = &actx->audio_decoded_buf;
@@ -151,35 +151,35 @@ static void *audio_decode_loop(void *arg)
             continue;
         }
         ret = audio_read_frame(decoder->parent, &frame);
-        if (ret < 0 || frame.size <= 0) {
+        if (ret < 0 || frame->size <= 0) {
             usleep(1000);
             dt_debug(TAG, "[%s:%d] dtaudio decoder loop read frame failed \n", __FUNCTION__,
                      __LINE__);
             continue;
         }
         //read ok,update current pts, clear the buffer size
-        if (PTS_VALID(frame.pts)) {
-            frame.pts = pts_exchange(decoder, frame.pts);
+        if (PTS_VALID(frame->pts)) {
+            frame->pts = pts_exchange(decoder, frame->pts);
         }
 
         if (PTS_INVALID(decoder->pts_first)) {
-            if (PTS_INVALID(frame.pts)) {
+            if (PTS_INVALID(frame->pts)) {
                 decoder->pts_first = decoder->pts_current = 0;
             } else {
-                decoder->pts_first = decoder->pts_current = decoder->pts_last_valid = frame.pts;
+                decoder->pts_first = decoder->pts_current = decoder->pts_last_valid = frame->pts;
             }
             decoder->first_frame_decoded = 1;
             first_apts = decoder->pts_first;
             audio_host_ioctl(decoder->parent, HOST_CMD_SET_FIRST_APTS, (unsigned long)(&decoder->pts_first));
             dt_info(TAG, "[%s:%d]Audio first frame read ok, pts:0x%llx dts:0x%llx\n",
-                    __FUNCTION__, __LINE__, frame.pts, frame.dts);
+                    __FUNCTION__, __LINE__, frame->pts, frame->dts);
         } else {
             decoder->pts_last_valid = decoder->pts_current;
-            decoder->pts_current = frame.pts;
+            decoder->pts_current = frame->pts;
             decoder->pts_buffer_size = 0;
             dt_debug(TAG,
                      "pkt pts:%lld current:%lld duration:%d pts_s:%lld dts:%lld buf_size:%d \n",
-                     frame.pts, decoder->pts_current, frame.duration, frame.pts / 90000, frame.dts,
+                     frame->pts, decoder->pts_current, frame->duration, frame->pts / 90000, frame->dts,
                      decoder->pts_buffer_size);
         }
 
@@ -189,11 +189,10 @@ static void *audio_decode_loop(void *arg)
             frame_data = NULL;
             frame_size = 0;
         }
-        if (rest_size) {
-            frame_data = malloc(frame.size + rest_size);
-        } else {
-            frame_data = frame.data;
-        }
+
+        // copy anyway
+        frame_data = malloc(frame->size + rest_size);
+
         if (!frame_data) {
             dt_error(TAG, "malloc audio frame failed ,we will lost one frame\n");
             if (rest_data) {
@@ -208,10 +207,9 @@ static void *audio_decode_loop(void *arg)
             memcpy(frame_data, rest_data, rest_size);
             free(rest_data);
             rest_data = NULL;
-            memcpy(frame_data + rest_size, frame.data, frame.size);
         }
-
-        frame_size = frame.size + rest_size;
+        memcpy(frame_data + rest_size, frame->data, frame->size);
+        frame_size = frame->size + rest_size;
         rest_size = 0;
         used = 0;
         declen = 0;
@@ -221,8 +219,8 @@ static void *audio_decode_loop(void *arg)
         pinfo->outlen = 0;
 
         //free pkt
-        frame.data = NULL;
-        frame.size = 0;
+        dtp_packet_free(frame);
+        frame = NULL;
 
 DECODE_LOOP:
         if (decoder->status == ADEC_STATUS_EXIT) {
@@ -282,7 +280,6 @@ DECODE_LOOP:
                 para->dst_samplerate = para->samplerate;
             }
         }
-
 
         // =====================
         // drop pcm check

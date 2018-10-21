@@ -28,7 +28,8 @@ int packet_queue_put_frame(dt_packet_queue_t * queue, dt_av_pkt_t * frame)
         return -1;
     }
     //list->frame=*frame;
-    memcpy(&list->frame, frame, sizeof(dt_av_pkt_t));
+    //memcpy(&list->frame, frame, sizeof(dt_av_pkt_t));
+    list->frame = frame;
     list->next = NULL;
     if (!(queue->last)) {
         queue->first = list;
@@ -68,7 +69,7 @@ END:
     return ret;
 }
 
-int packet_queue_get_frame(dt_packet_queue_t * queue, dt_av_pkt_t * frame)
+int packet_queue_get_frame(dt_packet_queue_t * queue, dt_av_pkt_t **pkt)
 {
     if (queue->nb_packets == 0) {
         dt_debug(TAG, "[%s:%d] No packet left\n", __FUNCTION__, __LINE__);
@@ -76,16 +77,18 @@ int packet_queue_get_frame(dt_packet_queue_t * queue, dt_av_pkt_t * frame)
     }
     dt_packet_list_t *list;
     list = queue->first;
+    dt_av_pkt_t * frame = NULL;
     if (list) {
         queue->first = list->next;
         if (!queue->first) {
             queue->last = NULL;
         }
         queue->nb_packets--;
-        *frame = (list->frame);
+        frame = list->frame;
         queue->size -= frame->size;
         //queue->size-=frame->size+sizeof(*list);
-        list->frame.data = NULL;
+        list->frame = NULL;
+        *pkt = frame;
         free(list);
         dt_debug(TAG, "[%s:%d] queue get frame ok\n", __FUNCTION__, __LINE__);
         return 0;
@@ -93,7 +96,7 @@ int packet_queue_get_frame(dt_packet_queue_t * queue, dt_av_pkt_t * frame)
     return -1;
 }
 
-int packet_queue_get(dt_packet_queue_t * queue, dt_av_pkt_t * frame)
+int packet_queue_get(dt_packet_queue_t * queue, dt_av_pkt_t **frame)
 {
     int ret;
     dt_lock(&queue->mutex);
@@ -121,7 +124,8 @@ int packet_queue_flush(dt_packet_queue_t * queue)
     for (list1 = queue->first; list1 != NULL; list1 = list2) {
         list2 = list1->next;
         //dt_debug(TAG,"free queue, data addr:%p list1:%p size:%d\n",list1->frame.data,list1,list1->frame.size);
-        free(list1->frame.data);
+        //free(list1->frame->data);
+        dtp_packet_free(list1->frame);
         //data malloc outside ,but free here if receive stop cmd
         //free(&list1->frame);//will free in free(list1) ops
         free(list1);

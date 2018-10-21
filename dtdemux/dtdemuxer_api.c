@@ -31,7 +31,7 @@ int dtdemuxer_get_media_info(void *priv, dtp_media_info_t **info)
     return 0;
 }
 
-int dtdemuxer_read_frame(void *priv, dt_av_pkt_t * frame)
+int dtdemuxer_read_frame(void *priv, dt_av_pkt_t **frame)
 {
     dtdemuxer_context_t *dem_ctx = (dtdemuxer_context_t *) priv;
     return demuxer_read_frame(dem_ctx, frame);

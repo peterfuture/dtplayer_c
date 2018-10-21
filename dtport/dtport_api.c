@@ -49,7 +49,7 @@ int dtport_write_frame(void *port, dt_av_pkt_t * frame, int type)
     return port_write_frame(pctx, frame, type);
 }
 
-int dtport_read_frame(void *port, dt_av_pkt_t * frame, int type)
+int dtport_read_frame(void *port, dt_av_pkt_t **frame, int type)
 {
     dtport_context_t *pctx = (dtport_context_t *) port;
     dt_debug(TAG, "[%s:%d]READ FRAME BEGIN \n", __FUNCTION__, __LINE__);

@@ -420,18 +420,20 @@ int player_seekto(dtplayer_context_t * dtp_ctx, int seek_time)
     dtp_state_t *play_stat = &dtp_ctx->state;
     play_stat->cur_time = (int64_t)seek_time;
     play_stat->cur_time_ms = (int64_t)seek_time * 1000;
-
+    dt_info(TAG, "[%s:%d]trace\n", __FUNCTION__, __LINE__);
     set_player_status(dtp_ctx, PLAYER_STATUS_SEEK_ENTER);
     if (io_thread_running(dtp_ctx)) {
         pause_io_thread(dtp_ctx);
     }
+    dt_info(TAG, "[%s:%d]trace\n", __FUNCTION__, __LINE__);
     //player_host_pause(dtp_ctx);
     player_host_stop(dtp_ctx);
-
+dt_info(TAG, "[%s:%d]trace\n", __FUNCTION__, __LINE__);
     int ret = dtdemuxer_seekto(dtp_ctx->demuxer_priv, (int64_t)seek_time);
     if (ret == -1) {
         goto FAIL;
     }
+    dt_info(TAG, "[%s:%d]trace\n", __FUNCTION__, __LINE__);
     player_host_init(dtp_ctx);
     // key frame waiting
     ctrl_info->ctrl_wait_key_frame = 1;

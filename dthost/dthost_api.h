@@ -130,7 +130,7 @@ int dthost_stop(void *host_priv);
 int dthost_init(void **host_priv, dthost_para_t * para);
 int dthost_video_resize(void **host_priv, int w, int h);
 
-int dthost_read_frame(void *host_priv, dt_av_pkt_t * frame, int type);
+int dthost_read_frame(void *host_priv, dt_av_pkt_t ** frame, int type);
 int dthost_write_frame(void *host_priv, dt_av_pkt_t * frame, int type);
 
 int dthost_get_info(void *host_priv, enum HOST_CMD cmd, unsigned long arg);

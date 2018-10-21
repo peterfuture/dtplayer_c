@@ -32,6 +32,11 @@ extern "C" {
 
 #define VIDEO_EXTRADATA_SIZE   4096
 
+enum {
+    DTP_PACKET_FLAG_DTP = 0x0,
+    DTP_PACKET_FLAG_FFMPEG = 0x10,
+};
+
 typedef enum {
     DTP_MEDIA_TYPE_UNKNOWN = -1,
     DTP_MEDIA_TYPE_VIDEO,
@@ -40,8 +45,7 @@ typedef enum {
     DTP_MEDIA_TYPE_SUBTITLE,
     DTP_MEDIA_TYPE_ATTACHMENT,
     DTP_MEDIA_TYPE_NB
-}
-dtp_media_type_t;
+} dtp_media_type_t;
 
 typedef enum {
     DTP_MEDIA_FORMAT_INVALID = -1,
@@ -79,6 +83,9 @@ typedef struct dt_av_pkt {
     int duration;
     int key_frame;
     dtp_media_type_t type;
+    // Use 3rd packet structure. AVPacket for FFmpeg case.
+    int flags;
+    void *opaque;
 } dt_av_pkt_t;
 
 
@@ -424,6 +431,9 @@ typedef struct dtav_subtitle {
 dt_av_frame_t *dtp_frame_alloc();
 void dtp_frame_unref(dt_av_frame_t *frame, int render);
 void dtp_frame_free(dt_av_frame_t *frame, int render);
+
+dt_av_pkt_t *dtp_packet_alloc(void);
+void dtp_packet_free(dt_av_pkt_t *pkt);
 
 #ifdef  __cplusplus
 }

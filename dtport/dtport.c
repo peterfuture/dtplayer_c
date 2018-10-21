@@ -112,7 +112,7 @@ int port_write_frame(dtport_context_t * pctx, dt_av_pkt_t * frame, int type)
     return packet_queue_put(queue, frame);
 }
 
-int port_read_frame(dtport_context_t * pctx, dt_av_pkt_t * frame, int type)
+int port_read_frame(dtport_context_t * pctx, dt_av_pkt_t **frame, int type)
 {
     dt_packet_queue_t *queue;
     switch (type) {

@@ -306,7 +306,7 @@ DEMUXER_SELECT:
     return 0;
 }
 
-int demuxer_read_frame(dtdemuxer_context_t * dem_ctx, dt_av_pkt_t * frame)
+int demuxer_read_frame(dtdemuxer_context_t * dem_ctx, dt_av_pkt_t **frame)
 {
     demuxer_wrapper_t *wrapper = dem_ctx->demuxer;
     return wrapper->read_frame(wrapper, frame);

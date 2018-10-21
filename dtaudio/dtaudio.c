@@ -5,7 +5,7 @@
 
 //==Part1:Data IO Relative
 /*read frame from dtport*/
-int audio_read_frame(void *priv, dt_av_pkt_t * frame)
+int audio_read_frame(void *priv, dt_av_pkt_t ** frame)
 {
     int type = DTP_MEDIA_TYPE_AUDIO;
     int ret = 0;
