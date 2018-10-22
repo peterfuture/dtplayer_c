@@ -171,7 +171,8 @@ int dtplayer_set_parameter(void *handle, int cmd, unsigned long arg)
 // setup dtplayer option
 // category == 0 means ffmpeg option
 // category == 0x100 meas dtp option
-void dtplayer_set_option(void *handle, int category, const char *name, const char *value)
+void dtplayer_set_option(void *handle, int category, const char *name,
+                         const char *value)
 {
     dtplayer_context_t *dtp_ctx = (dtplayer_context_t *)handle;
     player_set_option(dtp_ctx, category, name, value);

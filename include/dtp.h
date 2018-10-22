@@ -200,7 +200,8 @@ int dtplayer_set_parameter(void *handle, int cmd, unsigned long arg);
  * @return void
  *
  * */
-void dtplayer_set_option(void *handle, int category, const char *name, const char *value);
+void dtplayer_set_option(void *handle, int category, const char *name,
+                         const char *value);
 
 #ifdef  __cplusplus
 }

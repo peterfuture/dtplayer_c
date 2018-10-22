@@ -42,7 +42,8 @@ int player_host_init(dtplayer_context_t * dtp_ctx)
         dt_info(TAG, "downmix:%d \n", downmix);
         if (downmix) {
             host_para->audio_dst_channels = (astream->channels > 2) ? 2 : astream->channels;
-            dt_info(TAG, "downmix: %d -> %d \n", astream->channels, host_para->audio_dst_channels);
+            dt_info(TAG, "downmix: %d -> %d \n", astream->channels,
+                    host_para->audio_dst_channels);
         } else {
             host_para->audio_dst_channels = 0;
         }

@@ -164,13 +164,13 @@ static int demuxer_ffmpeg_open(demuxer_wrapper_t * wrapper)
 
     //AVDictionary *d = *(AVDictionary **)wrapper->para->options;
     AVDictionary *d = NULL;
-   AVDictionaryEntry *t = NULL;
+    AVDictionaryEntry *t = NULL;
     // set options
     char buf[20];
     av_dict_set(&d, "protocol_whitelist", "file,http,hls,udp,rtp,rtsp,tcp,sdp", 0);
-    sprintf(buf, "%d", dtp_setting.player_live_timeout*1000); // us
+    sprintf(buf, "%d", dtp_setting.player_live_timeout * 1000); // us
     av_dict_set(&d, "timeout", buf, 0);
-// dump key
+    // dump key
     dt_info(TAG, "dict count:%d \n", av_dict_count(d));
     while (t = av_dict_get(d, "", t, AV_DICT_IGNORE_SUFFIX)) {
         dt_info(TAG, "key:%s value:%s \n", t->key, t->value);
@@ -311,7 +311,7 @@ static int demuxer_ffmpeg_read_frame(demuxer_wrapper_t * wrapper,
         return DTERROR_READ_AGAIN;
     }
     dt_av_pkt_t *frame = dtp_packet_alloc();
-    if(!frame) {
+    if (!frame) {
         dt_error(TAG, "[%s:%d] out of memory\n", __FUNCTION__, __LINE__);
         return DTERROR_READ_FAILED;
     }
@@ -367,8 +367,9 @@ static int demuxer_ffmpeg_read_frame(demuxer_wrapper_t * wrapper,
     }
 
     frame->opaque = (void *)av_packet_clone(&avpkt);
-    if(frame->opaque != NULL)
+    if (frame->opaque != NULL) {
         frame->flags |= DTP_PACKET_FLAG_FFMPEG;
+    }
 
     av_packet_unref(&avpkt);
 

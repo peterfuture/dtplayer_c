@@ -119,7 +119,8 @@ static void audio_convert(dtaudio_decoder_t *decoder, AVFrame * dst,
     avcodec_fill_audio_frame(dst, out_channels, dst_fmt, dst->data[0], dst_buf_size,
                              0);
     dt_debug(TAG, "SRCFMT:%d dst_fmt:%d \n", src_fmt, dst_fmt);
-    dt_debug(TAG, "[%d - %d] -> [%d - %d]\n", src->channels, src->sample_rate, out_channels, out_samplerate);
+    dt_debug(TAG, "[%d - %d] -> [%d - %d]\n", src->channels, src->sample_rate,
+             out_channels, out_samplerate);
     /* resample toAV_SAMPLE_FMT_S16 */
     if (src_fmt != dst_fmt || out_channels != decoder->para->channels) {
         if (!m_swr_ctx) {

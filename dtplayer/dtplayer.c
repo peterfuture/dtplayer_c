@@ -428,7 +428,7 @@ int player_seekto(dtplayer_context_t * dtp_ctx, int seek_time)
     dt_info(TAG, "[%s:%d]trace\n", __FUNCTION__, __LINE__);
     //player_host_pause(dtp_ctx);
     player_host_stop(dtp_ctx);
-dt_info(TAG, "[%s:%d]trace\n", __FUNCTION__, __LINE__);
+    dt_info(TAG, "[%s:%d]trace\n", __FUNCTION__, __LINE__);
     int ret = dtdemuxer_seekto(dtp_ctx->demuxer_priv, (int64_t)seek_time);
     if (ret == -1) {
         goto FAIL;
@@ -524,7 +524,8 @@ int player_set_parameter(dtplayer_context_t *dtp_ctx, int cmd,
     return 0;
 }
 
-void player_set_option(dtplayer_context_t *dtp_ctx, int category, const char *name, const char *value)
+void player_set_option(dtplayer_context_t *dtp_ctx, int category,
+                       const char *name, const char *value)
 {
 #if ENABLE_FFMPEG
     AVDictionary **d = &av_options;           // "create" an empty dictionary
@@ -543,7 +544,8 @@ void player_set_option(dtplayer_context_t *dtp_ctx, int category, const char *na
 dtp_option:
     if (strcmp(name, "player.live_timeout") == 0) {
         dtp_setting.player_live_timeout = atoi(value);
-        dt_info(TAG, "use specify live timeout:%dms\n", dtp_setting.player_live_timeout);
+        dt_info(TAG, "use specify live timeout:%dms\n",
+                dtp_setting.player_live_timeout);
     } else if (strcmp(name, "player.log_level") == 0) {
         dtp_setting.log_level = atoi(value);
         dt_info(TAG, "use specify loglevel:%d\n", dtp_setting.log_level);
@@ -565,7 +567,8 @@ dtp_option:
 ffmpeg_option:
 #if ENABLE_FFMPEG
     av_dict_set(d, k, v, AV_DICT_DONT_STRDUP_KEY | AV_DICT_DONT_STRDUP_VAL);
-    dt_info(TAG, "ffmpeg option set. key:%s value:%s. count:%d\n", k, v, av_dict_count(*d));
+    dt_info(TAG, "ffmpeg option set. key:%s value:%s. count:%d\n", k, v,
+            av_dict_count(*d));
 #endif
     return;
 }

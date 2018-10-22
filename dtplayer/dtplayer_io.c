@@ -126,8 +126,8 @@ static void *player_io_thread(dtplayer_context_t * dtp_ctx)
                 play_ctrl->ctrl_wait_key_frame = 0;
             } else {
                 dt_debug(TAG, "wait key frame skip:type:%s pts:%lld (%lld ms)\n",
-                        (pkt->type == DTP_MEDIA_TYPE_VIDEO) ? "VIDEO" : "AUDIO", pkt->pts,
-                        pkt->pts / 90);
+                         (pkt->type == DTP_MEDIA_TYPE_VIDEO) ? "VIDEO" : "AUDIO", pkt->pts,
+                         pkt->pts / 90);
                 if (pkt_valid == 1) {
                     dtp_packet_free(pkt);
                     pkt = NULL;

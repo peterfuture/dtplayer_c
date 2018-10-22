@@ -70,7 +70,7 @@ void dtp_frame_free(dt_av_frame_t *frame, int render)
     free(frame);
 }
 
-dt_av_pkt_t *dtp_packet_alloc(void) 
+dt_av_pkt_t *dtp_packet_alloc(void)
 {
     dt_av_pkt_t *pkt = malloc(sizeof(dt_av_pkt_t));
     if (!pkt) {

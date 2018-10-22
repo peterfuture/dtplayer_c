@@ -97,6 +97,7 @@ int player_get_parameter(dtplayer_context_t *dtp_ctx, int cmd,
                          unsigned long arg);
 int player_set_parameter(dtplayer_context_t *dtp_ctx, int cmd,
                          unsigned long arg);
-void player_set_option(dtplayer_context_t *dtp_ctx, int category, const char *name, const char *value);
+void player_set_option(dtplayer_context_t *dtp_ctx, int category,
+                       const char *name, const char *value);
 
 #endif
