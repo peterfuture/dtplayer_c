@@ -370,6 +370,8 @@ static int demuxer_ffmpeg_read_frame(demuxer_wrapper_t * wrapper,
     if(frame->opaque != NULL)
         frame->flags |= DTP_PACKET_FLAG_FFMPEG;
 
+    av_packet_unref(&avpkt);
+
     *pkt = frame;
     //dt_info(TAG, "read ok,frame size:%d %02x %02x %02x %02x addr:%p type:%d\n", frame->size, frame->data[0], frame->data[1], frame->data[2], frame->data[3], frame->data,frame->type);
     //dt_debug(TAG, "SIDE_DATA_ELEMENT:%d \n", avpkt.side_data_elems);

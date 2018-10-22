@@ -88,7 +88,7 @@ void dtp_packet_free(dt_av_pkt_t *pkt)
 #if ENABLE_FFMPEG
     AVPacket *ff_pkt = (AVPacket *)pkt->opaque;
     if (pkt->flags & DTP_PACKET_FLAG_FFMPEG && ff_pkt != NULL) {
-        av_packet_unref(ff_pkt);
+        av_packet_free(&ff_pkt);
     }
 #endif
     if (pkt->flags == 0) {
