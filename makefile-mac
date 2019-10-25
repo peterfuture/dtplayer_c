@@ -197,7 +197,7 @@ endif
 #use separate module
 FFMPEGPARTS_ALL = libavfilter libavformat libavcodec libswscale libswresample libavutil 
 FFMPEGPARTS = $(foreach part, $(FFMPEGPARTS_ALL), $(if $(wildcard $(DT_FFMPEG_DIR)/lib), $(part)))
-FFMPEGLIBS  = $(foreach part, $(FFMPEGPARTS), $(DT_FFMPEG_DIR)/lib/$(part).dylib)
+FFMPEGLIBS  = $(foreach part, $(FFMPEGPARTS), $(DT_FFMPEG_DIR)/lib/$(part).a)
 
 DT_CFLAGS-$(DT_FFMPEG)   += -I$(DT_FFMPEG_DIR)/include
 COMMON_LIBS-$(DT_FFMPEG) += $(FFMPEGLIBS)
@@ -210,11 +210,13 @@ LDFLAGS-$(DT_SDL)  += -lSDL
 LDFLAGS-$(DT_SDL2) += -lSDL2 -Wl,-rpath,/usr/local/lib
 LDFLAGS-$(DT_ALSA) += -lasound
 LDFLAGS-$(DT_FAAD) += -lfaad
+LDFLAGS-$(DT_SDL2) += -framework AudioToolbox -framework VideoToolbox -framework CoreFoundation  \
+					-framework CoreMedia -framework CoreVideo -framework CoreServices -framework Security
 
 #======================================================
 #                   ENV-SETUP 
 #======================================================
-LDFLAGS += -lpthread -lm 
+LDFLAGS += -lpthread -lm -lbz2 -lz
 
 LDFLAGS     += $(LDFLAGS-yes)
 COMMON_LIBS += $(COMMON_LIBS-yes)
