@@ -10,6 +10,7 @@ extern "C" {
 #include "dtp_plugin.h"
 
 typedef int (*dtp_update_cb)(void *cookie, dtp_state_t * sta);
+typedef int (*player_notify)(void *cookie, int cmd, unsigned long ext1, unsigned long ext2);
 
 enum option_category {
     OPTION_CATEGORY_FFMPEG = 0x0,
@@ -36,6 +37,7 @@ typedef struct dtplayer_para {
     int height;
 
     dtp_update_cb update_cb;
+    player_notify notify_cb;
     void *cookie;
 } dtplayer_para_t;
 

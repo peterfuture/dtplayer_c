@@ -4,6 +4,13 @@
 
 #define TAG "PLAYER-HOST"
 
+int host_notify(void *Handle, int cmd, unsigned long ext1, unsigned long ext2)
+{
+    dtplayer_context_t *dtp_ctx = (dtplayer_context_t *)Handle;
+    dtp_ctx->notify_cb(dtp_ctx->cookie, cmd, ext1, ext2);
+    return 0;
+}
+
 int player_host_init(dtplayer_context_t * dtp_ctx)
 {
     int ret;
@@ -20,7 +27,7 @@ int player_host_init(dtplayer_context_t * dtp_ctx)
     host_para->has_video = pctrl->has_video;
     host_para->has_sub = pctrl->has_sub;
     host_para->sync_enable = pctrl->sync_enable;
-
+    host_para->parent = (void *)dtp_ctx;
     //----audio ----
     dt_info(TAG, "[%s:%d] has video:%d has audio:%d has sub:%d \n", __FUNCTION__,
             __LINE__, host_para->has_video, host_para->has_audio, host_para->has_sub);
@@ -161,6 +168,7 @@ int player_host_init(dtplayer_context_t * dtp_ctx)
 
     /* init dthost */
     dtp_ctx->host_priv = NULL;
+    host_para->notify = host_notify;
     ret = dthost_init(&dtp_ctx->host_priv, host_para);
     if (ret < 0) {
         dt_error(TAG, "[%s:%d] DTHOST_INIF FAILED \n", __FUNCTION__, __LINE__);

@@ -101,6 +101,7 @@ int player_init(dtplayer_context_t * dtp_ctx)
     dt_info(TAG, "[%s:%d] START PLAYER INIT\n", __FUNCTION__, __LINE__);
     dtp_ctx->file_name = dtp_ctx->player_para.file_name;
     dtp_ctx->update_cb = dtp_ctx->player_para.update_cb;
+    dtp_ctx->notify_cb = dtp_ctx->player_para.notify_cb;
 
     dtp_ctx->interrupt_cb.callback = player_interrupt_cb_default;
     dtp_ctx->interrupt_cb.opaque = (void *)dtp_ctx;

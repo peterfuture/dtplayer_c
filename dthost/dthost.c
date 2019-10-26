@@ -511,6 +511,10 @@ int host_init(dthost_context_t * hctx)
             dt_info(TAG, "[%s:%d]dtsub init success \n", __FUNCTION__, __LINE__);
         }
     }
+
+    // setup callback
+    hctx->notify = host_para->notify;
+    hctx->parent = host_para->parent;
     return 0;
 ERR1:
     return -1;

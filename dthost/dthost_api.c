@@ -125,6 +125,7 @@ static int64_t dthost_set_first_apts(void *host_priv, int64_t pts)
     dthost_context_t *hctx = (dthost_context_t *)(host_priv);
     hctx->pts_audio_first = hctx->pts_audio_last = hctx->pts_audio_current =
                                 pts;
+    hctx->notify(hctx->parent, DTP_EVENTS_FIRST_AUDIO_DECODE, 0, 0);
     return 0;
 }
 
@@ -145,6 +146,7 @@ static int64_t dthost_set_first_vpts(void *host_priv, int64_t pts)
     dthost_context_t *hctx = (dthost_context_t *)(host_priv);
     hctx->pts_video_first = hctx->pts_video_last = hctx->pts_video_current =
                                 pts;
+    hctx->notify(hctx->parent, DTP_EVENTS_FIRST_VIDEO_DECODE, 0, 0);
     return 0;
 }
 

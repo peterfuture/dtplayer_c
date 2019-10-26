@@ -40,6 +40,22 @@ static int update_cb(void *cookie, dtp_state_t * state)
     return 0;
 }
 
+static int notify_cb(void *cookie, int cmd, unsigned long ext1, unsigned long ext2)
+{
+    switch (cmd) {
+        case DTP_EVENTS_FIRST_AUDIO_DECODE:
+            dt_info(TAG, "DTP_EVENTS_FIRST_AUDIO_DECODE \n");
+            break;
+        case DTP_EVENTS_FIRST_VIDEO_DECODE:
+            dt_info(TAG, "DTP_EVENTS_FIRST_VIDEO_DECODE \n");
+            break;
+        default:
+            dt_info(TAG, "Unkown cmd \n");
+            break;
+    }
+    return 0;
+}
+
 static void on_loop(command_t *self)
 {
     dtplayer_para_t *para = (dtplayer_para_t *)self->data;
@@ -162,6 +178,7 @@ int main(int argc, char **argv)
     */
     memset(&player, 0, sizeof(player_t));
     para.update_cb = update_cb;
+    para.notify_cb = notify_cb;
     para.file_name = argv[argc - 1];
     player.file_name = para.file_name;
 

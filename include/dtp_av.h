@@ -11,6 +11,19 @@ extern "C" {
 #include <stdbool.h>
 #include <stdint.h>
 
+
+enum {
+    DTP_EVENTS_MIN = -1,
+    // player
+    DTP_EVENTS_BASE = 0x0,
+    // audio
+    DTP_EVENTS_FIRST_AUDIO_DECODE = 0x100,
+    DTP_EVENTS_FIRST_AUDIO_RENDER,
+    // video
+    DTP_EVENTS_FIRST_VIDEO_DECODE = 0x200,
+    DTP_EVENTS_FIRST_VIDEO_RENDER,
+};
+
 /*************************************
 ** MACRO
 *************************************/

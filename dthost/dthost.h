@@ -38,12 +38,16 @@ typedef struct {
     int sync_mode;
     int64_t av_diff;
 
+    // Callback to player
+    Host_Notify notify;
+
     int drop_done;
     /*a-v-s port part */
     void *port_priv;
     void *audio_priv;
     void *video_priv;
     void *sub_priv;
+    void *parent;
 } dthost_context_t;
 
 int host_start(dthost_context_t * hctx);

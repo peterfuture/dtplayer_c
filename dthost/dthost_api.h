@@ -9,6 +9,8 @@
 #define AUDIO_EXTR_DATA_SIZE 4096
 #define VIDEO_EXTR_DATA_SIZE 4096
 
+typedef int (*Host_Notify)(void *Handle, int cmd, unsigned long ext1, unsigned long ext2);
+
 enum HOST_CMD {
     HOST_CMD_UNKOWN = -1,
 
@@ -92,10 +94,12 @@ typedef struct {
     int sub_width;
     int sub_height;
     int sflag;                  //DISABLE_HW_SCODEC ETC.
+    Host_Notify notify;
     void *so_device;
     void *sctx_priv;
 
     void *service_mgt;          //service manager context
+    void *parent;               // dtplayer_context_t
 } dthost_para_t;
 
 typedef struct {

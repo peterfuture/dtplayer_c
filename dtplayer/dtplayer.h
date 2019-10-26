@@ -57,9 +57,9 @@ typedef struct dtplayer_context {
     void *host_priv;
 
     dtp_state_t state;
-    int (*update_cb)(void *cookie,
-                     dtp_state_t * state);  // update player info to uplevel
 
+    dtp_update_cb update_cb;
+    player_notify notify_cb;
     io_loop_t io_loop;
     pthread_t event_loop_id;
 
