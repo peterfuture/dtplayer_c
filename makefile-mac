@@ -197,7 +197,7 @@ endif
 #use separate module
 FFMPEGPARTS_ALL = libavfilter libavformat libavcodec libswscale libswresample libavutil 
 FFMPEGPARTS = $(foreach part, $(FFMPEGPARTS_ALL), $(if $(wildcard $(DT_FFMPEG_DIR)/lib), $(part)))
-FFMPEGLIBS  = $(foreach part, $(FFMPEGPARTS), $(DT_FFMPEG_DIR)/lib/$(part).a)
+FFMPEGLIBS  = $(foreach part, $(FFMPEGPARTS), $(DT_FFMPEG_DIR)/lib/$(part).dylib)
 
 DT_CFLAGS-$(DT_FFMPEG)   += -I$(DT_FFMPEG_DIR)/include
 COMMON_LIBS-$(DT_FFMPEG) += $(FFMPEGLIBS)
@@ -237,6 +237,7 @@ SRCS_COMMON-$(DT_UTIL) += dtutils/dt_buffer.c
 SRCS_COMMON-$(DT_UTIL) += dtutils/dt_queue.c
 SRCS_COMMON-$(DT_UTIL) += dtutils/commander.c
 SRCS_COMMON-$(DT_UTIL) += dtutils/dt_interrupt.c
+SRCS_COMMON-$(DT_UTIL) += dtutils/dt_string.c
 
 #dtstream
 SRCS_COMMON-$(DT_STREAM)      +=dtstream/dtstream_api.c

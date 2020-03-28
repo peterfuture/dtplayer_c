@@ -418,6 +418,12 @@ int player_seekto(dtplayer_context_t * dtp_ctx, int seek_time)
         return -1;
     }
 
+    // Handle buffeirng-seek case
+    if (get_player_status(dtp_ctx) < PLAYER_STATUS_BUFFERING) {
+        set_player_status(dtp_ctx, PLAYER_STATUS_RUNNING);
+        dtp_ctx->notify_cb(dtp_ctx->cookie, DTP_EVENTS_BUFFERING_END, NULL, NULL);
+    }
+
     dtp_state_t *play_stat = &dtp_ctx->state;
     play_stat->cur_time = (int64_t)seek_time;
     play_stat->cur_time_ms = (int64_t)seek_time * 1000;
@@ -636,11 +642,89 @@ START:
     return 0;
 }
 
+static int player_buffering_check(dtplayer_context_t * dtp_ctx)
+{
+    #define ABUF_ENTER_SIZE 1024*100
+    #define VBUF_ENTER_SIZE 1024*512
+
+    #define ABUF_EXIT_SIZE 1024*300
+    #define VBUF_EXIT_SIZE 1024*1024
+
+    dtp_state_t *stat = &dtp_ctx->state;
+    player_ctrl_t *ctrl_info = &dtp_ctx->ctrl_info;
+    int acache_size = 0;
+    int acache_time = 0;
+    int vcache_size = 0;
+    int vcache_time = 0;
+
+    int has_audio = ctrl_info->has_audio;
+    int has_video = ctrl_info->has_video;
+
+    int eof = dtp_ctx->ctrl_info.eof_flag;
+
+    char *url = dtp_ctx->file_name;
+    int live_playback = dt_strstart(url, "udp://", &url) != 0
+        || dt_strstart(url, "rtp://", &url) != 0
+        || dt_strstart(url, "rtmp://", &url) != 0;
+
+    int network_playback = dt_strstart(url, "udp://", &url) != 0
+        || dt_strstart(url, "rtp://", &url) != 0
+        || dt_strstart(url, "http://", &url) != 0
+        || dt_strstart(url, "https://", &url) != 0
+        || dt_strstart(url, "rtsp://", &url) != 0
+        || dt_strstart(url, "rtmp://", &url) != 0;
+
+    int cur_status = get_player_status(dtp_ctx);
+
+    acache_size = stat->acache_size;
+    acache_time = stat->acache_time;
+    vcache_size = stat->vcache_size;
+    vcache_time = stat->vcache_time;
+
+    if (network_playback == 0)
+        return 0;
+
+    if (has_audio == 0 && has_video == 0)
+        return 0;
+    
+    int need_enter = acache_size <= ABUF_ENTER_SIZE && vcache_size <= VBUF_ENTER_SIZE;
+    int need_exit =  acache_size >= ABUF_EXIT_SIZE && vcache_size >= VBUF_EXIT_SIZE;
+    if (eof == 1) {
+        need_enter = 0;
+        need_exit = 1;
+    }
+
+    // only enter buffering when running
+    if (need_enter && get_player_status(dtp_ctx) == PLAYER_STATUS_RUNNING) {
+        if (player_host_pause(dtp_ctx) == -1) {
+            dt_error(TAG, "PAUSE NOT HANDLED\n");
+            return -1;
+        }
+        set_player_status(dtp_ctx, PLAYER_STATUS_BUFFERING);
+        dtp_ctx->notify_cb(dtp_ctx->cookie, DTP_EVENTS_BUFFERING_START, NULL, NULL);
+        dt_info(TAG, "Enter buffing: Audio[%d<%d] Video[%d<%d]\n", 
+            acache_size, ABUF_ENTER_SIZE, vcache_size, VBUF_ENTER_SIZE);
+    }
+
+    if (need_exit && get_player_status(dtp_ctx) == PLAYER_STATUS_BUFFERING) {
+        if (player_host_resume(dtp_ctx) == -1) {
+            dt_error(TAG, "Resume NOT HANDLED\n");
+            return -1;
+        }
+        set_player_status(dtp_ctx, PLAYER_STATUS_RUNNING);
+        dtp_ctx->notify_cb(dtp_ctx->cookie, DTP_EVENTS_BUFFERING_END, NULL, NULL);
+        dt_info(TAG, "Exit buffing: Audio[%d>%d] Video[%d>%d]\n", 
+            acache_size, ABUF_EXIT_SIZE, vcache_size, VBUF_EXIT_SIZE);
+    }
+    return 0;
+}
+
 static void *event_handle_loop(dtplayer_context_t * dtp_ctx)
 {
     int render_closed = 0;
     int loop = dtp_ctx->player_para.loop_mode;
     dtp_state_t *stat = &dtp_ctx->state;
+
     while (1) {
         player_handle_event(dtp_ctx);
         if (get_player_status(dtp_ctx) == PLAYER_STATUS_STOP) {
@@ -648,12 +732,15 @@ static void *event_handle_loop(dtplayer_context_t * dtp_ctx)
         }
 
         usleep(300 * 1000);    // 1/3s update
-        if (get_player_status(dtp_ctx) != PLAYER_STATUS_RUNNING) {
+        if (get_player_status(dtp_ctx) < PLAYER_STATUS_RUNNING) {
             continue;
         }
 
         player_update_state(dtp_ctx);
         player_handle_cb(dtp_ctx);
+
+        // buffering check
+        player_buffering_check(dtp_ctx);
 
         if (!dtp_ctx->ctrl_info.eof_flag) {
             continue;

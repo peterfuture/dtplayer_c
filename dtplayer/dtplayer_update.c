@@ -169,7 +169,7 @@ void player_update_state(dtplayer_context_t * dtp_ctx)
     dtp_state_t *play_stat = &dtp_ctx->state;
     host_state_t host_state;
 
-    if (get_player_status(dtp_ctx) != PLAYER_STATUS_RUNNING) {
+    if (get_player_status(dtp_ctx) < PLAYER_STATUS_RUNNING) {
         return;
     }
 
@@ -186,6 +186,11 @@ void player_update_state(dtplayer_context_t * dtp_ctx)
     /*calc cur time */
     calc_cur_time(dtp_ctx, &host_state);
 
+    /*update lav & cache info*/
+    play_stat->acache_size = host_state.abuf_level;
+    play_stat->vcache_size = host_state.vbuf_level;
+    play_stat->scache_size = host_state.sbuf_level;
+   
     /*show info */
     dt_info(TAG,
             "[%s:%d]alevel:%d vlevel:%d slevel:%d cur_time:%lld(s) %lld(ms) duration:%lld(s) eof:%d\n",

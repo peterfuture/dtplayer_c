@@ -22,6 +22,9 @@ enum {
     // video
     DTP_EVENTS_FIRST_VIDEO_DECODE = 0x200,
     DTP_EVENTS_FIRST_VIDEO_RENDER,
+
+    DTP_EVENTS_BUFFERING_START = 0x300,
+    DTP_EVENTS_BUFFERING_END,
 };
 
 /*************************************

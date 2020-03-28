@@ -137,6 +137,8 @@ typedef enum {
     PLAYER_STATUS_START,
     PLAYER_STATUS_RUNNING,
 
+    PLAYER_STATUS_BUFFERING,
+
     PLAYER_STATUS_PAUSED,
     PLAYER_STATUS_RESUME,
     PLAYER_STATUS_SEEK_ENTER,
@@ -187,6 +189,13 @@ typedef struct {
     int64_t full_time;
     int64_t start_time;
     int64_t discontinue_point_ms;
+
+    int acache_size;
+    int acache_time;
+    int vcache_size;
+    int vcache_time;
+    int scache_size;
+    int scache_time;
 
     int vdec_type;
 } dtp_state_t;

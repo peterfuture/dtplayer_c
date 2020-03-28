@@ -49,6 +49,12 @@ static int notify_cb(void *cookie, int cmd, unsigned long ext1, unsigned long ex
         case DTP_EVENTS_FIRST_VIDEO_DECODE:
             dt_info(TAG, "DTP_EVENTS_FIRST_VIDEO_DECODE \n");
             break;
+        case DTP_EVENTS_BUFFERING_START:
+            dt_info(TAG, "DTP_EVENTS_BUFFERING_START \n");
+            break;
+        case DTP_EVENTS_BUFFERING_END:
+            dt_info(TAG, "DTP_EVENTS_BUFFERING_END \n");
+            break;
         default:
             dt_info(TAG, "Unkown cmd \n");
             break;
