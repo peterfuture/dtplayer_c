@@ -1,7 +1,5 @@
 
 # dtplayer 
-[![Build Status](https://travis-ci.org/peterfuture/dtplayer_c.svg?branch=master)](https://travis-ci.org/peterfuture/dtplayer_c)
-
 dtplayer is an open-source project based on C , aimed to provide multimedia playing service base on ffmpeg(linux version2.0+).
 
 At present, dtplayer have provided examples on stream-demuxer-decoder-render modules. User can easily understand how to add new element.
@@ -23,13 +21,13 @@ For more [details](http://blog.csdn.net/dtplayer).
 * make -j8
 
 ### Android
-* [Install ToolChain](https://github.com/peterfuture/dttv-android/wiki/1-%E5%AE%89%E8%A3%85android-arm%E4%BA%A4%E5%8F%89%E7%BC%96%E8%AF%91%E9%93%BE)
-* Install [ffmpeg-android](https://github.com/peterfuture/ffmpeg_android)
+* [Install ToolChain]
+* Install [ffmpeg-android]
 * ./build.sh android
 
 ## Demos
-* [dttv-desktop](https://github.com/peterfuture/dttv-desktop) - pc multimedia player
-* [dttv-android](https://github.com/peterfuture/dttv-android) - android multimedia player
+* [dttv-desktop] - pc multimedia player
+* [dttv-android]- android multimedia player
 
 # Licence
 GPL v3.0
