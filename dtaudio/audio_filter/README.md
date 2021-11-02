@@ -24,11 +24,3 @@ Test
 
 [Demo Repo]
 ========
-
-
-[Help]
-=========
-
-Email: peter_future@outlook.com 
-
-QQ: peter_future@outlook.com
