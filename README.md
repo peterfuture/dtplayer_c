@@ -31,8 +31,5 @@ For more [details](http://blog.csdn.net/dtplayer).
 * [dttv-desktop](https://github.com/peterfuture/dttv-desktop) - pc multimedia player
 * [dttv-android](https://github.com/peterfuture/dttv-android) - android multimedia player
 
-## Author
-peter_future@outlook.com
-
 # Licence
 GPL v3.0
